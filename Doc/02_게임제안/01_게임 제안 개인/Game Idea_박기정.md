@@ -28,7 +28,7 @@
         > 장면은 총 3가지 뿐이다.\
         > 마을 / 던전 지도 / 전투 필드 3가지 뿐이다.
 
-    ![Idea_1](./image/%EB%B0%95%EA%B8%B0%EC%A0%95_idea_1.png)
+    ![Idea_1](../image/%EB%B0%95%EA%B8%B0%EC%A0%95_idea_1.png)
 
 
 
