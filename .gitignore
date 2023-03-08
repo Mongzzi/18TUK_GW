@@ -47,7 +47,7 @@
 *.lastbuildstate
 *.suo
 *.db
-*.vcxproj
+#*.vcxproj
 *.ipch
 
 /Dev/.vs
