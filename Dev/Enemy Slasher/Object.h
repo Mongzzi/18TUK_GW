@@ -7,6 +7,11 @@
 #include "Mesh.h"
 #include "Camera.h"
 
+// KNH add
+#include "ES_Card.h"
+//
+
+
 #define DIR_FORWARD					0x01
 #define DIR_BACKWARD				0x02
 #define DIR_LEFT					0x04
@@ -320,6 +325,16 @@ public:
 };
 
 
+
+
+
+
+
+#define STATUS_NORMAL 0
+#define STATUS_COUNTER 1
+#define STATUS_FATAL 2
+
+// 플레이어 캐릭터들 (최대 4) , 적 몬스터
 class CCharacter : public CGameObject
 {
 public:
@@ -327,8 +342,9 @@ public:
 	virtual ~CCharacter();
 
 private:
+	// 모델 세부 부위
 	// 모델에 따라서 수정 필요
-
+	////////////////////////////////////////////////////////////
 	CGameObject* m_l_fore_arm = NULL;
 	CGameObject* m_r_fore_arm = NULL;
 
@@ -347,11 +363,16 @@ private:
 
 	CGameObject* m_l_foot = NULL;
 	CGameObject* m_r_foot = NULL;
+	//////////////////////////////////////////////////////////////
 
 	// status 클래스 생성하면 어떨까 토의 필요
-	int m_status{};	// 0 - 기본상태 , 1 - fatal 상태
+	int m_Status{};	// 0 - 기본상태 , 1 - counter 상태(카운터 카드 사용 가능 상태)
+	int m_Count{};	// 카운터 ( 공격카드 낼 때마다 증가할 예정 )
+	int m_MaxHp{};	// 최대 체력
+	int m_CurHp{};	// 현재 체력
+	int m_MaxEnergy{}; // 최대 에너지
+	int m_CurEnergey{};	// 현재 에너지
 
-	int m_count{};	// 카운터 ( 공격카드 낼 때마다 증가할 예정 )
 
 protected:
 	XMFLOAT3 m_xmf3Position;
@@ -365,14 +386,27 @@ protected:
 
 
 public:
-	void AddCount(int n) { ++m_count; }	// 카운터 증감
-	void SubCount(int n) { --m_count; }
+	void AddCount(int n) { ++m_Count; }	// 카운터 증감
+	void SubCount(int n) { --m_Count; }
 
-	void SetCount(int n) { m_count = n; }
-	int GetCount(int n) { return m_count; }
+	void SetCount(int n) { m_Count = n; }
+	int GetCount(int n) { return m_Count; }
 
-	void SetStatus(int n) { m_status = n; }	// 현재 상태값 가져오기 ( 상태값 정의 필요 ) 
-	int GetStatus(int n) { return m_status; }
+	void SetStatus(int n) { m_Status = n; }	// 현재 상태값 가져오기 ( 상태값 정의 필요 ) 
+	int GetStatus(int n) { return m_Status; }
+
+	void SetCurHp(int n) { m_CurHp = n; }
+	int GetCurHp(int n) { return m_CurHp; }
+
+	void SetCurEnergy(int n) { m_CurEnergey = n; }
+	int GetCurEnergy(int n) { return m_CurEnergey; }
+
+	// 카운터 상태인지 아닌지 확인
+	bool IsCounterState()
+	{
+		if (m_Status == STATUS_COUNTER) return true;
+		else return false;
+	}	
 
 public:
 	// 모델 구하면 수정 필요 
