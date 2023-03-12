@@ -373,6 +373,10 @@ private:
 	int m_MaxEnergy{}; // 최대 에너지
 	int m_CurEnergey{};	// 현재 에너지
 
+	// 캐릭터별 소유중인 카드 덱
+
+	std::vector<Card> m_Card_Deck;
+
 
 protected:
 	XMFLOAT3 m_xmf3Position;
@@ -383,6 +387,15 @@ protected:
 	CCamera* m_pCamera = NULL;		// 해당캐릭터가 바라보는 시선으로 전환하기 위함
 	CShader* m_pShader = NULL;
 
+public:
+	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
+	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
+	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
+	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
+
+	CCamera* GetCamera() { return(m_pCamera); }
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
+
 
 
 public:
@@ -390,16 +403,16 @@ public:
 	void SubCount(int n) { --m_Count; }
 
 	void SetCount(int n) { m_Count = n; }
-	int GetCount(int n) { return m_Count; }
+	int GetCount() { return m_Count; }
 
 	void SetStatus(int n) { m_Status = n; }	// 현재 상태값 가져오기 ( 상태값 정의 필요 ) 
-	int GetStatus(int n) { return m_Status; }
+	int GetStatus() { return m_Status; }
 
 	void SetCurHp(int n) { m_CurHp = n; }
-	int GetCurHp(int n) { return m_CurHp; }
+	int GetCurHp() { return m_CurHp; }
 
 	void SetCurEnergy(int n) { m_CurEnergey = n; }
-	int GetCurEnergy(int n) { return m_CurEnergey; }
+	int GetCurEnergy() { return m_CurEnergey; }
 
 	// 카운터 상태인지 아닌지 확인
 	bool IsCounterState()
@@ -407,6 +420,10 @@ public:
 		if (m_Status == STATUS_COUNTER) return true;
 		else return false;
 	}	
+
+	// 카드 덱 개수 반환
+	int GetDeckSize() { return m_Card_Deck.size(); }
+
 
 public:
 	// 모델 구하면 수정 필요 
