@@ -1019,3 +1019,14 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
+
+
+/////////////////////////////////////////
+// Charactor
+CCharacter::CCharacter(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+}
+
+CCharacter::~CCharacter()
+{
+}

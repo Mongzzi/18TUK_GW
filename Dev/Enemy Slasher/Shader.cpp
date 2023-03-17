@@ -448,14 +448,29 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
 
+	CGameObject* pBoxModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/box.bin", this);
+
 	int nColumnSpace = 5, nColumnSize = 30;           
     int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
 
 	int nObjects = 0;
     for (int h = 0; h < nFirstPassColumnSize; h++)
     {
-        for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
-        {
+		for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
+		{
+			if (nObjects == 0)
+			{
+				m_ppObjects[nObjects] = new CCharacter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+				m_ppObjects[nObjects]->SetChild(pBoxModel);
+				pBoxModel->AddRef();
+				float scaleSize = 20.0f;
+				XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
+				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+				m_ppObjects[nObjects]->SetScale(scaleSize, scaleSize, scaleSize);
+				m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+				m_ppObjects[nObjects++]->PrepareAnimate();
+				continue;
+			}
 			if (nObjects % 2)
 			{
 				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
