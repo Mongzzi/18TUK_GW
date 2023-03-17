@@ -458,6 +458,8 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
     {
 		for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
 		{
+
+			// Box 출력을 위한 if 문 나중에 옮기거나 삭제할 것
 			if (nObjects == 0)
 			{
 				m_ppObjects[nObjects] = new CCharacter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -471,6 +473,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[nObjects++]->PrepareAnimate();
 				continue;
 			}
+
 			if (nObjects % 2)
 			{
 				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
