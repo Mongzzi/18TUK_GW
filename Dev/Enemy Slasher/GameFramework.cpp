@@ -217,6 +217,7 @@ void CGameFramework::CreateRenderTargetViews()
 
 void CGameFramework::CreateDepthStencilView()
 {
+	// 속성
 	D3D12_RESOURCE_DESC d3dResourceDesc;
 	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	d3dResourceDesc.Alignment = 0;
@@ -230,6 +231,7 @@ void CGameFramework::CreateDepthStencilView()
 	d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
+	// 메모리 할당 정보
 	D3D12_HEAP_PROPERTIES d3dHeapProperties;
 	::ZeroMemory(&d3dHeapProperties, sizeof(D3D12_HEAP_PROPERTIES));
 	d3dHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -238,6 +240,7 @@ void CGameFramework::CreateDepthStencilView()
 	d3dHeapProperties.CreationNodeMask = 1;
 	d3dHeapProperties.VisibleNodeMask = 1;
 
+	// 초기화 정보
 	D3D12_CLEAR_VALUE d3dClearValue;
 	d3dClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	d3dClearValue.DepthStencil.Depth = 1.0f;
@@ -580,6 +583,7 @@ void CGameFramework::FrameAdvance()
 //	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	MoveToNextFrame();
 
+	// Print FrameRate And Player Position
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
