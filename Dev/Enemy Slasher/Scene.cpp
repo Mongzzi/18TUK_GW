@@ -333,7 +333,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-			// m_ppGameObjects[0] 이 더는 Player Object가 아님
+		// m_ppGameObjects[0] 이 더는 Player Object가 아님
 			
 		//case 'W': m_ppGameObjects[0]->MoveForward(+1.0f); break;
 		//case 'S': m_ppGameObjects[0]->MoveForward(-1.0f); break;
@@ -341,6 +341,15 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		//case 'D': m_ppGameObjects[0]->MoveStrafe(+1.0f); break;
 		//case 'Q': m_ppGameObjects[0]->MoveUp(+1.0f); break;
 		//case 'R': m_ppGameObjects[0]->MoveUp(-1.0f); break;
+
+		// 테스트용 빠른속도 이동 코드
+		case 'W': m_pPlayer->Move(DIR_FORWARD, 1.25f * 10, false); break;
+		case 'S': m_pPlayer->Move(DIR_BACKWARD, 1.25f * 10, false); break;
+		case 'A': m_pPlayer->Move(DIR_LEFT, 1.25f * 10, false); break;
+		case 'D': m_pPlayer->Move(DIR_RIGHT, 1.25f * 10, false); break;
+		case 'Q': m_pPlayer->Move(DIR_UP, 1.25f * 10, false); break;
+		case 'R': m_pPlayer->Move(DIR_DOWN, 1.25f * 10, false); break;
+
 		default:
 			break;
 		}
