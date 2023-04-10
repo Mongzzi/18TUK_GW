@@ -1,5 +1,5 @@
 <Hierarchy>:
-	<Frame>: 0 0 box
+	<Frame>: 0 1 box
 		<Transform>: -8.352789 0 7.721238 270 0 0 0.083654 0.083654 0.083654 -0.7071068 0 0 0.7071068  
 		<TransformMatrix>: 0.083654 0 0 0 0 -9.972334E-09 -0.08365401 0 0 0.08365401 -9.972334E-09 0 -8.352789 0 7.721238 1  
 		<Mesh>: 24 Box001
@@ -17,14 +17,20 @@
 		<Materials>: 1
 			<Material>: 0
 				<AlbedoColor>: 1 1 1 1
-				<EmissiveColor>: 0 0 0 0.9999999
+				<EmissiveColor>: 0 0 0 1
 				<Glossiness>: 0.5
 				<Metallic>: 0
 				<SpecularHighlight>: 1
 				<GlossyReflection>: 1
+				<AlbedoMap>: 512-red
+				<NormalMap>: null
+				<DetailNormalMap>: null
+				<MetallicMap>: null
+				<EmissionMap>: null
+				<DetailAlbedoMap>: null
 		</Materials>
 		<Children>: 1
-			<Frame>: 1 0 Box002
+			<Frame>: 1 1 Box002
 				<Transform>: 0 -4.108448E-09 7.026719 0 0 0 0.810089 0.810089 0.810089 0 0 0 1  
 				<TransformMatrix>: 0.810089 0 0 0 0 0.810089 0 0 0 0 0.810089 0 0 -4.108448E-09 7.026719 1  
 				<Mesh>: 24 Box002
@@ -42,14 +48,20 @@
 				<Materials>: 1
 					<Material>: 0
 						<AlbedoColor>: 1 1 1 1
-						<EmissiveColor>: 0 0 0 0.9999999
+						<EmissiveColor>: 0 0 0 1
 						<Glossiness>: 0.5
 						<Metallic>: 0
 						<SpecularHighlight>: 1
 						<GlossyReflection>: 1
+						<AlbedoMap>: @512-red
+						<NormalMap>: null
+						<DetailNormalMap>: null
+						<MetallicMap>: null
+						<EmissionMap>: null
+						<DetailAlbedoMap>: null
 				</Materials>
 				<Children>: 1
-					<Frame>: 2 0 Box003
+					<Frame>: 2 1 Box003
 						<Transform>: 0 -3.082095E-07 7.051011 0 0 0 0.621301 0.621301 0.621301 0 0 0 1  
 						<TransformMatrix>: 0.621301 0 0 0 0 0.621301 0 0 0 0 0.621301 0 0 -3.082095E-07 7.051011 1  
 						<Mesh>: 24 Box003
@@ -67,11 +79,17 @@
 						<Materials>: 1
 							<Material>: 0
 								<AlbedoColor>: 1 1 1 1
-								<EmissiveColor>: 0 0 0 0.9999999
+								<EmissiveColor>: 0 0 0 1
 								<Glossiness>: 0.5
 								<Metallic>: 0
 								<SpecularHighlight>: 1
 								<GlossyReflection>: 1
+								<AlbedoMap>: @512-red
+								<NormalMap>: null
+								<DetailNormalMap>: null
+								<MetallicMap>: null
+								<EmissionMap>: null
+								<DetailAlbedoMap>: null
 						</Materials>
 						<Children>: 0
 					</Frame>

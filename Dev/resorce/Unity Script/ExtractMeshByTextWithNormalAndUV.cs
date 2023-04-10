@@ -12,6 +12,8 @@ public class ExtractMeshByTextWithNormalAndUV : MonoBehaviour
 
     const float EPSILON = 1.0e-6f;
 
+    Dictionary<string, bool> printedMaterials = new Dictionary<string, bool>();
+
     bool IsZero(float fValue) { return ((Mathf.Abs(fValue) < EPSILON)); }
     bool IsEqual(float fA, float fB) { return (IsZero(fA - fB)); }
 
@@ -337,6 +339,31 @@ public class ExtractMeshByTextWithNormalAndUV : MonoBehaviour
                 if (materials[i].HasProperty("_GlossyReflections"))
                 {
                     WriteLineString(nLevel+2, "<GlossyReflection>: " + materials[i].GetFloat("_GlossyReflections"));
+                }
+
+
+                string[] texturePropertyNames = materials[i].GetTexturePropertyNames();
+                foreach (string name in texturePropertyNames)
+                {
+                    string materialName = null;
+                    Texture texture = materials[i].GetTexture(name);
+                    if (texture != null)
+                    {
+                        materialName = texture.name;
+                        if (!printedMaterials.ContainsKey(materialName)) printedMaterials[materialName] = true;
+                        else materialName = "@" + materialName;
+                    }
+                    else
+                    {
+                        materialName = "null";
+                    }
+
+                    if (name == "_MainTex") WriteLineString(nLevel + 2, "<AlbedoMap>: " + materialName);
+                    if (name == "_MetallicGlossMap") WriteLineString(nLevel + 2, "<MetallicMap>: " + materialName);
+                    if (name == "_BumpMap") WriteLineString(nLevel + 2, "<NormalMap>: " + materialName);                    
+                    if (name == "_EmissionMap") WriteLineString(nLevel + 2, "<EmissionMap>: " + materialName);
+                    if (name == "_DetailAlbedoMap") WriteLineString(nLevel + 2, "<DetailAlbedoMap>: " + materialName);
+                    if (name == "_DetailNormalMap") WriteLineString(nLevel + 2, "<DetailNormalMap>: " + materialName);
                 }
             }
         }

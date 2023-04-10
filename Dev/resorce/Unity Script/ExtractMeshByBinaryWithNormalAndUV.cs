@@ -10,6 +10,7 @@ public class ExtractMeshByBinaryWithNormalAndUV : MonoBehaviour
     private BinaryWriter binaryWriter = null;
     private int m_nFrames = 0;
 
+    Dictionary<string, bool> printedMaterials = new Dictionary<string, bool>();
     void WriteObjectName(Object obj)
     {
         binaryWriter.Write((obj) ? string.Copy(obj.name).Replace(" ", "_") : "null");
@@ -395,6 +396,31 @@ public class ExtractMeshByBinaryWithNormalAndUV : MonoBehaviour
             if (materials[i].HasProperty("_GlossyReflections"))
             {
                 WriteFloat("<GlossyReflection>:", materials[i].GetFloat("_GlossyReflections"));
+            }
+
+
+            string[] texturePropertyNames = materials[i].GetTexturePropertyNames();
+            foreach (string name in texturePropertyNames)
+            {
+                string materialName = null;
+                Texture texture = materials[i].GetTexture(name);
+                if (texture != null)
+                {
+                    materialName = texture.name;
+                    if (!printedMaterials.ContainsKey(materialName)) printedMaterials[materialName] = true;
+                    else materialName = "@" + materialName;
+                }
+                else
+                {
+                    materialName = "null";
+                }
+
+                if (name == "_MainTex") WriteString("<AlbedoMap>:", materialName);
+                if (name == "_MetallicGlossMap") WriteString("<MetallicMap>:", materialName);
+                if (name == "_BumpMap") WriteString("<NormalMap>:", materialName);
+                if (name == "_EmissionMap") WriteString("<EmissionMap>:", materialName);
+                if (name == "_DetailAlbedoMap") WriteString("<DetailAlbedoMap>:", materialName);
+                if (name == "_DetailNormalMap") WriteString("<DetailNormalMap>:", materialName);
             }
         }
         WriteString("</Materials>");
