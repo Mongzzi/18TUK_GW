@@ -362,7 +362,10 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 {
-	return(false);
+	//return(false);
+
+	// 씬에서 프레임별 입력을 처리할 것이므로 프레임마다 키 입력 처리하지 말 것
+	return(true);
 }
 
 void CScene::AnimateObjects(float fTimeElapsed)

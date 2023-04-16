@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Picking.h"
 
 CGameFramework::CGameFramework()
 {
@@ -290,6 +291,8 @@ void CGameFramework::ChangeSwapChainState()
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	CPicker picker;
+	PickInfo* pickinfo;
 	switch (nMessageID)
 	{
 		case WM_LBUTTONDOWN:
@@ -302,6 +305,13 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			::ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
+			if (::GetCapture() == hWnd) {
+				pickinfo = picker.PerformCPUPicking(hWnd, m_pCamera, m_pScene);
+
+				if (pickinfo->m_bHit) {
+					pickinfo->m_pGameObject->Release();
+				}
+			}
 			break;
 		default:
 			break;
