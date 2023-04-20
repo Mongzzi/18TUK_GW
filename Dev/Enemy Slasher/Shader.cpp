@@ -449,6 +449,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
 
 	CGameObject* pBoxModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/box.bin", this);
+	CGameObject* pCutterModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cutter.bin", this);
 
 	int nColumnSpace = 5, nColumnSize = 30;           
     int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
@@ -460,13 +461,26 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		{
 
 			// Box 출력을 위한 if 문 나중에 옮기거나 삭제할 것
-			if (nObjects == 0)
+			if (nObjects == 0) // Box
 			{
 				m_ppObjects[nObjects] = new CCharacter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				m_ppObjects[nObjects]->SetChild(pBoxModel);
 				pBoxModel->AddRef();
 				float scaleSize = 20.0f;
-				XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
+				XMFLOAT3 xmf3RandomPosition(730.0f, -20.0f, 1150.0f);
+				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+				m_ppObjects[nObjects]->SetScale(scaleSize, scaleSize, scaleSize);
+				m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+				m_ppObjects[nObjects++]->PrepareAnimate();
+				continue;
+			}
+			if (nObjects == 1) // Cutter
+			{
+				m_ppObjects[nObjects] = new CCutter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+				m_ppObjects[nObjects]->SetChild(pCutterModel);
+				pCutterModel->AddRef();
+				float scaleSize = 20.0f;
+				XMFLOAT3 xmf3RandomPosition(750.0f, -18.0f, 1180.0f);
 				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
 				m_ppObjects[nObjects]->SetScale(scaleSize, scaleSize, scaleSize);
 				m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);

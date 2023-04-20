@@ -1030,3 +1030,25 @@ CCharacter::CCharacter(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 CCharacter::~CCharacter()
 {
 }
+
+
+
+CCutter::CCutter(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+}
+
+CCutter::~CCutter()
+{
+}
+
+void CCutter::PrepareAnimate()
+{
+}
+
+void CCutter::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{	
+	XMMATRIX xmmtxTransform = XMMatrixTranslation(0.0f, 0.0f, -0.1f);
+	m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxTransform, m_xmf4x4Transform);
+
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+}

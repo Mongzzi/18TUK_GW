@@ -431,3 +431,17 @@ public:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
 
 };
+
+
+// 임시용 커터 오브젝트
+class CCutter : public CGameObject
+{
+public:
+	CCutter(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CCutter();
+
+public:
+	// 모델 구하면 수정 필요 
+	virtual void PrepareAnimate();
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+};
