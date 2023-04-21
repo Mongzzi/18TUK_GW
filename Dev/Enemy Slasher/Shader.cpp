@@ -392,10 +392,14 @@ D3D12_SHADER_BYTECODE CStandardShader::CreatePixelShader()
 
 void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
-	m_nPipelineStates = 1;
+	m_nPipelineStates = 1 + 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	// WireFrame PiplineState
+	m_d3dPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	HRESULT hResult = pd3dDevice->CreateGraphicsPipelineState(&m_d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[1]);
 
 	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
 	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
@@ -557,11 +561,25 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
+		if (j == 0 || j == 1) continue;
 		if (m_ppObjects[j])
 		{
 			m_ppObjects[j]->Animate(0.16f);
 			m_ppObjects[j]->UpdateTransform(NULL);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		}
+	}
+
+	CShader::Render(pd3dCommandList, pCamera, 1);
+	if (m_nObjects > 0) {
+		for (int j = 0; j < 2; j++)
+		{
+			if (m_ppObjects[j])
+			{
+				m_ppObjects[j]->Animate(0.16f);
+				m_ppObjects[j]->UpdateTransform(NULL);
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+			}
 		}
 	}
 }
@@ -666,4 +684,3 @@ void CTerrainShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
-

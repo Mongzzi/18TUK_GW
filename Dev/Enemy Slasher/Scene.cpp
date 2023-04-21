@@ -375,6 +375,38 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	
+
+	if (m_nGameObjects > 0) {
+		CGameObject* box;
+		CGameObject* cutter;
+		if (m_ppGameObjects[0]) box = m_ppGameObjects[0];
+		if (m_ppGameObjects[1]) cutter = m_ppGameObjects[1];
+	}
+
+	//CMesh;
+
+	//for (int i = 0; i < nGameObjectCount; ++i)
+	//{
+	//	for (int j = i + 1; j < nGameObjectCount; ++j)
+	//	{
+	//		CGameObject* pObject1 = ppGameObject[i];
+	//		CGameObject* pObject2 = ppGameObject[j];
+
+	//		// 두 오브젝트의 AABB 충돌 체크
+	//		if (!AABBIntersect(pObject1->GetAABB(), pObject2->GetAABB()))
+	//		{
+	//			continue;
+	//		}
+
+	//		// 두 오브젝트의 메쉬 충돌 체크
+	//		if (MeshIntersect(pObject1->GetMesh(), pObject2->GetMesh()))
+	//		{
+	//			// 충돌 처리
+	//			// ...
+	//		}
+	//	}
+	//}
+
 	if (m_pLights)
 	{
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
@@ -400,4 +432,3 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 }
-
