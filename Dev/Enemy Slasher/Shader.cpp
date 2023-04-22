@@ -491,6 +491,28 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[nObjects++]->PrepareAnimate();
 				continue;
 			}
+			if (nObjects == 2) // testBox
+			{
+				CGameObject* testBox = new CGameObject(1, 1);
+				strcpy_s(testBox->m_pstrFrameName, 64, "TestBox");
+				testBox->SetMesh(0, new TestBoxMesh(pd3dDevice, pd3dCommandList));
+				CMaterial* testBoxMaterial = new CMaterial();
+				CTexture* testBoxTexture = new CTexture(7, RESOURCE_TEXTURE2D, 0, 7);
+				testBoxMaterial->SetTexture(testBoxTexture);
+				testBox->SetMaterial(0, testBoxMaterial);
+				
+
+				m_ppObjects[nObjects] = new CCharacter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+				m_ppObjects[nObjects]->SetChild(testBox);
+				testBox->AddRef();
+				float scaleSize = 20.0f;
+				XMFLOAT3 xmf3RandomPosition(750.0f, -18.0f, 1180.0f);
+				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+				m_ppObjects[nObjects]->SetScale(scaleSize, scaleSize, scaleSize);
+				m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+				m_ppObjects[nObjects++]->PrepareAnimate();
+				continue;
+			}
 
 			if (nObjects % 2)
 			{
@@ -561,7 +583,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		if (j == 0 || j == 1) continue;
+		//if (j == 0 || j == 1) continue;
 		if (m_ppObjects[j])
 		{
 			m_ppObjects[j]->Animate(0.16f);
@@ -570,18 +592,18 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 		}
 	}
 
-	CShader::Render(pd3dCommandList, pCamera, 1);
-	if (m_nObjects > 0) {
-		for (int j = 0; j < 2; j++)
-		{
-			if (m_ppObjects[j])
-			{
-				m_ppObjects[j]->Animate(0.16f);
-				m_ppObjects[j]->UpdateTransform(NULL);
-				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
-			}
-		}
-	}
+	//CShader::Render(pd3dCommandList, pCamera, 1);
+	//if (m_nObjects > 0) {
+	//	for (int j = 0; j < 2; j++)
+	//	{
+	//		if (m_ppObjects[j])
+	//		{
+	//			m_ppObjects[j]->Animate(0.16f);
+	//			m_ppObjects[j]->UpdateTransform(NULL);
+	//			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+	//		}
+	//	}
+	//}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
