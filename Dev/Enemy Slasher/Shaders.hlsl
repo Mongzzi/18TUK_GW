@@ -107,7 +107,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 	float4 cIllumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP) // 텍스쳐가 있고, 노말 맵이 있을 경우
 	{
 		float3 normalW = input.normalW;
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
@@ -115,6 +115,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		normalW = normalize(mul(vNormal, TBN));
 		cIllumination = Lighting(input.positionW, normalW);
 		cColor = lerp(cColor, cIllumination, 0.5f);
+	}
+	else if (!gnTexturesMask) // 텍스쳐가 없을 경우
+	{
+		cColor = float4(1.0f, 0.0f, 0.0f, 1.0f); // 우선 Bounding Box 출력을 위해 붉은색으로 출력
 	}
 
 	return(cColor);
@@ -250,4 +254,33 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	//	float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
 
 	return(cColor);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// AABB를 출력하기 위한 정점 셰이더 코드
+struct VS_AABB_INPUT
+{
+	float3 position : POSITION;
+};
+
+struct VS_AABB_OUTPUT
+{
+	float4 position : SV_POSITION;
+};
+
+VS_AABB_OUTPUT VSRenderAABB(VS_AABB_INPUT input)
+{
+	VS_AABB_OUTPUT output = (VS_AABB_OUTPUT)0;
+
+	output.position = mul(float4(input.position, 1.0f), gmtxGameObject);
+
+	return output;
+}
+
+// AABB를 출력하기 위한 픽셀 셰이더 코드
+float4 PSRenderAABB(VS_AABB_OUTPUT input) : SV_TARGET
+{
+	return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }

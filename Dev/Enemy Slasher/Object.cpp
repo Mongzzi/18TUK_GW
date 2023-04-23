@@ -430,7 +430,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 			if (m_nMeshes == 1)
 			{
-				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
+				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i, false);
 			}
 		}
 	}
@@ -446,7 +446,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		{
 			for (int i = 0; i < m_nMeshes; i++)
 			{
-				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0, false);
 			}
 		}
 	}

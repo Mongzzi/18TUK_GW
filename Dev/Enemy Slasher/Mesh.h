@@ -43,6 +43,14 @@ protected:
 	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
+	int								m_nAABBVertices = 8;
+
+	XMFLOAT3*						m_pxmf3AABBVertices = NULL;
+
+	ID3D12Resource*					m_pd3dAABBVertexBuffer = NULL;
+	ID3D12Resource*					m_pd3dAABBVertexUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dAABBVertexBufferView;
+
 	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT							m_nSlot = 0;
 	UINT							m_nOffset = 0;
@@ -68,7 +76,8 @@ public:
 	UINT GetType() { return(m_nType); }
 
 	virtual void ReleaseUploadBuffers();
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet, bool bRenderAABB);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,59 +226,3 @@ public:
 	virtual float OnGetHeight(int x, int z, void* pContext);
 	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
 };
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class TestBoxMesh : public CMesh
-{
-private:
-public:
-	TestBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList) {
-		MakeBox(pd3dDevice, pd3dCommandList);
-	};
-	virtual ~TestBoxMesh() {};
-
-	void MakeBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {
-
-		int nPositions = 24;
-		int i = 0;
-		m_nVertices = nPositions;
-		m_nType |= VERTEXT_POSITION;
-
-		m_pxmf3Positions = new XMFLOAT3[nPositions];
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f, -0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f, -0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f,  0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f,  0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f,  0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f,  0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f, -0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f, -0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f,  0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f,  0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f,  0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f,  0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f, -0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f, -0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f, -0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f, -0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f, -0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f,  0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f,  0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3(-0.5f, -0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f, -0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f,  0.5f, -0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f,  0.5f,  0.5);
-		m_pxmf3Positions[i++] = XMFLOAT3( 0.5f, -0.5f,  0.5);
-
-		m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
-
-		m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
-		m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
-		m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
-
-	}
-};
-
-

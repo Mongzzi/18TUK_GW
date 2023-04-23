@@ -63,6 +63,17 @@ void CMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
 	}
 }
 
+void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet, bool bRenderAABB)
+{
+	Render(pd3dCommandList, nSubSet);
+
+	if (bRenderAABB)
+	{
+		pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dAABBVertexBufferView);
+		pd3dCommandList->DrawInstanced(8, 1, 0, 0);
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CTexturedRectMesh::CTexturedRectMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, float fWidth, float fHeight, float fDepth, float fxPosition, float fyPosition, float fzPosition) : CMesh(pd3dDevice, pd3dCommandList)
@@ -300,6 +311,26 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+			if (m_xmf3AABBExtents.x != 0.0f || m_xmf3AABBExtents.y != 0.0f || m_xmf3AABBExtents.z != 0.0f) {
+				// AABB의 8개 꼭지점 계산
+				XMFLOAT3* vertices = new XMFLOAT3[m_nAABBVertices];
+				vertices[0] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+				vertices[1] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+				vertices[2] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+				vertices[3] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+				vertices[4] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+				vertices[5] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+				vertices[6] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+				vertices[7] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+
+				m_pxmf3AABBVertices = vertices;
+
+				m_pd3dAABBVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3AABBVertices, sizeof(XMFLOAT3) * m_nAABBVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dAABBVertexUploadBuffer);
+
+				m_d3dAABBVertexBufferView.BufferLocation = m_pd3dAABBVertexBuffer->GetGPUVirtualAddress();
+				m_d3dAABBVertexBufferView.StrideInBytes = sizeof(XMFLOAT3);
+				m_d3dAABBVertexBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nAABBVertices;
+			}
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{
