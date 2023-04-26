@@ -430,7 +430,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 			if (m_nMeshes == 1)
 			{
-				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i, false);
+				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
 			}
 		}
 	}
@@ -446,13 +446,31 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		{
 			for (int i = 0; i < m_nMeshes; i++)
 			{
-				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0, false);
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
 			}
 		}
 	}
 
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+}
+
+void CGameObject::RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender();
+
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i] && m_ppMeshes[i]->GetHasAABB()) m_ppMeshes[i]->RenderAABB(pd3dCommandList, 0);
+		}
+	}
+
+	if (m_pSibling) m_pSibling->RenderAABB(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->RenderAABB(pd3dCommandList, pCamera);
 }
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)

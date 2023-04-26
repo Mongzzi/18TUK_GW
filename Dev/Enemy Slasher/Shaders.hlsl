@@ -259,25 +259,10 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// AABB를 출력하기 위한 정점 셰이더 코드
-struct VS_AABB_INPUT
-{
-	float3 position : POSITION;
-};
-
 struct VS_AABB_OUTPUT
 {
 	float4 position : SV_POSITION;
 };
-
-VS_AABB_OUTPUT VSRenderAABB(VS_AABB_INPUT input)
-{
-	VS_AABB_OUTPUT output = (VS_AABB_OUTPUT)0;
-
-	output.position = mul(float4(input.position, 1.0f), gmtxGameObject);
-
-	return output;
-}
 
 // AABB를 출력하기 위한 픽셀 셰이더 코드
 float4 PSRenderAABB(VS_AABB_OUTPUT input) : SV_TARGET

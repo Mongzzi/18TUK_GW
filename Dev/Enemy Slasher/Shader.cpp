@@ -412,10 +412,12 @@ void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 //
 CObjectsShader::CObjectsShader()
 {
+	m_pAABBShader = new CAABBShader;
 }
 
 CObjectsShader::~CObjectsShader()
 {
+	delete m_pAABBShader;
 }
 
 float Random(float fMin, float fMax)
@@ -445,6 +447,8 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
 {
+	m_pAABBShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
 	m_nObjects = 120;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
@@ -578,7 +582,6 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		//if (j == 0 || j == 1) continue;
 		if (m_ppObjects[j])
 		{
 			m_ppObjects[j]->Animate(0.16f);
@@ -587,6 +590,16 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 		}
 	}
 
+	//Render AABB
+	m_pAABBShader->Render(pd3dCommandList, pCamera, nPipelineState);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->UpdateTransform(NULL);
+			m_ppObjects[j]->RenderAABB(pd3dCommandList, pCamera);
+		}
+	}
 	
 	//CShader::Render(pd3dCommandList, pCamera, 1);
 	//if (m_nObjects > 0) {
@@ -718,21 +731,20 @@ CAABBShader::~CAABBShader()
 
 D3D12_INPUT_LAYOUT_DESC CAABBShader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 1;
+	UINT nInputElementDescs = 5;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[4] = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 4, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;
 
 	return(d3dInputLayoutDesc);
-}
-
-D3D12_SHADER_BYTECODE CAABBShader::CreateVertexShader()
-{
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSRenderAABB", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CAABBShader::CreatePixelShader()
@@ -745,7 +757,6 @@ D3D12_RASTERIZER_DESC CAABBShader::CreateRasterizerState()
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
-	//d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 	d3dRasterizerDesc.DepthBias = 0;
@@ -771,4 +782,11 @@ void CAABBShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
 
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CAABBShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+
+
 }

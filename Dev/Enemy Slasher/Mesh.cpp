@@ -12,6 +12,7 @@ CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandLis
 CMesh::~CMesh()
 {
 	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
+	if (m_pd3dAABBVertexBuffer) m_pd3dAABBVertexBuffer->Release();
 
 	if (m_nSubMeshes > 0)
 	{
@@ -34,6 +35,9 @@ void CMesh::ReleaseUploadBuffers()
 {
 	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
 	m_pd3dPositionUploadBuffer = NULL;
+
+	if (m_pd3dAABBVertexUploadBuffer) m_pd3dAABBVertexUploadBuffer->Release();
+	m_pd3dAABBVertexUploadBuffer = NULL;
 
 	if ((m_nSubMeshes > 0) && m_ppd3dSubSetIndexUploadBuffers)
 	{
@@ -69,9 +73,19 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet, bool
 
 	if (bRenderAABB)
 	{
-		pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dAABBVertexBufferView);
-		pd3dCommandList->DrawInstanced(8, 1, 0, 0);
+		pd3dCommandList->IASetPrimitiveTopology(m_d3dAABBPrimitiveTopology);
+		pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dAABBVertexBufferView);
+
+		pd3dCommandList->DrawInstanced(m_nAABBVertices, 1, m_nOffset, 0);
 	}
+}
+
+void CMesh::RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
+{
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dAABBPrimitiveTopology);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dAABBVertexBufferView);
+
+	pd3dCommandList->DrawInstanced(m_nAABBVertices, 1, m_nOffset, 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,7 +327,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
 			if (m_xmf3AABBExtents.x != 0.0f || m_xmf3AABBExtents.y != 0.0f || m_xmf3AABBExtents.z != 0.0f) {
 				// AABB의 8개 꼭지점 계산
-				XMFLOAT3* vertices = new XMFLOAT3[m_nAABBVertices];
+				XMFLOAT3* vertices = new XMFLOAT3[8];
 				vertices[0] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
 				vertices[1] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
 				vertices[2] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
@@ -323,13 +337,36 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 				vertices[6] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
 				vertices[7] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
 
-				m_pxmf3AABBVertices = vertices;
+				// AABB를 구성하는 선들을 정의
+				UINT indices[] = {
+					0, 1,
+					0, 2,
+					0, 4,
+					1, 3,
+					1, 5,
+					2, 3,
+					2, 6,
+					3, 7,
+					4, 5,
+					4, 6,
+					5, 7,
+					6, 7
+				};
+				m_nAABBVertices = 24;
+				XMFLOAT3* lines = new XMFLOAT3[m_nAABBVertices];
+				for (int i = 0; i < m_nAABBVertices; i++) {
+					lines[i] = vertices[indices[i]];
+				}
+
+				m_pxmf3AABBVertices = lines;
 
 				m_pd3dAABBVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3AABBVertices, sizeof(XMFLOAT3) * m_nAABBVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dAABBVertexUploadBuffer);
 
 				m_d3dAABBVertexBufferView.BufferLocation = m_pd3dAABBVertexBuffer->GetGPUVirtualAddress();
 				m_d3dAABBVertexBufferView.StrideInBytes = sizeof(XMFLOAT3);
 				m_d3dAABBVertexBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nAABBVertices;
+
+				m_bHasAABB = true;
 			}
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
