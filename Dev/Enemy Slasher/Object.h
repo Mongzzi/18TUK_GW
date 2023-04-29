@@ -177,6 +177,32 @@ public:
 	XMFLOAT4X4						m_xmf4x4Transform;
 	XMFLOAT4X4						m_xmf4x4World;
 
+public:
+	XMFLOAT4X4						m_xmf4x4AABBTransform;
+	XMFLOAT4X4						m_xmf4x4AABBWorld;
+
+	bool							m_bHasAABB = false;
+
+	void CreateAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // 현 오브젝트의 모든 Mesh를 순회하며 AABB 제작
+	void CreateMainAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList); // Children을 전부 순회하며 모두 포함하는 AABB 제작
+	void CalculateMainAABB(XMFLOAT3* AABBCenter, XMFLOAT3* AABBExtents); // CreateMainAABB Center/Extents 계산용 함수
+	void UpdateAABBScaleByRotation(XMMATRIX mtxRotate);
+
+protected:
+	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	int								m_nAABBVertices = 0;
+
+	XMFLOAT3*						m_pxmf3AABBVertices = NULL;
+
+	ID3D12Resource*					m_pd3dAABBVertexBuffer = NULL;
+	ID3D12Resource*					m_pd3dAABBVertexUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dAABBVertexBufferView;
+	D3D12_PRIMITIVE_TOPOLOGY		m_d3dAABBPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+
+
+public:
 	CGameObject* m_pParent = NULL;
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
@@ -199,6 +225,7 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
@@ -224,6 +251,7 @@ public:
 
 	CGameObject* GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	void UpdateAABBTransform(XMFLOAT4X4* pxmf4x4AABBParent = NULL);
 	CGameObject* FindFrame(char* pstrFrameName);
 
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);

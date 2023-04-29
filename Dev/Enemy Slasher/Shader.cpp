@@ -460,6 +460,8 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CGameObject* pBoxModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/box.bin", this);
 	CGameObject* pCutterModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cutter.bin", this);
 	CGameObject* pStandardCubeModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cube.bin", this);
+	
+	//pGunshipModel->CreateAABB(pd3dDevice, pd3dCommandList);
 
 	int nColumnSpace = 5, nColumnSize = 30;           
     int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
@@ -504,6 +506,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 				pStandardCubeModel->m_ppMaterials[0]->m_xmf4EmissiveColor = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 				m_ppObjects[nObjects]->SetChild(pStandardCubeModel);
 				pStandardCubeModel->AddRef();
+				//m_ppObjects[nObjects]->CreateMainAABB(pd3dDevice, pd3dCommandList);
 				float scaleSize = 20.0f;
 				XMFLOAT3 xmf3RandomPosition(750.0f, -18.0f, 1180.0f);
 				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
@@ -596,7 +599,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 	{
 		if (m_ppObjects[j])
 		{
-			m_ppObjects[j]->UpdateTransform(NULL);
+			m_ppObjects[j]->UpdateAABBTransform(NULL);
 			m_ppObjects[j]->RenderAABB(pd3dCommandList, pCamera);
 		}
 	}

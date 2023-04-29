@@ -296,6 +296,9 @@ CGameObject::CGameObject()
 {
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4World = Matrix4x4::Identity();
+
+	m_xmf4x4AABBTransform = Matrix4x4::Identity();
+	m_xmf4x4AABBWorld = Matrix4x4::Identity();
 }
 
 CGameObject::CGameObject(int nMeshes, int nMaterials) : CGameObject()
@@ -319,6 +322,8 @@ CGameObject::CGameObject(int nMeshes, int nMaterials) : CGameObject()
 CGameObject::~CGameObject()
 {
 	ReleaseShaderVariables();
+
+	if (m_pd3dAABBVertexBuffer) m_pd3dAABBVertexBuffer->Release();
 
 	if (m_ppMeshes)
 	{
@@ -371,6 +376,177 @@ void CGameObject::SetChild(CGameObject *pChild)
 	{
 		pChild->m_pParent = this;
 	}
+}
+
+void CGameObject::CreateAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// m_xmf3AABBExtents 와 m_xmf3AABBCenter 계산
+	if (m_nMeshes == 0) return;
+
+	// 첫번째 메쉬의 AABB를 초기값으로 설정
+	m_xmf3AABBCenter = m_ppMeshes[0]->GetAABBCenter();
+	m_xmf3AABBExtents = m_ppMeshes[0]->GetAABBExtents();
+
+	// 모든 메쉬의 AABB를 포함하는 AABB 계산
+	for (int i = 1; i < m_nMeshes; ++i) {
+		XMFLOAT3 xmf3MeshCenter = m_ppMeshes[i]->GetAABBCenter();
+		XMFLOAT3 xmf3MeshExtents = m_ppMeshes[i]->GetAABBExtents();
+
+		// X 축
+		if (m_xmf3AABBCenter.x - m_xmf3AABBExtents.x < xmf3MeshCenter.x - xmf3MeshExtents.x)
+			m_xmf3AABBExtents.x = xmf3MeshCenter.x - m_xmf3AABBCenter.x + xmf3MeshExtents.x;
+		if (m_xmf3AABBCenter.x + m_xmf3AABBExtents.x > xmf3MeshCenter.x + xmf3MeshExtents.x)
+			m_xmf3AABBExtents.x = m_xmf3AABBCenter.x - xmf3MeshCenter.x + xmf3MeshExtents.x;
+		m_xmf3AABBCenter.x = (m_xmf3AABBExtents.x + m_xmf3AABBCenter.x + xmf3MeshCenter.x - xmf3MeshExtents.x) * 0.5f;
+
+		// Y 축
+		if (m_xmf3AABBCenter.y - m_xmf3AABBExtents.y < xmf3MeshCenter.y - xmf3MeshExtents.y)
+			m_xmf3AABBExtents.y = xmf3MeshCenter.y - m_xmf3AABBCenter.y + xmf3MeshExtents.y;
+		if (m_xmf3AABBCenter.y + m_xmf3AABBExtents.y > xmf3MeshCenter.y + xmf3MeshExtents.y)
+			m_xmf3AABBExtents.y = m_xmf3AABBCenter.y - xmf3MeshCenter.y + xmf3MeshExtents.y;
+		m_xmf3AABBCenter.y = (m_xmf3AABBExtents.y + m_xmf3AABBCenter.y + xmf3MeshCenter.y - xmf3MeshExtents.y) * 0.5f;
+
+		// Z 축
+		if (m_xmf3AABBCenter.z - m_xmf3AABBExtents.z < xmf3MeshCenter.z - xmf3MeshExtents.z)
+			m_xmf3AABBExtents.z = xmf3MeshCenter.z - m_xmf3AABBCenter.z + xmf3MeshExtents.z;
+		if (m_xmf3AABBCenter.z + m_xmf3AABBExtents.z > xmf3MeshCenter.z + xmf3MeshExtents.z)
+			m_xmf3AABBExtents.z = m_xmf3AABBCenter.z - xmf3MeshCenter.z + xmf3MeshExtents.z;
+		m_xmf3AABBCenter.z = (m_xmf3AABBExtents.z + m_xmf3AABBCenter.z + xmf3MeshCenter.z - xmf3MeshExtents.z) * 0.5f;
+	}
+
+	if (m_xmf3AABBExtents.x != 0.0f || m_xmf3AABBExtents.y != 0.0f || m_xmf3AABBExtents.z != 0.0f) {
+		// AABB의 8개 꼭지점 계산
+		XMFLOAT3* vertices = new XMFLOAT3[8];
+		vertices[0] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[1] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		vertices[2] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[3] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		vertices[4] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[5] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		vertices[6] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[7] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+
+		// AABB를 구성하는 선들을 정의
+		UINT indices[] = {
+			0, 1,
+			0, 2,
+			0, 4,
+			1, 3,
+			1, 5,
+			2, 3,
+			2, 6,
+			3, 7,
+			4, 5,
+			4, 6,
+			5, 7,
+			6, 7
+		};
+		m_nAABBVertices = 24;
+		XMFLOAT3* lines = new XMFLOAT3[m_nAABBVertices];
+		for (int i = 0; i < m_nAABBVertices; i++) {
+			lines[i] = vertices[indices[i]];
+		}
+
+		m_pxmf3AABBVertices = lines;
+
+		m_pd3dAABBVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3AABBVertices, sizeof(XMFLOAT3) * m_nAABBVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dAABBVertexUploadBuffer);
+
+		m_d3dAABBVertexBufferView.BufferLocation = m_pd3dAABBVertexBuffer->GetGPUVirtualAddress();
+		m_d3dAABBVertexBufferView.StrideInBytes = sizeof(XMFLOAT3);
+		m_d3dAABBVertexBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nAABBVertices;
+
+		m_bHasAABB = true;
+	}
+}
+
+void CGameObject::CreateMainAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	CalculateMainAABB(&m_xmf3AABBCenter, &m_xmf3AABBExtents);
+
+	if (m_xmf3AABBExtents.x != 0.0f || m_xmf3AABBExtents.y != 0.0f || m_xmf3AABBExtents.z != 0.0f) {
+		// AABB의 8개 꼭지점 계산
+		XMFLOAT3* vertices = new XMFLOAT3[8];
+		vertices[0] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[1] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		vertices[2] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[3] = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		vertices[4] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[5] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		vertices[6] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
+		vertices[7] = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+
+		// AABB를 구성하는 선들을 정의
+		UINT indices[] = {
+			0, 1,
+			0, 2,
+			0, 4,
+			1, 3,
+			1, 5,
+			2, 3,
+			2, 6,
+			3, 7,
+			4, 5,
+			4, 6,
+			5, 7,
+			6, 7
+		};
+		m_nAABBVertices = 24;
+		XMFLOAT3* lines = new XMFLOAT3[m_nAABBVertices];
+		for (int i = 0; i < m_nAABBVertices; i++) {
+			lines[i] = vertices[indices[i]];
+		}
+
+		m_pxmf3AABBVertices = lines;
+
+		m_pd3dAABBVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3AABBVertices, sizeof(XMFLOAT3) * m_nAABBVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dAABBVertexUploadBuffer);
+
+		m_d3dAABBVertexBufferView.BufferLocation = m_pd3dAABBVertexBuffer->GetGPUVirtualAddress();
+		m_d3dAABBVertexBufferView.StrideInBytes = sizeof(XMFLOAT3);
+		m_d3dAABBVertexBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nAABBVertices;
+
+		m_bHasAABB = true;
+	}
+}
+
+void CGameObject::CalculateMainAABB(XMFLOAT3* AABBCenter, XMFLOAT3* AABBExtents)
+{
+	if (m_bHasAABB) // AABB를 가지고 있다면 Main AABB 계산에 합산
+	{
+		// X 축
+		if (AABBCenter->x - AABBExtents->x < m_xmf3AABBCenter.x - m_xmf3AABBExtents.x)
+			AABBExtents->x = m_xmf3AABBCenter.x - AABBCenter->x + m_xmf3AABBExtents.x;
+		if (AABBCenter->x + AABBExtents->x > m_xmf3AABBCenter.x + m_xmf3AABBExtents.x)
+			AABBExtents->x = AABBCenter->x - m_xmf3AABBCenter.x + m_xmf3AABBExtents.x;
+		AABBCenter->x = (AABBExtents->x + AABBCenter->x + m_xmf3AABBCenter.x - m_xmf3AABBExtents.x) * 0.5f;
+
+		// Y 축
+		if (AABBCenter->y - AABBExtents->y < m_xmf3AABBCenter.y - m_xmf3AABBExtents.y)
+			AABBExtents->y = m_xmf3AABBCenter.y - AABBCenter->y + m_xmf3AABBExtents.y;
+		if (AABBCenter->y + AABBExtents->y > m_xmf3AABBCenter.y + m_xmf3AABBExtents.y)
+			AABBExtents->y = AABBCenter->y - m_xmf3AABBCenter.y + m_xmf3AABBExtents.y;
+		AABBCenter->y = (AABBExtents->y + AABBCenter->y + m_xmf3AABBCenter.y - m_xmf3AABBExtents.y) * 0.5f;
+
+		// Z 축
+		if (AABBCenter->z - AABBExtents->z < m_xmf3AABBCenter.z - m_xmf3AABBExtents.z)
+			AABBExtents->z = m_xmf3AABBCenter.z - AABBCenter->z + m_xmf3AABBExtents.z;
+		if (AABBCenter->z + AABBExtents->z > m_xmf3AABBCenter.z + m_xmf3AABBExtents.z)
+			AABBExtents->z = AABBCenter->z - m_xmf3AABBCenter.z + m_xmf3AABBExtents.z;
+		AABBCenter->z = (AABBExtents->z + AABBCenter->z + m_xmf3AABBCenter.z - m_xmf3AABBExtents.z) * 0.5f;
+	}
+
+	if (m_pSibling) m_pSibling->CalculateMainAABB(AABBCenter, AABBExtents);
+	if (m_pChild) m_pChild->CalculateMainAABB(AABBCenter, AABBExtents);
+}
+
+void CGameObject::UpdateAABBScaleByRotation(XMMATRIX mtxRotate)
+{
+	// 오브젝트의 회전이 있을 때 AABB를 Sclae하는 함수
+
+
+
 }
 
 void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
@@ -459,14 +635,14 @@ void CGameObject::RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 {
 	OnPrepareRender();
 
-	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4AABBWorld);
 
-	if (m_ppMeshes)
+	if (m_bHasAABB)
 	{
-		for (int i = 0; i < m_nMeshes; i++)
-		{
-			if (m_ppMeshes[i] && m_ppMeshes[i]->GetHasAABB()) m_ppMeshes[i]->RenderAABB(pd3dCommandList, 0);
-		}
+		pd3dCommandList->IASetPrimitiveTopology(m_d3dAABBPrimitiveTopology);
+		pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dAABBVertexBufferView);
+
+		pd3dCommandList->DrawInstanced(m_nAABBVertices, 1, 0, 0);
 	}
 
 	if (m_pSibling) m_pSibling->RenderAABB(pd3dCommandList, pCamera);
@@ -498,6 +674,9 @@ void CGameObject::ReleaseShaderVariables()
 
 void CGameObject::ReleaseUploadBuffers()
 {
+	if (m_pd3dAABBVertexUploadBuffer) m_pd3dAABBVertexUploadBuffer->Release();
+	m_pd3dAABBVertexUploadBuffer = NULL;
+
 	for (int i = 0; i < m_nMeshes; i++)
 	{
 		if (m_ppMeshes[i]) m_ppMeshes[i]->ReleaseUploadBuffers();
@@ -520,13 +699,28 @@ void CGameObject::UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent)
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 }
 
+void CGameObject::UpdateAABBTransform(XMFLOAT4X4* pxmf4x4AABBParent)
+{
+	// Update AABB's matrix
+	m_xmf4x4AABBWorld = (pxmf4x4AABBParent) ? Matrix4x4::Multiply(m_xmf4x4AABBTransform, *pxmf4x4AABBParent) : m_xmf4x4AABBTransform;
+
+	if (m_pSibling) m_pSibling->UpdateAABBTransform(pxmf4x4AABBParent);
+	if (m_pChild) m_pChild->UpdateAABBTransform(&m_xmf4x4AABBWorld);
+}
+
 void CGameObject::SetPosition(float x, float y, float z)
 {
 	m_xmf4x4Transform._41 = x;
 	m_xmf4x4Transform._42 = y;
 	m_xmf4x4Transform._43 = z;
 
+	//AABB
+	m_xmf4x4AABBTransform._41 = x;
+	m_xmf4x4AABBTransform._42 = y;
+	m_xmf4x4AABBTransform._43 = z;
+
 	UpdateTransform(NULL);
+	UpdateAABBTransform(NULL);
 }
 
 void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
@@ -539,7 +733,10 @@ void CGameObject::SetScale(float x, float y, float z)
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 
+	m_xmf4x4AABBTransform = Matrix4x4::Multiply(mtxScale, m_xmf4x4AABBTransform);
+
 	UpdateTransform(NULL);
+	UpdateAABBTransform(NULL);
 }
 
 XMFLOAT3 CGameObject::GetPosition()
@@ -788,6 +985,9 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 			CStandardMesh *pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 			pGameObject->SetMesh(0, pMesh);
+
+			// Create AABB from Meshes
+			pGameObject->CreateAABB(pd3dDevice, pd3dCommandList);
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
@@ -837,6 +1037,8 @@ CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12G
 	::rewind(pInFile);
 
 	CGameObject *pGameObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader);
+
+	//pGameObject->CreateAABB(pd3dDevice, pd3dCommandList);
 
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 	TCHAR pstrDebug[256] = { 0 };

@@ -47,21 +47,12 @@ protected:
 protected:
 	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-	int								m_nAABBVertices = 0;
 	bool							m_bHasAABB = false;
-
-	XMFLOAT3*						m_pxmf3AABBVertices = NULL;
-
-	ID3D12Resource*					m_pd3dAABBVertexBuffer = NULL;
-	ID3D12Resource*					m_pd3dAABBVertexUploadBuffer = NULL;
-	D3D12_VERTEX_BUFFER_VIEW		m_d3dAABBVertexBufferView;
-	D3D12_PRIMITIVE_TOPOLOGY		m_d3dAABBPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
 
 public:
 	bool GetHasAABB() { return m_bHasAABB; }
-	void GetAABB() {};
-	void UpdateAABB() {};
+	XMFLOAT3 GetAABBCenter() { return m_xmf3AABBCenter; }
+	XMFLOAT3 GetAABBExtents() { return m_xmf3AABBExtents; }
 
 protected:
 	int								m_nVertices = 0;
@@ -85,8 +76,6 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet, bool bRenderAABB);
-	virtual void RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
