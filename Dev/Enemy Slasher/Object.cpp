@@ -538,9 +538,36 @@ void CGameObject::CalculateMainAABB(XMFLOAT3* AABBCenter, XMFLOAT3* AABBExtents)
 void CGameObject::UpdateAABBScaleByRotation(XMMATRIX mtxRotate)
 {
 	// 오브젝트의 회전이 있을 때 AABB를 Sclae하는 함수
+	Matrix4x4::Multiply(mtxRotate, m_xmf4x4AABBTransform);
+	UpdateAABBTransform(NULL);
+
+	// 기존 AABB의 World에서의 중심과 크기를 구한다.
+	XMFLOAT3 center, extents;
+	XMStoreFloat3(&center, XMVector3Transform(XMLoadFloat3(&m_xmf3AABBCenter), XMLoadFloat4x4(&m_xmf4x4AABBWorld)));
+	XMStoreFloat3(&extents, XMVector3Transform(XMLoadFloat3(&m_xmf3AABBExtents), XMLoadFloat4x4(&m_xmf4x4AABBWorld)));
 
 
 
+
+	// 회전 변환 행렬의 각 축 벡터를 추출한다.
+	// obb Code
+	//XMFLOAT3 xAxis, yAxis, zAxis;
+	//xAxis = XMFLOAT3(mtxRotate.r[0].m128_f32[0], mtxRotate.r[0].m128_f32[1], mtxRotate.r[0].m128_f32[2]);
+	//yAxis = XMFLOAT3(mtxRotate.r[1].m128_f32[0], mtxRotate.r[1].m128_f32[1], mtxRotate.r[1].m128_f32[2]);
+	//zAxis = XMFLOAT3(mtxRotate.r[2].m128_f32[0], mtxRotate.r[2].m128_f32[1], mtxRotate.r[2].m128_f32[2]);
+
+	// 회전 변환 후의 AABB를 포함하는 최소 크기의 AABB를 계산한다.
+	//float xExtent = (fabsf(extents.x * xAxis.x) + fabsf(extents.y * yAxis.x) + fabsf(extents.z * zAxis.x));
+	//float yExtent = (fabsf(extents.x * xAxis.y) + fabsf(extents.y * yAxis.y) + fabsf(extents.z * zAxis.y));
+	//float zExtent = (fabsf(extents.x * xAxis.z) + fabsf(extents.y * yAxis.z) + fabsf(extents.z * zAxis.z));
+
+	// 새로 계산한 AABB의 중심과 크기를 저장한다.
+	//m_xmf3AABBCenter = center;
+	//m_xmf3AABBExtents = XMFLOAT3(xExtent, yExtent, zExtent);
+
+
+	//if (m_pSibling) m_pSibling->UpdateAABBScaleByRotation(pxmf4x4AABBParent);
+	//if (m_pChild) m_pChild->UpdateAABBScaleByRotation(&m_xmf4x4AABBWorld);
 }
 
 void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
@@ -782,7 +809,10 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
 
+	m_xmf4x4AABBTransform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4AABBTransform);
+
 	UpdateTransform(NULL);
+	UpdateAABBTransform(NULL);
 }
 
 void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
@@ -790,7 +820,10 @@ void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
 
+	m_xmf4x4AABBTransform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4AABBTransform);
+
 	UpdateTransform(NULL);
+	UpdateAABBTransform(NULL);
 }
 
 void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
@@ -798,7 +831,10 @@ void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
 
+	m_xmf4x4AABBTransform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4AABBTransform);
+
 	UpdateTransform(NULL);
+	UpdateAABBTransform(NULL);
 }
 
 //#define _WITH_DEBUG_FRAME_HIERARCHY
@@ -1267,4 +1303,31 @@ void CCutter::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxTransform, m_xmf4x4Transform);
 
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+}
+
+CColisionBoxData::CColisionBoxData()
+{
+}
+
+CColisionBoxData::CColisionBoxData(XMFLOAT3* m_pxmf3AABBCenter, XMFLOAT3* m_pxmf3AABBExtents)
+{
+	SetAABBCenterExtent(m_pxmf3AABBCenter, m_pxmf3AABBExtents);
+}
+
+CColisionBoxData::~CColisionBoxData()
+{
+}
+
+void CColisionBoxData::SetAABBCenterExtent(XMFLOAT3* m_pxmf3AABBCenter, XMFLOAT3* m_pxmf3AABBExtents)
+{
+	m_xmf3AABBCenter = *(m_pxmf3AABBCenter);
+	m_xmf3AABBExtents = *(m_pxmf3AABBExtents);
+
+	MakeMinMaxData();
+}
+
+void CColisionBoxData::MakeMinMaxData()
+{
+	m_xmf3AABBMax = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+	m_xmf3AABBMin = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
 }

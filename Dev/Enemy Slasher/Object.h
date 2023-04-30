@@ -148,6 +148,32 @@ public:
 	float							m_fMetallic = 0.0f;
 	float							m_fGlossyReflection = 0.0f;
 };
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CColisionBoxData
+{
+public:
+	CColisionBoxData();
+	CColisionBoxData(XMFLOAT3* m_pxmf3AABBCenter, XMFLOAT3* m_pxmf3AABBExtents);
+
+public:
+	~CColisionBoxData();
+
+public:
+	XMFLOAT3 m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3AABBMin = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3AABBMax = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+public:
+	void SetAABBCenterExtent(XMFLOAT3* m_pxmf3AABBCenter, XMFLOAT3* m_pxmf3AABBExtents);
+	//XMFLOAT3 GetAABBMin() { return m_xmf3AABBMin; }
+	//XMFLOAT3 GetAABBMax() { return m_xmf3AABBMax; }
+
+private:
+	void MakeMinMaxData();
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -188,9 +214,13 @@ public:
 	void CalculateMainAABB(XMFLOAT3* AABBCenter, XMFLOAT3* AABBExtents); // CreateMainAABB Center/Extents 계산용 함수
 	void UpdateAABBScaleByRotation(XMMATRIX mtxRotate);
 
+	CColisionBoxData GetAABB() { return m_AABBData; }
+
 protected:
 	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	CColisionBoxData				m_AABBData;
 
 	int								m_nAABBVertices = 0;
 
