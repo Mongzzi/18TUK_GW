@@ -463,6 +463,11 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	
 	//pGunshipModel->CreateAABB(pd3dDevice, pd3dCommandList);
 
+	CGameObject* AABBBox = new CGameObject();
+	AABBBox->SetChild(pSuperCobraModel);
+	pSuperCobraModel->AddRef();
+	AABBBox->CreateMainAABB(pd3dDevice, pd3dCommandList);
+
 	int nColumnSpace = 5, nColumnSize = 30;           
     int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
 
@@ -476,8 +481,10 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 			if (nObjects == 0) // Box
 			{
 				m_ppObjects[nObjects] = new CCharacter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pBoxModel);
-				pBoxModel->AddRef();
+				//m_ppObjects[nObjects]->SetChild(pBoxModel);
+				//pBoxModel->AddRef();
+				m_ppObjects[nObjects]->SetChild(AABBBox);
+				AABBBox->AddRef();
 				float scaleSize = 20.0f;
 				XMFLOAT3 xmf3RandomPosition(730.0f, -20.0f, 1150.0f);
 				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);

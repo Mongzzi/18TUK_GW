@@ -389,29 +389,29 @@ void CGameObject::CreateAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	// 모든 메쉬의 AABB를 포함하는 AABB 계산
 	for (int i = 1; i < m_nMeshes; ++i) {
-		XMFLOAT3 xmf3MeshCenter = m_ppMeshes[i]->GetAABBCenter();
-		XMFLOAT3 xmf3MeshExtents = m_ppMeshes[i]->GetAABBExtents();
+		XMFLOAT3 meshCenter = m_ppMeshes[i]->GetAABBCenter();
+		XMFLOAT3 meshExtents = m_ppMeshes[i]->GetAABBExtents();
 
-		// X 축
-		if (m_xmf3AABBCenter.x - m_xmf3AABBExtents.x < xmf3MeshCenter.x - xmf3MeshExtents.x)
-			m_xmf3AABBExtents.x = xmf3MeshCenter.x - m_xmf3AABBCenter.x + xmf3MeshExtents.x;
-		if (m_xmf3AABBCenter.x + m_xmf3AABBExtents.x > xmf3MeshCenter.x + xmf3MeshExtents.x)
-			m_xmf3AABBExtents.x = m_xmf3AABBCenter.x - xmf3MeshCenter.x + xmf3MeshExtents.x;
-		m_xmf3AABBCenter.x = (m_xmf3AABBExtents.x + m_xmf3AABBCenter.x + xmf3MeshCenter.x - xmf3MeshExtents.x) * 0.5f;
+		XMFLOAT3 maxBound = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		XMFLOAT3 minBound = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
 
-		// Y 축
-		if (m_xmf3AABBCenter.y - m_xmf3AABBExtents.y < xmf3MeshCenter.y - xmf3MeshExtents.y)
-			m_xmf3AABBExtents.y = xmf3MeshCenter.y - m_xmf3AABBCenter.y + xmf3MeshExtents.y;
-		if (m_xmf3AABBCenter.y + m_xmf3AABBExtents.y > xmf3MeshCenter.y + xmf3MeshExtents.y)
-			m_xmf3AABBExtents.y = m_xmf3AABBCenter.y - xmf3MeshCenter.y + xmf3MeshExtents.y;
-		m_xmf3AABBCenter.y = (m_xmf3AABBExtents.y + m_xmf3AABBCenter.y + xmf3MeshCenter.y - xmf3MeshExtents.y) * 0.5f;
+		XMFLOAT3 meshMaxBound = XMFLOAT3(meshCenter.x + meshExtents.x, meshCenter.y + meshExtents.y, meshCenter.z + meshExtents.z);
+		XMFLOAT3 meshMinBound = XMFLOAT3(meshCenter.x - meshExtents.x, meshCenter.y - meshExtents.y, meshCenter.z - meshExtents.z);
 
-		// Z 축
-		if (m_xmf3AABBCenter.z - m_xmf3AABBExtents.z < xmf3MeshCenter.z - xmf3MeshExtents.z)
-			m_xmf3AABBExtents.z = xmf3MeshCenter.z - m_xmf3AABBCenter.z + xmf3MeshExtents.z;
-		if (m_xmf3AABBCenter.z + m_xmf3AABBExtents.z > xmf3MeshCenter.z + xmf3MeshExtents.z)
-			m_xmf3AABBExtents.z = m_xmf3AABBCenter.z - xmf3MeshCenter.z + xmf3MeshExtents.z;
-		m_xmf3AABBCenter.z = (m_xmf3AABBExtents.z + m_xmf3AABBCenter.z + xmf3MeshCenter.z - xmf3MeshExtents.z) * 0.5f;
+		if (meshMaxBound.x > maxBound.x) maxBound.x = meshMaxBound.x;
+		if (meshMaxBound.y > maxBound.y) maxBound.y = meshMaxBound.y;
+		if (meshMaxBound.z > maxBound.z) maxBound.z = meshMaxBound.z;
+		if (meshMinBound.x < minBound.x) minBound.x = meshMinBound.x;
+		if (meshMinBound.y < minBound.y) minBound.y = meshMinBound.y;
+		if (meshMinBound.z < minBound.z) minBound.z = meshMinBound.z;
+
+		m_xmf3AABBCenter.x = (maxBound.x + minBound.x) * 0.5f;
+		m_xmf3AABBCenter.y = (maxBound.y + minBound.y) * 0.5f;
+		m_xmf3AABBCenter.z = (maxBound.z + minBound.z) * 0.5f;
+
+		m_xmf3AABBExtents.x = (maxBound.x - minBound.x) * 0.5f;
+		m_xmf3AABBExtents.y = (maxBound.y - minBound.y) * 0.5f;
+		m_xmf3AABBExtents.z = (maxBound.z - minBound.z) * 0.5f;
 	}
 
 	if (m_xmf3AABBExtents.x != 0.0f || m_xmf3AABBExtents.y != 0.0f || m_xmf3AABBExtents.z != 0.0f) {
@@ -515,26 +515,20 @@ void CGameObject::CalculateMainAABB(XMFLOAT3* AABBCenter, XMFLOAT3* AABBExtents)
 {
 	if (m_bHasAABB) // AABB를 가지고 있다면 Main AABB 계산에 합산
 	{
-		// X 축
-		if (AABBCenter->x - AABBExtents->x < m_xmf3AABBCenter.x - m_xmf3AABBExtents.x)
-			AABBExtents->x = m_xmf3AABBCenter.x - AABBCenter->x + m_xmf3AABBExtents.x;
-		if (AABBCenter->x + AABBExtents->x > m_xmf3AABBCenter.x + m_xmf3AABBExtents.x)
-			AABBExtents->x = AABBCenter->x - m_xmf3AABBCenter.x + m_xmf3AABBExtents.x;
-		AABBCenter->x = (AABBExtents->x + AABBCenter->x + m_xmf3AABBCenter.x - m_xmf3AABBExtents.x) * 0.5f;
+		// 현재 GameObject의 AABB 정보를 부모 GameObject의 AABB에 합산
+		XMFLOAT3 maxBound = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
+		XMFLOAT3 minBound = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
 
-		// Y 축
-		if (AABBCenter->y - AABBExtents->y < m_xmf3AABBCenter.y - m_xmf3AABBExtents.y)
-			AABBExtents->y = m_xmf3AABBCenter.y - AABBCenter->y + m_xmf3AABBExtents.y;
-		if (AABBCenter->y + AABBExtents->y > m_xmf3AABBCenter.y + m_xmf3AABBExtents.y)
-			AABBExtents->y = AABBCenter->y - m_xmf3AABBCenter.y + m_xmf3AABBExtents.y;
-		AABBCenter->y = (AABBExtents->y + AABBCenter->y + m_xmf3AABBCenter.y - m_xmf3AABBExtents.y) * 0.5f;
+		if (maxBound.x > AABBCenter->x + AABBExtents->x) AABBExtents->x = maxBound.x - AABBCenter->x;
+		if (maxBound.y > AABBCenter->y + AABBExtents->y) AABBExtents->y = maxBound.y - AABBCenter->y;
+		if (maxBound.z > AABBCenter->z + AABBExtents->z) AABBExtents->z = maxBound.z - AABBCenter->z;
+		if (minBound.x < AABBCenter->x - AABBExtents->x) AABBExtents->x = AABBCenter->x - minBound.x;
+		if (minBound.y < AABBCenter->y - AABBExtents->y) AABBExtents->y = AABBCenter->y - minBound.y;
+		if (minBound.z < AABBCenter->z - AABBExtents->z) AABBExtents->z = AABBCenter->z - minBound.z;
 
-		// Z 축
-		if (AABBCenter->z - AABBExtents->z < m_xmf3AABBCenter.z - m_xmf3AABBExtents.z)
-			AABBExtents->z = m_xmf3AABBCenter.z - AABBCenter->z + m_xmf3AABBExtents.z;
-		if (AABBCenter->z + AABBExtents->z > m_xmf3AABBCenter.z + m_xmf3AABBExtents.z)
-			AABBExtents->z = AABBCenter->z - m_xmf3AABBCenter.z + m_xmf3AABBExtents.z;
-		AABBCenter->z = (AABBExtents->z + AABBCenter->z + m_xmf3AABBCenter.z - m_xmf3AABBExtents.z) * 0.5f;
+		AABBCenter->x = (maxBound.x + minBound.x) * 0.5f;
+		AABBCenter->y = (maxBound.y + minBound.y) * 0.5f;
+		AABBCenter->z = (maxBound.z + minBound.z) * 0.5f;
 	}
 
 	if (m_pSibling) m_pSibling->CalculateMainAABB(AABBCenter, AABBExtents);
@@ -988,6 +982,8 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 
 			// Create AABB from Meshes
 			pGameObject->CreateAABB(pd3dDevice, pd3dCommandList);
+			if (pGameObject->m_bHasAABB)
+				pGameObject->m_xmf4x4AABBTransform = pGameObject->m_xmf4x4Transform;
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
