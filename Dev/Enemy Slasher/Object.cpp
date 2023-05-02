@@ -1329,3 +1329,21 @@ void CColisionBoxData::MakeMinMaxData()
 	m_xmf3AABBMax = XMFLOAT3(m_xmf3AABBCenter.x + m_xmf3AABBExtents.x, m_xmf3AABBCenter.y + m_xmf3AABBExtents.y, m_xmf3AABBCenter.z + m_xmf3AABBExtents.z);
 	m_xmf3AABBMin = XMFLOAT3(m_xmf3AABBCenter.x - m_xmf3AABBExtents.x, m_xmf3AABBCenter.y - m_xmf3AABBExtents.y, m_xmf3AABBCenter.z - m_xmf3AABBExtents.z);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CLandObject::CLandObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+}
+
+CLandObject::~CLandObject()
+{
+}
+
+void CLandObject::PrepareAnimate()
+{
+}
+
+void CLandObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+}

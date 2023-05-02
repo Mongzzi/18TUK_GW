@@ -504,7 +504,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = 120;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 3); //SuperCobra(17), Gunship(2)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 3 + 13 + 13); //SuperCobra(17), Gunship(2), Other(3), Stone(9), Tree(4), Normal(13)
 
 	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
@@ -512,6 +512,37 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CGameObject* pBoxModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/box.bin", this);
 	CGameObject* pCutterModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cutter.bin", this);
 	CGameObject* pStandardCubeModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cube.bin", this);
+
+	CGameObject*** pppStoneModel;
+	CGameObject** ppTreeModel;
+	{
+#define STONE_BIG 0
+#define STONE_MID 1
+#define STONE_SMALL 2
+		int nStoneSizeType = 3, nStoneBigType = 3, nStoneMidType = 3, nStoneSmallType = 3;
+		pppStoneModel = new CGameObject * *[nStoneSizeType]; // 0-Big 1-Mid 2-Lit
+		pppStoneModel[STONE_BIG] = new CGameObject * [nStoneBigType];
+		pppStoneModel[STONE_MID] = new CGameObject * [nStoneMidType];
+		pppStoneModel[STONE_SMALL] = new CGameObject * [nStoneSmallType];
+
+		pppStoneModel[STONE_BIG][0] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_big_004.bin", this);
+		pppStoneModel[STONE_BIG][1] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_big_008.bin", this);
+		pppStoneModel[STONE_BIG][2] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_big_010.bin", this);
+		pppStoneModel[STONE_MID][0] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_mid_001.bin", this);
+		pppStoneModel[STONE_MID][1] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_mid_003.bin", this);
+		pppStoneModel[STONE_MID][2] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_mid_008.bin", this);
+		pppStoneModel[STONE_SMALL][0] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_lit_001.bin", this);
+		pppStoneModel[STONE_SMALL][1] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_lit_007.bin", this);
+		pppStoneModel[STONE_SMALL][2] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Stone_lit_012.bin", this);
+	}
+	{
+		int nTreeType = 4;
+		ppTreeModel = new CGameObject * [nTreeType];
+		ppTreeModel[0] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Tree_temp_climate_001.bin", this);
+		ppTreeModel[1] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Tree_temp_climate_002.bin", this);
+		ppTreeModel[2] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Tree_temp_climate_003.bin", this);
+		ppTreeModel[3] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/LandObjects/Tree_temp_climate_008.bin", this);
+	}
 	
 	//pGunshipModel->CreateAABB(pd3dDevice, pd3dCommandList);
 
@@ -575,47 +606,68 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 				continue;
 			}
 
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-				pSuperCobraModel->AddRef();
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel);
-				pGunshipModel->AddRef();
-			}
-			XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
-			m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+			//if (nObjects % 2)
+			//{
+			//	m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//	m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
+			//	pSuperCobraModel->AddRef();
+			//}
+			//else
+			//{
+			//	m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//	m_ppObjects[nObjects]->SetChild(pGunshipModel);
+			//	pGunshipModel->AddRef();
+			//}
+
+			int nRandSel = (int)(Random() * 100) % 3;
+			m_ppObjects[nObjects] = new CLandObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_ppObjects[nObjects]->SetChild(pppStoneModel[STONE_BIG][nRandSel]);
+			pppStoneModel[STONE_BIG][nRandSel]->AddRef();
+
+
+			//XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
+			//m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+			float WallStoneScaleSize = 30.0f;
+			XMFLOAT3 xmf3RandomPosition = XMFLOAT3(100.0f, 0.0f, 2100.0f);
+
+			float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
+			float fRadius = 400.0f;
+
+			XMFLOAT3 xmf3Position;
+			xmf3Position.x = xmf3RandomPosition.x + fRadius * sin(fAngle);
+			xmf3Position.y = 200.0f;
+			xmf3Position.z = xmf3RandomPosition.z + fRadius * cos(fAngle);
+			xmf3RandomPosition = xmf3Position;
+
+			m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y, xmf3RandomPosition.z);
 			m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+			m_ppObjects[nObjects]->SetScale(WallStoneScaleSize, WallStoneScaleSize, WallStoneScaleSize);
 			m_ppObjects[nObjects++]->PrepareAnimate();
 		}
     }
 
-    if (nFirstPassColumnSize != nColumnSize)
-    {
-        for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
-        {
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-				pSuperCobraModel->AddRef();
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel);
-				pGunshipModel->AddRef();
-			}
-			XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace);
-			m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 850.0f, xmf3RandomPosition.z);
-			m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppObjects[nObjects++]->PrepareAnimate();
-        }
-    }
+   // if (nFirstPassColumnSize != nColumnSize)
+   // {
+   //     for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
+   //     {
+			//if (nObjects % 2)
+			//{
+			//	m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//	m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
+			//	pSuperCobraModel->AddRef();
+			//}
+			//else
+			//{
+			//	m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//	m_ppObjects[nObjects]->SetChild(pGunshipModel);
+			//	pGunshipModel->AddRef();
+			//}
+			//XMFLOAT3 xmf3RandomPosition = RandomPositionInSphere(XMFLOAT3(920.0f, 0.0f, 1200.0f), Random(20.0f, 150.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace);
+			//m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 850.0f, xmf3RandomPosition.z);
+			//m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+			//m_ppObjects[nObjects++]->PrepareAnimate();
+   //     }
+   // }
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

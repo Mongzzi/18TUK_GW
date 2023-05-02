@@ -421,9 +421,11 @@ void CGameFramework::BuildObjects()
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 	CAirplanePlayer *pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
-	pAirplanePlayer->SetPosition(XMFLOAT3(920.0f, 745.0f, 1270.0));
+	pAirplanePlayer->SetPosition(XMFLOAT3(830.0f, 300.0f, 2283.0));
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
-	m_pCamera = m_pPlayer->GetCamera();
+	m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
+	m_pPlayer->Rotate(0.0f, 90.0f, 0.0f);
+	//m_pCamera = m_pPlayer->GetCamera();
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };

@@ -636,12 +636,12 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pxmf2TextureCoords0 = new XMFLOAT2[m_nVertices];
 	m_pxmf2TextureCoords1 = new XMFLOAT2[m_nVertices];
 
-	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX, fHeightOffset = 0.3f;
 	for (int i = 0, z = zStart; z < (zStart + nLength); z++)
 	{
 		for (int x = xStart; x < (xStart + nWidth); x++, i++)
 		{
-			fHeight = OnGetHeight(x, z, pContext);
+			fHeight = OnGetHeight(x, z, pContext) * fHeightOffset;
 			m_pxmf3Positions[i] = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
 			m_pxmf4Colors[i] = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
 			m_pxmf2TextureCoords0[i] = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
