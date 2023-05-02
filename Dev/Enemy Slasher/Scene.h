@@ -57,6 +57,9 @@ public:
 	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
+	ID3D12RootSignature* CreateComputeRootSignature(ID3D12Device* pd3dDevice);
+	ID3D12RootSignature* GetComputeRootSignature() { return(m_pd3dComputeRootSignature); }
+
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
@@ -67,6 +70,8 @@ public:
 
 public:
 	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
+	ID3D12RootSignature					*m_pd3dComputeRootSignature = NULL;
+
 
 	int									m_nGameObjects = 0;
 	CGameObject							**m_ppGameObjects = NULL;
@@ -74,8 +79,11 @@ public:
 	int									m_nShaders = 0;
 	CShader								**m_ppShaders = NULL;
 
+	//int								m_nComputeShaders = 0;
+	//CComputeShader					**m_ppComputeShaders = NULL;
+
 	CSkyBox								*m_pSkyBox = NULL;
-	CHeightMapTerrain*					m_pTerrain = NULL;
+	CHeightMapTerrain					*m_pTerrain = NULL;
 
 	LIGHT								*m_pLights = NULL;
 	int									m_nLights = 0;

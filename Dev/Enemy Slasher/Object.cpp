@@ -547,8 +547,6 @@ void CGameObject::UpdateAABBScaleByRotation(XMMATRIX mtxRotate)
 	XMStoreFloat3(&extents, XMVector3Transform(XMLoadFloat3(&m_xmf3AABBExtents), XMLoadFloat4x4(&m_xmf4x4AABBWorld)));
 
 
-
-
 	// 회전 변환 행렬의 각 축 벡터를 추출한다.
 	// obb Code
 	//XMFLOAT3 xAxis, yAxis, zAxis;
