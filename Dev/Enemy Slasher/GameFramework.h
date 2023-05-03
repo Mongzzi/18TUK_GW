@@ -33,6 +33,7 @@ public:
     void ProcessInput();
     void AnimateObjects();
     void FrameAdvance();
+	void CollisionCheck();
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
