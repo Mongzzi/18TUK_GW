@@ -167,6 +167,31 @@ public:
 
 public:
 	void SetAABBCenterExtent(XMFLOAT3* m_pxmf3AABBCenter, XMFLOAT3* m_pxmf3AABBExtents);
+
+	void SetAABBMaxMin(XMVECTOR m_pxmf3AABBMax, XMVECTOR m_pxmf3AABBMin) {
+		XMStoreFloat3(&m_xmf3AABBMin, m_pxmf3AABBMin);
+		XMStoreFloat3(&m_xmf3AABBMax, m_pxmf3AABBMax);
+	}
+	XMVECTOR GetVecAABBMin() { return XMLoadFloat3(&m_xmf3AABBMin); }
+	XMVECTOR GetVecAABBMax() { return XMLoadFloat3(&m_xmf3AABBMax); }
+	void ReCheck() {
+		float temp;
+		if (m_xmf3AABBMax.x < m_xmf3AABBMin.x) {
+			temp = m_xmf3AABBMax.x;
+			m_xmf3AABBMax.x = m_xmf3AABBMin.x;
+			m_xmf3AABBMin.x = temp;
+		}
+		if (m_xmf3AABBMax.y < m_xmf3AABBMin.y) {
+			temp = m_xmf3AABBMax.y;
+			m_xmf3AABBMax.y = m_xmf3AABBMin.y;
+			m_xmf3AABBMin.y = temp;
+		}
+		if (m_xmf3AABBMax.z < m_xmf3AABBMin.z) {
+			temp = m_xmf3AABBMax.z;
+			m_xmf3AABBMax.z = m_xmf3AABBMin.z;
+			m_xmf3AABBMin.z = temp;
+		}
+	}
 	//XMFLOAT3 GetAABBMin() { return m_xmf3AABBMin; }
 	//XMFLOAT3 GetAABBMax() { return m_xmf3AABBMax; }
 
@@ -216,9 +241,9 @@ public:
 
 	CColisionBoxData GetAABB() { return m_AABBData; }
 
-protected:
 	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
+protected:
 
 	CColisionBoxData				m_AABBData;
 

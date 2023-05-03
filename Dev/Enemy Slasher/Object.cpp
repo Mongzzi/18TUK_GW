@@ -1016,8 +1016,11 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 
 			// Create AABB from Meshes
 			pGameObject->CreateAABB(pd3dDevice, pd3dCommandList);
-			if (pGameObject->m_bHasAABB)
+			if (pGameObject->m_bHasAABB) {
 				pGameObject->m_xmf4x4AABBTransform = pGameObject->m_xmf4x4Transform;
+				pGameObject->m_xmf3AABBCenter = pMesh->GetAABBCenter();
+				pGameObject->m_xmf3AABBExtents = pMesh->GetAABBExtents();
+			}
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
@@ -1297,8 +1300,10 @@ void CCutter::PrepareAnimate()
 
 void CCutter::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {	
-	XMMATRIX xmmtxTransform = XMMatrixTranslation(0.0f, 0.0f, -0.1f);
+	//XMMATRIX xmmtxTransform = XMMatrixTranslation(0.0f, 0.0f, -0.1f);
+	XMMATRIX xmmtxTransform = XMMatrixTranslation(0.0f, 0.0f, -0.05f);
 	m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxTransform, m_xmf4x4Transform);
+	m_xmf4x4AABBTransform = Matrix4x4::Multiply(xmmtxTransform, m_xmf4x4AABBTransform);
 
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }

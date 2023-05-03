@@ -504,7 +504,7 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = 120;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 3 + 13 + 13); //SuperCobra(17), Gunship(2), Other(3), Stone(9), Tree(4), Normal(13)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2 + 3 + 13 + 13 + 2); //SuperCobra(17), Gunship(2), Other(3), Stone(9), Tree(4), Normal(13)
 
 	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
@@ -512,6 +512,8 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	CGameObject* pBoxModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/box.bin", this);
 	CGameObject* pCutterModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cutter.bin", this);
 	CGameObject* pStandardCubeModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cube.bin", this);
+
+	CGameObject* pEnemyModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/rich_citizens_3.bin", this);
 
 	CGameObject*** pppStoneModel;
 	CGameObject** ppTreeModel;
@@ -546,10 +548,10 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	
 	//pGunshipModel->CreateAABB(pd3dDevice, pd3dCommandList);
 
-	CGameObject* AABBBox = new CGameObject();
-	AABBBox->SetChild(pSuperCobraModel);
-	pSuperCobraModel->AddRef();
-	AABBBox->CreateMainAABB(pd3dDevice, pd3dCommandList);
+	//CGameObject* AABBBox = new CGameObject();
+	//AABBBox->SetChild(pBoxModel);
+	//pBoxModel->AddRef();
+	//AABBBox->CreateMainAABB(pd3dDevice, pd3dCommandList);
 
 	int nColumnSpace = 5, nColumnSize = 30;           
     int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
@@ -564,15 +566,15 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 			if (nObjects == 0) // Box
 			{
 				m_ppObjects[nObjects] = new CCharacter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				//m_ppObjects[nObjects]->SetChild(pBoxModel);
-				//pBoxModel->AddRef();
-				m_ppObjects[nObjects]->SetChild(AABBBox);
-				AABBBox->AddRef();
+				m_ppObjects[nObjects]->SetChild(pBoxModel);
+				pBoxModel->AddRef();
+				//m_ppObjects[nObjects]->SetChild(AABBBox);
+				//AABBBox->AddRef();
 				float scaleSize = 20.0f;
 				XMFLOAT3 xmf3RandomPosition(730.0f, -20.0f, 1150.0f);
 				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
 				m_ppObjects[nObjects]->SetScale(scaleSize, scaleSize, scaleSize);
-				m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+				//m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
 				m_ppObjects[nObjects++]->PrepareAnimate();
 				continue;
 			}
@@ -582,10 +584,12 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[nObjects]->SetChild(pCutterModel);
 				pCutterModel->AddRef();
 				float scaleSize = 20.0f;
-				XMFLOAT3 xmf3RandomPosition(750.0f, -18.0f, 1180.0f);
-				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+				//XMFLOAT3 xmf3RandomPosition(750.0f, -18.0f, 1180.0f);
+				//XMFLOAT3 xmf3RandomPosition(700.0f, -18.0f, 1100.0f);
+				XMFLOAT3 xmf3RandomPosition(700.0f, -18.0f, 1200.0f);
 				m_ppObjects[nObjects]->SetScale(scaleSize, scaleSize, scaleSize);
-				m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+				//m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
 				m_ppObjects[nObjects++]->PrepareAnimate();
 				continue;
 			}
@@ -594,14 +598,14 @@ void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[nObjects] = new CCharacter(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				pStandardCubeModel->m_ppMaterials[0]->m_xmf4AlbedoColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 				pStandardCubeModel->m_ppMaterials[0]->m_xmf4EmissiveColor = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-				m_ppObjects[nObjects]->SetChild(pStandardCubeModel);
-				pStandardCubeModel->AddRef();
+				m_ppObjects[nObjects]->SetChild(pEnemyModel);
+				pEnemyModel->AddRef();
 				//m_ppObjects[nObjects]->CreateMainAABB(pd3dDevice, pd3dCommandList);
-				float scaleSize = 20.0f;
-				XMFLOAT3 xmf3RandomPosition(750.0f, -18.0f, 1180.0f);
-				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y + 750.0f, xmf3RandomPosition.z);
+				float scaleSize = 50.0f;
+				XMFLOAT3 xmf3RandomPosition(1980.0f, 220.0f, 2483.0);
+				m_ppObjects[nObjects]->SetPosition(xmf3RandomPosition.x, xmf3RandomPosition.y, xmf3RandomPosition.z);
 				m_ppObjects[nObjects]->SetScale(scaleSize, scaleSize, scaleSize);
-				m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
+				m_ppObjects[nObjects]->Rotate(0.0f, -90.0f, 0.0f);
 				m_ppObjects[nObjects++]->PrepareAnimate();
 				continue;
 			}
@@ -704,14 +708,16 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 		}
 	}
 
-	//Render AABB
-	m_pAABBShader->Render(pd3dCommandList, pCamera, nPipelineState);
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		if (m_ppObjects[j])
+	if (false) {
+		//Render AABB
+		m_pAABBShader->Render(pd3dCommandList, pCamera, nPipelineState);
+		for (int j = 0; j < m_nObjects; j++)
 		{
-			m_ppObjects[j]->UpdateAABBTransform(NULL);
-			m_ppObjects[j]->RenderAABB(pd3dCommandList, pCamera);
+			if (m_ppObjects[j])
+			{
+				m_ppObjects[j]->UpdateAABBTransform(NULL);
+				m_ppObjects[j]->RenderAABB(pd3dCommandList, pCamera);
+			}
 		}
 	}
 	

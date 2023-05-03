@@ -422,9 +422,12 @@ void CGameFramework::BuildObjects()
 
 	CAirplanePlayer *pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	pAirplanePlayer->SetPosition(XMFLOAT3(830.0f, 300.0f, 2283.0));
+	//pAirplanePlayer->SetPosition(XMFLOAT3(610.0f, 750.0f, 1322.0));
+
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
-	m_pPlayer->Rotate(0.0f, 90.0f, 0.0f);
+	//m_pPlayer->Rotate(0.0f, -90.0f, 0.0f);
+	m_pPlayer->Rotate(0.0f, 85.0f, 10.0f);
 	//m_pCamera = m_pPlayer->GetCamera();
 
 	m_pd3dCommandList->Close();
@@ -478,9 +481,10 @@ void CGameFramework::ProcessInput()
 			if (cxDelta || cyDelta)
 			{
 				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				//m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				//else
+				//	m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
 			if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
 		}
@@ -533,6 +537,9 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
     AnimateObjects();
+
+	//충돌 체크
+	CollisionCheck();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -603,3 +610,65 @@ void CGameFramework::FrameAdvance()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
+
+void CollisionCheckWithHierarchy(CGameObject* ob1, CGameObject* ob2)
+{
+	//CColisionBoxData ob1AABB(&(ob1->m_xmf3AABBCenter), &(ob1->m_xmf3AABBExtents));
+	//CColisionBoxData ob2AABB(&(ob2->m_xmf3AABBCenter), &(ob2->m_xmf3AABBExtents));
+
+	if (ob1->m_ppMeshes != NULL && ob2->m_ppMeshes != NULL) {
+		CColisionBoxData ob1AABB(&(ob1->m_ppMeshes[0]->GetAABBCenter()), &(ob1->m_ppMeshes[0]->GetAABBExtents()));
+		CColisionBoxData ob2AABB(&(ob2->m_ppMeshes[0]->GetAABBCenter()), &(ob2->m_ppMeshes[0]->GetAABBExtents()));
+
+		XMVECTOR ob1Min = XMVector3TransformCoord(XMLoadFloat3(&(ob1AABB.m_xmf3AABBMin)), XMLoadFloat4x4(&(ob1->m_xmf4x4AABBWorld)));
+		XMVECTOR ob1Max = XMVector3TransformCoord(XMLoadFloat3(&(ob1AABB.m_xmf3AABBMax)), XMLoadFloat4x4(&(ob1->m_xmf4x4AABBWorld)));
+		XMVECTOR ob2Min = XMVector3TransformCoord(XMLoadFloat3(&(ob2AABB.m_xmf3AABBMin)), XMLoadFloat4x4(&(ob2->m_xmf4x4AABBWorld)));
+		XMVECTOR ob2Max = XMVector3TransformCoord(XMLoadFloat3(&(ob2AABB.m_xmf3AABBMax)), XMLoadFloat4x4(&(ob2->m_xmf4x4AABBWorld)));
+
+		XMVECTOR ob1Center = XMVector3TransformCoord(XMLoadFloat3(&(ob1AABB.m_xmf3AABBCenter)), XMLoadFloat4x4(&(ob2->m_xmf4x4AABBWorld)));
+		XMVECTOR ob2Center = XMVector3TransformCoord(XMLoadFloat3(&(ob2AABB.m_xmf3AABBCenter)), XMLoadFloat4x4(&(ob2->m_xmf4x4AABBWorld)));
+
+		XMFLOAT3 obTestFloat[4];
+		XMStoreFloat3(&obTestFloat[0], ob1Min);
+		XMStoreFloat3(&obTestFloat[1], ob1Max);
+		XMStoreFloat3(&obTestFloat[2], ob2Min);
+		XMStoreFloat3(&obTestFloat[3], ob2Max);
+
+		ob1AABB.SetAABBMaxMin(ob1Max, ob1Min);
+		ob2AABB.SetAABBMaxMin(ob2Max, ob2Min);
+		ob1AABB.ReCheck();
+		ob2AABB.ReCheck();
+
+		// AABB끼리 겹치는 부분이 있는지 판단
+		//bool isColliding = XMVector3LessOrEqual(ob1Min, ob2Max) && XMVector3LessOrEqual(ob2Min, ob1Max);
+		bool isColliding1 = XMVector3LessOrEqual(ob1AABB.GetVecAABBMin(), ob2AABB.GetVecAABBMax());
+		bool isColliding2 = XMVector3LessOrEqual(ob2AABB.GetVecAABBMin(), ob1AABB.GetVecAABBMax());
+		bool isColliding = isColliding1 && isColliding2;
+
+		if (isColliding) {
+			//
+			printf("collision");
+
+		}
+	}
+
+	if (ob1->m_pSibling) CollisionCheckWithHierarchy(ob1->m_pSibling, ob2);
+	if (ob1->m_pChild)CollisionCheckWithHierarchy(ob1->m_pChild, ob2);
+	if (ob2->m_pSibling) CollisionCheckWithHierarchy(ob1, ob2->m_pSibling);
+	if (ob2->m_pChild)CollisionCheckWithHierarchy(ob1, ob2->m_pChild);
+}
+
+void CGameFramework::CollisionCheck()
+{
+	if (m_pScene) {
+		if (m_pScene[0].m_ppShaders) {
+			if (((CObjectsShader*)(m_pScene[0].m_ppShaders[0]))->GetnObjects()) {
+				CGameObject** objectList = ((CObjectsShader*)(m_pScene[0].m_ppShaders[0]))->GetppObjects();
+				CGameObject* box = objectList[0];
+				CGameObject* cutter = objectList[1];
+
+				CollisionCheckWithHierarchy(box, cutter);
+			}
+		}
+	}
+}
