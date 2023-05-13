@@ -68,6 +68,8 @@ public:
 
 	CPlayer								*m_pPlayer = NULL;
 
+	bool								m_bRenderAABB = false;
+
 public:
 	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
 	ID3D12RootSignature					*m_pd3dComputeRootSignature = NULL;

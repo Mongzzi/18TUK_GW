@@ -85,84 +85,84 @@ bool LoadScene(FbxManager* pManager, FbxScene* pScene, const char* pFilename)
 
 void ExtractAnimationData(const char* pFilename, const char* pOutputFilename)
 {
-    // Initialize the FBX SDK objects
-    FbxManager* pManager = nullptr;
-    FbxScene* pScene = nullptr;
-    InitializeSdkObjects(pManager, pScene);
+    //// Initialize the FBX SDK objects
+    //FbxManager* pManager = nullptr;
+    //FbxScene* pScene = nullptr;
+    //InitializeSdkObjects(pManager, pScene);
 
-    // Load the scene
-    if (!LoadScene(pManager, pScene, pFilename))
-    {
-        std::cerr << "Failed to load scene: " << pFilename << std::endl;
-        return;
-    }
+    //// Load the scene
+    //if (!LoadScene(pManager, pScene, pFilename))
+    //{
+    //    std::cerr << "Failed to load scene: " << pFilename << std::endl;
+    //    return;
+    //}
 
-    // Open the output file
-    std::ofstream outFile(pOutputFilename);
-    if (!outFile.is_open())
-    {
-        std::cerr << "Failed to open output file: " << pOutputFilename << std::endl;
-        return;
-    }
+    //// Open the output file
+    //std::ofstream outFile(pOutputFilename);
+    //if (!outFile.is_open())
+    //{
+    //    std::cerr << "Failed to open output file: " << pOutputFilename << std::endl;
+    //    return;
+    //}
 
-    // Get the root node
-    FbxNode* pRootNode = pScene->GetRootNode();
-    if (!pRootNode)
-    {
-        std::cerr << "Root node is null." << std::endl;
-        return;
-    }
+    //// Get the root node
+    //FbxNode* pRootNode = pScene->GetRootNode();
+    //if (!pRootNode)
+    //{
+    //    std::cerr << "Root node is null." << std::endl;
+    //    return;
+    //}
 
-    // Traverse the scene and extract animation data
-    for (int i = 0; i < pRootNode->GetChildCount(); i++)
-    {
-        FbxNode* pNode = pRootNode->GetChild(i);
-        FbxNodeAttribute* pAttribute = pNode->GetNodeAttribute();
+    //// Traverse the scene and extract animation data
+    //for (int i = 0; i < pRootNode->GetChildCount(); i++)
+    //{
+    //    FbxNode* pNode = pRootNode->GetChild(i);
+    //    FbxNodeAttribute* pAttribute = pNode->GetNodeAttribute();
 
-        if (pAttribute && pAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
-        {
-            // Extract animation data for this node
-            outFile << "Node: " << pNode->GetName() << std::endl;
+    //    if (pAttribute && pAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+    //    {
+    //        // Extract animation data for this node
+    //        outFile << "Node: " << pNode->GetName() << std::endl;
 
-            FbxAnimStack* pAnimStack = pScene->GetMember<FbxAnimStack>(0);
-            if (!pAnimStack)
-            {
-                std::cerr << "Animation stack is null." << std::endl;
-                return;
-            }
+    //        FbxAnimStack* pAnimStack = pScene->GetMember<FbxAnimStack>(0);
+    //        if (!pAnimStack)
+    //        {
+    //            std::cerr << "Animation stack is null." << std::endl;
+    //            return;
+    //        }
 
-            FbxAnimLayer* pAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(0);
-            if (!pAnimLayer)
-            {
-                std::cerr << "Animation layer is null." << std::endl;
-                return;
-            }
+    //        FbxAnimLayer* pAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(0);
+    //        if (!pAnimLayer)
+    //        {
+    //            std::cerr << "Animation layer is null." << std::endl;
+    //            return;
+    //        }
 
-            FbxTime start = pAnimStack->GetLocalTimeSpan().GetStart();
-            FbxTime end = pAnimStack->GetLocalTimeSpan().GetStop();
+    //        FbxTime start = pAnimStack->GetLocalTimeSpan().GetStart();
+    //        FbxTime end = pAnimStack->GetLocalTimeSpan().GetStop();
 
-            outFile << "Start Time: " << start.GetSecondDouble() << std::endl;
-            outFile << "End Time: " << end.GetSecondDouble() << std::endl;
+    //        outFile << "Start Time: " << start.GetSecondDouble() << std::endl;
+    //        outFile << "End Time: " << end.GetSecondDouble() << std::endl;
 
-            FbxTime time;
-            FbxAMatrix matrix;
+    //        FbxTime time;
+    //        FbxAMatrix matrix;
 
-            for (time = start; time <= end; time += FbxTime::GetFramedTime())
-            {
-                matrix = pNode->EvaluateGlobalTransform(time);
-                outFile << "Time: " << time.GetSecondDouble() << std::endl;
-                outFile << "Matrix: " << matrix[0][0] << " " << matrix[0][1] << " " << matrix[0][2] << " " << matrix[0][3] << std::endl;
-                outFile << "        " << matrix[1][0] << " " << matrix[1][1] << " " << matrix[1][2] << " " << matrix[1][3] << std::endl;
-                outFile << "        " << matrix[2][0] << " " << matrix[2][1] << " " << matrix[2][2] << " " << matrix[2][3] << std::endl;
-                outFile << std::endl; // Add a newline character to separate animation data for different nodes
-            }
-        }
-    }
-    // Close the output file
-    outFile.close();
+    //        for (time = start; time <= end; time += time.FbxTime::GetFramedTime())
+    //        {
+    //            matrix = pNode->EvaluateGlobalTransform(time);
+    //            outFile << "Time: " << time.GetSecondDouble() << std::endl;
+    //            outFile << "Matrix: " << matrix[0][0] << " " << matrix[0][1] << " " << matrix[0][2] << " " << matrix[0][3] << std::endl;
+    //            outFile << "        " << matrix[1][0] << " " << matrix[1][1] << " " << matrix[1][2] << " " << matrix[1][3] << std::endl;
+    //            outFile << "        " << matrix[2][0] << " " << matrix[2][1] << " " << matrix[2][2] << " " << matrix[2][3] << std::endl;
+    //            outFile << std::endl; // Add a newline character to separate animation data for different nodes
+    //        }
+    //    }
+    //}
+    //// Close the output file
+    //outFile.close();
 
-    // Destroy the FBX SDK objects
-    pManager->Destroy();
+    //// Destroy the FBX SDK objects
+    //pManager->Destroy();
 }
 
 

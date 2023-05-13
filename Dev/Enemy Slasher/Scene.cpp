@@ -401,6 +401,8 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		case 'Q': m_pPlayer->Move(DIR_UP, 1.25f * 10, false); break;
 		case 'R': m_pPlayer->Move(DIR_DOWN, 1.25f * 10, false); break;
 
+		case '1': m_bRenderAABB = !m_bRenderAABB; break;
+
 		default:
 			break;
 		}
@@ -481,5 +483,5 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera, m_bRenderAABB);
 }
