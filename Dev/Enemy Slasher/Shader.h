@@ -99,6 +99,71 @@ public:
 	virtual void CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 };
 
+
+struct MATERIAL
+{
+	XMFLOAT4						m_xmf4Ambient;
+	XMFLOAT4						m_xmf4Diffuse;
+	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4						m_xmf4Emissive;
+};
+
+struct CB_GAMEOBJECT_INFO
+{
+	XMFLOAT4X4						m_xmf4x4World;
+	MATERIAL						m_material;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	XMFLOAT2						m_xmf2TextureOffset;
+};
+
+class CCardShader : public CShader
+{
+public:
+	CCardShader();
+	virtual ~CCardShader();
+
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+
+
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void ReleaseObjects();
+
+	//virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	//virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	//virtual void ReleaseShaderVariables(); 
+	//virtual void ReleaseUploadBuffers();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
+	
+	
+
+protected:
+	CGameObject** m_ppObjects = 0;
+	int	m_nObjects = 0;
+
+	//ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	//CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
+
+
+};
+
+
+
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CComputeShader : public CShader
