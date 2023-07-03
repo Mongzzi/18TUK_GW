@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "framework.h"
+#include "GameFramework.h"
 #include "Enemy Slasher.h"
 
 #define MAX_LOADSTRING 100
