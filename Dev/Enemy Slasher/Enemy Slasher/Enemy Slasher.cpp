@@ -1,18 +1,16 @@
 ﻿// Enemy Slasher.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
+#include "stdafx.h"
 #include "framework.h"
 #include "Enemy Slasher.h"
-
-#define FRAME_BUFFER_WIDTH 640
-#define FRAME_BUFFER_HEIGHT 480
 
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
-HINSTANCE                       ghAppInstance;                                // 현재 인스턴스입니다.
-TCHAR                           szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
-TCHAR                           szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
+HINSTANCE           ghAppInstance;                            // 현재 인스턴스입니다.
+TCHAR               szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
+TCHAR               szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
