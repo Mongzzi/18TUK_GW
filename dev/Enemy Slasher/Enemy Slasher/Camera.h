@@ -103,23 +103,23 @@ protected:
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 };
 
-class CSpaceShipCamera : public CCamera
-{
-public:
-	CSpaceShipCamera(CCamera *pCamera);
-	virtual ~CSpaceShipCamera() { }
-
-	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
-};
-
-class CFirstPersonCamera : public CCamera
-{
-public:
-	CFirstPersonCamera(CCamera *pCamera);
-	virtual ~CFirstPersonCamera() { }
-
-	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
-};
+//class CSpaceShipCamera : public CCamera
+//{
+//public:
+//	CSpaceShipCamera(CCamera *pCamera);
+//	virtual ~CSpaceShipCamera() { }
+//
+//	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+//};
+//
+//class CFirstPersonCamera : public CCamera
+//{
+//public:
+//	CFirstPersonCamera(CCamera *pCamera);
+//	virtual ~CFirstPersonCamera() { }
+//
+//	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+//};
 
 class CThirdPersonCamera : public CCamera
 {
@@ -131,3 +131,22 @@ public:
 	virtual void SetLookAt(XMFLOAT3& vLookAt);
 };
 
+
+
+
+
+
+// ****************** 카드 전투 씬( 오픈월드에서 적과 조우 시 ) 에서 사용 할 카메라
+class CCardFightCamera : public CCamera
+{
+private:
+	CAMERA_MOVING_MODE m_camera_mode = CAMERA_MOVING_MODE::DEFAULT;
+
+public:
+	CCardFightCamera(CCardFightCamera* pCamera);
+	virtual ~CCardFightCamera() { }
+	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+	virtual void SetLookAt(XMFLOAT3& vLookAt);
+
+
+};

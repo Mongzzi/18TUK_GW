@@ -44,6 +44,10 @@ using namespace DirectX::PackedVector;
 
 using Microsoft::WRL::ComPtr;
 
+
+#define FRAME_BUFFER_WIDTH		640
+#define FRAME_BUFFER_HEIGHT		480
+
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
 //#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS
@@ -64,6 +68,17 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxgi.lib")
 
 #pragma comment(lib, "dxguid.lib")
+
+// 턴제 전투 돌입 시 카메라 모드
+enum class CAMERA_MOVING_MODE
+{
+	DEFAULT,
+	PLAYER_ATTACK_START,
+	PLAYER_ATTACK_END,
+
+	MONSTER_ATTACK_START,
+	MONSTER_ATTACK_END
+};
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
