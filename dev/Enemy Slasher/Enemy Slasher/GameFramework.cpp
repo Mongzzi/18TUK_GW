@@ -388,9 +388,10 @@ void CGameFramework::BuildObjects()
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	//m_pScene = new CScene();
-	//if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-
+	m_pScene = new CScene();
+	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	
+	m_pCamera = new CCamera();
 	//m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	//m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
 	//m_pCamera = m_pPlayer->GetCamera();
@@ -401,7 +402,7 @@ void CGameFramework::BuildObjects()
 
 	WaitForGpuComplete();
 
-	//if (m_pScene) m_pScene->ReleaseUploadBuffers();
+	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	//if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
@@ -411,8 +412,8 @@ void CGameFramework::ReleaseObjects()
 {
 	//if (m_pPlayer) m_pPlayer->Release();
 
-	//if (m_pScene) m_pScene->ReleaseObjects();
-	//if (m_pScene) delete m_pScene;
+	if (m_pScene) m_pScene->ReleaseObjects();
+	if (m_pScene) delete m_pScene;
 }
 
 void CGameFramework::ProcessInput()
