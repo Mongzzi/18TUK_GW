@@ -1,5 +1,6 @@
 #pragma once
 #include "Camera.h"
+#include "Object.h"
 
 class CScene
 {
@@ -32,7 +33,7 @@ public:
 	ID3D12RootSignature*					m_pd3dGraphicsRootSignature = NULL;
 
 	//int									m_nGameObjects = 0;
-	//CGameObject** m_ppGameObjects = NULL;
+	CGameObject* m_pGameObjects = NULL;
 
 	//int									m_nShaders = 0;
 	//CShader** m_ppShaders = NULL;

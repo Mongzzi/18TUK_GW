@@ -16,6 +16,12 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	XMFLOAT3 xmf3Scale(18.0f, 6.0f, 18.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 
+	CBoxMesh* box = new CBoxMesh(pd3dDevice,pd3dCommandList);
+	m_pGameObjects = new CGameObject();
+	m_pGameObjects->SetMesh(box);
+	m_pGameObjects->MoveForward(5.0f);
+
+
 	//m_nShaders = 1;
 	//m_ppShaders = new CShader * [m_nShaders];
 
@@ -197,6 +203,11 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pGameObjects) {
+		m_pGameObjects->Render(pd3dCommandList, pCamera);
+	}
+
 
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
