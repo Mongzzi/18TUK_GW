@@ -43,6 +43,6 @@ class CBoxMesh : public CMesh
 {
 
 public:
-	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 2.0f, float height = 2.0f, float depth = 2.0f);
+	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
 	virtual ~CBoxMesh();
 };

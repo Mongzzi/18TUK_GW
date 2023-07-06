@@ -19,7 +19,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CBoxMesh* box = new CBoxMesh(pd3dDevice,pd3dCommandList);
 	m_pGameObjects = new CGameObject();
 	m_pGameObjects->SetMesh(box);
-	m_pGameObjects->MoveForward(5.0f);
+	
 
 
 	//m_nShaders = 1;

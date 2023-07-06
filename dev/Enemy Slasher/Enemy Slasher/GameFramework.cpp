@@ -390,8 +390,19 @@ void CGameFramework::BuildObjects()
 
 	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-	
-	m_pCamera = new CCamera();
+
+	// TEST
+	m_pCamera = new CThirdPersonCamera(m_pCamera);
+	m_pCamera->SetTimeLag(0.25f);
+	m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));
+
+	m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pCamera->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
+	//
+
+
 	//m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	//m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
 	//m_pCamera = m_pPlayer->GetCamera();
@@ -442,18 +453,19 @@ void CGameFramework::ProcessInput()
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
-	//	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-	//	{
-	//		if (cxDelta || cyDelta)
-	//		{
-	//			if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-	//				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-	//			//m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-	//			//else
-	//			//	m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-	//		}
-	//		if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
-	//	}
+		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		{
+			if (cxDelta || cyDelta)
+			{
+				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+					m_pCamera->Rotate(cyDelta, 0.0f, -cxDelta);
+					//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				//m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				//else
+				//	m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			}
+			//if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
+		}
 	}
 
 	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
