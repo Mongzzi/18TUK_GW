@@ -327,10 +327,10 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	{
 	case WM_ACTIVATE:
 	{
-		//if (LOWORD(wParam) == WA_INACTIVE)
-		//	m_GameTimer.Stop();
-		//else
-		//	m_GameTimer.Start();
+		if (LOWORD(wParam) == WA_INACTIVE)
+			m_GameTimer.Stop();
+		else
+			m_GameTimer.Start();
 		break;
 	}
 	case WM_SIZE:
@@ -404,7 +404,7 @@ void CGameFramework::BuildObjects()
 	//if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	//if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
-	//m_GameTimer.Reset();
+	m_GameTimer.Reset();
 }
 
 void CGameFramework::ReleaseObjects()
@@ -460,7 +460,7 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObjects()
 {
-	//float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
 	//if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
@@ -498,7 +498,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {
-	//m_GameTimer.Tick(0.0f);
+	m_GameTimer.Tick(0.0f);
 
 	ProcessInput();
 
@@ -567,8 +567,8 @@ void CGameFramework::FrameAdvance()
 
 	// Print FrameRate And Player Position
 	//m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-	//size_t nLength = _tcslen(m_pszFrameRate);
+	m_GameTimer.GetFrameRate(m_pszFrameRate + 15, 40);
 	//XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	//_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-	//::SetWindowText(m_hWnd, m_pszFrameRate);
+	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
