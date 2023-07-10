@@ -6,6 +6,8 @@
 CGameObject::CGameObject()
 {
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
+	m_pMesh = NULL;
+	m_pShader = NULL;
 }
 
 CGameObject::~CGameObject()
@@ -52,8 +54,6 @@ void CGameObject::OnPrepareRender()
 {
 }
 
-
-
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender();
@@ -81,6 +81,10 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
+void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+}
 
 void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 {

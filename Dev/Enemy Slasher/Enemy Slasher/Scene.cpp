@@ -18,6 +18,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShaders[0].CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
 
+	m_pGameObjects = new CGameObject;
+	m_pGameObjects->SetMesh(new CBoxMesh(pd3dDevice, pd3dCommandList));
 
 
 	//CObjectsShader* pObjectsShader = new CObjectsShader();

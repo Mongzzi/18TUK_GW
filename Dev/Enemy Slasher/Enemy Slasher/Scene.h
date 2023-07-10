@@ -1,5 +1,5 @@
 #pragma once
-#include "Camera.h"
+#include "Player.h"
 #include "Shader.h"
 
 class CScene

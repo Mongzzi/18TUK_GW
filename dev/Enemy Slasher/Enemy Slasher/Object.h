@@ -1,5 +1,4 @@
 #pragma once
-#include "stdafx.h"
 #include "Camera.h"
 #include "Mesh.h"
 
@@ -17,9 +16,10 @@ public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 protected:
-	XMFLOAT4X4 m_xmf4x4World;
-	CMesh* m_pMesh = NULL;
-	CShader* m_pShader = NULL;
+	XMFLOAT4X4						m_xmf4x4World;
+	XMFLOAT4X4						m_xmf4x4Transform;
+	CMesh* m_pMesh;
+	CShader* m_pShader;
 
 public:
 	//상수 버퍼를 생성한다. 
@@ -28,6 +28,8 @@ public:
 	//상수 버퍼의 내용을 갱신한다. 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent);
 
 
 public:

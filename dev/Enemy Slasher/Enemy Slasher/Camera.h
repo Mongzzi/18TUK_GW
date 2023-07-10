@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 #define ASPECT_RATIO				(float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
@@ -103,23 +104,23 @@ protected:
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 };
 
-//class CSpaceShipCamera : public CCamera
-//{
-//public:
-//	CSpaceShipCamera(CCamera *pCamera);
-//	virtual ~CSpaceShipCamera() { }
-//
-//	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
-//};
-//
-//class CFirstPersonCamera : public CCamera
-//{
-//public:
-//	CFirstPersonCamera(CCamera *pCamera);
-//	virtual ~CFirstPersonCamera() { }
-//
-//	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
-//};
+class CSpaceShipCamera : public CCamera
+{
+public:
+	CSpaceShipCamera(CCamera *pCamera);
+	virtual ~CSpaceShipCamera() { }
+
+	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+};
+
+class CFirstPersonCamera : public CCamera
+{
+public:
+	CFirstPersonCamera(CCamera *pCamera);
+	virtual ~CFirstPersonCamera() { }
+
+	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+};
 
 class CThirdPersonCamera : public CCamera
 {

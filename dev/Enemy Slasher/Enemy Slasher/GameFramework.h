@@ -2,7 +2,7 @@
 
 #include "Timer.h"
 #include "Scene.h"
-#include "Camera.h"
+#include "Player.h"
 
 class CGameFramework
 {
@@ -76,8 +76,8 @@ private:
 	CGameTimer					m_GameTimer;
 
 	CScene*						m_pScene = NULL;
-	//CPlayer*						m_pPlayer = NULL;
-	CCamera*						m_pCamera = NULL;
+	CPlayer*					m_pPlayer = NULL;
+	CCamera*					m_pCamera = NULL;
 
 	POINT						m_ptOldCursorPos;
 

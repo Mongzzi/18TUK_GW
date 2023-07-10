@@ -1,13 +1,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
-#define DIR_FORWARD					0x01
-#define DIR_BACKWARD				0x02
-#define DIR_LEFT					0x04
-#define DIR_RIGHT					0x08
-#define DIR_UP						0x10
-#define DIR_DOWN					0x20
-
 CGameFramework::CGameFramework()
 {
 	m_pdxgiFactory = NULL;
@@ -394,7 +387,7 @@ void CGameFramework::BuildObjects()
 	// TEST
 	m_pCamera = new CThirdPersonCamera(m_pCamera);
 	m_pCamera->SetTimeLag(0.25f);
-	m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));
+	m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, -30.0f));
 
 	m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -580,8 +573,23 @@ void CGameFramework::FrameAdvance()
 
 	// Print FrameRate And Player Position
 	//m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-	m_GameTimer.GetFrameRate(m_pszFrameRate + 15, 40);
 	//XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	//_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+
+	
+
+	int nLength = 15;
+	m_GameTimer.GetFrameRate(m_pszFrameRate + nLength, 40);
+
+	//XMFLOAT3 xmf3Position = m_pCamera->GetLookVector();
+	//XMFLOAT3 xmf3Position;
+	//if (m_pScene) {
+	//	if (m_pScene->m_pGameObjects) {
+	//		xmf3Position = m_pScene->m_pGameObjects->GetPosition();
+	//		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+	//	}
+	//}
+	
+	//m_GameTimer.GetFrameRate(m_pszFrameRate + 15, 40);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
