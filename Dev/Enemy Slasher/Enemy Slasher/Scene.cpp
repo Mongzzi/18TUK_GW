@@ -35,6 +35,17 @@ void CScene::ReleaseObjects()
 
 	ReleaseShaderVariables();
 
+
+
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].ReleaseShaderVariables();
+		m_pShaders[i].ReleaseObjects();
+	}
+
+	if (m_pShaders) delete[] m_pShaders;
+
+
 	//if (m_ppShaders)
 	//{
 	//	for (int i = 0; i < m_nShaders; i++)
@@ -118,6 +129,8 @@ void CScene::ReleaseShaderVariables()
 
 void CScene::ReleaseUploadBuffers()
 {
+	for (int i = 0; i < m_nShaders; i++) m_pShaders[i].ReleaseUploadBuffers();
+
 	//if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	//if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 
@@ -176,6 +189,12 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
+
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].AnimateObjects(fTimeElapsed);
+	}
+
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
 
@@ -199,10 +218,10 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	if (m_pGameObjects) {
-		m_pGameObjects->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		m_pShaders[i].Render(pd3dCommandList, pCamera);
 	}
-
 
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
