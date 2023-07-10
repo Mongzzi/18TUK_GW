@@ -36,6 +36,6 @@ public:
 	CGameObject* m_pGameObjects = NULL;
 
 	int m_nShaders = 0;
-	CShader* m_pShaders = NULL;
+	CObjectsShader* m_pShaders = NULL;
 };
 
