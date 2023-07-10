@@ -23,10 +23,10 @@ protected:
 
 public:
 	//상수 버퍼를 생성한다. 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
 	//상수 버퍼의 내용을 갱신한다. 
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
 
@@ -52,7 +52,7 @@ public:
 
 
 public:
-	void ReleaseUploadBuffers(); 
+	void ReleaseUploadBuffers();
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void Animate(float fTimeElapsed);
@@ -74,7 +74,6 @@ private:
 public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) {
-		m_xmf3RotationAxis =
-			xmf3RotationAxis;
+		m_xmf3RotationAxis = xmf3RotationAxis;
 	}virtual void Animate(float fTimeElapsed);
-};
+}; 

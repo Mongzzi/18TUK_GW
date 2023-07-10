@@ -1,5 +1,7 @@
 #pragma once
-#include "Camera.h"
+#include "Object.h"
+
+
 
 class CShader
 {
@@ -11,15 +13,15 @@ private:
 	int									m_nReferences = 0;
 
 protected:
-	ID3DBlob*							m_pd3dVertexShaderBlob = NULL;
-	ID3DBlob*							m_pd3dPixelShaderBlob = NULL;
+	ID3DBlob* m_pd3dVertexShaderBlob = NULL;
+	ID3DBlob* m_pd3dPixelShaderBlob = NULL;
 
 	int									m_nPipelineStates = 0;
-	ID3D12PipelineState**				m_ppd3dPipelineStates = NULL;
+	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC	m_d3dPipelineStateDesc;
 
-	ID3D12DescriptorHeap*				m_pd3dCbvSrvDescriptorHeap = NULL;
+	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = NULL;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE			m_d3dCbvCPUDescriptorStartHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE			m_d3dCbvGPUDescriptorStartHandle;
@@ -75,16 +77,17 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class CPlayerShader : public CShader
+class CObjectsShader : public CShader
 {
 public:
-	CPlayerShader();
-	virtual ~CPlayerShader();
+	CObjectsShader();
+	virtual ~CObjectsShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };

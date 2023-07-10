@@ -21,16 +21,16 @@ struct VS_STANDARD_INPUT
 struct VS_STANDARD_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float3 positionW : POSITION;
 };
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
 
-	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-
+	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	
+	
 	return(output);
 }
 

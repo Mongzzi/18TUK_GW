@@ -247,15 +247,15 @@ void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CPlayerShader::CPlayerShader()
+CObjectsShader::CObjectsShader()
 {
 }
 
-CPlayerShader::~CPlayerShader()
+CObjectsShader::~CObjectsShader()
 {
 }
 
-D3D12_INPUT_LAYOUT_DESC CPlayerShader::CreateInputLayout()
+D3D12_INPUT_LAYOUT_DESC CObjectsShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 1;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -269,17 +269,22 @@ D3D12_INPUT_LAYOUT_DESC CPlayerShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CPlayerShader::CreateVertexShader()
+D3D12_SHADER_BYTECODE CObjectsShader::CreateVertexShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CPlayerShader::CreatePixelShader()
+D3D12_SHADER_BYTECODE CObjectsShader::CreatePixelShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
-void CPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+void CObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+
+}
+
+void CObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];

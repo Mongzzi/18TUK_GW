@@ -22,9 +22,9 @@ CGameObject::~CGameObject()
 void CGameObject::SetShader(CShader* pShader)
 {
 	if (m_pShader) m_pShader->Release();
-	
+
 	m_pShader = pShader;
-	
+
 	if (m_pShader) m_pShader->AddRef();
 }
 
@@ -78,7 +78,7 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 	//객체의 월드 변환 행렬을 루트 상수(32-비트 값)를 통하여 셰이더 변수(상수 버퍼)로 복사한다. 
-	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
 
@@ -143,7 +143,7 @@ void CGameObject::MoveUp(float fDistance)
 {
 	XMFLOAT3 xmf3Position = GetPosition();
 	XMFLOAT3 xmf3Up = GetUp();
-	xmf3Position = Vector3::Add(xmf3Position, xmf3Up, fDistance); 
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Up, fDistance);
 	CGameObject::SetPosition(xmf3Position);
 }
 
