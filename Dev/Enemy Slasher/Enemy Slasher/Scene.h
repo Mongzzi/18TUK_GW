@@ -27,7 +27,7 @@ public:
 
 	void ReleaseUploadBuffers();
 
-	//CPlayer* m_pPlayer = NULL;
+	CPlayer* m_pPlayer = NULL;
 
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
