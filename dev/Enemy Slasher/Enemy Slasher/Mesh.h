@@ -39,6 +39,16 @@ public:
 };
 
 
+class Vertex_Color
+{
+private:
+	XMFLOAT3 vertex;
+	XMFLOAT4 color;
+public:
+	Vertex_Color() {};
+	Vertex_Color(XMFLOAT3 v, XMFLOAT4 c) : vertex{ v }, color{ c } {}
+};
+
 class CBoxMesh : public CMesh
 {
 

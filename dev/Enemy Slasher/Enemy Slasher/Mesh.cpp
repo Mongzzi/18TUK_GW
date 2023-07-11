@@ -53,28 +53,31 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 
-CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height, float depth): CMesh(pd3dDevice, pd3dCommandList)
+CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height, float depth) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 8;				// 꼭지점 개수
-	m_nStride = sizeof(XMFLOAT3); // x , y, z 좌표
+	m_nStride = sizeof(Vertex_Color); // x , y, z 좌표
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	
 
-	float fx = width * 0.5f, fy = height * 0.5f, fz = depth* 0.5f;
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution <> urd(0.0, 1.0);
 
-	XMFLOAT3 pVertices[8];
-	pVertices[0] = XMFLOAT3(-fx, +fy, -fz);
-	pVertices[1] = XMFLOAT3(+fx, +fy, -fz);
-	pVertices[2] = XMFLOAT3(+fx, +fy, +fz);
-	pVertices[3] = XMFLOAT3(-fx, +fy, +fz);
-	pVertices[4] = XMFLOAT3(-fx, -fy, -fz);
-	pVertices[5] = XMFLOAT3(+fx, -fy, -fz);
-	pVertices[6] = XMFLOAT3(+fx, -fy, +fz);
-	pVertices[7] = XMFLOAT3(-fx, -fy, +fz);
+	float fx = width * 0.5f, fy = height * 0.5f, fz = depth * 0.5f;
+
+	Vertex_Color pVertices[8];
+	pVertices[0] = Vertex_Color(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	pVertices[1] = Vertex_Color(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	pVertices[2] = Vertex_Color(XMFLOAT3(+fx, +fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	pVertices[3] = Vertex_Color(XMFLOAT3(-fx, +fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	pVertices[4] = Vertex_Color(XMFLOAT3(-fx, -fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	pVertices[5] = Vertex_Color(XMFLOAT3(+fx, -fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	pVertices[6] = Vertex_Color(XMFLOAT3(+fx, -fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	pVertices[7] = Vertex_Color(XMFLOAT3(-fx, -fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
 
 	// 버퍼생성
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-	
+
 	// 바인딩위해 버퍼뷰 초기화
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;

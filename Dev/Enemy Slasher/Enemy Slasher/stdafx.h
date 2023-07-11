@@ -23,6 +23,9 @@
 #include <fstream>
 #include <vector>
 
+#include <iostream>
+#include <random>
+
 using namespace std;
 
 #include <d3d12.h>
@@ -43,6 +46,7 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 
 using Microsoft::WRL::ComPtr;
+
 
 
 #define FRAME_BUFFER_WIDTH		640
@@ -69,6 +73,9 @@ using Microsoft::WRL::ComPtr;
 
 #pragma comment(lib, "dxguid.lib")
 
+
+
+
 // 턴제 전투 돌입 시 카메라 모드
 enum class CAMERA_MOVING_MODE
 {
@@ -93,6 +100,8 @@ extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice, ID3D12Grap
 extern ID3D12Resource* CreateTexture2DResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
+
+
 
 #define EPSILON					1.0e-10f
 
