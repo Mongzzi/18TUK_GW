@@ -2,7 +2,10 @@
 #include "Object.h"
 #include "Camera.h"
 
-enum class ShaderList {
+enum class ShaderList : int;
+
+enum class ShaderList : int {
+	NON,
 	CObjectsShader
 };
 

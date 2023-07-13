@@ -16,10 +16,15 @@ void CObjectManager::DelObj(CGameObject* object, ObjectLayer layer)
 
 void CObjectManager::AnimateObjects(float fTimeElapsed)
 {
-	for (std::vector<CGameObject*> a : m_pvObjectManager) {
-	}
+	for (std::vector<CGameObject*> a : m_pvObjectManager)
+		for (CGameObject* b : a)
+			b->Animate(fTimeElapsed);
+	
 }
 
 void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	for (std::vector<CGameObject*> a : m_pvObjectManager)
+		for (CGameObject* b : a)
+			b->Render(pd3dCommandList, pCamera);
 }
