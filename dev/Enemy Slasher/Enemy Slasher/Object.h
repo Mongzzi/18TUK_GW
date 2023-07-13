@@ -4,6 +4,7 @@
 
 class CShader;
 
+enum class ShaderType : int;
 
 class CGameObject
 {
@@ -20,6 +21,8 @@ protected:
 	XMFLOAT4X4						m_xmf4x4Transform;
 	CMesh* m_pMesh;
 	CShader* m_pShader;
+	ShaderType m_ShaderType;
+
 
 public:
 	//상수 버퍼를 생성한다. 
@@ -50,6 +53,9 @@ public:
 
 	//게임 객체를 회전(x-축, y-축, z-축)한다. 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+
+	//m_pShader
+	ShaderType GetShaderType() { return m_ShaderType;}
 
 
 

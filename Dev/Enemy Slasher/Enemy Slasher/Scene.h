@@ -1,7 +1,8 @@
 #pragma once
 #include "Player.h"
 #include "Shader.h"
-#include "ObjectManager.h"
+
+class CObjectManager;
 
 class CScene
 {

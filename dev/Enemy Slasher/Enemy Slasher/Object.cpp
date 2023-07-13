@@ -8,6 +8,7 @@ CGameObject::CGameObject()
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 	m_pMesh = NULL;
 	m_pShader = NULL;
+	m_ShaderType = ShaderType::NON;
 }
 
 CGameObject::~CGameObject()
@@ -185,6 +186,8 @@ CRotatingObject::CRotatingObject()
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
+	m_ShaderType = ShaderType::CObjectsShader;
+
 }
 
 CRotatingObject::~CRotatingObject()

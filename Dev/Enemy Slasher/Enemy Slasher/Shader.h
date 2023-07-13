@@ -2,11 +2,13 @@
 #include "Object.h"
 #include "Camera.h"
 
-enum class ShaderList : int;
+enum class ShaderType : int;
 
-enum class ShaderList : int {
-	NON,
-	CObjectsShader
+enum class ShaderType : int {
+	NON,					// mesh 생성 코드부분에 쉐이더 연결을 안 하면 나오는 회색 바둑판
+	CObjectsShader,
+	삼번,
+	Count
 };
 
 class CShader

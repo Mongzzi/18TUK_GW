@@ -19,13 +19,21 @@ class CObjectManager
 {
 private:
 	std::vector<CGameObject*> m_pvObjectManager[int(ObjectLayer::Count)];
-	std::vector<CShader*> m_vShaderManager;
+	CShader** m_ppShaderManager;
+
 
 public:
+	CObjectManager();
+	~CObjectManager();
+
 	void AddObj(CGameObject* object, ObjectLayer layer);
 	void DelObj(CGameObject* object, ObjectLayer layer);
 
 	void AnimateObjects(float fTimeElapsed);
 	
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+
+	// m_vShaderManager
+
 };
