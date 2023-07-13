@@ -2,6 +2,9 @@
 #include "Object.h"
 #include "Camera.h"
 
+enum class ShaderList {
+	CObjectsShader
+};
 
 class CShader
 {

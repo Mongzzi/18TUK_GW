@@ -18,14 +18,14 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 class CObjectManager
 {
 private:
-	std::vector<CGameObject*> m_vObjectManager[int(ObjectLayer::Count)];
+	std::vector<CGameObject*> m_pvObjectManager[int(ObjectLayer::Count)];
 	std::vector<CShader*> m_vShaderManager;
 
 public:
 	void AddObj(CGameObject* object, ObjectLayer layer);
 	void DelObj(CGameObject* object, ObjectLayer layer);
-	void AddShader(CGameObject* object);
-	void DelShader(CGameObject* object);
 
-	void Render();
+	void AnimateObjects(float fTimeElapsed);
+	
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
