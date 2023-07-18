@@ -2,18 +2,14 @@
 #include "Object.h"
 #include "Shader.h"
 #include "ObjectManager.h"
+#include "ShaderManager.h"
 
 CObjectManager::CObjectManager()
 {
-	m_ppShaderManager = new CShader*[(int)ShaderType::Count];
 }
 
 CObjectManager::~CObjectManager()
 {
-	for (int i = 0;i < (int)ShaderType::Count;i++)
-		if(m_ppShaderManager[i]) delete m_ppShaderManager[i];
-
-	delete[] m_ppShaderManager;
 }
 
 
@@ -26,6 +22,8 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	/*if (!m_ppShaderManager[(int)object->GetShaderType()]) {
 		CShaderManager::쉐이더_만드는_함수((int)object->GetShaderType());
 	}*/
+
+	// 일단 쉐이더 매니저는 항상 모든 쉐이더를 가지고 있음
 
 	m_pvObjectManager[int(layer)].push_back(object);
 }
@@ -44,9 +42,11 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 	
 }
 
-void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
-		for (CGameObject* b : a)
+		for (CGameObject* b : a) {
+			pShaderManager->Render(pd3dCommandList, pCamera, b->GetShaderType());
 			b->Render(pd3dCommandList, pCamera);
+		}
 }

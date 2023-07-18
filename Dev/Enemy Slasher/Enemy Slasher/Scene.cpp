@@ -1,15 +1,18 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "ObjectManager.h"
+#include "ShaderManager.h"
 
 CScene::CScene()
 {
 	m_pObjectManager = new CObjectManager;
+	m_pShaderManager = new CShaderManager;
 }
 
 CScene::~CScene()
 {
 	delete m_pObjectManager;
+	delete m_pShaderManager;
 }
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -19,8 +22,44 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_nShaders = 1;
 	m_pShaders = new CObjectsShader[m_nShaders];
 	m_pShaders[0].CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+	//m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
 
+	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	{
+		//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다. 
+		CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+
+		/*x-축, y-축, z-축 양의 방향의 객체 개수이다. 각 값을 1씩 늘리거나 줄이면서 실행할 때 프레임 레이트가 어떻게
+		변하는 가를 살펴보기 바란다.*/
+		int xObjects = 10, yObjects = 10, zObjects = 10, i = 0;
+
+		//x-축, y-축, z-축으로 21개씩 총 21 x 21 x 21 = 9261개의 정육면체를 생성하고 배치한다.
+		int m_nObjects;
+		m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
+
+		float fxPitch = 12.0f * 2.5f;
+		float fyPitch = 12.0f * 2.5f;
+		float fzPitch = 12.0f * 2.5f;
+
+		CRotatingObject* pRotatingObject = NULL;
+		for (int x = -xObjects; x <= xObjects; x++)
+		{
+			for (int y = -yObjects; y <= yObjects; y++)
+			{
+				for (int z = -zObjects; z <= zObjects; z++)
+				{
+					pRotatingObject = new CRotatingObject();
+					pRotatingObject->SetMesh(pCubeMesh);
+
+					//각 정육면체 객체의 위치를 설정한다. 
+					pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
+					pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+					pRotatingObject->SetRotationSpeed(10.0f * (i % 10) + 3.0f);
+					m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
+				}
+			}
+		}
+	}
 
 	//CObjectsShader* pObjectsShader = new CObjectsShader();
 	//pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -194,7 +233,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_pShaders[i].AnimateObjects(fTimeElapsed);
+		//m_pShaders[i].AnimateObjects(fTimeElapsed);
 	}
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 
@@ -223,9 +262,9 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		m_pShaders[i].Render(pd3dCommandList, pCamera);
+		//m_pShaders[i].Render(pd3dCommandList, pCamera);
 	}
-	m_pObjectManager->Render(pd3dCommandList, pCamera);
+	m_pObjectManager->Render(pd3dCommandList, pCamera, m_pShaderManager);
 
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights

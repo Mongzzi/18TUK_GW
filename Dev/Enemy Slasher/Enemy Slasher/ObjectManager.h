@@ -1,5 +1,7 @@
 #pragma once
 
+class CShaderManager;
+
 enum class ObjectLayer : int;
 
 enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으로 명시적 형변환을 해야 함
@@ -19,8 +21,6 @@ class CObjectManager
 {
 private:
 	std::vector<CGameObject*> m_pvObjectManager[int(ObjectLayer::Count)];
-	CShader** m_ppShaderManager;
-
 
 public:
 	CObjectManager();
@@ -31,9 +31,5 @@ public:
 
 	void AnimateObjects(float fTimeElapsed);
 	
-	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-
-	// m_vShaderManager
-
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager);
 };

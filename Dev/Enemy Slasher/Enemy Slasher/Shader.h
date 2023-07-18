@@ -4,10 +4,9 @@
 
 enum class ShaderType : int;
 
-enum class ShaderType : int {
+enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로 명시적 형변환을 해야 함
 	NON,					// mesh 생성 코드부분에 쉐이더 연결을 안 하면 나오는 회색 바둑판
 	CObjectsShader,
-	삼번,
 	Count
 };
 

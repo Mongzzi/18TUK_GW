@@ -3,6 +3,7 @@
 #include "Shader.h"
 
 class CObjectManager;
+class CShaderManager;
 
 class CScene
 {
@@ -37,6 +38,7 @@ public:
 	int m_nGameObjects = 0;
 	CGameObject* m_pGameObjects = NULL;
 	CObjectManager* m_pObjectManager = NULL;
+	CShaderManager* m_pShaderManager = NULL;
 
 	int m_nShaders = 0;
 	CObjectsShader* m_pShaders = NULL;
