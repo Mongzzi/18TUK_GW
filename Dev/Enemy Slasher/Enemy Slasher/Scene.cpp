@@ -54,7 +54,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 					//각 정육면체 객체의 위치를 설정한다. 
 					pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
 					pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-					pRotatingObject->SetRotationSpeed(10.0f * (i % 10) + 3.0f);
+					pRotatingObject->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
 					m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
 				}
 			}
