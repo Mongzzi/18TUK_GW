@@ -384,18 +384,6 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
-	// TEST
-	//m_pCamera = new CThirdPersonCamera(m_pCamera);
-	//m_pCamera->SetTimeLag(0.25f);
-	//m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, -30.0f));
-
-	//m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-	//m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	//m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	//m_pCamera->CreateShaderVariables(m_pd3dDevice, m_pd3dCommandList);
-	//
-
-
 	m_pScene->m_pPlayer = m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
 	m_pCamera = m_pPlayer->GetCamera();
