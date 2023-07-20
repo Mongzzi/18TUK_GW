@@ -12,6 +12,11 @@ CShaderManager::~CShaderManager()
 	m_vShaderManager.clear();
 }
 
+void CShaderManager::ReleaseShaderVariables()
+{
+	for (CShader* a : m_vShaderManager) a->ReleaseShaderVariables();
+}
+
 void CShaderManager::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* m_pd3dGraphicsRootSignature)
 {
 	CShader* shader;

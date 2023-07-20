@@ -19,12 +19,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_nShaders = 1;
-	m_pShaders = new CObjectsShader[m_nShaders];
-	m_pShaders[0].CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
-
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
 	{
 		//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다. 
 		CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
@@ -61,12 +57,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		}
 	}
 
-	//CObjectsShader* pObjectsShader = new CObjectsShader();
-	//pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-
-	//m_ppShaders[0] = pObjectsShader;
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -76,33 +66,7 @@ void CScene::ReleaseObjects()
 
 	ReleaseShaderVariables();
 
-
-
-	for (int i = 0; i < m_nShaders; i++)
-	{
-		m_pShaders[i].ReleaseShaderVariables();
-		m_pShaders[i].ReleaseObjects();
-	}
-
-	if (m_pShaders) delete[] m_pShaders;
-
-
-	//if (m_ppShaders)
-	//{
-	//	for (int i = 0; i < m_nShaders; i++)
-	//	{
-	//		m_ppShaders[i]->ReleaseShaderVariables();
-	//		m_ppShaders[i]->ReleaseObjects();
-	//		m_ppShaders[i]->Release();
-	//	}
-	//	delete[] m_ppShaders;
-	//}
-
-	//if (m_ppGameObjects)
-	//{
-	//	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
-	//	delete[] m_ppGameObjects;
-	//}
+	m_pObjectManager->ReleaseObjects();
 
 	//if (m_pLights) delete[] m_pLights;
 }
@@ -170,7 +134,7 @@ void CScene::ReleaseShaderVariables()
 
 void CScene::ReleaseUploadBuffers()
 {
-	for (int i = 0; i < m_nShaders; i++) m_pShaders[i].ReleaseUploadBuffers();
+	m_pObjectManager->ReleaseUploadBuffers();
 
 	//if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	//if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
@@ -230,25 +194,7 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-
-	for (int i = 0; i < m_nShaders; i++)
-	{
-		//m_pShaders[i].AnimateObjects(fTimeElapsed);
-	}
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
-
-	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
-	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
-
-	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-
-
-	//if (m_nGameObjects > 0) {
-	//	CGameObject* box;
-	//	CGameObject* cutter;
-	//	if (m_ppGameObjects[0]) box = m_ppGameObjects[0];
-	//	if (m_ppGameObjects[1]) cutter = m_ppGameObjects[1];
-	//}
 }
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -260,15 +206,8 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	for (int i = 0; i < m_nShaders; i++)
-	{
-		//m_pShaders[i].Render(pd3dCommandList, pCamera);
-	}
 	m_pObjectManager->Render(pd3dCommandList, pCamera, m_pShaderManager);
 
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
-
-	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera, m_bRenderAABB);
 }
