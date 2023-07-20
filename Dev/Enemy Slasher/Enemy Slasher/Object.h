@@ -55,6 +55,7 @@ public:
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 
 	//m_pShader
+	void SetShaderType(ShaderType shaderType) { m_ShaderType = shaderType; }
 	ShaderType GetShaderType() { return m_ShaderType;}
 
 
