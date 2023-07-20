@@ -9,17 +9,25 @@ enum class ShaderType : int;
 class CGameObject
 {
 public:
-	CGameObject();
+	//CGameObject();
+	CGameObject(int nMeshes = 1);
 	virtual ~CGameObject();
+
 private:
 	int m_nReferences = 0;
+
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
+
 protected:
 	XMFLOAT4X4						m_xmf4x4World;
 	XMFLOAT4X4						m_xmf4x4Transform;
-	CMesh* m_pMesh;
+
+	//CMesh* m_pMesh;
+	CMesh** m_ppMeshes = NULL;
+	int m_nMeshes = 0;
+
 	CShader* m_pShader;
 	ShaderType m_ShaderType;
 
@@ -62,7 +70,7 @@ public:
 
 public:
 	void ReleaseUploadBuffers();
-	virtual void SetMesh(CMesh* pMesh);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender();
@@ -75,7 +83,7 @@ public:
 class CRotatingObject : public CGameObject
 {
 public:
-	CRotatingObject();
+	CRotatingObject(int nMeshes=1);
 	virtual ~CRotatingObject();
 private:
 	XMFLOAT3 m_xmf3RotationAxis;
@@ -86,3 +94,17 @@ public:
 		m_xmf3RotationAxis = xmf3RotationAxis;
 	}virtual void Animate(float fTimeElapsed);
 }; 
+
+
+
+class CHeightMapTerrain : public CGameObject
+{
+private:
+	int m_nWidth;
+	int m_nLength;
+
+	XMFLOAT3 m_xmf3Scale;
+	CHeightMapImage* m_pHeightMapImage;
+
+
+};

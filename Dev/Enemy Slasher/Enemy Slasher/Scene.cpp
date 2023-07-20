@@ -45,7 +45,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 				for (int z = -zObjects; z <= zObjects; z++)
 				{
 					pRotatingObject = new CRotatingObject();
-					pRotatingObject->SetMesh(pCubeMesh);
+					pRotatingObject->SetMesh(0,pCubeMesh);
 
 					//각 정육면체 객체의 위치를 설정한다. 
 					pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);

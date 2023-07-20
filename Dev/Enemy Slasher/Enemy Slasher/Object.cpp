@@ -3,17 +3,35 @@
 #include "Shader.h"
 
 
-CGameObject::CGameObject()
+CGameObject::CGameObject(int nMeshes)
 {
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
-	m_pMesh = NULL;
+	m_nMeshes = nMeshes;
+	m_ppMeshes = NULL;
 	m_pShader = NULL;
 	m_ShaderType = ShaderType::NON;
+
+	if (m_nMeshes > 0)
+	{
+		m_ppMeshes = new CMesh * [m_nMeshes];
+		for (int i = 0; i < m_nMeshes; i++) m_ppMeshes[i] = NULL;
+	}
 }
 
 CGameObject::~CGameObject()
 {
-	if (m_pMesh) m_pMesh->Release();
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->Release();
+			m_ppMeshes[i] = NULL;
+		}
+		delete[] m_ppMeshes;
+	}
+
+
+
 	if (m_pShader)
 	{
 		m_pShader->ReleaseShaderVariables();
@@ -32,19 +50,29 @@ void CGameObject::SetShader(CShader* pShader)
 }
 
 
-void CGameObject::SetMesh(CMesh* pMesh)
+void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
 {
-	if (m_pMesh) m_pMesh->Release();
+	if (m_ppMeshes)
+	{
+		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
 
-	m_pMesh = pMesh;
-
-	if (m_pMesh) m_pMesh->AddRef();
+		m_ppMeshes[nIndex] = pMesh;
+		if (pMesh) pMesh->AddRef();
+	}
 }
 
 void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다. 
-	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
+
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->ReleaseUploadBuffers();
+		}
+	}
+
 }
 
 void CGameObject::Animate(float fTimeElapsed)
@@ -63,7 +91,14 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariables(pd3dCommandList);
 
 	if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+		}
+	}
 }
 
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -182,7 +217,7 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 
 
 
-CRotatingObject::CRotatingObject()
+CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
