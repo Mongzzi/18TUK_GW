@@ -30,6 +30,9 @@ public:
 	void DelObj(CGameObject* object, ObjectLayer layer);
 
 	void AnimateObjects(float fTimeElapsed);
+
+	void ReleaseObjects();
+	void ReleaseUploadBuffers();
 	
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager);
 };

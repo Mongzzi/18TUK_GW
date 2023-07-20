@@ -42,6 +42,24 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 	
 }
 
+void CObjectManager::ReleaseObjects()
+{
+	for (std::vector<CGameObject*> a : m_pvObjectManager) {
+		for (CGameObject* b : a)
+			delete b;
+		a.clear();
+	}
+
+}
+
+void CObjectManager::ReleaseUploadBuffers()
+{
+	for (std::vector<CGameObject*> a : m_pvObjectManager)
+		for (CGameObject* b : a)
+			b->ReleaseUploadBuffers();
+		
+}
+
 void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
