@@ -45,8 +45,18 @@ private:
 	XMFLOAT3 vertex;
 	XMFLOAT4 color;
 public:
-	Vertex_Color() {};
 	Vertex_Color(XMFLOAT3 v, XMFLOAT4 c) : vertex{ v }, color{ c } {}
+
+	Vertex_Color() {
+		vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	}
+	Vertex_Color(float x, float y, float z, XMFLOAT4 c) {
+		vertex = XMFLOAT3(x, y, z);
+		color = c;
+	}
+	~Vertex_Color() { }
+
 };
 
 class CBoxMesh : public CMesh
