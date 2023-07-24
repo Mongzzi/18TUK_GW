@@ -310,10 +310,25 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			m_pCamera->Move(temp);
 			break;
 		case 0x41: //a
-			temp = XMFLOAT3(0.0f,10.0f, 0.0f);
+			temp = XMFLOAT3(-100.0f,0.0f, 0.0f);
 			m_pCamera->Move(temp);
 			break;
-
+		case 0x53: //s
+			temp = XMFLOAT3(0.0f, 0.0f, -100.0f);
+			m_pCamera->Move(temp);
+			break;
+		case 0x44: //d
+			temp = XMFLOAT3(100.0f, 0.0f, 0.0f);
+			m_pCamera->Move(temp);
+			break;
+		case 0x51: //q
+			temp = XMFLOAT3(0.0f, 100.0f, 0.0f);
+			m_pCamera->Move(temp);
+			break;
+		case 0x45: //e
+			temp = XMFLOAT3(0.0f, -100.0f, 0.0f);
+			m_pCamera->Move(temp);
+			break;
 		default:
 			break;
 		}
