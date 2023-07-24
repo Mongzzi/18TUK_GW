@@ -7,6 +7,7 @@ enum class ShaderType : int;
 enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로 명시적 형변환을 해야 함
 	NON,					// mesh 생성 코드부분에 쉐이더 연결을 안 하면 나오는 회색 바둑판
 	CObjectsShader,
+	CTerrainShader,
 	Count
 };
 
@@ -97,4 +98,17 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 private:
+};
+
+
+
+class CTerrainShader : public CShader
+{
+public:
+	CTerrainShader();
+	virtual ~CTerrainShader();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };

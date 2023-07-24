@@ -31,10 +31,14 @@ public:
 	void ReleaseUploadBuffers();
 
 	CPlayer* m_pPlayer = NULL;
+	CHeightMapTerrain* GetTerrain() { return(m_pTerrain); }
 
+protected:
+	CHeightMapTerrain* m_pTerrain = NULL;
+
+	
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
-
 	CObjectManager* m_pObjectManager = NULL;
 	CShaderManager* m_pShaderManager = NULL;
 };

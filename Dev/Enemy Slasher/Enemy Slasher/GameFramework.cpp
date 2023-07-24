@@ -284,7 +284,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-
+	XMFLOAT3 temp= XMFLOAT3(0.0f, 0.0f, 0.0f);
 	switch (nMessageID)
 	{
 	case WM_KEYUP:
@@ -305,6 +305,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_F5:
 			break;
+		case 0x57:	//w
+			temp = XMFLOAT3(0.0f, 0.0f, 100.0f);
+			m_pCamera->Move(temp);
+			break;
+		case 0x41: //a
+			temp = XMFLOAT3(0.0f,10.0f, 0.0f);
+			m_pCamera->Move(temp);
+			break;
+
 		default:
 			break;
 		}
