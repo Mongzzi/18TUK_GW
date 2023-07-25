@@ -307,27 +307,27 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case 0x57:	//w
 			temp = XMFLOAT3(0.0f, 0.0f, 100.0f);
-			m_pCamera->Move(temp);
+			m_pPlayer->Move(temp);
 			break;
 		case 0x41: //a
 			temp = XMFLOAT3(-100.0f,0.0f, 0.0f);
-			m_pCamera->Move(temp);
+			m_pPlayer->Move(temp);
 			break;
 		case 0x53: //s
 			temp = XMFLOAT3(0.0f, 0.0f, -100.0f);
-			m_pCamera->Move(temp);
+			m_pPlayer->Move(temp);
 			break;
 		case 0x44: //d
 			temp = XMFLOAT3(100.0f, 0.0f, 0.0f);
-			m_pCamera->Move(temp);
+			m_pPlayer->Move(temp);
 			break;
 		case 0x51: //q
 			temp = XMFLOAT3(0.0f, 100.0f, 0.0f);
-			m_pCamera->Move(temp);
+			m_pPlayer->Move(temp);
 			break;
 		case 0x45: //e
 			temp = XMFLOAT3(0.0f, -100.0f, 0.0f);
-			m_pCamera->Move(temp);
+			m_pPlayer->Move(temp);
 			break;
 		default:
 			break;
@@ -463,13 +463,11 @@ void CGameFramework::ProcessInput()
 			if (cxDelta || cyDelta)
 			{
 				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pCamera->Rotate(cyDelta, 0.0f, -cxDelta);
-					//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-				//m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				//else
-				//	m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				else
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			//if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
+			if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
 		}
 	}
 
