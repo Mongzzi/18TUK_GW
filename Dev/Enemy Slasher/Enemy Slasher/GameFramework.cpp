@@ -27,8 +27,8 @@ CGameFramework::CGameFramework()
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
 	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
 
-	//m_pScene = NULL;
-	//m_pPlayer = NULL;
+	m_pScene = NULL;
+	m_pPlayer = NULL;
 
 	_tcscpy_s(m_pszFrameRate, _T("Enemy Slasher ("));
 }
@@ -298,7 +298,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_F1:
 		case VK_F2:
 		case VK_F3:
-			//m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+			m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 			break;
 		case VK_F9:
 			ChangeSwapChainState();
@@ -419,14 +419,14 @@ void CGameFramework::BuildObjects()
 	WaitForGpuComplete();
 
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	//if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
 }
 
 void CGameFramework::ReleaseObjects()
 {
-	//if (m_pPlayer) m_pPlayer->Release();
+	if (m_pPlayer) m_pPlayer->Release();
 
 	if (m_pScene) m_pScene->ReleaseObjects();
 	if (m_pScene) delete m_pScene;
@@ -436,7 +436,7 @@ void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
-	//if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
@@ -482,7 +482,7 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
-	//m_pPlayer->Animate(fTimeElapsed, NULL);
+	m_pPlayer->Animate(fTimeElapsed);
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -551,7 +551,7 @@ void CGameFramework::FrameAdvance()
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	//if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -584,24 +584,9 @@ void CGameFramework::FrameAdvance()
 	MoveToNextFrame();
 
 	// Print FrameRate And Player Position
-	//m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-	//XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	//_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-
-	
-
-	int nLength = 15;
-	m_GameTimer.GetFrameRate(m_pszFrameRate + nLength, 40);
-
-	//XMFLOAT3 xmf3Position = m_pCamera->GetLookVector();
-	//XMFLOAT3 xmf3Position;
-	//if (m_pScene) {
-	//	if (m_pScene->m_pGameObjects) {
-	//		xmf3Position = m_pScene->m_pGameObjects->GetPosition();
-	//		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-	//	}
-	//}
-	
-	//m_GameTimer.GetFrameRate(m_pszFrameRate + 15, 40);
+	m_GameTimer.GetFrameRate(m_pszFrameRate + 15, 37);
+	size_t nLength = _tcslen(m_pszFrameRate);
+	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
+	_stprintf_s(m_pszFrameRate + nLength, 75 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
