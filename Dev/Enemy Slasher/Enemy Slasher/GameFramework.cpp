@@ -305,27 +305,27 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_F5:
 			break;
-		case 0x57:	//w
+		case 'W':
 			temp = XMFLOAT3(0.0f, 0.0f, 100.0f);
 			m_pPlayer->Move(temp);
 			break;
-		case 0x41: //a
+		case 'A':
 			temp = XMFLOAT3(-100.0f,0.0f, 0.0f);
 			m_pPlayer->Move(temp);
 			break;
-		case 0x53: //s
+		case 'S':
 			temp = XMFLOAT3(0.0f, 0.0f, -100.0f);
 			m_pPlayer->Move(temp);
 			break;
-		case 0x44: //d
+		case 'D':
 			temp = XMFLOAT3(100.0f, 0.0f, 0.0f);
 			m_pPlayer->Move(temp);
 			break;
-		case 0x51: //q
+		case 'Q':
 			temp = XMFLOAT3(0.0f, 100.0f, 0.0f);
 			m_pPlayer->Move(temp);
 			break;
-		case 0x45: //e
+		case 'E':
 			temp = XMFLOAT3(0.0f, -100.0f, 0.0f);
 			m_pPlayer->Move(temp);
 			break;
