@@ -282,7 +282,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		}
 	}
 
-	m_ShaderType = ShaderType::CTerrainShader;
+	m_ShaderType = ShaderType::CObjectsShader;
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)
