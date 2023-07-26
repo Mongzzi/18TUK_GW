@@ -329,6 +329,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			temp = XMFLOAT3(0.0f, -100.0f, 0.0f);
 			m_pCamera->Move(temp);
 			break;
+		case 0x52: //r
+			m_pCamera->Rotate(0.0f, 20.0f, 0.0f);
+			break;
+		case 0x54: //t
+			m_pCamera->Rotate(0.0f, -20.0f, 0.0f);
+			break;
 		default:
 			break;
 		}
