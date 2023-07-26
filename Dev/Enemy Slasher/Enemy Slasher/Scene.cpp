@@ -85,6 +85,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
+	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, "fbxsdk/Stone_lit_001.txt");
+
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
 	CRotatingObject* pRotatingObject = NULL;
 
@@ -95,7 +97,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 			for (int y = 0; y < yObjects; y++)
 			{
 				pRotatingObject = new CRotatingObject(1);
-				pRotatingObject->SetMesh(0, pCubeMesh);
+				pRotatingObject->SetMesh(0, pFBXMesh);
 
 				float xPosition = x * fxPitch;
 				float zPosition = z * fzPitch;

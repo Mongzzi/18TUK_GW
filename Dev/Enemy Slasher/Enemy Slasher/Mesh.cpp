@@ -123,6 +123,60 @@ CBoxMesh::~CBoxMesh()
 {
 }
 
+CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	ifstream in{ fileName };
+
+	in >> m_nVertices;				// 꼭지점 개수
+	m_nStride = sizeof(Vertex_Color); // x , y, z 좌표
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution <> urd(0.0, 1.0);
+
+	float fx, fy, fz;
+
+	Vertex_Color* pVertices = new Vertex_Color[m_nVertices];
+	for (int i = 0;i < m_nVertices;i++)
+	{
+		in >> fx;
+		in >> fy;
+		in >> fz;
+		pVertices[i] = Vertex_Color(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	}
+
+	// 버퍼생성
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	in >> m_nIndices;
+	int loop = m_nIndices;
+	m_nIndices *= 3;
+	UINT* pnIndices = new UINT[m_nIndices];
+	for (int i = 0;i < loop;i++)
+	{
+		for (int j = 0;j < 3;j++)
+		{
+			in >> pnIndices[i * 3 + j];
+		}
+	}
+
+	//인덱스 버퍼를 생성한다. 
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+CFBXMesh::~CFBXMesh()
+{
+}
+
 // -------------------------------- 터레인 맵 ------------------------------------
 
 
