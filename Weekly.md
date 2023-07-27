@@ -44,7 +44,11 @@
     > 메쉬를 그릴 수 있게 준비함 ( CHeightMapGridMesh 클래스 )\
     > 지형메쉬의 크기를 정하고 가로길이 세로 길이를 지정하여 전체 터레인 지형의 일부분만 그릴 수 있게 여러개의 메쉬를 가지고 있게 함( CHeightMapTerrain 클래스 )\
     > 터레인 지형에서 정점의 높이값을 가져오고 해당 위치의 노말값 방향으로 큐브 오브젝트를 회전시키고 배치시킴\
-    > FBX파일에서 필요한 정보(ControlPoint, ControlPointIndex)만 뽑아서 txt로 저장하는 코드 작성 적용 확인
+    > FBX파일에서 필요한 정보(ControlPoint, ControlPointIndex)만 뽑아서 txt로 저장하는 코드 작성 적용 확인\
+    > Scene, Player, Camera가 완성됨으로 CGameFramework에서 임시로 카메라 오브젝트를 사용하는 부분을 Scene의 Player의 Camera를 이용하여 출력함\
+    > 그동안 임시로 생성해두었던 객체들 삭제 및 CGameFramework에 객체 생성 후 연결
 
     - 다음 주 할 작업
-    > FBX파일에서 필요한 정보를 계층구조로 가져오도록 변경   
+    > FBX파일에서 필요한 정보를 계층구조로 가져오도록 변경\
+    > OBJ파일 랜더링 적용 확인 후 오브젝트 절단 작성 시작\
+    > ┗ 계산 쉐이더 작성 및 연결 확인
