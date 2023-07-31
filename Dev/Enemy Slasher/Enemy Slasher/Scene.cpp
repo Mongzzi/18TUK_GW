@@ -21,121 +21,6 @@ void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	// ------------------------------------       큐브 메쉬      -------------------------------
-
-	//{
-	//	//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다. 
-	//	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-
-	//	/*x-축, y-축, z-축 양의 방향의 객체 개수이다. 각 값을 1씩 늘리거나 줄이면서 실행할 때 프레임 레이트가 어떻게
-	//	변하는 가를 살펴보기 바란다.*/
-	//	int xObjects = 10, yObjects = 10, zObjects = 10, i = 0;
-
-	//	//x-축, y-축, z-축으로 21개씩 총 21 x 21 x 21 = 9261개의 정육면체를 생성하고 배치한다.
-	//	int m_nObjects;
-	//	m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
-
-	//	float fxPitch = 12.0f * 2.5f;
-	//	float fyPitch = 12.0f * 2.5f;
-	//	float fzPitch = 12.0f * 2.5f;
-
-	//	CRotatingObject* pRotatingObject = NULL;
-	//	for (int x = -xObjects; x <= xObjects; x++)
-	//	{
-	//		for (int y = -yObjects; y <= yObjects; y++)
-	//		{
-	//			for (int z = -zObjects; z <= zObjects; z++)
-	//			{
-	//				pRotatingObject = new CRotatingObject();
-	//				pRotatingObject->SetMesh(0, pCubeMesh);
-
-	//				//각 정육면체 객체의 위치를 설정한다. 
-	//				pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
-	//				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//				pRotatingObject->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
-	//				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
-	//			}
-	//		}
-	//	}
-	//}
-
-	// ------------------------------------       터레인      -------------------------------
-	//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다. 
-	XMFLOAT3 xmf3Scale(8.0f, 8.0f, 8.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
-
-	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다. 
-	CHeightMapTerrain* pTerrain;
-#ifdef _WITH_TERRAIN_PARTITION
-	/*하나의 격자 메쉬의 크기는 가로x세로(17x17)이다. 지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메쉬를 가진다. 지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.*/
-	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
-
-#else
-//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
-	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
-
-#endif
-	m_pObjectManager->AddObj(pTerrain, ObjectLayer::BackGround);
-
-	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
-	float fxPitch = 12.0f * 3.5f;
-	float fyPitch = 12.0f * 3.5f;
-	float fzPitch = 12.0f * 3.5f;
-
-	//직육면체를 지형 표면에 그리고 지형보다 높은 위치에 일정한 간격으로 배치한다. 
-	int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch);
-
-	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-
-	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, "fbxsdk/Stone_lit_001.txt");
-
-	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	CRotatingObject* pRotatingObject = NULL;
-
-	for (int i = 0, x = 0; x < xObjects; x++)
-	{
-		for (int z = 0; z < zObjects; z++)
-		{
-			for (int y = 0; y < yObjects; y++)
-			{
-				pRotatingObject = new CRotatingObject(1);
-				pRotatingObject->SetMesh(0, pFBXMesh);
-
-				float xPosition = x * fxPitch;
-				float zPosition = z * fzPitch;
-				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
-
-				if (y == 0)
-				{
-					/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선 벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
-					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
-
-					XMFLOAT3 temp = XMFLOAT3(0.0f, 1.0f, 0.0f);
-					xmf3RotateAxis = Vector3::CrossProduct(temp, xmf3SurfaceNormal);
-
-					if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-					float fAngle = acos(Vector3::DotProduct(temp, xmf3SurfaceNormal));
-
-					pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
-				}
-				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
-				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
-			}
-		}
-	}
-
-	//m_nShaders = 1;
-	//m_pShaders = new CObjectsShader[m_nShaders];
-
-	//m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
-
-
-
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -229,27 +114,6 @@ bool CBasicScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 
 bool CBasicScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	switch (nMessageID)
-	{
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-			// 테스트용 빠른속도 이동 코드
-		case 'W': m_pPlayer->Move(DIR_FORWARD, 1.25f * 10, false); break;
-		case 'S': m_pPlayer->Move(DIR_BACKWARD, 1.25f * 10, false); break;
-		case 'A': m_pPlayer->Move(DIR_LEFT, 1.25f * 10, false); break;
-		case 'D': m_pPlayer->Move(DIR_RIGHT, 1.25f * 10, false); break;
-		case 'Q': m_pPlayer->Move(DIR_UP, 1.25f * 10, false); break;
-		case 'E': m_pPlayer->Move(DIR_DOWN, 1.25f * 10, false); break;
-		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
-		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
-		default:
-			break;
-		}
-		break;
-	default:
-		break;
-	}
 	return(false);
 }
 
@@ -283,4 +147,164 @@ void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+}
+
+CTestScene::CTestScene()
+{
+}
+
+CTestScene::~CTestScene()
+{
+}
+
+bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return false;
+}
+
+bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+			// 테스트용 빠른속도 이동 코드
+		case 'W': m_pPlayer->Move(DIR_FORWARD, 1.25f * 10, false); break;
+		case 'S': m_pPlayer->Move(DIR_BACKWARD, 1.25f * 10, false); break;
+		case 'A': m_pPlayer->Move(DIR_LEFT, 1.25f * 10, false); break;
+		case 'D': m_pPlayer->Move(DIR_RIGHT, 1.25f * 10, false); break;
+		case 'Q': m_pPlayer->Move(DIR_UP, 1.25f * 10, false); break;
+		case 'E': m_pPlayer->Move(DIR_DOWN, 1.25f * 10, false); break;
+		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
+		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return(false);
+}
+
+void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	// ------------------------------------       큐브 메쉬      -------------------------------
+
+//{
+//	//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다. 
+//	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+
+//	/*x-축, y-축, z-축 양의 방향의 객체 개수이다. 각 값을 1씩 늘리거나 줄이면서 실행할 때 프레임 레이트가 어떻게
+//	변하는 가를 살펴보기 바란다.*/
+//	int xObjects = 10, yObjects = 10, zObjects = 10, i = 0;
+
+//	//x-축, y-축, z-축으로 21개씩 총 21 x 21 x 21 = 9261개의 정육면체를 생성하고 배치한다.
+//	int m_nObjects;
+//	m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
+
+//	float fxPitch = 12.0f * 2.5f;
+//	float fyPitch = 12.0f * 2.5f;
+//	float fzPitch = 12.0f * 2.5f;
+
+//	CRotatingObject* pRotatingObject = NULL;
+//	for (int x = -xObjects; x <= xObjects; x++)
+//	{
+//		for (int y = -yObjects; y <= yObjects; y++)
+//		{
+//			for (int z = -zObjects; z <= zObjects; z++)
+//			{
+//				pRotatingObject = new CRotatingObject();
+//				pRotatingObject->SetMesh(0, pCubeMesh);
+
+//				//각 정육면체 객체의 위치를 설정한다. 
+//				pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
+//				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+//				pRotatingObject->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
+//				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
+//			}
+//		}
+//	}
+//}
+
+// ------------------------------------       터레인      -------------------------------
+//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다. 
+	XMFLOAT3 xmf3Scale(8.0f, 8.0f, 8.0f);
+	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
+
+	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다. 
+	CHeightMapTerrain* pTerrain;
+#ifdef _WITH_TERRAIN_PARTITION
+	/*하나의 격자 메쉬의 크기는 가로x세로(17x17)이다. 지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메쉬를 가진다. 지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.*/
+	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
+
+#else
+	//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
+	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
+
+#endif
+	m_pObjectManager->AddObj(pTerrain, ObjectLayer::BackGround);
+
+	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
+	float fxPitch = 12.0f * 3.5f;
+	float fyPitch = 12.0f * 3.5f;
+	float fzPitch = 12.0f * 3.5f;
+
+	//직육면체를 지형 표면에 그리고 지형보다 높은 위치에 일정한 간격으로 배치한다. 
+	int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch);
+
+	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+
+	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, "fbxsdk/Stone_lit_001.txt");
+
+	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
+	CRotatingObject* pRotatingObject = NULL;
+
+	for (int i = 0, x = 0; x < xObjects; x++)
+	{
+		for (int z = 0; z < zObjects; z++)
+		{
+			for (int y = 0; y < yObjects; y++)
+			{
+				pRotatingObject = new CRotatingObject(1);
+				pRotatingObject->SetMesh(0, pFBXMesh);
+
+				float xPosition = x * fxPitch;
+				float zPosition = z * fzPitch;
+				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+				pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
+
+				if (y == 0)
+				{
+					/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선 벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
+					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
+
+					XMFLOAT3 temp = XMFLOAT3(0.0f, 1.0f, 0.0f);
+					xmf3RotateAxis = Vector3::CrossProduct(temp, xmf3SurfaceNormal);
+
+					if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+					float fAngle = acos(Vector3::DotProduct(temp, xmf3SurfaceNormal));
+
+					pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
+				}
+				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+				pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
+				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
+			}
+		}
+	}
+
+	//m_nShaders = 1;
+	//m_pShaders = new CObjectsShader[m_nShaders];
+
+	//m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
