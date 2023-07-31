@@ -247,10 +247,10 @@ CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	switch (nNewCameraMode)
 	{
 	case FIRST_PERSON_CAMERA:
-		SetFriction(2.0f);
+		SetFriction(300.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(2.5f);
-		SetMaxVelocityY(40.0f);
+		SetMaxVelocityXZ(500.0f);
+		SetMaxVelocityY(80.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));

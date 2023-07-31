@@ -387,6 +387,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
 	m_pCamera = m_pPlayer->GetCamera();
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -443,7 +444,7 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
+			if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
 		}
 	}
 
