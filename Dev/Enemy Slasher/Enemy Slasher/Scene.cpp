@@ -3,19 +3,19 @@
 #include "ObjectManager.h"
 #include "ShaderManager.h"
 
-CScene::CScene()
+CBasicScene::CBasicScene()
 {
 	m_pObjectManager = new CObjectManager;
 	m_pShaderManager = new CShaderManager;
 }
 
-CScene::~CScene()
+CBasicScene::~CBasicScene()
 {
 	delete m_pObjectManager;
 	delete m_pShaderManager;
 }
 
-void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -139,7 +139,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-void CScene::ReleaseObjects()
+void CBasicScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 
@@ -150,7 +150,7 @@ void CScene::ReleaseObjects()
 	//if (m_pLights) delete[] m_pLights;
 }
 
-ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
+ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
@@ -184,7 +184,7 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	return(pd3dGraphicsRootSignature);
 }
 
-void CScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CBasicScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	//m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
@@ -192,14 +192,14 @@ void CScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	//m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 }
 
-void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void CBasicScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
 	//::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	//::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 }
 
-void CScene::ReleaseShaderVariables()
+void CBasicScene::ReleaseShaderVariables()
 {
 	//if (m_pd3dcbLights)
 	//{
@@ -211,7 +211,7 @@ void CScene::ReleaseShaderVariables()
 	//if (m_pSkyBox) m_pSkyBox->ReleaseShaderVariables();
 }
 
-void CScene::ReleaseUploadBuffers()
+void CBasicScene::ReleaseUploadBuffers()
 {
 	m_pObjectManager->ReleaseUploadBuffers();
 
@@ -222,12 +222,12 @@ void CScene::ReleaseUploadBuffers()
 	//for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 }
 
-bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CBasicScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	return(false);
 }
 
-bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CBasicScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -253,7 +253,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	return(false);
 }
 
-bool CScene::ProcessInput(UCHAR* pKeysBuffer)
+bool CBasicScene::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return(false);
 
@@ -261,12 +261,12 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 	//return(true);
 }
 
-void CScene::AnimateObjects(float fTimeElapsed)
+void CBasicScene::AnimateObjects(float fTimeElapsed)
 {
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 }
 
-void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
