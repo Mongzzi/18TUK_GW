@@ -110,6 +110,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.2\lib\vs2019\x64\$(Configuration)\libfbxsdk-md.lib;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.2\lib\vs2019\x64\$(Configuration)\libxml2-md.lib;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.2\lib\vs2019\x64\$(Configuration)\zlib-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
