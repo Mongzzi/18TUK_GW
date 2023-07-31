@@ -65,17 +65,19 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
 	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다. 
-
+	CHeightMapTerrain* pTerrain;
 #ifdef _WITH_TERRAIN_PARTITION
 	/*하나의 격자 메쉬의 크기는 가로x세로(17x17)이다. 지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메쉬를 가진다. 지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.*/
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
+	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 
 #else
 //지형을 하나의 격자 메쉬(257x257)로 생성한다. 
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
+	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
 
 #endif
-	float fTerrainWidth = m_pTerrain->GetWidth(), fTerrainLength = m_pTerrain->GetLength();
+	m_pObjectManager->AddObj(pTerrain, ObjectLayer::BackGround);
+
+	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
 	float fxPitch = 12.0f * 3.5f;
 	float fyPitch = 12.0f * 3.5f;
 	float fzPitch = 12.0f * 3.5f;
@@ -101,13 +103,13 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 				float xPosition = x * fxPitch;
 				float zPosition = z * fzPitch;
-				float fHeight = m_pTerrain->GetHeight(xPosition, zPosition);
+				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 				pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
 
 				if (y == 0)
 				{
 					/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선 벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
-					xmf3SurfaceNormal = m_pTerrain->GetNormal(xPosition, zPosition);
+					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
 
 					XMFLOAT3 temp = XMFLOAT3(0.0f, 1.0f, 0.0f);
 					xmf3RotateAxis = Vector3::CrossProduct(temp, xmf3SurfaceNormal);
@@ -124,9 +126,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 			}
 		}
 	}
-
-	m_pObjectManager->AddObj(m_pTerrain, ObjectLayer::Object);
-
 
 	//m_nShaders = 1;
 	//m_pShaders = new CObjectsShader[m_nShaders];
