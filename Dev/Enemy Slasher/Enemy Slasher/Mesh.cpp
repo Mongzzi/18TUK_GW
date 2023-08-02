@@ -126,9 +126,132 @@ CBoxMesh::~CBoxMesh()
 
 CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	ifstream in{ fileName };
+	//------------------------------------------------------------------------------------------
+	FbxManager* lSdkManager = NULL;
+	FbxScene* lScene = NULL;
+	bool lResult;
 
-	in >> m_nVertices;				// 꼭지점 개수
+	InitializeSdkObjects(lSdkManager, lScene);
+
+	FbxString lFilePath(fileName);
+
+	if (lFilePath.IsEmpty())
+	{
+		lResult = false;
+		//FBXSDK_printf("\n\nUsage: ImportScene <FBX file name>\n\n");
+	}
+	else
+	{
+		//FBXSDK_printf("\n\nFile: %s\n\n", lFilePath.Buffer());
+		lResult = LoadScene(lSdkManager, lScene, lFilePath.Buffer());
+	}
+
+	if (lResult == false)
+	{
+		//FBXSDK_printf("\n\nAn error occurred while loading the scene...");
+	}
+	else
+	{
+		LoadContent(pd3dDevice, pd3dCommandList, lScene);
+	}
+
+	DestroySdkObjects(lSdkManager, lResult);
+	//------------------------------------------------------------------------------------------
+}
+
+CFBXMesh::~CFBXMesh()
+{
+}
+
+void CFBXMesh::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxScene* pScene)
+{
+	int i;
+	FbxNode* lNode = pScene->GetRootNode();
+
+	if (lNode)
+	{
+		for (i = 0; i < lNode->GetChildCount(); i++)
+		{
+			LoadContent(pd3dDevice, pd3dCommandList, lNode->GetChild(i));
+		}
+	}
+}
+
+void CFBXMesh::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
+{
+	FbxNodeAttribute::EType lAttributeType;
+	int i;
+
+	if (pNode->GetNodeAttribute() == NULL)
+	{
+		//FBXSDK_printf("NULL Node Attribute\n\n");
+	}
+	else
+	{
+		lAttributeType = (pNode->GetNodeAttribute()->GetAttributeType());
+
+		switch (lAttributeType)
+		{
+		default:
+			break;
+		case FbxNodeAttribute::eMarker:
+			//DisplayMarker(pNode);
+			break;
+
+		case FbxNodeAttribute::eSkeleton:
+			//DisplaySkeleton(pNode);
+			break;
+
+		case FbxNodeAttribute::eMesh:
+			LoadMesh(pd3dDevice, pd3dCommandList, pNode);
+			break;
+
+		case FbxNodeAttribute::eNurbs:
+			//DisplayNurb(pNode);
+			break;
+
+		case FbxNodeAttribute::ePatch:
+			//DisplayPatch(pNode);
+			break;
+
+		case FbxNodeAttribute::eCamera:
+			//DisplayCamera(pNode);
+			break;
+
+		case FbxNodeAttribute::eLight:
+			//DisplayLight(pNode);
+			break;
+
+		case FbxNodeAttribute::eLODGroup:
+			//DisplayLodGroup(pNode);
+			break;
+		}
+	}
+
+	//DisplayUserProperties(pNode);
+	//DisplayTarget(pNode);
+	//DisplayPivotsAndLimits(pNode);
+	//DisplayTransformPropagation(pNode);
+	//DisplayGeometricTransform(pNode);
+
+	for (i = 0; i < pNode->GetChildCount(); i++)
+	{
+		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i));
+	}
+}
+
+void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
+{
+	FbxMesh* lMesh = (FbxMesh*)pNode->GetNodeAttribute();
+
+	//DisplayMetaDataConnections(lMesh);
+
+	//-----------------------------------------------------------------------------------
+	//DisplayControlsPoints(lMesh);
+	int i, lControlPointsCount = lMesh->GetControlPointsCount();
+	FbxVector4* lControlPoints = lMesh->GetControlPoints();
+
+	m_nVertices = lControlPointsCount;
 	m_nStride = sizeof(Vertex_Color); // x , y, z 좌표
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
@@ -139,12 +262,25 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	float fx, fy, fz;
 
 	Vertex_Color* pVertices = new Vertex_Color[m_nVertices];
-	for (int i = 0;i < m_nVertices;i++)
+
+	for (i = 0; i < lControlPointsCount; i++)
 	{
-		in >> fx;
-		in >> fy;
-		in >> fz;
+		fx = (float)lControlPoints[i][0];
+		fy = (float)lControlPoints[i][1];
+		fz = (float)lControlPoints[i][2];
 		pVertices[i] = Vertex_Color(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+
+		/*for (int j = 0; j < lMesh->GetElementNormalCount(); j++)
+		{
+			FbxGeometryElementNormal* leNormals = lMesh->GetElementNormal(j);
+			if (leNormals->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			{
+				char header[100];
+				FBXSDK_sprintf(header, 100, "            Normal Vector: ");
+				if (leNormals->GetReferenceMode() == FbxGeometryElement::eDirect)
+					Display3DVector(header, leNormals->GetDirectArray().GetAt(i));
+			}
+		}*/
 	}
 
 	// 버퍼생성
@@ -155,17 +291,22 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	in >> m_nIndices;
-	int loop = m_nIndices;
-	m_nIndices *= 3;
+	//DisplayPolygons(lMesh);
+	int j, lPolygonCount = lMesh->GetPolygonCount();
+	m_nIndices = lPolygonCount;
 	UINT* pnIndices = new UINT[m_nIndices];
-	for (int i = 0;i < loop;i++)
+
+	for (i = 0; i < lPolygonCount; i++)
 	{
-		for (int j = 0;j < 3;j++)
+		int lPolygonSize = lMesh->GetPolygonSize(i);
+		for (j = 0; j < lPolygonSize; j++)
 		{
-			in >> pnIndices[i * 3 + j];
+			int lControlPointIndex = lMesh->GetPolygonVertex(i, j);
+			pnIndices[i * 3 + j] = lControlPointIndex;
 		}
+
 	}
+	m_nIndices *= 3;
 
 	//인덱스 버퍼를 생성한다. 
 	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
@@ -173,9 +314,18 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
-}
-CFBXMesh::~CFBXMesh()
-{
+
+	//DisplayMaterialMapping(lMesh);
+	//DisplayMaterial(lMesh);
+	//DisplayTexture(lMesh);
+	//DisplayMaterialConnections(lMesh);
+
+	//DisplayLink(lMesh);
+
+	//DisplayShape(lMesh);
+
+	//DisplayCache(lMesh);
+
 }
 
 // -------------------------------- 터레인 맵 ------------------------------------

@@ -260,7 +260,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, "fbxsdk/Stone_lit_001.txt");
+	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, "fbxsdk/Stone_lit_001.fbx");
 
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
 	CRotatingObject* pRotatingObject = NULL;
