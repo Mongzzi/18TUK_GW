@@ -19,10 +19,7 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
 
 void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
 {
-    // 이 두줄이 없으면 오류나옴. 왜? 것보다 어떻게 해결했음? 이게 해결한건가?
-    // 아마 FbxManager의 생성자가 static이여서 생기는 문제인듯
-    if(pManager) pManager->Destroy();
-    else pManager = FbxManager::Create();
+    if(!pManager) pManager = FbxManager::Create();
 
     //The first thing to do is to create the FBX Manager which is the object allocator for almost all the classes in the SDK
     if (!pManager)
@@ -51,8 +48,10 @@ void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
 
 void DestroySdkObjects(FbxManager* pManager, bool pExitStatus)
 {
-    if (pManager) pManager->Destroy();
-    //if (pExitStatus) FBXSDK_printf("Program Success!\n");
+    if (pManager)
+        pManager->Destroy();
+    if (pExitStatus)
+        ;//FBXSDK_printf("Program Success!\n");
 }
 
 //-------------------------------------------------------------------------------------------

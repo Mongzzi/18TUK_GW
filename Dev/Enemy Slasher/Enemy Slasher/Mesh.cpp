@@ -154,8 +154,8 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, lScene);
 	}
-
-	DestroySdkObjects(lSdkManager, lResult);
+	//lScene->Destroy();
+	//DestroySdkObjects(lSdkManager, lResult);
 	//------------------------------------------------------------------------------------------
 }
 
