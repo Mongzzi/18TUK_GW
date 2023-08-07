@@ -35,7 +35,7 @@ CGameFramework::CGameFramework()
 
 CGameFramework::~CGameFramework()
 {
-	//DestroySdkObjects(m_plSdkManager, true);
+	DestroySdkObjects(m_plSdkManager, true);
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
