@@ -105,6 +105,7 @@ private:
 public:	
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
+	void LoadContent(const char* fileName);
 	virtual void Animate(float fTimeElapsed);
 };
 

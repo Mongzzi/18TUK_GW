@@ -240,7 +240,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;
 	//FbxScene* plScene = NULL;
-	bool lResult;
+	LoadResult lResult;
 
 	//InitializeSdkObjects(plSdkManager, plScene);
 
@@ -248,7 +248,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	if (lFilePath.IsEmpty())
 	{
-		lResult = false;
+		lResult = LoadResult::False;
 #ifdef _DEBUG
 		FBXSDK_printf("\n\nUsage: ImportScene <FBX file name>\n\n");
 #endif // _DEBUG
@@ -261,16 +261,20 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		lResult = pFBXLoader->LoadScene(lFilePath.Buffer());
 	}
 
-	if (lResult == false)
+	if (lResult == LoadResult::False)
 	{
 #ifdef _DEBUG
 		FBXSDK_printf("\n\nAn error occurred while loading the scene...");
 #endif // _DEBUG
 
 	}
-	else
+	else if(lResult == LoadResult::First)
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader);
+	}
+	else if (lResult == LoadResult::Overlapping)
+	{
+		LoadContent(fileName);
 	}
 	//lScene->Destroy();
 	//DestroySdkObjects(lSdkManager, lResult);
@@ -359,6 +363,11 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i));
 	}
+}
+
+void CFBXObject::LoadContent(const char* fileName)
+{
+	// 가져와서 생성.
 }
 
 void CFBXObject::Animate(float fTimeElapsed)

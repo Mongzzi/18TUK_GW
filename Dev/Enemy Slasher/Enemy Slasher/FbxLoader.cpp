@@ -61,7 +61,25 @@ void CFBXLoader::DestroySdkObjects(bool pExitStatus)
 #endif // _DEBUG
 }
 
-bool CFBXLoader::LoadScene(const char* pFilename)
+LoadResult CFBXLoader::LoadScene(const char* pFilename)
+{
+    LoadResult result;
+
+    if (CheckFileNameList(pFilename))
+    {
+        result = LoadResult::Overlapping;
+    }
+    else {
+        if (LoadSceneFromFile(pFilename))
+            result = LoadResult::First;
+        else
+            result = LoadResult::False;
+    }
+
+    return result;
+}
+
+bool CFBXLoader::LoadSceneFromFile(const char* pFilename)
 {
     int lFileMajor, lFileMinor, lFileRevision;
     int lSDKMajor, lSDKMinor, lSDKRevision;
@@ -99,14 +117,14 @@ bool CFBXLoader::LoadScene(const char* pFilename)
         return false;
     }
 #ifdef _DEBUG
-    FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
+    //FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
 #endif // _DEBUG
 
 
     if (lImporter->IsFBX())
     {
 #ifdef _DEBUG
-        FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
+        //FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
 #endif // _DEBUG
 
 
@@ -210,6 +228,16 @@ bool CFBXLoader::LoadScene(const char* pFilename)
     lImporter->Destroy();
 
     return lStatus;
+}
+
+bool CFBXLoader::CheckFileNameList(const char* pFilename)
+{
+    // 리스트를 확인해 리스트에 있으면  true 반환. 
+    if (m_vfileNameList.end() != find(m_vfileNameList.begin(), m_vfileNameList.end(), pFilename))
+        return true;
+    // 없으면 리스트에 넣고 false 반환.
+    m_vfileNameList.push_back(pFilename);
+    return false;
 }
 
 FbxScene* CFBXLoader::GetScene()
