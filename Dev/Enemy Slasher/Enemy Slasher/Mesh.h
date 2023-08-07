@@ -1,5 +1,5 @@
 #pragma once
-#include "FbxsdkTest.h"
+#include "FbxLoader.h"
 
 class CMesh
 {

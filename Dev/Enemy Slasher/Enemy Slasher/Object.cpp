@@ -235,7 +235,7 @@ void CRotatingObject::Animate(float fTimeElapsed)
 }
 
 
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene, const char* fileName) : CGameObject(1)//  모델에 mesh가 한개만 생성되도록
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CGameObject(1)//  모델에 mesh가 한개만 생성되도록
 {
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;
@@ -258,7 +258,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 #ifdef _DEBUG
 		//FBXSDK_printf("\n\nFile: %s\n\n", lFilePath.Buffer());
 #endif // _DEBUG
-		lResult = LoadScene(plSdkManager, plScene, lFilePath.Buffer());
+		lResult = pFBXLoader->LoadScene(lFilePath.Buffer());
 	}
 
 	if (lResult == false)
@@ -270,7 +270,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	}
 	else
 	{
-		LoadContent(pd3dDevice, pd3dCommandList, plScene);
+		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader);
 	}
 	//lScene->Destroy();
 	//DestroySdkObjects(lSdkManager, lResult);
@@ -281,10 +281,10 @@ CFBXObject::~CFBXObject()
 {
 }
 
-void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxScene* pScene)
+void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
 {
 	int i;
-	FbxNode* lNode = pScene->GetRootNode();
+	FbxNode* lNode = pFBXLoader->GetScene()->GetRootNode();
 
 	if (lNode)
 	{

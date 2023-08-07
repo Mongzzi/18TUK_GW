@@ -15,7 +15,7 @@ CBasicScene::~CBasicScene()
 	delete m_pShaderManager;
 }
 
-void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene)
+void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -188,7 +188,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return(false);
 }
 
-void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene)
+void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -268,7 +268,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CFBXObject* pRotatingObject = NULL;
 	//CRotatingObject* pRotatingObject = NULL;
 
-	CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
+	CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
 	//m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 
 	for (int i = 0, x = 0; x < /*xObjects*/3; x++)
@@ -277,7 +277,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		{
 			for (int y = 0; y < yObjects; y++)
 			{
-				pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");
+				pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_BIG_001_FBX);
 				//if(x%2) pRotatingObject->SetMesh(0, pCubeMesh);
 				//else pRotatingObject->SetMesh(0, pCubeMesh);
 

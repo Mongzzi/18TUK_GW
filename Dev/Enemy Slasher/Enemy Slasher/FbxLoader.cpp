@@ -1,57 +1,67 @@
-#include "FbxsdkTest.h"
+#include "FbxLoader.h"
 
 #ifdef IOS_REF  // 모호합니다.
 #undef  IOS_REF
-#define IOS_REF (*(pManager->GetIOSettings()))
+#define IOS_REF (*(m_plSdkManager->GetIOSettings()))
 #endif
 
-void InitializeSdkObjects(FbxManager*& pManager, FbxScene*& pScene)
+CFBXLoader::CFBXLoader()
 {
-    pManager = NULL;
-    pScene = NULL;
-    if (!pManager)
-        pManager = FbxManager::Create();
+    InitializeSdkObjects();
+}
+
+CFBXLoader::~CFBXLoader()
+{
+    DestroySdkObjects(true);    // 필요한가?
+}
+
+void CFBXLoader::InitializeSdkObjects()
+{
+    m_plSdkManager = NULL;
+    m_plScene = NULL;
+    if (!m_plSdkManager)
+        m_plSdkManager = FbxManager::Create();
 
     //The first thing to do is to create the FBX Manager which is the object allocator for almost all the classes in the SDK
-    if (!pManager)
+    if (!m_plSdkManager)
     {
         //FBXSDK_printf("Error: Unable to create FBX Manager!\n");
         exit(1);
     }
     else
 #ifdef _DEBUG
-        FBXSDK_printf("Autodesk FBX SDK version %s\n", pManager->GetVersion());
+        FBXSDK_printf("Autodesk FBX SDK version %s\n", m_plSdkManager->GetVersion());
 #endif // _DEBUG
 
 
     //Create an IOSettings object. This object holds all import/export settings.
-    FbxIOSettings* ios = FbxIOSettings::Create(pManager, IOSROOT);
-    pManager->SetIOSettings(ios);
+    FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
+    m_plSdkManager->SetIOSettings(ios);
 
     //Load plugins from the executable directory (optional)
     FbxString lPath = FbxGetApplicationDirectory();
-    pManager->LoadPluginsDirectory(lPath.Buffer());
+    m_plSdkManager->LoadPluginsDirectory(lPath.Buffer());
 
     //Create an FBX scene. This object holds most objects imported/exported from/to files.
-    pScene = FbxScene::Create(pManager, "My Scene");
-    if (!pScene)
+    m_plScene = FbxScene::Create(m_plSdkManager, "My Scene");
+    if (!m_plScene)
     {
         //FBXSDK_printf("Error: Unable to create FBX scene!\n");
         exit(1);
     }
 }
 
-void DestroySdkObjects(FbxManager* pManager, bool pExitStatus)
+void CFBXLoader::DestroySdkObjects(bool pExitStatus)
 {
-    if (pManager)
-        pManager->Destroy();
+    if (m_plSdkManager)
+        m_plSdkManager->Destroy();
     if (pExitStatus)
 #ifdef _DEBUG
         FBXSDK_printf("Program Success!\n");
 #endif // _DEBUG
 }
 
-bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
+bool CFBXLoader::LoadScene(const char* pFilename)
 {
     int lFileMajor, lFileMinor, lFileRevision;
     int lSDKMajor, lSDKMinor, lSDKRevision;
@@ -64,10 +74,10 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     FbxManager::GetFileFormatVersion(lSDKMajor, lSDKMinor, lSDKRevision);
 
     // Create an importer.
-    FbxImporter* lImporter = FbxImporter::Create(pManager, "");
+    FbxImporter* lImporter = FbxImporter::Create(m_plSdkManager, "");
 
     // Initialize the importer by providing a filename.
-    const bool lImportStatus = lImporter->Initialize(pFilename, -1, pManager->GetIOSettings());
+    const bool lImportStatus = lImporter->Initialize(pFilename, -1, m_plSdkManager->GetIOSettings());
     lImporter->GetFileVersion(lFileMajor, lFileMinor, lFileRevision);
 
     if (!lImportStatus)
@@ -141,7 +151,7 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     }
 
     // Import the scene.
-    lStatus = lImporter->Import(pScene);
+    lStatus = lImporter->Import(m_plScene);
     if (lStatus == false && lImporter->GetStatus() == FbxStatus::ePasswordError)
     {
         //FBXSDK_printf("Please enter password: ");
@@ -157,7 +167,7 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
         IOS_REF.SetStringProp(IMP_FBX_PASSWORD, lString);
         IOS_REF.SetBoolProp(IMP_FBX_PASSWORD_ENABLE, true);
 
-        lStatus = lImporter->Import(pScene);
+        lStatus = lImporter->Import(m_plScene);
 
         if (lStatus == false && lImporter->GetStatus() == FbxStatus::ePasswordError)
         {
@@ -200,4 +210,9 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     lImporter->Destroy();
 
     return lStatus;
+}
+
+FbxScene* CFBXLoader::GetScene()
+{
+    return m_plScene;
 }

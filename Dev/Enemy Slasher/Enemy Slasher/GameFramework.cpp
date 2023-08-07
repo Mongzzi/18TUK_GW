@@ -35,7 +35,7 @@ CGameFramework::CGameFramework()
 
 CGameFramework::~CGameFramework()
 {
-	DestroySdkObjects(m_plSdkManager, true);
+	m_pFBXLoader->DestroySdkObjects(true);	// 이거 해줘야하나?
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
@@ -51,7 +51,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CoInitialize(NULL);
 	
-	InitializeSdkObjects(m_plSdkManager, m_plScene);	//생성자에서 부르면 터짐.BuildObjects() 보다 먼저 불려야함.
+	m_pFBXLoader = new CFBXLoader();	//생성자에서 부르면 터짐.BuildObjects() 보다 먼저 불려야함.
 
 	BuildObjects();
 
@@ -386,7 +386,7 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	m_pScene = new CTestScene();
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_plSdkManager, m_plScene);
+	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
 
 	m_pScene->m_pPlayer = m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
