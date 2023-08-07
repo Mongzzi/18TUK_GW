@@ -260,21 +260,26 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");
-	CFBXMesh* pFBXMesh2 = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/box.fbx");
+	//CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");
+	//CFBXMesh* pFBXMesh2 = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/box.fbx");
 
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	CRotatingObject* pRotatingObject = NULL;
+	//CRotatingObject* pRotatingObject = NULL;
+	CFBXObject* pRotatingObject = NULL;
+	//CRotatingObject* pRotatingObject = NULL;
 
-	for (int i = 0, x = 0; x < xObjects; x++)
+	CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
+	//m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+
+	for (int i = 0, x = 0; x < /*xObjects*/3; x++)
 	{
-		for (int z = 0; z < zObjects; z++)
+		for (int z = 0; z < /*zObjects*/3; z++)
 		{
 			for (int y = 0; y < yObjects; y++)
 			{
-				pRotatingObject = new CRotatingObject(1);
-				if(x%2) pRotatingObject->SetMesh(0, pFBXMesh);
-				else pRotatingObject->SetMesh(0, pFBXMesh2);
+				pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");
+				//if(x%2) pRotatingObject->SetMesh(0, pCubeMesh);
+				//else pRotatingObject->SetMesh(0, pCubeMesh);
 
 				float xPosition = x * fxPitch;
 				float zPosition = z * fzPitch;
@@ -295,8 +300,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 					pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
 				}
-				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
+				//pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+				//pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
 				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
 			}
 		}

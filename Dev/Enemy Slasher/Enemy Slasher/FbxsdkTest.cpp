@@ -51,156 +51,6 @@ void DestroySdkObjects(FbxManager* pManager, bool pExitStatus)
 #endif // _DEBUG
 }
 
-//-------------------------------------------------------------------------------------------
-//                  Mesh로 옮겨야함.
-//void DisplayContent(FbxScene* pScene)
-//{
-//    int i;
-//    FbxNode* lNode = pScene->GetRootNode();
-//    // 루트 노드와 그 차일드.
-//
-//    if (lNode)
-//    {
-//        for (i = 0; i < lNode->GetChildCount(); i++)
-//        {
-//            DisplayContent(lNode->GetChild(i));
-//        }
-//    }
-//}
-//
-//void DisplayContent(FbxNode* pNode)
-//{
-//    FbxNodeAttribute::EType lAttributeType;
-//    int i;
-//
-//    if (pNode->GetNodeAttribute() == NULL)
-//    {
-//        //FBXSDK_printf("NULL Node Attribute\n\n");
-//    }
-//    else
-//    {
-//        lAttributeType = (pNode->GetNodeAttribute()->GetAttributeType());
-//
-//        switch (lAttributeType)
-//        {
-//        default:
-//            break;
-//        case FbxNodeAttribute::eMarker:
-//            //DisplayMarker(pNode);
-//            break;
-//
-//        case FbxNodeAttribute::eSkeleton:
-//            //DisplaySkeleton(pNode);
-//            break;
-//
-//        case FbxNodeAttribute::eMesh:
-//            DisplayMesh(pNode);
-//            break;
-//
-//        case FbxNodeAttribute::eNurbs:
-//            //DisplayNurb(pNode);
-//            break;
-//
-//        case FbxNodeAttribute::ePatch:
-//            //DisplayPatch(pNode);
-//            break;
-//
-//        case FbxNodeAttribute::eCamera:
-//            //DisplayCamera(pNode);
-//            break;
-//
-//        case FbxNodeAttribute::eLight:
-//            //DisplayLight(pNode);
-//            break;
-//
-//        case FbxNodeAttribute::eLODGroup:
-//            //DisplayLodGroup(pNode);
-//            break;
-//        }
-//    }
-//
-//    //DisplayUserProperties(pNode);
-//    //DisplayTarget(pNode);
-//    //DisplayPivotsAndLimits(pNode);
-//    //DisplayTransformPropagation(pNode);
-//    //DisplayGeometricTransform(pNode);
-//
-//    for (i = 0; i < pNode->GetChildCount(); i++)
-//    {
-//        DisplayContent(pNode->GetChild(i));
-//    }
-//}
-//
-//void DisplayMesh(FbxNode* pNode)
-//{
-//    FbxMesh* lMesh = (FbxMesh*)pNode->GetNodeAttribute();
-//
-//    std::string rudfh = "C:\\Users\\yyyyw\\Desktop\\asdf\\";	// 파일 생성 위치.
-//    std::string MeshName = (char*)pNode->GetName();
-//    std::string type = ".txt";
-//
-//    rudfh += MeshName;
-//    rudfh += type;
-//
-//    std::ofstream out{ rudfh };
-//
-//    //DisplayMetaDataConnections(lMesh);
-//
-//    //-----------------------------------------------------------------------------------
-//    //DisplayControlsPoints(lMesh);
-//    int i, lControlPointsCount = lMesh->GetControlPointsCount();
-//    FbxVector4* lControlPoints = lMesh->GetControlPoints();
-//
-//    //DisplayString("    Control Points");
-//    //out.write((const char*)&lControlPointsCount, sizeof(int));
-//    out << lControlPointsCount << " ";
-//    for (i = 0; i < lControlPointsCount; i++)
-//    {
-//        out << lControlPoints[i][0] << " " << lControlPoints[i][1] << " " << lControlPoints[i][2] << " ";
-//
-//        /*for (int j = 0; j < lMesh->GetElementNormalCount(); j++)
-//        {
-//            FbxGeometryElementNormal* leNormals = lMesh->GetElementNormal(j);
-//            if (leNormals->GetMappingMode() == FbxGeometryElement::eByControlPoint)
-//            {
-//                char header[100];
-//                FBXSDK_sprintf(header, 100, "            Normal Vector: ");
-//                if (leNormals->GetReferenceMode() == FbxGeometryElement::eDirect)
-//                    Display3DVector(header, leNormals->GetDirectArray().GetAt(i));
-//            }
-//        }*/
-//    }
-//    out << std::endl;
-//    //DisplayString("");
-//    //-----------------------------------------------------------------------------------
-//
-//    //DisplayPolygons(lMesh);
-//    int j, lPolygonCount = lMesh->GetPolygonCount();
-//    out << lPolygonCount << " ";
-//    for (i = 0; i < lPolygonCount; i++)
-//    {
-//        int lPolygonSize = lMesh->GetPolygonSize(i);
-//        for (j = 0; j < lPolygonSize; j++)
-//        {
-//            int lControlPointIndex = lMesh->GetPolygonVertex(i, j);
-//            out << lControlPointIndex << " ";
-//        }
-//
-//    }
-//
-//    //DisplayMaterialMapping(lMesh);
-//    //DisplayMaterial(lMesh);
-//    //DisplayTexture(lMesh);
-//    //DisplayMaterialConnections(lMesh);
-//    
-//    //DisplayLink(lMesh);
-//    
-//    //DisplayShape(lMesh);
-//
-//    //DisplayCache(lMesh);
-//}
-// 
-//-------------------------------------------------------------------------------------------
 bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
 {
     int lFileMajor, lFileMinor, lFileRevision;
@@ -223,13 +73,17 @@ bool LoadScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename)
     if (!lImportStatus)
     {
         FbxString error = lImporter->GetStatus().GetErrorString();
-        /*FBXSDK_printf("Call to FbxImporter::Initialize() failed.\n");
-        FBXSDK_printf("Error returned: %s\n\n", error.Buffer());*/
+#ifdef _DEBUG
+        FBXSDK_printf("Call to FbxImporter::Initialize() failed.\n");
+        FBXSDK_printf("Error returned: %s\n\n", error.Buffer());
+#endif // _DEBUG
 
         if (lImporter->GetStatus().GetCode() == FbxStatus::eInvalidFileVersion)
         {
-            /*FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
-            FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);*/
+#ifdef _DEBUG
+            FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
+            FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
+#endif // _DEBUG
         }
 
         return false;

@@ -235,6 +235,136 @@ void CRotatingObject::Animate(float fTimeElapsed)
 }
 
 
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene, const char* fileName) : CGameObject(1)//  모델에 mesh가 한개만 생성되도록
+{
+	//------------------------------------------------------------------------------------------
+	//FbxManager* plSdkManager = NULL;
+	//FbxScene* plScene = NULL;
+	bool lResult;
+
+	//InitializeSdkObjects(plSdkManager, plScene);
+
+	FbxString lFilePath(fileName);
+
+	if (lFilePath.IsEmpty())
+	{
+		lResult = false;
+#ifdef _DEBUG
+		FBXSDK_printf("\n\nUsage: ImportScene <FBX file name>\n\n");
+#endif // _DEBUG
+	}
+	else
+	{
+#ifdef _DEBUG
+		//FBXSDK_printf("\n\nFile: %s\n\n", lFilePath.Buffer());
+#endif // _DEBUG
+		lResult = LoadScene(plSdkManager, plScene, lFilePath.Buffer());
+	}
+
+	if (lResult == false)
+	{
+#ifdef _DEBUG
+		FBXSDK_printf("\n\nAn error occurred while loading the scene...");
+#endif // _DEBUG
+
+	}
+	else
+	{
+		LoadContent(pd3dDevice, pd3dCommandList, plScene);
+	}
+	//lScene->Destroy();
+	//DestroySdkObjects(lSdkManager, lResult);
+	//------------------------------------------------------------------------------------------
+}
+
+CFBXObject::~CFBXObject()
+{
+}
+
+void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxScene* pScene)
+{
+	int i;
+	FbxNode* lNode = pScene->GetRootNode();
+
+	if (lNode)
+	{
+		for (i = 0; i < lNode->GetChildCount(); i++)
+		{
+			LoadContent(pd3dDevice, pd3dCommandList, lNode->GetChild(i));
+		}
+	}
+}
+
+void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
+{
+	FbxNodeAttribute::EType lAttributeType;
+	int i;
+	CFBXMesh* pFBXMesh = NULL;
+
+	if (pNode->GetNodeAttribute() == NULL)
+	{
+		//FBXSDK_printf("NULL Node Attribute\n\n");
+	}
+	else
+	{
+		lAttributeType = (pNode->GetNodeAttribute()->GetAttributeType());
+
+		switch (lAttributeType)
+		{
+		default:
+			break;
+		case FbxNodeAttribute::eMarker:
+			//DisplayMarker(pNode);
+			break;
+
+		case FbxNodeAttribute::eSkeleton:
+			//DisplaySkeleton(pNode);
+			break;
+
+		case FbxNodeAttribute::eMesh:
+			pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList);
+			pFBXMesh->LoadMesh(pd3dDevice, pd3dCommandList, pNode);
+			SetMesh(0, pFBXMesh);
+			break;
+
+		case FbxNodeAttribute::eNurbs:
+			//DisplayNurb(pNode);
+			break;
+
+		case FbxNodeAttribute::ePatch:
+			//DisplayPatch(pNode);
+			break;
+
+		case FbxNodeAttribute::eCamera:
+			//DisplayCamera(pNode);
+			break;
+
+		case FbxNodeAttribute::eLight:
+			//DisplayLight(pNode);
+			break;
+
+		case FbxNodeAttribute::eLODGroup:
+			//DisplayLodGroup(pNode);
+			break;
+		}
+	}
+
+	//DisplayUserProperties(pNode);
+	//DisplayTarget(pNode);
+	//DisplayPivotsAndLimits(pNode);
+	//DisplayTransformPropagation(pNode);
+	//DisplayGeometricTransform(pNode);
+
+	for (i = 0; i < pNode->GetChildCount(); i++)
+	{
+		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i));
+	}
+}
+
+void CFBXObject::Animate(float fTimeElapsed)
+{
+}
+
 
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, 
 	int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CGameObject(0)

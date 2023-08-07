@@ -123,128 +123,23 @@ CBoxMesh::~CBoxMesh()
 {
 }
 
-CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene, const char* fileName) : CMesh(pd3dDevice, pd3dCommandList)
+CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	//------------------------------------------------------------------------------------------
-	//FbxManager* plSdkManager = NULL;
-	//FbxScene* plScene = NULL;
-	bool lResult;
-
-	//InitializeSdkObjects(plSdkManager, plScene);
-
-	FbxString lFilePath(fileName);
-
-	if (lFilePath.IsEmpty())
-	{
-		lResult = false;
-		//FBXSDK_printf("\n\nUsage: ImportScene <FBX file name>\n\n");
-	}
-	else
-	{
-		//FBXSDK_printf("\n\nFile: %s\n\n", lFilePath.Buffer());
-		lResult = LoadScene(plSdkManager, plScene, lFilePath.Buffer());
-	}
-
-	if (lResult == false)
-	{
-#ifdef _DEBUG
-		FBXSDK_printf("\n\nAn error occurred while loading the scene...");
-#endif // _DEBUG
-
-	}
-	else
-	{
-		LoadContent(pd3dDevice, pd3dCommandList, plScene);
-	}
-	//lScene->Destroy();
-	//DestroySdkObjects(lSdkManager, lResult);
-	//------------------------------------------------------------------------------------------
 }
 
 CFBXMesh::~CFBXMesh()
 {
 }
 
-void CFBXMesh::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxScene* pScene)
-{
-	int i;
-	FbxNode* lNode = pScene->GetRootNode();
-
-	if (lNode)
-	{
-		for (i = 0; i < lNode->GetChildCount(); i++)
-		{
-			LoadContent(pd3dDevice, pd3dCommandList, lNode->GetChild(i));
-		}
-	}
-}
-
-void CFBXMesh::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
-{
-	FbxNodeAttribute::EType lAttributeType;
-	int i;
-
-	if (pNode->GetNodeAttribute() == NULL)
-	{
-		//FBXSDK_printf("NULL Node Attribute\n\n");
-	}
-	else
-	{
-		lAttributeType = (pNode->GetNodeAttribute()->GetAttributeType());
-
-		switch (lAttributeType)
-		{
-		default:
-			break;
-		case FbxNodeAttribute::eMarker:
-			//DisplayMarker(pNode);
-			break;
-
-		case FbxNodeAttribute::eSkeleton:
-			//DisplaySkeleton(pNode);
-			break;
-
-		case FbxNodeAttribute::eMesh:
-			LoadMesh(pd3dDevice, pd3dCommandList, pNode);
-			break;
-
-		case FbxNodeAttribute::eNurbs:
-			//DisplayNurb(pNode);
-			break;
-
-		case FbxNodeAttribute::ePatch:
-			//DisplayPatch(pNode);
-			break;
-
-		case FbxNodeAttribute::eCamera:
-			//DisplayCamera(pNode);
-			break;
-
-		case FbxNodeAttribute::eLight:
-			//DisplayLight(pNode);
-			break;
-
-		case FbxNodeAttribute::eLODGroup:
-			//DisplayLodGroup(pNode);
-			break;
-		}
-	}
-
-	//DisplayUserProperties(pNode);
-	//DisplayTarget(pNode);
-	//DisplayPivotsAndLimits(pNode);
-	//DisplayTransformPropagation(pNode);
-	//DisplayGeometricTransform(pNode);
-
-	for (i = 0; i < pNode->GetChildCount(); i++)
-	{
-		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i));
-	}
-}
 
 void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
 {
 	FbxMesh* lMesh = (FbxMesh*)pNode->GetNodeAttribute();
+
+#ifdef _DEBUG
+	std::cout << "Mesh Name: " << (char*)pNode->GetName() << std::endl;
+#endif // _DEBUG
+
 
 	//DisplayMetaDataConnections(lMesh);
 
@@ -284,8 +179,8 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 			}
 		}*/
 	}
-
-	// 버퍼생성
+	////////////////////////////////////////////////////////////// - 여기 문제가 있음. - //////////////////////////////////////////////////////////////
+	// 버퍼생성 
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	// 바인딩위해 버퍼뷰 초기화
@@ -296,6 +191,7 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	//DisplayPolygons(lMesh);
 	int j, lPolygonCount = lMesh->GetPolygonCount();
 	m_nIndices = lPolygonCount;
+	m_nIndices *= 3;
 	UINT* pnIndices = new UINT[m_nIndices];
 
 	for (i = 0; i < lPolygonCount; i++)
@@ -308,14 +204,14 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		}
 
 	}
-	m_nIndices *= 3;
 
-	//인덱스 버퍼를 생성한다. 
+	//인덱스 버퍼를 생성한다.
 	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
 	//인덱스 버퍼 뷰를 생성한다. 
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+	////////////////////////////////////////////////////////////// - 여기 문제가 있음. - //////////////////////////////////////////////////////////////
 
 	//DisplayMaterialMapping(lMesh);
 	//DisplayMaterial(lMesh);

@@ -74,17 +74,10 @@ public:
 
 class CFBXMesh : public CMesh
 {
-	// 이 둘을 static이나 아무튼 멤버변수로 하는걸 고려
-	// FbxManager는 싱글톤or 아무튼 한번만 생성,
-	//FbxManager* lSdkManager = NULL;
-	// FbxScene는 멤버변수로.
-	//FbxScene* lScene = NULL;
 public:
-	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene, const char* fileName = "fbxsdk/Box001.fbx");
+	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CFBXMesh();
 
-	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxScene* pScene);
-	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
 	void LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
 };
 
