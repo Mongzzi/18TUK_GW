@@ -7,6 +7,15 @@
 
 #define MAX_LOADSTRING 100
 
+#ifdef _DEBUG
+    #ifdef UNICODE                                                                                      
+        #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console") 
+    #else                                                                                                    
+        #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")   
+    #endif // UNICODE
+#endif // _DEBUG
+
+
 // 전역 변수:
 HINSTANCE           ghAppInstance;                            // 현재 인스턴스입니다.
 TCHAR               szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.

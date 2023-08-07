@@ -1,4 +1,5 @@
-#include <fbxsdk.h>
+#pragma once
+#include "FbxsdkTest.h"
 
 class CMesh
 {
@@ -79,7 +80,7 @@ class CFBXMesh : public CMesh
 	// FbxScene는 멤버변수로.
 	//FbxScene* lScene = NULL;
 public:
-	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName = "fbxsdk/Box001.txt");
+	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene, const char* fileName = "fbxsdk/Box001.fbx");
 	virtual ~CFBXMesh();
 
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxScene* pScene);

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Mesh.h"
-#include "FbxsdkTest.h"
 
 
 
@@ -124,14 +123,14 @@ CBoxMesh::~CBoxMesh()
 {
 }
 
-CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName) : CMesh(pd3dDevice, pd3dCommandList)
+CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene, const char* fileName) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	//------------------------------------------------------------------------------------------
-	FbxManager* lSdkManager = NULL;
-	FbxScene* lScene = NULL;
+	//FbxManager* plSdkManager = NULL;
+	//FbxScene* plScene = NULL;
 	bool lResult;
 
-	InitializeSdkObjects(lSdkManager, lScene);
+	//InitializeSdkObjects(plSdkManager, plScene);
 
 	FbxString lFilePath(fileName);
 
@@ -143,16 +142,19 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	else
 	{
 		//FBXSDK_printf("\n\nFile: %s\n\n", lFilePath.Buffer());
-		lResult = LoadScene(lSdkManager, lScene, lFilePath.Buffer());
+		lResult = LoadScene(plSdkManager, plScene, lFilePath.Buffer());
 	}
 
 	if (lResult == false)
 	{
-		//FBXSDK_printf("\n\nAn error occurred while loading the scene...");
+#ifdef _DEBUG
+		FBXSDK_printf("\n\nAn error occurred while loading the scene...");
+#endif // _DEBUG
+
 	}
 	else
 	{
-		LoadContent(pd3dDevice, pd3dCommandList, lScene);
+		LoadContent(pd3dDevice, pd3dCommandList, plScene);
 	}
 	//lScene->Destroy();
 	//DestroySdkObjects(lSdkManager, lResult);

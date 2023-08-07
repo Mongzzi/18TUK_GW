@@ -101,6 +101,9 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="FbxsdkTest.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Enemy Slasher.rc">

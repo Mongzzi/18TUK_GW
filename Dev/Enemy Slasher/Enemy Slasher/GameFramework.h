@@ -3,6 +3,7 @@
 #include "Timer.h"
 #include "Scene.h"
 #include "Player.h"
+#include "FbxsdkTest.h"
 
 class CGameFramework
 {
@@ -68,7 +69,6 @@ private:
 	ID3D12Fence*				m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
-
 #if defined(_DEBUG)
 	ID3D12Debug*				m_pd3dDebugController;
 #endif
@@ -83,5 +83,7 @@ private:
 
 	_TCHAR						m_pszFrameRate[75];
 
+	FbxManager*					m_plSdkManager = NULL;
+	FbxScene*					m_plScene = NULL;
 };
 

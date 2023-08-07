@@ -18,7 +18,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene);
 	void ReleaseObjects();
 
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
@@ -47,5 +47,5 @@ public:
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene);
 };

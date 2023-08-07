@@ -15,7 +15,7 @@ CBasicScene::~CBasicScene()
 	delete m_pShaderManager;
 }
 
-void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -188,7 +188,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return(false);
 }
 
-void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* plSdkManager, FbxScene* plScene)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -260,8 +260,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, "fbxsdk/Stone_lit_001.fbx");
-	CFBXMesh* pFBXMesh2 = new CFBXMesh(pd3dDevice, pd3dCommandList, "fbxsdk/box.fbx");
+	CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");
+	CFBXMesh* pFBXMesh2 = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/box.fbx");
 
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
 	CRotatingObject* pRotatingObject = NULL;
