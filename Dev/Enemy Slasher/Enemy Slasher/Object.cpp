@@ -258,8 +258,9 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 #ifdef _DEBUG
 		//FBXSDK_printf("\n\nFile: %s\n\n", lFilePath.Buffer());
 #endif // _DEBUG
-		lResult = pFBXLoader->LoadScene(lFilePath.Buffer());
+		lResult = pFBXLoader->LoadScene(lFilePath.Buffer(), pFBXLoader);
 	}
+
 
 	if (lResult == LoadResult::False)
 	{
@@ -270,14 +271,13 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	}
 	else if(lResult == LoadResult::First)
 	{
-		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader);
+		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 	}
 	else if (lResult == LoadResult::Overlapping)
 	{
-		LoadContent(fileName);
+		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 	}
-	//lScene->Destroy();
-	//DestroySdkObjects(lSdkManager, lResult);
+
 	//------------------------------------------------------------------------------------------
 }
 
@@ -285,11 +285,10 @@ CFBXObject::~CFBXObject()
 {
 }
 
-void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* filePath)
 {
 	int i;
-	FbxNode* lNode = pFBXLoader->GetScene()->GetRootNode();
-
+	FbxNode* lNode = pFBXLoader->GetNode(filePath);
 	if (lNode)
 	{
 		for (i = 0; i < lNode->GetChildCount(); i++)
@@ -363,11 +362,6 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i));
 	}
-}
-
-void CFBXObject::LoadContent(const char* fileName)
-{
-	// 가져와서 생성.
 }
 
 void CFBXObject::Animate(float fTimeElapsed)
