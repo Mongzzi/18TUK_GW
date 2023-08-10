@@ -103,9 +103,8 @@ private:
 	XMFLOAT3 m_xmf3RotationAxis;
 	float m_fRotationSpeed;
 public:	
-	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
+	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
-	void LoadContent(const char* fileName);
 	virtual void Animate(float fTimeElapsed);
 };
 

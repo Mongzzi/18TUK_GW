@@ -61,21 +61,36 @@ void CFBXLoader::DestroySdkObjects(bool pExitStatus)
 #endif // _DEBUG
 }
 
-LoadResult CFBXLoader::LoadScene(const char* pFilename)
+LoadResult CFBXLoader::LoadScene(const char* pFilename, CFBXLoader* pFBXLoader)
 {
     LoadResult result;
 
-    if (CheckFileNameList(pFilename))
+    if (CheckFileNameList(pFilename, pFBXLoader))
     {
         result = LoadResult::Overlapping;
+#ifdef _DEBUG
+        //FBXSDK_printf("insertResult::Overlapping, File name : %s\n", pFilename);
+#endif // _DEBUG
     }
     else {
         if (LoadSceneFromFile(pFilename))
+        {
             result = LoadResult::First;
+            // 없으면 리스트에 넣고 false 반환.
+            FbxNode* lNode = pFBXLoader->GetScene()->GetRootNode();
+
+            auto re = m_mfileNameList.insert({ pFilename, lNode });
+#ifdef _DEBUG
+            FBXSDK_printf("insertResult::First, File name : %s\n", pFilename);
+#endif // _DEBUG
+        }
         else
             result = LoadResult::False;
     }
 
+#ifdef _DEBUG
+    //FBXSDK_printf("LoadResult::%d\n", static_cast<int>(result));
+#endif // _DEBUG
     return result;
 }
 
@@ -230,14 +245,20 @@ bool CFBXLoader::LoadSceneFromFile(const char* pFilename)
     return lStatus;
 }
 
-bool CFBXLoader::CheckFileNameList(const char* pFilename)
+bool CFBXLoader::CheckFileNameList(const char* pFilename, CFBXLoader* pFBXLoader)
 {
     // 리스트를 확인해 리스트에 있으면  true 반환. 
-    if (m_vfileNameList.end() != find(m_vfileNameList.begin(), m_vfileNameList.end(), pFilename))
+    if (m_mfileNameList.contains(pFilename))
+    {
         return true;
-    // 없으면 리스트에 넣고 false 반환.
-    m_vfileNameList.push_back(pFilename);
+    }
+    
     return false;
+}
+
+FbxNode* CFBXLoader::GetNode(const char* filename)
+{
+    return m_mfileNameList.find(filename)->second;
 }
 
 FbxScene* CFBXLoader::GetScene()

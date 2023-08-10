@@ -271,13 +271,14 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
 	//m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 
-	for (int i = 0, x = 0; x < /*xObjects*/3; x++)
+	for (int i = 0, x = 0; x < 1; x++)
 	{
-		for (int z = 0; z < /*zObjects*/3; z++)
+		for (int z = 0; z < zObjects; z++)
 		{
 			for (int y = 0; y < yObjects; y++)
 			{
-				pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_BIG_001_FBX);
+				if(x%2)pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_002_FBX);
+				else pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_003_FBX);
 				//if(x%2) pRotatingObject->SetMesh(0, pCubeMesh);
 				//else pRotatingObject->SetMesh(0, pCubeMesh);
 

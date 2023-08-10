@@ -137,7 +137,7 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	FbxMesh* lMesh = (FbxMesh*)pNode->GetNodeAttribute();
 
 #ifdef _DEBUG
-	std::cout << "Mesh Name: " << (char*)pNode->GetName() << std::endl;
+	//std::cout << "Mesh Name: " << (char*)pNode->GetName() << std::endl;
 #endif // _DEBUG
 
 
