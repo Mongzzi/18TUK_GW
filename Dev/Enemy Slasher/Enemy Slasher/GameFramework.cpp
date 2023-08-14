@@ -398,14 +398,14 @@ void CGameFramework::BuildObjects()
 		CBasicScene* pNewScene;
 		pNewScene = new CTestScene();
 		if (pNewScene) pNewScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
-		pNewScene->m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, pNewScene->GetGraphicsRootSignature());
+		pNewScene->m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList);
 		pNewScene->m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
 		pNewScene->m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
 		m_pvScenelist.push_back(pNewScene);
 
 		pNewScene = new CTestScene_Card();
 		if (pNewScene) pNewScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
-		pNewScene->m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, pNewScene->GetGraphicsRootSignature());
+		pNewScene->m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList);
 		pNewScene->m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
 		pNewScene->m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pvScenelist.push_back(pNewScene);
