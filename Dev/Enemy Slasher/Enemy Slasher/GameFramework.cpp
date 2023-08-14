@@ -309,6 +309,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_F5:
 			break;
+		case '0':
+			// 임시 씬 변환 키
+			if (m_pvScenelist.size() <= ++m_nSceneCounter) m_nSceneCounter = 0;
+			m_pScene = m_pvScenelist[m_nSceneCounter];
+			m_pPlayer = m_pScene->m_pPlayer;
+			m_pCamera = m_pPlayer->GetCamera();
+			break;
 		default:
 			break;
 		}
