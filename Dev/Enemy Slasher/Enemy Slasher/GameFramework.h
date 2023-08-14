@@ -75,7 +75,11 @@ private:
 
 	CGameTimer					m_GameTimer;
 
-	CBasicScene*						m_pScene = NULL;
+	// 여러개의 씬을 관리하기 위한 임시 변수
+	std::vector<CBasicScene*>	m_pvScenelist;
+	int							m_nSceneCounter = 0;
+
+	CBasicScene*				m_pScene = NULL;
 	CPlayer*					m_pPlayer = NULL;
 	CCamera*					m_pCamera = NULL;
 

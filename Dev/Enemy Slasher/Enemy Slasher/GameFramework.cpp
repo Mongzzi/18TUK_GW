@@ -385,13 +385,37 @@ void CGameFramework::BuildObjects()
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	m_pScene = new CTestScene();
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
+	{
+		// m_pvScenelist 에 여러 씬 등록 및 각 씬의 플레이어 생성
 
-	m_pScene->m_pPlayer = m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
-	m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
-	m_pCamera = m_pPlayer->GetCamera();
-	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
+		CBasicScene* pNewScene;
+		pNewScene = new CTestScene();
+		if (pNewScene) pNewScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
+		pNewScene->m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, pNewScene->GetGraphicsRootSignature());
+		pNewScene->m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
+		pNewScene->m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
+		m_pvScenelist.push_back(pNewScene);
+
+		pNewScene = new CTestScene_Card();
+		if (pNewScene) pNewScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
+		pNewScene->m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, pNewScene->GetGraphicsRootSignature());
+		pNewScene->m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
+		pNewScene->m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pvScenelist.push_back(pNewScene);
+
+		// 현재 프레임워크에 Scenelist에서 Scene을 뽑아서 등록
+		m_pScene = m_pvScenelist[m_nSceneCounter];
+		m_pPlayer = m_pScene->m_pPlayer;
+		m_pCamera = m_pPlayer->GetCamera();
+	}
+
+	//m_pScene = new CTestScene();
+	//if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
+
+	//m_pScene->m_pPlayer = m_pPlayer = new TestPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
+	//m_pCamera = m_pPlayer->ChangeCamera((DWORD)(1), m_GameTimer.GetTimeElapsed());
+	//m_pCamera = m_pPlayer->GetCamera();
+	//m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -399,8 +423,16 @@ void CGameFramework::BuildObjects()
 
 	WaitForGpuComplete();
 
-	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+	//if (m_pScene) m_pScene->ReleaseUploadBuffers();
+	//if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+
+	{
+		// 등록한 Scene들의 UploadBuffer 해제
+		for (CBasicScene* a : m_pvScenelist) {
+			a->ReleaseUploadBuffers();
+			a->m_pPlayer->ReleaseUploadBuffers();
+		}
+	}
 
 	m_GameTimer.Reset();
 }
