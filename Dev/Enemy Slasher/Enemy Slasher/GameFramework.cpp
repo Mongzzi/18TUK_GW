@@ -495,7 +495,7 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
-	m_pPlayer->Animate(fTimeElapsed);
+	//m_pPlayer->Animate(fTimeElapsed);
 }
 
 void CGameFramework::WaitForGpuComplete()
