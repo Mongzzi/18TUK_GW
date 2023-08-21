@@ -257,7 +257,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
 
 #endif
-	m_pObjectManager->AddObj(pTerrain, ObjectLayer::BackGround);
+	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
 
 	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
 	float fxPitch = 12.0f * 3.5f;
