@@ -75,6 +75,9 @@ public:
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
+
+	virtual bool ProcessInput(UCHAR* pKeysBuffer);
+	virtual void AnimateObjects(float fTimeElapsed);
 };
 
 class CTestScene_Card : public CBasicScene

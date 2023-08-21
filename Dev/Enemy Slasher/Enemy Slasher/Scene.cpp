@@ -170,12 +170,12 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		switch (wParam)
 		{
 			// 테스트용 빠른속도 이동 코드
-		case 'W': m_pPlayer->Move(DIR_FORWARD, 1.25f * 10, false); break;
-		case 'S': m_pPlayer->Move(DIR_BACKWARD, 1.25f * 10, false); break;
-		case 'A': m_pPlayer->Move(DIR_LEFT, 1.25f * 10, false); break;
-		case 'D': m_pPlayer->Move(DIR_RIGHT, 1.25f * 10, false); break;
-		case 'Q': m_pPlayer->Move(DIR_UP, 1.25f * 10, false); break;
-		case 'E': m_pPlayer->Move(DIR_DOWN, 1.25f * 10, false); break;
+		case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'D': m_pPlayer->Move(DIR_RIGHT, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'Q': m_pPlayer->Move(DIR_UP, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
 		default:
@@ -317,6 +317,25 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
+bool CTestScene::ProcessInput(UCHAR* pKeysBuffer)
+{
+	DWORD dwDirection = 0;
+	if (pKeysBuffer['w']) dwDirection |= DIR_FORWARD;
+	if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
+	if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
+	if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
+	if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
+	if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+
+	if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
+
+	return(false);
+}
+
+void CTestScene::AnimateObjects(float fTimeElapsed)
+{
+	m_pObjectManager->AnimateObjects(fTimeElapsed);
+}
 
 
 
