@@ -2,6 +2,26 @@
 #include "stdafx.h"
 #include "Shader.h"
 
+CMaterial::CMaterial()
+{
+	m_xmf4Albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
+CMaterial::~CMaterial()
+{
+	if (m_pShader)
+	{
+		m_pShader->ReleaseShaderVariables();
+		m_pShader->Release();
+	}
+}
+
+void CMaterial::SetShader(CShader* pShader)
+{
+	if (m_pShader) m_pShader->Release();
+	m_pShader = pShader;
+	if (m_pShader) m_pShader->AddRef();
+}
 
 CGameObject::CGameObject(int nMeshes)
 {
@@ -30,23 +50,45 @@ CGameObject::~CGameObject()
 		delete[] m_ppMeshes;
 	}
 
-
-
 	if (m_pShader)
 	{
 		m_pShader->ReleaseShaderVariables();
 		m_pShader->Release();
 	}
+
+	if (m_pMaterial) m_pMaterial->Release();
+
 }
 
 
 void CGameObject::SetShader(CShader* pShader)
 {
-	if (m_pShader) m_pShader->Release();
+	//if (m_pShader) m_pShader->Release();
 
-	m_pShader = pShader;
+	//m_pShader = pShader;
 
-	if (m_pShader) m_pShader->AddRef();
+	//if (m_pShader) m_pShader->AddRef();
+	if (!m_pMaterial)
+	{
+		m_pMaterial = new CMaterial();
+		m_pMaterial->AddRef();
+	}
+
+	if (m_pMaterial) m_pMaterial->SetShader(pShader);
+
+}
+
+void CGameObject::SetMaterial(CMaterial* pMaterial)
+{
+	if (m_pMaterial) m_pMaterial->Release();
+	m_pMaterial = pMaterial;
+	if (m_pMaterial) m_pMaterial->AddRef();
+}
+
+void CGameObject::SetMaterial(UINT nReflection)
+{
+	if (!m_pMaterial) m_pMaterial = new CMaterial();
+	m_pMaterial->m_nReflection = nReflection;
 }
 
 
@@ -90,7 +132,17 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	//객체의 정보를 셰이더 변수(상수 버퍼)로 복사한다. 
 	UpdateShaderVariables(pd3dCommandList);
 
-	if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
+
+	if (m_pMaterial)
+	{
+		if (m_pMaterial->m_pShader)
+		{
+			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+			m_pMaterial->m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		}
+	}
+
+	//if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
 
 	if (m_ppMeshes)
 	{
@@ -204,19 +256,6 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -228,6 +267,45 @@ CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
 CRotatingObject::~CRotatingObject()
 {
 }
+
+CRotatingNormalObject::CRotatingNormalObject(int nmeshes)
+{
+	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fRotationSpeed = 90.0f;
+	m_ShaderType = ShaderType::CObjectNormalShader;
+}
+
+CRotatingNormalObject::~CRotatingNormalObject()
+{
+}
+
+void CRotatingNormalObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbGameObjectBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+}
+
+void CRotatingNormalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+
+	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	m_pcbMappedGameObject->m_nMaterial = m_pMaterial->m_nReflection;
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObject->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(4, d3dGpuVirtualAddress);
+}
+
+void CRotatingNormalObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObject)
+	{
+		m_pd3dcbGameObject->Unmap(0, NULL);
+		m_pd3dcbGameObject->Release();
+	}
+}
+
 
 void CRotatingObject::Animate(float fTimeElapsed)
 {
@@ -269,7 +347,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 #endif // _DEBUG
 
 	}
-	else if(lResult == LoadResult::First)
+	else if (lResult == LoadResult::First)
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 	}
@@ -369,7 +447,7 @@ void CFBXObject::Animate(float fTimeElapsed)
 }
 
 
-CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, 
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName,
 	int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CGameObject(0)
 {
 	//지형에 사용할 높이 맵의 가로, 세로의 크기이다.
@@ -393,10 +471,10 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;
 
 	//지형 전체를 표현하기 위한 격자 메쉬의 개수이다. 
-	 m_nMeshes = cxBlocks * czBlocks;
-	
+	m_nMeshes = cxBlocks * czBlocks;
+
 	//지형 전체를 표현하기 위한 격자 메쉬에 대한 포인터 배열을 생성한다. 
-	m_ppMeshes = new CMesh*[m_nMeshes];
+	m_ppMeshes = new CMesh * [m_nMeshes];
 
 	for (int i = 0; i < m_nMeshes; i++)m_ppMeshes[i] = NULL;
 	CHeightMapGridMesh* pHeightMapGridMesh = NULL;
@@ -422,3 +500,4 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 {
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
+

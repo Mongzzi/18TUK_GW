@@ -5,6 +5,33 @@
 class CObjectManager;
 class CShaderManager;
 
+struct LIGHT
+{
+	XMFLOAT4 m_xmf4Ambient; XMFLOAT4 m_xmf4Diffuse;
+	XMFLOAT4 m_xmf4Specular;
+	XMFLOAT3 m_xmf3Position;
+	float m_fFalloff;
+	XMFLOAT3 m_xmf3Direction;
+	float m_fTheta; //cos(m_fTheta)
+	XMFLOAT3 m_xmf3Attenuation;
+	float m_fPhi; //cos(m_fPhi)
+	bool m_bEnable;
+	int m_nType;
+	float m_fRange;
+	float padding;
+};
+
+struct LIGHTS
+{
+	LIGHT m_pLights[MAX_LIGHTS];
+	XMFLOAT4 m_xmf4GlobalAmbient;
+};
+
+struct MATERIALS
+{
+	MATERIAL m_pReflections[MAX_MATERIALS];
+};
+
 class CBasicScene
 {
 public:
@@ -19,14 +46,14 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
-	void ReleaseObjects();
+	virtual void ReleaseObjects();
 
-	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer);
-	void AnimateObjects(float fTimeElapsed);
-	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	void ReleaseUploadBuffers();
 
@@ -60,4 +87,35 @@ public:
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
+
+	void BuildLightsAndMaterials();
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+	
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+
+
+public:
+	//CPlayer* m_pPlayer = NULL; -> 조명을 붙이기 위해 새로 초기화 필요
+	
+	virtual void ReleaseObjects();
+	virtual void AnimateObjects(float fTimeElapsed);
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+
+protected:
+	//씬의 조명
+	LIGHTS* m_pLights = NULL;
+
+	//조명을 나타내는 리소스와 리소스에 대한 포인터이다. 
+	ID3D12Resource *m_pd3dcbLights = NULL;
+	LIGHTS* m_pcbMappedLights = NULL;
+
+	//씬의 객체들에 적용되는 재질
+	MATERIALS* m_pMaterials = NULL;//재질을 나타내는 리소스와 리소스에 대한 포인터이다. 
+
+	ID3D12Resource *m_pd3dcbMaterials = NULL;
+	MATERIAL* m_pcbMappedMaterials = NULL;
+
 };

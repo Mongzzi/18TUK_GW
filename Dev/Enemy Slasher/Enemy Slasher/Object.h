@@ -6,6 +6,45 @@ class CShader;
 
 enum class ShaderType : int;
 
+
+//객체를 렌더링할 때 적용하는 상수 버퍼 데이터
+struct CB_GAMEOBJECT_INFO
+{
+	XMFLOAT4X4 m_xmf4x4World;
+	//객체에 적용될 재질 번호
+	UINT m_nMaterial;
+};
+
+
+struct MATERIAL
+{
+	XMFLOAT4 m_xmf4Ambient;
+	XMFLOAT4 m_xmf4Diffuse;
+	XMFLOAT4 m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4 m_xmf4Emissive;
+};
+
+class CMaterial
+{
+public:
+	CMaterial();
+	virtual ~CMaterial();
+private:
+	int m_nReferences = 0;
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+	//재질의 기본 색상
+	XMFLOAT4 m_xmf4Albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	//재질의 번호
+	UINT m_nReflection = 0;
+	//재질을 적용하여 렌더링을 하기 위한 쉐이더
+	CShader* m_pShader = NULL;
+	void SetAlbedo(XMFLOAT4& xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
+	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
+	void SetShader(CShader* pShader);
+};
+
 class CGameObject
 {
 public:
@@ -30,7 +69,7 @@ protected:
 
 	CShader* m_pShader;
 	ShaderType m_ShaderType;
-
+	CMaterial* m_pMaterial = NULL;
 
 public:
 	//상수 버퍼를 생성한다. 
@@ -66,7 +105,8 @@ public:
 	void SetShaderType(ShaderType shaderType) { m_ShaderType = shaderType; }
 	ShaderType GetShaderType() { return m_ShaderType; }
 
-
+	void SetMaterial(CMaterial* pMaterial);
+	void SetMaterial(UINT nReflection);
 
 public:
 	void ReleaseUploadBuffers();
@@ -85,7 +125,7 @@ class CRotatingObject : public CGameObject
 public:
 	CRotatingObject(int nMeshes = 1);
 	virtual ~CRotatingObject();
-private:
+protected:
 	XMFLOAT3 m_xmf3RotationAxis;
 	float m_fRotationSpeed;
 public:
@@ -93,6 +133,25 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 	virtual void Animate(float fTimeElapsed);
 };
+
+class CRotatingNormalObject : public CRotatingObject
+{
+public:
+	CRotatingNormalObject(int nmeshes = 1);
+	virtual ~CRotatingNormalObject();
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	//상수 버퍼의 내용을 갱신한다. 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
+private:
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
+};
+
+
 
 class CFBXObject : public CGameObject
 {

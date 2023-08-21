@@ -9,6 +9,7 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	LightObject,			// 조명 오브젝트
 	InteractiveObject,		// 상호작용가능 오브젝트 (ex 문, 버튼)
 	Object,					// 중립 오브젝트
+	ObjectNormal,
 	DestroyedObject,		// 파괴된 오브젝트
 	Enemy,					// 적 오브젝트
 	Player,					// 플레이어 오브젝트
