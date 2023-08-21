@@ -54,6 +54,8 @@ public:
 	virtual bool ProcessInput(UCHAR* pKeysBuffer);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	virtual void Enter();
+	virtual void Exit();
 
 	void ReleaseUploadBuffers();
 
@@ -78,6 +80,8 @@ public:
 
 	virtual bool ProcessInput(UCHAR* pKeysBuffer);
 	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Enter();
+	virtual void Exit();
 };
 
 class CTestScene_Card : public CBasicScene
@@ -104,6 +108,8 @@ public:
 	
 	virtual void ReleaseObjects();
 	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Enter();
+	virtual void Exit();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 

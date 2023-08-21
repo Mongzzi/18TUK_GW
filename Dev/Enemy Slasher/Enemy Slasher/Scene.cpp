@@ -149,6 +149,16 @@ void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 }
 
+void CBasicScene::Enter()
+{
+}
+
+void CBasicScene::Exit()
+{
+}
+
+
+
 CTestScene::CTestScene()
 {
 }
@@ -169,7 +179,6 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-			// 테스트용 빠른속도 이동 코드
 		case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
@@ -319,16 +328,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 bool CTestScene::ProcessInput(UCHAR* pKeysBuffer)
 {
-	DWORD dwDirection = 0;
-	if (pKeysBuffer['w']) dwDirection |= DIR_FORWARD;
-	if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-	if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-	if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-	if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-	if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
-
-	if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
-
 	return(false);
 }
 
@@ -336,6 +335,15 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 {
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 }
+
+void CTestScene::Enter()
+{
+}
+
+void CTestScene::Exit()
+{
+}
+
 
 
 
@@ -612,4 +620,12 @@ void CTestScene_Card::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	m_pObjectManager->Render(pd3dCommandList, pCamera, m_pShaderManager);
 
 
+}
+
+void CTestScene_Card::Enter()
+{
+}
+
+void CTestScene_Card::Exit()
+{
 }
