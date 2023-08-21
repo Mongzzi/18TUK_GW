@@ -203,6 +203,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
+	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList);
+	m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
+	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
+	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+
 	// ------------------------------------       큐브 메쉬      -------------------------------
 
 //{
@@ -392,6 +398,10 @@ void CTestScene_Card::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
+	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList);
+	m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
 	BuildLightsAndMaterials();
 
