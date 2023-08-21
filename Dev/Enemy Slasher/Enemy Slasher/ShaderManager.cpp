@@ -31,10 +31,10 @@ void CShaderManager::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_vShaderManager.push_back(shader);
 
-	//// CObjectNormalShader
-	//shader = new CObjectsNormalShader();
-	//shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//m_vShaderManager.push_back(shader);
+	// CObjectNormalShader
+	shader = new CObjectsNormalShader();
+	shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_vShaderManager.push_back(shader);
 
 }
 
