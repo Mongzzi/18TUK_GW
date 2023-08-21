@@ -76,3 +76,17 @@
     > ObjectManager에 조명처리 이전
     > 계산 쉐이더 작성
     > 충돌처리
+
++ 8월 셋째 주 ( 8월 11일 ~ 8월 17일)
+    - 이번 주 한 작업
+    > Scene 변환을 위한 작업\
+    > ┗ CBasicScene을 상속받는 CTestScene_Card class 생성\
+    > ┗ GameFramework에 존재하는 모든 씬들을 저장하는 벡터 m_pvScenelist를 선언\
+    > ┗ BuildObject에서 Scene을 Build하여 m_pvScenelist에 넣어두고 필요한 Scene을 꺼내어 씀\
+    > card 등 UI를 스크린 좌표에 그리기 위한 함수 작성\
+    > ┗ 원하는 스크린 좌표를 넣으면 그 위치에 출력할 수 있는 월드좌표를 알려주는 함수
+    
+    - 다음 주 할 작업
+    > ObjectManager에 조명처리 이전
+    > 계산 쉐이더 작성
+    > 충돌처리
