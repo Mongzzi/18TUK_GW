@@ -40,20 +40,6 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a)
 			b->Animate(fTimeElapsed);
-	
-	if (!m_pvObjectManager[(int)ObjectLayer::Terrain].empty() && !m_pvObjectManager[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면
-		CPlayer* pPlayer = (CPlayer*)m_pvObjectManager[(int)ObjectLayer::Player][0];
-		XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
-		float fHeight = ((CHeightMapTerrain*)m_pvObjectManager[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
-
-		if (xmfPlayerPos.y < fHeight) {
-			xmfPlayerPos.y = fHeight;
-			pPlayer->SetPosition(xmfPlayerPos);
-			XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
-			xmfVelocity.y = 0.0f;
-			pPlayer->SetVelocity(xmfVelocity);
-		}
-	}
 }
 
 void CObjectManager::ReleaseObjects()

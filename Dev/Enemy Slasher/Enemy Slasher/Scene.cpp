@@ -340,6 +340,21 @@ bool CTestScene::ProcessInput(UCHAR* pKeysBuffer)
 void CTestScene::AnimateObjects(float fTimeElapsed)
 {
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
+
+	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+	if (!pvObjectList[(int)ObjectLayer::Terrain].empty() && !pvObjectList[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면
+		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
+		XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+		float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
+
+		if (xmfPlayerPos.y < fHeight) {
+			xmfPlayerPos.y = fHeight;
+			pPlayer->SetPosition(xmfPlayerPos);
+			XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
+			xmfVelocity.y = 0.0f;
+			pPlayer->SetVelocity(xmfVelocity);
+		}
+	}
 }
 
 void CTestScene::Enter()

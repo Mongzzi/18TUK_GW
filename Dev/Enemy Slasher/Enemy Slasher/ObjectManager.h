@@ -27,6 +27,8 @@ public:
 	CObjectManager();
 	~CObjectManager();
 
+	std::vector<CGameObject*>* GetObjectList() { return m_pvObjectManager; }
+
 	void AddObj(CGameObject* object, ObjectLayer layer);
 	void DelObj(CGameObject* object, ObjectLayer layer);
 
