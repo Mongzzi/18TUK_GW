@@ -49,6 +49,9 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 		if (xmfPlayerPos.y < fHeight) {
 			xmfPlayerPos.y = fHeight;
 			pPlayer->SetPosition(xmfPlayerPos);
+			XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
+			xmfVelocity.y = 0.0f;
+			pPlayer->SetVelocity(xmfVelocity);
 		}
 	}
 }
