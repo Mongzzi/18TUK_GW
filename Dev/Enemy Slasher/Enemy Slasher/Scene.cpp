@@ -425,36 +425,38 @@ void CTestScene_Card::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	// ------------------------------------       큐브 메쉬      -------------------------------
 
 	{
-		////가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다. 
-		//CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice,pd3dCommandList, 12.0f, 12.0f, 12.0f);
+		//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다. 
+		CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice,pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-		//int xObjects = 2, yObjects = 2, zObjects = 2, i = 0;
+		int xObjects = 2, yObjects = 2, zObjects = 2, i = 0;
 
-		//int m_nObjects;
-		//m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
+		int m_nObjects;
+		m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
 
-		//float fxPitch = 12.0f * 2.5f;
-		//float fyPitch = 12.0f * 2.5f;
-		//float fzPitch = 12.0f * 2.5f;
+		float fxPitch = 12.0f * 2.5f;
+		float fyPitch = 12.0f * 2.5f;
+		float fzPitch = 12.0f * 2.5f;
 
-		//CRotatingNormalObject* pRotatingNormalObject = NULL;
-		//for (int x = -xObjects; x <= xObjects; x++)
-		//{
-		//	for (int y = -yObjects; y <= yObjects; y++)
-		//	{
-		//		for (int z = -zObjects; z <= zObjects; z++)
-		//		{
-		//			pRotatingNormalObject = new CRotatingNormalObject();
-		//			pRotatingNormalObject->SetMesh(0, pCubeMesh);
-		//			pRotatingNormalObject->SetMaterial(i % MAX_MATERIALS);
+		CRotatingNormalObject* pRotatingNormalObject = NULL;
+		for (int x = -xObjects; x <= xObjects; x++)
+		{
+			for (int y = -yObjects; y <= yObjects; y++)
+			{
+				for (int z = -zObjects; z <= zObjects; z++)
+				{
+					pRotatingNormalObject = new CRotatingNormalObject();
+					pRotatingNormalObject->SetMesh(0, pCubeMesh);
+					pRotatingNormalObject->SetMaterial(i % MAX_MATERIALS);
 
-		//			pRotatingNormalObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
-		//			pRotatingNormalObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-		//			pRotatingNormalObject->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
-		//			m_pObjectManager->AddObj(pRotatingNormalObject, ObjectLayer::ObjectNormal);
-		//		}
-		//	}
-		//}
+					pRotatingNormalObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
+					pRotatingNormalObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+					pRotatingNormalObject->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
+					pRotatingNormalObject->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+					m_pObjectManager->AddObj(pRotatingNormalObject, ObjectLayer::ObjectNormal);
+				}
+			}
+		}
 	}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -560,18 +562,23 @@ ID3D12RootSignature* CTestScene_Card::CreateGraphicsRootSignature(ID3D12Device* 
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[5];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[4];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Camera
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// 게임 오브젝트
-	pd3dRootParameters[1].Constants.Num32BitValues = 16;
-	pd3dRootParameters[1].Constants.ShaderRegister = 1;
-	pd3dRootParameters[1].Constants.RegisterSpace = 0;
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	//pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// 게임 오브젝트
+	//pd3dRootParameters[1].Constants.Num32BitValues = 16;
+	//pd3dRootParameters[1].Constants.ShaderRegister = 1;
+	//pd3dRootParameters[1].Constants.RegisterSpace = 0;
+	//pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[1].Descriptor.ShaderRegister = 4; //GameObject
+	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 2; //Materials
@@ -583,10 +590,6 @@ ID3D12RootSignature* CTestScene_Card::CreateGraphicsRootSignature(ID3D12Device* 
 	pd3dRootParameters[3].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[4].Descriptor.ShaderRegister = 4; //GameObject
-	pd3dRootParameters[4].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;

@@ -294,7 +294,7 @@ void CRotatingNormalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3
 	m_pcbMappedGameObject->m_nMaterial = m_pMaterial->m_nReflection;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObject->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(4, d3dGpuVirtualAddress);
+	pd3dCommandList->SetGraphicsRootConstantBufferView(1, d3dGpuVirtualAddress);
 }
 
 void CRotatingNormalObject::ReleaseShaderVariables()
