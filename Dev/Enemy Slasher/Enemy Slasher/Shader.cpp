@@ -446,3 +446,111 @@ void CComputeShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList, UINT c
 	UpdateShaderVariables(pd3dCommandList);
 	pd3dCommandList->Dispatch(cxThreadGroups, cyThreadGroups, czThreadGroups);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CGaussian2DBlurComputeShader::CGaussian2DBlurComputeShader()
+{
+}
+
+CGaussian2DBlurComputeShader::~CGaussian2DBlurComputeShader()
+{
+}
+
+D3D12_SHADER_BYTECODE CGaussian2DBlurComputeShader::CreateComputeShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	textureDesc.Width = FRAME_BUFFER_WIDTH;
+	textureDesc.Height = FRAME_BUFFER_HEIGHT;
+	textureDesc.MipLevels = 1;
+	textureDesc.DepthOrArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "CSGaussian2DBlur", "cs_5_1", ppd3dShaderBlob));
+}
+
+void CGaussian2DBlurComputeShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+//#ifdef _WITH_SHARED_TEXTURE
+//	m_pTexture = new CTexture(3, RESOURCE_TEXTURE2D, 0, 2, 1, 1, 2, 1, 1);
+//#else
+//	m_pTexture = new CTexture(3, RESOURCE_TEXTURE2D, 0, 0, 1, 1, 0, 1, 1);
+//#endif
+//
+//	pd3dDevice->CreateCommittedResource(
+//		&heapProperties,
+//		D3D12_HEAP_FLAG_NONE,
+//		&textureDesc,
+//		D3D12_RESOURCE_STATE_RENDER_TARGET, // 텍스처 상태 설정
+//		nullptr,
+//		IID_PPV_ARGS(&renderTargetTexture))
+//
+//	m_pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/ImageC.dds", RESOURCE_TEXTURE2D, 0);
+//	ID3D12Resource* pd3dResource = m_pTexture->GetResource(0);
+//	D3D12_RESOURCE_DESC d3dResourceDesc = pd3dResource->GetDesc();
+//	m_pTexture->CreateTexture(pd3dDevice, d3dResourceDesc.Width, d3dResourceDesc.Height, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_COPY_DEST, NULL, RESOURCE_TEXTURE2D, 1);
+//	m_pTexture->CreateTexture(pd3dDevice, d3dResourceDesc.Width, d3dResourceDesc.Height, DXGI_FORMAT_R8G8B8A8_UNORM, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL, RESOURCE_TEXTURE2D, 2);
+//
+//	ID3D12Resource* pd3dSource = m_pTexture->GetResource(0);
+//	ID3D12Resource* pd3dDestination = m_pTexture->GetResource(1);
+//	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
+//
+//	CreateComputeShaderResourceView(pd3dDevice, m_pTexture, 1, 0, 0, 1);
+//	CreateComputeUnorderedAccessView(pd3dDevice, m_pTexture, 2, 0, 0, 1);
+//
+//	m_pTexture->SetComputeSrvRootParameter(0, 0, 0, 1);
+//	m_pTexture->SetComputeUavRootParameter(0, 1, 0, 1);
+//
+//	m_cxThreadGroups = ceil(d3dResourceDesc.Width / 32.0f);
+//	m_cyThreadGroups = ceil(d3dResourceDesc.Height / 32.0f);
+}
+
+void CGaussian2DBlurComputeShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dRootSignature, UINT cxThreadGroups, UINT cyThreadGroups, UINT czThreadGroups, int nPipelineState)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CComputeShader::CreateShader(pd3dDevice, pd3dRootSignature, cxThreadGroups, cyThreadGroups, czThreadGroups, 0);
+
+	//CreateCbvSrvUavDescriptorHeaps(pd3dDevice, 0, 2, 1);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CGaussian2DBlurComputeShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//if (m_pTexture) m_pTexture->UpdateComputeSrvShaderVariable(pd3dCommandList, 0);
+	//if (m_pTexture) m_pTexture->UpdateComputeUavShaderVariable(pd3dCommandList, 0);
+}
+
+void CGaussian2DBlurComputeShader::ReleaseShaderVariables()
+{
+	//if (m_pTexture) m_pTexture->Release();
+}
+
+void CGaussian2DBlurComputeShader::ReleaseUploadBuffers()
+{
+	//if (m_pTexture) m_pTexture->ReleaseUploadBuffers();
+}
+
+void CGaussian2DBlurComputeShader::Dispatch(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
+{
+	//OnPrepare(pd3dCommandList);
+	//if (m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+	//UpdateShaderVariables(pd3dCommandList);
+
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	pd3dCommandList->Dispatch(m_cxThreadGroups, m_cyThreadGroups, m_czThreadGroups);
+
+	//	ID3D12Resource* pd3dSource = m_pTexture->GetResource(2);
+	//	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	//	ID3D12Resource* pd3dDestination = m_pTexture->GetResource(1);
+	//	pd3dCommandList->CopyResource(pd3dDestination, pd3dSource);
+	//	::SynchronizeResourceTransition(pd3dCommandList, pd3dSource, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	//}
+}

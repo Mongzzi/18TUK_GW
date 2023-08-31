@@ -63,6 +63,7 @@ public:
 	
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
+	ID3D12RootSignature* m_pd3dComputeRootSignature = NULL;
 	CObjectManager* m_pObjectManager = NULL;
 	CShaderManager* m_pShaderManager = NULL;
 };
