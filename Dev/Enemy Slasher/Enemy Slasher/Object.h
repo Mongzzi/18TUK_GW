@@ -34,21 +34,24 @@ private:
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
+	
 	//재질의 기본 색상
 	XMFLOAT4 m_xmf4Albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	
 	//재질의 번호
 	UINT m_nReflection = 0;
+	
 	//재질을 적용하여 렌더링을 하기 위한 쉐이더
-	CShader* m_pShader = NULL;
+	ShaderType m_ShaderType;
+
 	void SetAlbedo(XMFLOAT4& xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
-	void SetShader(CShader* pShader);
+	void SetShaderType(ShaderType type) { m_ShaderType = type; }
 };
 
 class CGameObject
 {
 public:
-	//CGameObject();
 	CGameObject(int nMeshes = 1);
 	virtual ~CGameObject();
 
@@ -63,12 +66,9 @@ protected:
 	XMFLOAT4X4						m_xmf4x4World;
 	XMFLOAT4X4						m_xmf4x4Transform;
 
-	//CMesh* m_pMesh;
 	CMesh** m_ppMeshes = NULL;
 	int m_nMeshes = 0;
 
-	CShader* m_pShader;
-	ShaderType m_ShaderType;
 	CMaterial* m_pMaterial = NULL;
 
 public:
@@ -102,16 +102,15 @@ public:
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 
 	//m_pShader
-	void SetShaderType(ShaderType shaderType) { m_ShaderType = shaderType; }
-	ShaderType GetShaderType() { return m_ShaderType; }
+	void SetShaderType(ShaderType shaderType);
 
 	void SetMaterial(CMaterial* pMaterial);
 	void SetMaterial(UINT nReflection);
+	CMaterial* GetMaterial() { return m_pMaterial; }
 
 public:
 	void ReleaseUploadBuffers();
 	virtual void SetMesh(int nIndex, CMesh* pMesh);
-	virtual void SetShader(CShader* pShader);
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);

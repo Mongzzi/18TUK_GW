@@ -9,27 +9,14 @@ CMaterial::CMaterial()
 
 CMaterial::~CMaterial()
 {
-	if (m_pShader)
-	{
-		m_pShader->ReleaseShaderVariables();
-		m_pShader->Release();
-	}
 }
 
-void CMaterial::SetShader(CShader* pShader)
-{
-	if (m_pShader) m_pShader->Release();
-	m_pShader = pShader;
-	if (m_pShader) m_pShader->AddRef();
-}
 
 CGameObject::CGameObject(int nMeshes)
 {
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
-	m_pShader = NULL;
-	m_ShaderType = ShaderType::NON;
 
 	if (m_nMeshes > 0)
 	{
@@ -50,33 +37,10 @@ CGameObject::~CGameObject()
 		delete[] m_ppMeshes;
 	}
 
-	if (m_pShader)
-	{
-		m_pShader->ReleaseShaderVariables();
-		m_pShader->Release();
-	}
-
 	if (m_pMaterial) m_pMaterial->Release();
-
 }
 
 
-void CGameObject::SetShader(CShader* pShader)
-{
-	//if (m_pShader) m_pShader->Release();
-
-	//m_pShader = pShader;
-
-	//if (m_pShader) m_pShader->AddRef();
-	if (!m_pMaterial)
-	{
-		m_pMaterial = new CMaterial();
-		m_pMaterial->AddRef();
-	}
-
-	if (m_pMaterial) m_pMaterial->SetShader(pShader);
-
-}
 
 void CGameObject::SetMaterial(CMaterial* pMaterial)
 {
@@ -133,16 +97,15 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariables(pd3dCommandList);
 
 
-	if (m_pMaterial)
-	{
-		if (m_pMaterial->m_pShader)
-		{
-			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
-			m_pMaterial->m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-		}
-	}
+	//if (m_pMaterial)
+	//{
+	//	if (m_pMaterial->m_pShader)
+	//	{
+	//		m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+	//		m_pMaterial->m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	//	}
+	//}
 
-	//if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
 
 	if (m_ppMeshes)
 	{
@@ -256,11 +219,22 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+void CGameObject::SetShaderType(ShaderType shaderType)
+{
+	if (!m_pMaterial)
+	{
+		m_pMaterial = new CMaterial();
+		m_pMaterial->AddRef();
+	}
+
+	if (m_pMaterial) m_pMaterial->SetShaderType(shaderType); 
+}
+
 CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
-	m_ShaderType = ShaderType::CObjectsShader;
+	CGameObject::SetShaderType(ShaderType::CObjectsShader);
 
 }
 
@@ -272,7 +246,7 @@ CRotatingNormalObject::CRotatingNormalObject(int nmeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
-	m_ShaderType = ShaderType::CObjectNormalShader;
+	CGameObject::SetShaderType(ShaderType::CObjectNormalShader);
 }
 
 CRotatingNormalObject::~CRotatingNormalObject()
@@ -493,7 +467,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		}
 	}
 
-	m_ShaderType = ShaderType::CObjectsShader;
+	CGameObject::SetShaderType(ShaderType::CObjectsShader);
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)
