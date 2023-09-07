@@ -64,7 +64,9 @@ void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
-			pShaderManager->Render(pd3dCommandList, pCamera, b->GetShaderType());
+			if (b->GetMaterial() && b->GetMaterial()->m_ShaderType != ShaderType::NON) {
+			pShaderManager->Render(pd3dCommandList, pCamera, b->GetMaterial()->m_ShaderType);
 			b->Render(pd3dCommandList, pCamera);
+			}
 		}
 }
