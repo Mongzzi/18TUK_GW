@@ -37,5 +37,8 @@ public:
 	void ReleaseObjects();
 	void ReleaseUploadBuffers();
 	
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
+
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager);
 };

@@ -33,12 +33,12 @@ struct LIGHT
     float padding;
 };
 
-cbuffer cbMaterial : register(b3)
+cbuffer cbMaterial : register(b2)
 {
     MATERIAL gMaterials[MAX_MATERIALS];
 };
 
-cbuffer cbLights : register(b4)
+cbuffer cbLights : register(b3)
 {
     LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;

@@ -57,6 +57,8 @@ using Microsoft::WRL::ComPtr;
 #define FRAME_BUFFER_WIDTH		640
 #define FRAME_BUFFER_HEIGHT		480
 
+#include <cassert>
+
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
 //#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS

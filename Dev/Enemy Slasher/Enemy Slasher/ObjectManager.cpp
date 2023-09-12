@@ -60,6 +60,14 @@ void CObjectManager::ReleaseUploadBuffers()
 		
 }
 
+void CObjectManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CObjectManager::ReleaseShaderVariables()
+{
+}
+
 void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
