@@ -47,6 +47,7 @@ public:
 	void SetAlbedo(XMFLOAT4& xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 	void SetShaderType(ShaderType type) { m_ShaderType = type; }
+
 };
 
 class CGameObject

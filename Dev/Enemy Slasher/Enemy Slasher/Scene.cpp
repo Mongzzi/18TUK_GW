@@ -318,6 +318,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				}
 				//pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 				//pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
+				pRotatingObject->SetShaderType(ShaderType::CObjectsShader);
 				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
 			}
 		}
