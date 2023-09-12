@@ -28,11 +28,11 @@ void CFBXLoader::InitializeSdkObjects()
         //FBXSDK_printf("Error: Unable to create FBX Manager!\n");
         exit(1);
     }
-    else
+    else {
 #ifdef _DEBUG
         FBXSDK_printf("Autodesk FBX SDK version %s\n", m_plSdkManager->GetVersion());
 #endif // _DEBUG
-
+    }
 
     //Create an IOSettings object. This object holds all import/export settings.
     FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
@@ -55,10 +55,11 @@ void CFBXLoader::DestroySdkObjects(bool pExitStatus)
 {
     if (m_plSdkManager)
         m_plSdkManager->Destroy();
-    if (pExitStatus)
+    if (pExitStatus) {
 #ifdef _DEBUG
         FBXSDK_printf("Program Success!\n");
 #endif // _DEBUG
+    }
 }
 
 LoadResult CFBXLoader::LoadScene(const char* pFilename, CFBXLoader* pFBXLoader)
