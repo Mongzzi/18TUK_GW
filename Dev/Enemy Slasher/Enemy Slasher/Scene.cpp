@@ -336,10 +336,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
 	DWORD dwDirection = 0;
-	if (pKeysBuffer['W']) dwDirection |= DIR_FORWARD;
-	if (pKeysBuffer['S']) dwDirection |= DIR_BACKWARD;
-	if (pKeysBuffer['A']) dwDirection |= DIR_LEFT;
-	if (pKeysBuffer['D']) dwDirection |= DIR_RIGHT;
+	if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
+	if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
+	if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
+	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
