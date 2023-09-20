@@ -444,7 +444,7 @@ void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(m_hWnd, pKeysBuffer, m_ptOldCursorPos);
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;

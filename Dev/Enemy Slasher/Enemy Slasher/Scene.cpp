@@ -117,7 +117,7 @@ bool CBasicScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 	return(false);
 }
 
-bool CBasicScene::ProcessInput(UCHAR* pKeysBuffer)
+bool CBasicScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
 	return(false);
 
@@ -179,10 +179,10 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
-		case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
-		case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
-		case 'D': m_pPlayer->Move(DIR_RIGHT, m_pPlayer->GetMoveSpeed(), true); break;
+		//case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
+		//case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
+		//case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
+		//case 'D': m_pPlayer->Move(DIR_RIGHT, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'Q': m_pPlayer->Move(DIR_UP, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
@@ -333,9 +333,36 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-bool CTestScene::ProcessInput(UCHAR* pKeysBuffer)
+bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
-	return(false);
+	DWORD dwDirection = 0;
+	if (pKeysBuffer['W']) dwDirection |= DIR_FORWARD;
+	if (pKeysBuffer['S']) dwDirection |= DIR_BACKWARD;
+	if (pKeysBuffer['A']) dwDirection |= DIR_LEFT;
+	if (pKeysBuffer['D']) dwDirection |= DIR_RIGHT;
+
+	float cxDelta = 0.0f, cyDelta = 0.0f;
+	POINT ptCursorPos;
+	if (GetCapture() == hWnd)
+	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - ptOldCursorPos.y) / 3.0f;
+		SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+	}
+
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
+		if (cxDelta || cyDelta)
+		{
+			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+		}
+		if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
+	}
+
+	return(true);
 }
 
 void CTestScene::AnimateObjects(float fTimeElapsed)
