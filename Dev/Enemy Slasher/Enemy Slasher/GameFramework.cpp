@@ -393,18 +393,11 @@ void CGameFramework::BuildObjects()
 
 	{
 		// m_pvScenelist 에 여러 씬 등록 및 각 씬의 플레이어 생성
+		m_pvScenelist.push_back(new CTestScene);
+		m_pvScenelist.push_back(new CTestScene_Card);
 
-		CBasicScene* pNewScene;
-		pNewScene = new CTestScene();
-		if (pNewScene) {
-			pNewScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
-			m_pvScenelist.push_back(pNewScene);
-		}
-		pNewScene = new CTestScene_Card();
-		if (pNewScene) {
-			pNewScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
-			m_pvScenelist.push_back(pNewScene);
-		}
+		for (auto scene : m_pvScenelist)
+			scene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
 		// 현재 프레임워크에 Scenelist에서 Scene을 뽑아서 등록
 		m_pScene = m_pvScenelist[m_nSceneCounter];
 		m_pPlayer = m_pScene->m_pPlayer;
