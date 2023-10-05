@@ -49,6 +49,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateSwapChain();
 	CreateDepthStencilView();
 
+	//CreateD3D11On12Device();
+	//CreateD2DDevice();
+
 	CoInitialize(NULL);
 	
 	m_pFBXLoader = new CFBXLoader();	//생성자에서 부르면 터짐.BuildObjects() 보다 먼저 불려야함.
@@ -230,6 +233,57 @@ void CGameFramework::CreateDepthStencilView()
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, &d3dDepthStencilViewDesc, d3dDsvCPUDescriptorHandle);
+}
+
+void CGameFramework::CreateD2DDevice()
+{
+	//// Create D2D/DWrite components.
+	//D2D1_FACTORY_OPTIONS d2dFactoryOptions{};
+	//D2D1_DEVICE_CONTEXT_OPTIONS deviceOptions = D2D1_DEVICE_CONTEXT_OPTIONS_NONE;
+	//DX::ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory3), &d2dFactoryOptions, &m_d2dFactory));
+	//ComPtr<IDXGIDevice> dxgiDevice;
+	//DX::ThrowIfFailed(m_d3d11On12Device.As(&dxgiDevice));
+	//DX::ThrowIfFailed(m_d2dFactory->CreateDevice(dxgiDevice.Get(), &m_d2dDevice));
+	//DX::ThrowIfFailed(m_d2dDevice->CreateDeviceContext(deviceOptions, &m_d2dDeviceContext));
+	//DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dWriteFactory));
+}
+
+void CGameFramework::CreateD3D11On12Device()
+{
+	// Create an 11 device wrapped around the 12 device and share
+	   // 12's command queue.
+	ComPtr<ID3D11Device> d3d11Device;
+	ID3D11DeviceContext* m_pd3d11DeviceContext;
+	ComPtr<ID3D11On12Device> m_d3d11On12Device;
+	//d3d11Device->GetImmediateContext(&m_pd3d11DeviceContext);
+	//DX::ThrowIfFailed(D3D11On12CreateDevice(
+	//	m_pd3dDevice,
+	//	D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+	//	nullptr,
+	//	0,
+	//	reinterpret_cast<IUnknown**>(m_pd3dCommandQueue),
+	//	1,
+	//	0,
+	//	&d3d11Device,
+	//	&m_pd3d11DeviceContext,
+	//	nullptr
+	//));
+
+	//D3D11On12CreateDevice(
+	//	m_pd3dDevice,               // DirectX 12 디바이스
+	//	D3D11_CREATE_DEVICE_BGRA_SUPPORT, // 옵션 플래그
+	//	nullptr,                   // 초기화 옵션 (nullptr로 설정하여 기본 옵션 사용)
+	//	0,                         // 입력 인터페이스 수
+	//	nullptr,                   // 입력 인터페이스 배열 (nullptr로 설정하여 없음)
+	//	1,                         // 출력 인터페이스 수
+	//	0,                         // 선택된 D3D_FEATURE_LEVEL (nullptr로 설정하여 기본 값 사용)
+	//	&d3d11Device,              // DirectX 11 디바이스를 저장할 변수
+	//	&m_pd3d11DeviceContext,       // DirectX 11 디바이스 컨텍스트를 저장할 변수
+	//	nullptr                    // DirectX 11과 DirectX 12를 연결할 변수 (사용하지 않음)
+	//);
+
+	//// Query the 11On12 device from the 11 device.
+	DX::ThrowIfFailed(d3d11Device.As(&m_d3d11On12Device));
 }
 
 void CGameFramework::ChangeSwapChainState()

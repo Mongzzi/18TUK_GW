@@ -23,6 +23,9 @@ public:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 
+	void CreateD2DDevice();
+	void CreateD3D11On12Device();
+
 	void ChangeSwapChainState();
 
 	void BuildObjects();

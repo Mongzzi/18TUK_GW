@@ -37,6 +37,13 @@ using namespace std;
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
+#include <d3d11on12.h>
+#include "DirectXHelper.h"
+#include <d2d1.h>
+#include <d2d1_1.h>
+#include <d2d1helper.h>
+#include <dwrite.h>
+
 #include <Mmsystem.h>
 
 #ifdef _DEBUG
