@@ -37,6 +37,7 @@ using namespace std;
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
+#pragma comment(lib, "d3d11.lib")
 #include <d3d11on12.h>
 #include "DirectXHelper.h"
 #include <d2d1.h>

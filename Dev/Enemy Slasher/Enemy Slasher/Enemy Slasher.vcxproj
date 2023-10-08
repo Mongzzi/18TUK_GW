@@ -137,6 +137,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="DirectXHelper.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Enemy Slasher.h" />
     <ClInclude Include="FbxLoader.h" />
     <ClInclude Include="GameFramework.h" />

@@ -256,18 +256,18 @@ void CGameFramework::CreateD3D11On12Device()
 	ID3D11DeviceContext* m_pd3d11DeviceContext;
 	ComPtr<ID3D11On12Device> m_d3d11On12Device;
 	//d3d11Device->GetImmediateContext(&m_pd3d11DeviceContext);
-	//DX::ThrowIfFailed(D3D11On12CreateDevice(
-	//	m_pd3dDevice,
-	//	D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-	//	nullptr,
-	//	0,
-	//	reinterpret_cast<IUnknown**>(m_pd3dCommandQueue),
-	//	1,
-	//	0,
-	//	&d3d11Device,
-	//	&m_pd3d11DeviceContext,
-	//	nullptr
-	//));
+	DX::ThrowIfFailed(D3D11On12CreateDevice(
+		m_pd3dDevice,
+		D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+		nullptr,
+		0,
+		reinterpret_cast<IUnknown**>(m_pd3dCommandQueue),
+		1,
+		0,
+		&d3d11Device,
+		&m_pd3d11DeviceContext,
+		nullptr
+	));
 
 	//D3D11On12CreateDevice(
 	//	m_pd3dDevice,               // DirectX 12 디바이스
