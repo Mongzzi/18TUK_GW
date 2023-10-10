@@ -53,6 +53,10 @@ private:
 	IDXGISwapChain3*			m_pdxgiSwapChain = NULL;
 	ID3D12Device*				m_pd3dDevice = NULL;
 
+	// d3d11on12
+	ComPtr<ID3D11Device>		d3d11Device;
+	ID3D11DeviceContext*		m_pd3d11DeviceContext;
+
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
 

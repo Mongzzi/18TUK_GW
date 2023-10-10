@@ -38,12 +38,13 @@ using namespace std;
 #include <DirectXCollision.h>
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d2d1.lib")
 #include <d3d11on12.h>
 #include "DirectXHelper.h"
 #include <d2d1.h>
-#include <d2d1_1.h>
+#include <d2d1_3.h>
 #include <d2d1helper.h>
-#include <dwrite.h>
+#include <dwrite_3.h>
 
 #include <Mmsystem.h>
 
