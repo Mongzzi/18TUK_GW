@@ -235,135 +235,31 @@ void CGameFramework::CreateDepthStencilView()
 	m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, &d3dDepthStencilViewDesc, d3dDsvCPUDescriptorHandle);
 }
 
-void InitializeD2D1AndDWrite(
-	ID3D11On12Device* d3d11On12Device,  // D3D11On12 디바이스
-	D2D1_FACTORY_TYPE d2d1FactoryType,  // D2D1 팩토리 타입 (D2D1_FACTORY_TYPE_SINGLE_THREADED 또는 D2D1_FACTORY_TYPE_MULTI_THREADED)
-	ID2D1Factory3** d2d1Factory,        // D2D1Factory 포인터
-	IDWriteFactory3** dwriteFactory,      // IDWriteFactory 포인터
-	ID2D1Device3** d2d1FactoryDevice = nullptr // D2D1FactoryDevice 포인터
-) {
-
-
-	// D2D1Factory 초기화
-	D2D1_FACTORY_OPTIONS d2d1FactoryOptions = { D2D1_DEBUG_LEVEL_NONE };
-	HRESULT hr = D2D1CreateFactory(
-		d2d1FactoryType,
-		__uuidof(ID2D1Factory3),
-		&d2d1FactoryOptions,
-		reinterpret_cast<void**>(d2d1Factory)
-	);
-
-	if (FAILED(hr)) {
-		// 오류 처리
-		return;
-	}
-
-	// IDWriteFactory 초기화
-	//hr = DWriteCreateFactory(
-	//	DWRITE_FACTORY_TYPE_SHARED,
-	//	__uuidof(IDWriteFactory3),
-	//	reinterpret_cast<IUnknown**>(dwriteFactory)
-	//);
-
-	if (FAILED(hr)) {
-		// 오류 처리
-		(*d2d1Factory)->Release(); // D2D1Factory 해제
-		*d2d1Factory = nullptr;
-		return;
-	}
-
-	//// D3D11On12 디바이스와 D2D1Factory, IDWriteFactory 연동
-	//D2D1_DEVICE_CONTEXT_OPTIONS d2d1FactoryDeviceOptions;
-	//hr = (*d2d1Factory)->QueryInterface(
-	//	__uuidof(ID2D1Factory3),
-	//	reinterpret_cast<void**>(d2d1Factory)
-	//);
-
-	if (SUCCEEDED(hr)) {
-		//hr = (*d2d1Factory)->CreateDevice(
-		//	d3d11On12Device,
-		//	&d2d1FactoryDeviceOptions,
-		//	d2d1FactoryDevice
-		//);
-
-		//if (SUCCEEDED(hr)) {
-		//	(*d2d1FactoryDevice)->SetDpi(96.0f, 96.0f); // D2D1FactoryDevice DPI 설정 (선택 사항)
-		//}
-	}
-
-	if (FAILED(hr)) {
-		// 오류 처리
-		(*d2d1Factory)->Release(); // D2D1Factory 해제
-		*d2d1Factory = nullptr;
-		(*dwriteFactory)->Release(); // IDWriteFactory 해제
-		*dwriteFactory = nullptr;
-		return;
-	}
-}
-
-//int main() {
-//	ID3D11On12Device* d3d11On12Device = /* D3D11On12Device 초기화 */;
-//	ID2D1Factory3* d2d1Factory = nullptr;
-//	IDWriteFactory3* dwriteFactory = nullptr;
-//
-//	InitializeD2D1AndDWrite(
-//		d3d11On12Device,
-//		D2D1_FACTORY_TYPE_SINGLE_THREADED, // 또는 D2D1_FACTORY_TYPE_MULTI_THREADED
-//		&d2d1Factory,
-//		&dwriteFactory
-//	);
-//
-//	// 이제 d2d1Factory 및 dwriteFactory를 사용하여 D2D 및 DWrite 기능을 활용할 수 있습니다.
-//
-//	// 사용이 끝난 후에는 해제합니다.
-//	if (d2d1Factory) {
-//		d2d1Factory->Release();
-//	}
-//
-//	if (dwriteFactory) {
-//		dwriteFactory->Release();
-//	}
-//
-//	return 0;
-//}
-
-
 void CGameFramework::CreateD2DDevice()
 {
-	// Create an 11 device wrapped around the 12 device and share 12's command queue.
-	ComPtr<ID3D11On12Device> m_d3d11On12Device;
-	//d3d11Device->GetImmediateContext(&m_pd3d11DeviceContext);
-	DX::ThrowIfFailed(D3D11On12CreateDevice(
-		m_pd3dDevice,
-		D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-		nullptr,
-		0,
-		reinterpret_cast<IUnknown**>(m_pd3dCommandQueue),
-		1,
-		0,
-		&d3d11Device,
-		&m_pd3d11DeviceContext,
-		nullptr
-	));
-
-	//// Query the 11On12 device from the 11 device.
-	DX::ThrowIfFailed(d3d11Device.As(&m_d3d11On12Device));
-
-
-
-	ID2D1Factory3* m_pd2dFactory = NULL;
-
 	// Create D2D/DWrite components.
 	D2D1_FACTORY_OPTIONS d2dFactoryOptions{};
-	D2D1_DEVICE_CONTEXT_OPTIONS deviceOptions = D2D1_DEVICE_CONTEXT_OPTIONS_NONE;
-	//DX::ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory3), &d2dFactoryOptions, &m_pd2dFactory));
-	DX::ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pd2dFactory));
+	D2D1_DEVICE_CONTEXT_OPTIONS deviceContextOption = D2D1_DEVICE_CONTEXT_OPTIONS_NONE;
+	DX::ThrowIfFailed(D2D1CreateFactory(
+		D2D1_FACTORY_TYPE_SINGLE_THREADED,
+		__uuidof(ID2D1Factory3),
+		&d2dFactoryOptions,
+		reinterpret_cast<void**>(&m_pd2dFactory))
+	);
 
-	//ComPtr<IDXGIDevice> dxgiDevice;
-	//DX::ThrowIfFailed(m_d3d11On12Device.As(&dxgiDevice));
-	//DX::ThrowIfFailed(m_pd2dFactory->CreateDevice(dxgiDevice.Get(), &m_d2dDevice));
-	//DX::ThrowIfFailed(m_d2dDevice->CreateDeviceContext(deviceOptions, &m_d2dDeviceContext));
-	//DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_dWriteFactory));
+	DX::ThrowIfFailed(m_cd3d11On12Device.As(&m_cdxgiDevice));
+	DX::ThrowIfFailed(m_pd2dFactory->CreateDevice(m_cdxgiDevice.Get(), reinterpret_cast<ID2D1Device2**>(&m_d2dDevice)));
+	DX::ThrowIfFailed(m_d2dDevice->CreateDeviceContext(deviceContextOption, &m_d2dDeviceContext));
+	DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&m_dWriteFactory)));
+
+	//// 사용이 끝난 후에는 해제합니다.
+	//if (d2d1Factory) {
+	//	d2d1Factory->Release();
+	//}
+
+	//if (dwriteFactory) {
+	//	dwriteFactory->Release();
+	//}
 }
 
 void CGameFramework::CreateD3D11On12Device()
@@ -379,13 +275,13 @@ void CGameFramework::CreateD3D11On12Device()
 		reinterpret_cast<IUnknown**>(m_pd3dCommandQueue),
 		1,
 		0,
-		&d3d11Device,
+		&m_cd3d11Device,
 		&m_pd3d11DeviceContext,
 		nullptr
 	));
 
 	//// Query the 11On12 device from the 11 device.
-	DX::ThrowIfFailed(d3d11Device.As(&m_d3d11On12Device));
+	DX::ThrowIfFailed(m_cd3d11Device.As(&m_d3d11On12Device));
 }
 
 void CGameFramework::ChangeSwapChainState()

@@ -53,9 +53,15 @@ private:
 	IDXGISwapChain3*			m_pdxgiSwapChain = NULL;
 	ID3D12Device*				m_pd3dDevice = NULL;
 
-	// d3d11on12
-	ComPtr<ID3D11Device>		d3d11Device;
+	// d3d11on12 | connect  d3d11 -> d3d11on12 -> d2d -> dwrite
+	ComPtr<ID3D11Device>		m_cd3d11Device;
 	ID3D11DeviceContext*		m_pd3d11DeviceContext;
+	ComPtr<ID3D11On12Device>	m_cd3d11On12Device;
+	ID2D1Factory3*				m_pd2dFactory = NULL;
+	ID2D1Device3*				m_d2dDevice;
+	ID2D1DeviceContext3*		m_d2dDeviceContext;
+	ComPtr<IDXGIDevice>			m_cdxgiDevice;
+	IDWriteFactory3*			m_dWriteFactory;
 
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
