@@ -149,6 +149,32 @@ void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 }
 
+void CBasicScene::Render2D(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory)
+{
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	static const WCHAR text[] = L"D3D11On12 프로젝트 입니다.";
+
+	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
+	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
+
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_ITALIC,
+		DWRITE_FONT_STRETCH_NORMAL,
+		25,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+}
+
 void CBasicScene::Enter()
 {
 }

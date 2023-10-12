@@ -54,6 +54,7 @@ public:
 	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	virtual void Render2D(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory);
 	virtual void Enter();
 	virtual void Exit();
 

@@ -45,12 +45,12 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
+	CreateD3D11On12Device();
+	CreateD2DDevice();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
 	CreateDepthStencilView();
 
-	//CreateD3D11On12Device();
-	//CreateD2DDevice();
 
 	CoInitialize(NULL);
 	
@@ -183,11 +183,42 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 
 void CGameFramework::CreateRenderTargetViews()
 {
+	FLOAT dpiX, dpiY;
+#pragma warning(push)
+#pragma warning(disable:4996)
+	m_pd2dFactory->GetDesktopDpi(&dpiX, &dpiY);
+#pragma warning(pop)
+
+	D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
+		D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+		dpiX,
+		dpiY);
+
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	for (UINT i = 0; i < m_nSwapChainBuffers; i++)
 	{
 		m_pdxgiSwapChain->GetBuffer(i, __uuidof(ID3D12Resource), (void**)&m_ppd3dSwapChainBackBuffers[i]);
 		m_pd3dDevice->CreateRenderTargetView(m_ppd3dSwapChainBackBuffers[i], NULL, d3dRtvCPUDescriptorHandle);
+
+		D3D11_RESOURCE_FLAGS d3d11ResourceFlags = { D3D11_BIND_RENDER_TARGET };
+		DX::ThrowIfFailed(m_cd3d11On12Device->CreateWrappedResource(
+			m_ppd3dSwapChainBackBuffers[i],
+			&d3d11ResourceFlags,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PRESENT,
+			IID_PPV_ARGS(&m_cpWrappedBackBuffers[i])
+		));
+
+		// Create a render target for D2D to draw directly to this back buffer.
+		ComPtr<IDXGISurface> surface;
+		DX::ThrowIfFailed(m_cpWrappedBackBuffers[i].As(&surface));
+		DX::ThrowIfFailed(m_pd2dDeviceContext->CreateBitmapFromDxgiSurface(
+			surface.Get(),
+			&bitmapProperties,
+			&m_cpd2dRenderTargets[i]
+		));
+
 		d3dRtvCPUDescriptorHandle.ptr += gnRtvDescriptorIncrementSize;
 	}
 }
@@ -248,9 +279,9 @@ void CGameFramework::CreateD2DDevice()
 	);
 
 	DX::ThrowIfFailed(m_cd3d11On12Device.As(&m_cdxgiDevice));
-	DX::ThrowIfFailed(m_pd2dFactory->CreateDevice(m_cdxgiDevice.Get(), reinterpret_cast<ID2D1Device2**>(&m_d2dDevice)));
-	DX::ThrowIfFailed(m_d2dDevice->CreateDeviceContext(deviceContextOption, &m_d2dDeviceContext));
-	DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&m_dWriteFactory)));
+	DX::ThrowIfFailed(m_pd2dFactory->CreateDevice(m_cdxgiDevice.Get(), reinterpret_cast<ID2D1Device2**>(&m_pd2dDevice)));
+	DX::ThrowIfFailed(m_pd2dDevice->CreateDeviceContext(deviceContextOption, &m_pd2dDeviceContext));
+	DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&m_pdWriteFactory)));
 
 	//// 사용이 끝난 후에는 해제합니다.
 	//if (d2d1Factory) {
@@ -265,14 +296,12 @@ void CGameFramework::CreateD2DDevice()
 void CGameFramework::CreateD3D11On12Device()
 {
 	// Create an 11 device wrapped around the 12 device and share 12's command queue.
-	ComPtr<ID3D11On12Device> m_d3d11On12Device;
-	//d3d11Device->GetImmediateContext(&m_pd3d11DeviceContext);
 	DX::ThrowIfFailed(D3D11On12CreateDevice(
 		m_pd3dDevice,
 		D3D11_CREATE_DEVICE_BGRA_SUPPORT,
 		nullptr,
 		0,
-		reinterpret_cast<IUnknown**>(m_pd3dCommandQueue),
+		reinterpret_cast<IUnknown**>(&m_pd3dCommandQueue),
 		1,
 		0,
 		&m_cd3d11Device,
@@ -280,8 +309,8 @@ void CGameFramework::CreateD3D11On12Device()
 		nullptr
 	));
 
-	//// Query the 11On12 device from the 11 device.
-	DX::ThrowIfFailed(m_cd3d11Device.As(&m_d3d11On12Device));
+	// Query the 11On12 device from the 11 device.
+	DX::ThrowIfFailed(m_cd3d11Device.As(&m_cd3d11On12Device));
 }
 
 void CGameFramework::ChangeSwapChainState()
@@ -609,6 +638,8 @@ void CGameFramework::FrameAdvance()
 #endif
 	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
+	Render2D();
+
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -645,4 +676,49 @@ void CGameFramework::FrameAdvance()
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 75 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
+}
+
+void CGameFramework::Render2D()
+{
+	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
+	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
+	DX::ThrowIfFailed(m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(m_pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_ITALIC,
+		DWRITE_FONT_STRETCH_NORMAL,
+		25,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	static const WCHAR text[] = L"D3D11On12 프로젝트 입니다.";
+	/////////////////////////////////
+
+	// Acquire our wrapped render target resource for the current back buffer.
+	m_cd3d11On12Device->AcquireWrappedResources(m_cpWrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
+
+	// Render text directly to the back buffer.
+	m_pd2dDeviceContext->SetTarget(m_cpd2dRenderTargets[m_nSwapChainBufferIndex].Get());
+	m_pd2dDeviceContext->BeginDraw();
+
+	//if (m_pScene) m_pScene->Render2D(m_pd2dDeviceContext, m_pdWriteFactory);
+
+	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	m_pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), D2D1::RectF(0, 0, 600.0f, 500.0f), mSolidColorBrush.Get());
+
+	DX::ThrowIfFailed(m_pd2dDeviceContext->EndDraw());
+
+	// Release our wrapped render target resource. Releasing 
+	// transitions the back buffer resource to the state specified
+	// as the OutState when the wrapped resource was created.
+	m_cd3d11On12Device->ReleaseWrappedResources(m_cpWrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
+
+	// Flush to submit the 11 command list to the shared command queue.
+	m_pd3d11DeviceContext->Flush();
 }

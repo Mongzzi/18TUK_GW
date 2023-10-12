@@ -475,3 +475,14 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
+void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext)
+{
+	//pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(m_position.x, m_position.y));
+	//pd2dDeviceContext->DrawText(
+	//	m_text.c_str(),
+	//	static_cast<UINT32>(m_text.size()),
+	//	s_formats[m_format].Get(),
+	//	&m_rect,
+	//	s_brushes[m_brush].Get()
+	//);
+}

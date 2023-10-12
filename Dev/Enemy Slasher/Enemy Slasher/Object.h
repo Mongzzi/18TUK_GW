@@ -206,3 +206,14 @@ public:
 	float GetLength() { return(m_nLength * m_xmf3Scale.z); }
 };
 
+
+
+///////////////////////////////////////////////////////////
+
+class CTextObject
+{
+	POINT m_position;
+
+public:
+	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
+};

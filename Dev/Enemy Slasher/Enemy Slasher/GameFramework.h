@@ -35,6 +35,8 @@ public:
 	void AnimateObjects();
 	void FrameAdvance();
 
+	void Render2D();
+
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
 
@@ -58,10 +60,10 @@ private:
 	ID3D11DeviceContext*		m_pd3d11DeviceContext;
 	ComPtr<ID3D11On12Device>	m_cd3d11On12Device;
 	ID2D1Factory3*				m_pd2dFactory = NULL;
-	ID2D1Device3*				m_d2dDevice;
-	ID2D1DeviceContext3*		m_d2dDeviceContext;
+	ID2D1Device3*				m_pd2dDevice;
+	ID2D1DeviceContext3*		m_pd2dDeviceContext;
 	ComPtr<IDXGIDevice>			m_cdxgiDevice;
-	IDWriteFactory3*			m_dWriteFactory;
+	IDWriteFactory3*			m_pdWriteFactory;
 
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
@@ -74,6 +76,10 @@ private:
 
 	ID3D12Resource*				m_pd3dDepthStencilBuffer = NULL;
 	ID3D12DescriptorHeap*		m_pd3dDsvDescriptorHeap = NULL;
+
+	// d3d11on12 | 2D Render Resource
+	ComPtr<ID3D11Resource>		m_cpWrappedBackBuffers[m_nSwapChainBuffers];
+	ComPtr<ID2D1Bitmap1>		m_cpd2dRenderTargets[m_nSwapChainBuffers];
 
 	ID3D12CommandAllocator*		m_pd3dCommandAllocator = NULL;
 	ID3D12CommandQueue*			m_pd3dCommandQueue = NULL;
