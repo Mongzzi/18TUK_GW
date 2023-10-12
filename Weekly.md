@@ -153,8 +153,15 @@
 
 + 10월 첫?째 주 ~ 다섯째 주 ( 10월 6일 ~ 10월 12일)
     - 이번 주 한 작업
-    > 
+    > 문자 출력\
+    > ┗ D3D11OnD12, Direct2D, DirectWrite Device 와 Context 작성 및 기존 프레임 워크에 연결\
+    > ┗ SwapChain의 RenderTarget 생성부분에 문자 출력을 위한 Bitmap Buffer 추가\
+    > ┗ Render2D 함수 제공. 각 씬은 해당 함수로 필요한 문자를 출력할 수 있게함\
+    > ┗ 단, 출력시 버퍼를 Clear 하거나 오브젝트를 출력하면 문자가 묻혀서 출력되지 않는 버그가 있음\
+    > ┗ https://andy3790.tistory.com/6
 
 
     - 다음 주 할 작업
-    > 카드 UI 드래그 추가
+    > 카드 UI 드래그 추가\
+    > 문자 출력 버그 수정 (Clear 시 출력이 안되는 버그)\
+    > CPU를 이용한 오브젝트 절단 작업
