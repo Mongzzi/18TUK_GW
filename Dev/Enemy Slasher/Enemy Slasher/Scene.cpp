@@ -149,8 +149,17 @@ void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 }
 
-void CBasicScene::Render2D(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory)
+void CBasicScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
 {
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	static const WCHAR text[] = L"D3D11On12 프로젝트 입니다.";
 
@@ -162,7 +171,7 @@ void CBasicScene::Render2D(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactor
 		L"Verdana",
 		nullptr,
 		DWRITE_FONT_WEIGHT_NORMAL,
-		DWRITE_FONT_STYLE_ITALIC,
+		DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
 		25,
 		L"en-us",

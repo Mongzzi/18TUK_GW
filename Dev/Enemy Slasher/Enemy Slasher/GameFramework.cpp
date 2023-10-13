@@ -680,26 +680,6 @@ void CGameFramework::FrameAdvance()
 
 void CGameFramework::Render2D()
 {
-	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
-	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
-	DX::ThrowIfFailed(m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
-	DX::ThrowIfFailed(m_pdWriteFactory->CreateTextFormat(
-		L"Verdana",
-		nullptr,
-		DWRITE_FONT_WEIGHT_NORMAL,
-		DWRITE_FONT_STYLE_ITALIC,
-		DWRITE_FONT_STRETCH_NORMAL,
-		25,
-		L"en-us",
-		mDWriteTextFormat.GetAddressOf()));
-
-	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-
-	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"D3D11On12 프로젝트 입니다.";
-	/////////////////////////////////
-
 	// Acquire our wrapped render target resource for the current back buffer.
 	m_cd3d11On12Device->AcquireWrappedResources(m_cpWrappedBackBuffers[m_nSwapChainBufferIndex].GetAddressOf(), 1);
 
@@ -707,10 +687,7 @@ void CGameFramework::Render2D()
 	m_pd2dDeviceContext->SetTarget(m_cpd2dRenderTargets[m_nSwapChainBufferIndex].Get());
 	m_pd2dDeviceContext->BeginDraw();
 
-	//if (m_pScene) m_pScene->Render2D(m_pd2dDeviceContext, m_pdWriteFactory);
-
-	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	m_pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), D2D1::RectF(0, 0, 600.0f, 500.0f), mSolidColorBrush.Get());
+	if (m_pScene) m_pScene->Render2D(m_pd3dCommandList, m_pd2dDeviceContext, m_pdWriteFactory, m_pCamera);
 
 	DX::ThrowIfFailed(m_pd2dDeviceContext->EndDraw());
 

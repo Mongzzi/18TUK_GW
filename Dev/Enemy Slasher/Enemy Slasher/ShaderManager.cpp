@@ -22,20 +22,15 @@ void CShaderManager::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CShader* shader;
 
 	// NON
-	shader = new CShader();
-	shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_vShaderManager.push_back(shader);
+	m_vShaderManager.push_back(new CShader());
 
-	// CObjectsShader
-	shader = new CObjectsShader();
-	shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_vShaderManager.push_back(shader);
+	m_vShaderManager.push_back(new CObjectsShader());
+	m_vShaderManager.push_back(new CObjectsNormalShader());
+	m_vShaderManager.push_back(new CTerrainShader());
+	m_vShaderManager.push_back(new CTextShader());
 
-	// CObjectNormalShader
-	shader = new CObjectsNormalShader();
-	shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_vShaderManager.push_back(shader);
-
+	for (auto d : m_vShaderManager)
+		d->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 }
 
 void CShaderManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, ShaderType pShaderType)
