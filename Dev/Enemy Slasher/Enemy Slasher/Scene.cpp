@@ -161,7 +161,7 @@ void CBasicScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"D3D11On12 프로젝트 입니다.";
+	static const WCHAR text[] = L"BasicScene의 Render2D 입니다.";
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
@@ -718,5 +718,183 @@ void CTestScene_Card::Enter()
 }
 
 void CTestScene_Card::Exit()
+{
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+CTestScene_Slice::CTestScene_Slice()
+{
+}
+
+CTestScene_Slice::~CTestScene_Slice()
+{
+}
+
+bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	return false;
+}
+
+bool CTestScene_Slice::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+			//case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
+			//case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
+			//case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
+			//case 'D': m_pPlayer->Move(DIR_RIGHT, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'Q': m_pPlayer->Move(DIR_UP, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
+		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
+		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return(false);
+}
+
+void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+{
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	{
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList);
+		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+	}
+
+	{
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
+		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
+		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
+	{
+		CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+		CRotatingObject* pRotatingObject = NULL;
+
+		pRotatingObject = new CRotatingObject();
+		pRotatingObject->SetMesh(0, pCubeMesh);
+		pRotatingObject->SetPosition(-50.0f, 40.0f, 100.0f);
+		pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		pRotatingObject->SetRotationSpeed(0);
+		pRotatingObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
+	}
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
+{
+	DWORD dwDirection = 0;
+	if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
+	if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
+	if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
+	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
+
+	float cxDelta = 0.0f, cyDelta = 0.0f;
+	POINT ptCursorPos;
+	if (GetCapture() == hWnd)
+	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - ptOldCursorPos.y) / 3.0f;
+		SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+	}
+
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
+		if (cxDelta || cyDelta)
+		{
+			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+		}
+		if (dwDirection) m_pPlayer->Move(dwDirection, 0.5f, false);
+	}
+
+	return(true);
+}
+
+void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
+{
+	m_pObjectManager->AnimateObjects(fTimeElapsed);
+
+	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+	if (!pvObjectList[(int)ObjectLayer::Object].empty()) {
+		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][0];
+		CRotatingObject* pObject_cuttur = (CRotatingObject*)pvObjectList[(int)ObjectLayer::Object][1];
+		pObject_cuttur->MoveStrafe(0.04);
+	}
+	//if (!pvObjectList[(int)ObjectLayer::Terrain].empty() && !pvObjectList[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면
+	//	CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
+	//	XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+	//	float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
+
+	//	if (xmfPlayerPos.y < fHeight) {
+	//		xmfPlayerPos.y = fHeight;
+	//		pPlayer->SetPosition(xmfPlayerPos);
+	//		XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
+	//		xmfVelocity.y = 0.0f;
+	//		pPlayer->SetVelocity(xmfVelocity);
+	//	}
+	//}
+}
+
+void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	static const WCHAR text[] = L"CTestScene_Slice의 Render2D 입니다.";
+
+	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
+	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
+
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		25,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+}
+
+void CTestScene_Slice::Enter()
+{
+}
+
+void CTestScene_Slice::Exit()
 {
 }
