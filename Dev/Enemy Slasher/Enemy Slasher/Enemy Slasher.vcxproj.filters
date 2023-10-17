@@ -72,6 +72,9 @@
     <ClInclude Include="Ray.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="BoundingBox.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Enemy Slasher.cpp">
@@ -117,6 +120,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Ray.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BoundingBox.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

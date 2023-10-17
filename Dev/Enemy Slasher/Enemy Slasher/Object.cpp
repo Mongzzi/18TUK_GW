@@ -416,6 +416,26 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	}
 }
 
+bool CFBXObject::IsCursorOverObject()
+{
+	return false;
+}
+
+void CFBXObject::ButtenDown()
+{
+}
+
+void CFBXObject::ButtenUp()
+{
+}
+
+CAABB* CFBXObject::GetAABB()
+{
+	// 만약 하나의 오브젝트에 매쉬가 더 늘어날 경우 수정해야함.
+	CFBXMesh* tmp = (CFBXMesh*)m_ppMeshes[0];
+	return tmp->GetAABB();
+}
+
 void CFBXObject::Animate(float fTimeElapsed)
 {
 }

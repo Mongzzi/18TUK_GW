@@ -1,5 +1,6 @@
 #pragma once
 #include "FbxLoader.h"
+#include "BoundingBox.h"
 
 class CMesh
 {
@@ -60,6 +61,7 @@ public:
 	}
 	~Vertex_Color() { }
 
+	XMFLOAT3 GetVertex() { return vertex; };
 };
 
 class CIlluminatedVertex 
@@ -114,11 +116,20 @@ public:
 
 class CFBXMesh : public CMesh
 {
+private:
+	Vertex_Color* pVertices;
+	UINT* pnIndices;
+
 public:
 	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CFBXMesh();
 
 	void LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
+
+	Vertex_Color* GetVertices() { return pVertices; };
+	UINT* GetUnit() { return pnIndices; };
+
+	CAABB* GetAABB();
 };
 
 // ------------------------------- ≈Õ∑π¿Œ ∏  -----------------------------------

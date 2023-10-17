@@ -305,7 +305,7 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	float fx, fy, fz;
 
-	Vertex_Color* pVertices = new Vertex_Color[m_nVertices];
+	pVertices = new Vertex_Color[m_nVertices];
 
 	for (i = 0; i < lControlPointsCount; i++)
 	{
@@ -339,7 +339,7 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	int j, lPolygonCount = lMesh->GetPolygonCount();
 	m_nIndices = lPolygonCount;
 	m_nIndices *= 3;
-	UINT* pnIndices = new UINT[m_nIndices];
+	pnIndices = new UINT[m_nIndices];
 
 	for (i = 0; i < lPolygonCount; i++)
 	{
@@ -371,6 +371,29 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	//DisplayCache(lMesh);
 
+}
+
+CAABB* CFBXMesh::GetAABB()
+{
+	float xMin = FLT_MAX, yMin = FLT_MAX, zMin = FLT_MAX;
+	float xMax = FLT_MIN, yMax = FLT_MIN, zMax = FLT_MIN;
+
+	for (int i = 0;i < m_nVertices;i++) {
+		float x = pVertices[i].GetVertex().x;
+		float y = pVertices[i].GetVertex().y;
+		float z = pVertices[i].GetVertex().z;
+
+		if (x < xMin) xMin = x;
+		if (y < yMin) yMin = y;
+		if (z < zMin) zMin = z;
+
+		if (x > xMax) xMax = x;
+		if (y > yMax) yMax = y;
+		if (z > zMax) zMax = z;
+	}
+
+	CAABB* aabb = new CAABB(XMFLOAT3((xMax + xMin) / 2, (yMax + yMin) / 2, (zMax + zMin) / 2), XMFLOAT3((xMax - xMin) / 2, (yMax - yMin) / 2, (zMax - zMin) / 2));
+	return aabb;
 }
 
 // -------------------------------- ≈Õ∑π¿Œ ∏  ------------------------------------

@@ -165,6 +165,11 @@ public:
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
 	virtual void Animate(float fTimeElapsed);
+
+	bool IsCursorOverObject();
+	void ButtenDown();
+	void ButtenUp();
+	CAABB* GetAABB();
 };
 
 class CHeightMapTerrain : public CGameObject

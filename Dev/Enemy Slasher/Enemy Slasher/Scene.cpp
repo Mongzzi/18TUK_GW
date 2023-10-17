@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "ObjectManager.h"
 #include "ShaderManager.h"
+#include "Ray.h"
 
 CBasicScene::CBasicScene()
 {
@@ -389,10 +390,33 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
+		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+		std::vector<CGameObject*>* pOM = m_pObjectManager->GetObjectList();
+
 		if (cxDelta || cyDelta)
 		{
 			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+			{
+				for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
+				{
+					if (lc == (int)ObjectLayer::Object)
+					{
+						for (int i = 0;i < pOM[lc].size();i++) {
+							CFBXObject* obj = (CFBXObject*)pOM[lc][i];
+							CAABB* aabb = obj->GetAABB();
+#ifdef _DEBUG
+							std::cout << "count: " << i << " IntersectsAABB: " << r.IntersectsAABB(*aabb) << std::endl;
+#endif // _DEBUG
+							if (r.IntersectsAABB(*aabb))
+							{
+								//m_pObjectManager->DelObj(obj, ObjectLayer::Count);
+							}
+						}
+					}
+				}
+			}
 		}
 		if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
 	}
@@ -441,6 +465,29 @@ CTestScene_Card::~CTestScene_Card()
 
 bool CTestScene_Card::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	POINT m_ptOldCursorPos;
+	
+
+
+	//std::vector<CGameObject*>* GetObjectList() { return m_pvObjectManager; };
+
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		
+		break;
+	case WM_RBUTTONDOWN:
+		break;
+	case WM_LBUTTONUP:
+		break;
+	case WM_RBUTTONUP:
+		break;
+	case WM_MOUSEMOVE:
+		break;
+	default:
+		break;
+	}
+
 	return false;
 }
 

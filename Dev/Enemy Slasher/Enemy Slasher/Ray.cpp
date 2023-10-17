@@ -80,3 +80,32 @@ bool CRay::RayIntersectsTriangle(CRay& ray, XMFLOAT3& vertex1, XMFLOAT3& vertex2
     return (dot1 >= 0 && dot2 >= 0 && dot1 + dot2 <= XMVectorGetX(XMVector3Dot(XMLoadFloat3(&edge1), XMLoadFloat3(&edge1))));
 
 }
+
+bool CRay::IntersectsAABB(CAABB& aabb)
+{
+    XMFLOAT3 center = aabb.GetCenter();
+    XMFLOAT3 edgeDist = aabb.GetEdgeDistances();
+    XMFLOAT3 aabbMin = Vector3::Subtract(center, edgeDist);
+    XMFLOAT3 aabbMax = Vector3::Add(center, edgeDist);
+
+    float t1 = (aabbMin.x - m_vOriginal.x) / m_xmf3Dir.x;
+    float t2 = (aabbMax.x - m_vOriginal.x) / m_xmf3Dir.x;
+    float t3 = (aabbMin.y - m_vOriginal.y) / m_xmf3Dir.y;
+    float t4 = (aabbMax.y - m_vOriginal.y) / m_xmf3Dir.y;
+    float t5 = (aabbMin.z - m_vOriginal.z) / m_xmf3Dir.z;
+    float t6 = (aabbMax.z - m_vOriginal.z) / m_xmf3Dir.z;
+
+    float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+    float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+
+    if (tmax < 0) // Ray의 방향이 AABB 뒤에 있는 경우
+        return false;
+
+    if (tmin > tmax) // Ray와 AABB가 평행하면서 겹치지 않는 경우
+        return false;
+
+    if (tmin < 0) // Ray의 시작점이 AABB 내부에 있는 경우
+        return true;
+
+    return true; // Ray와 AABB가 교차하는 경우
+}
