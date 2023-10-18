@@ -378,7 +378,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
-	POINT ptCursorPos;
+	POINT ptCursorPos{ 0,0 }; //초기화를 하지 않을 시 낮은 확률로 아래의 if문에 진입하지 못하여 초기화되지 않은 값을 사용하게 된다.
 	if (GetCapture() == hWnd)
 	{
 		SetCursor(NULL);
@@ -887,6 +887,11 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][0];
 		CRotatingObject* pObject_cuttur = (CRotatingObject*)pvObjectList[(int)ObjectLayer::Object][1];
 		pObject_cuttur->MoveStrafe(0.04);
+
+
+
+
+
 	}
 	//if (!pvObjectList[(int)ObjectLayer::Terrain].empty() && !pvObjectList[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면
 	//	CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
