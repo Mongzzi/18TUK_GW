@@ -433,7 +433,7 @@ CAABB* CFBXObject::GetAABB()
 {
 	// 만약 하나의 오브젝트에 매쉬가 더 늘어날 경우 수정해야함.
 	CFBXMesh* tmp = (CFBXMesh*)m_ppMeshes[0];
-	return tmp->GetAABB();
+	return tmp->GetAABB(m_xmf4x4World);
 }
 
 void CFBXObject::Animate(float fTimeElapsed)

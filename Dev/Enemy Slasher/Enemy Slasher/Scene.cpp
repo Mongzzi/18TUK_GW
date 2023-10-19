@@ -390,6 +390,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
+		GetCursorPos(&ptCursorPos);
 		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 		std::vector<CGameObject*>* pOM = m_pObjectManager->GetObjectList();
 
@@ -408,6 +409,9 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 							CAABB* aabb = obj->GetAABB();
 #ifdef _DEBUG
 							std::cout << "count: " << i << " IntersectsAABB: " << r.IntersectsAABB(*aabb) << std::endl;
+							std::cout << obj->GetPosition().x << ", " << obj->GetPosition().y << ", " << obj->GetPosition().z << std::endl;
+							std::cout << aabb->GetCenter().x << ", " << aabb->GetCenter().y << ", " << aabb->GetCenter().z << std::endl;
+							std::cout << aabb->GetEdgeDistances().x << ", " << aabb->GetEdgeDistances().y << ", " << aabb->GetEdgeDistances().z << std::endl;
 #endif // _DEBUG
 							if (r.IntersectsAABB(*aabb))
 							{
@@ -465,12 +469,6 @@ CTestScene_Card::~CTestScene_Card()
 
 bool CTestScene_Card::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	POINT m_ptOldCursorPos;
-	
-
-
-	//std::vector<CGameObject*>* GetObjectList() { return m_pvObjectManager; };
-
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
