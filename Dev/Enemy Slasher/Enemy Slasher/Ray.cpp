@@ -88,15 +88,88 @@ bool CRay::IntersectsAABB(CAABB& aabb)
     XMFLOAT3 aabbMin = Vector3::Subtract(center, edgeDist);
     XMFLOAT3 aabbMax = Vector3::Add(center, edgeDist);
 
-    float t1 = (aabbMin.x - m_vOriginal.x) / m_xmf3Dir.x;
-    float t2 = (aabbMax.x - m_vOriginal.x) / m_xmf3Dir.x;
-    float t3 = (aabbMin.y - m_vOriginal.y) / m_xmf3Dir.y;
-    float t4 = (aabbMax.y - m_vOriginal.y) / m_xmf3Dir.y;
-    float t5 = (aabbMin.z - m_vOriginal.z) / m_xmf3Dir.z;
-    float t6 = (aabbMax.z - m_vOriginal.z) / m_xmf3Dir.z;
+    XMFLOAT3 x(1, 0, 0);
+    XMFLOAT3 y(0, 1, 0);
+    XMFLOAT3 z(0, 0, 1);
+    XMFLOAT3 dist = Vector3::Subtract(center, m_vOriginal);
+    
+    float s1, s2;
+    float dot = Vector3::DotProduct(x, m_xmf3Dir);
+    if (dot > FLT_EPSILON)
+    {
+        s1 = (Vector3::DotProduct(x, dist) + edgeDist.x) / dot;
+        s2 = (Vector3::DotProduct(x, dist) - edgeDist.x) / dot;
+#ifdef _DEBUG
+        //std::cout <<"x: " << s1 << ", " << s2 << std::endl;
+#endif // _DEBUG
+    }
+    else 
+    {
+#ifdef _DEBUG
+        //std::cout << "x exit: " << -(Vector3::DotProduct(x, dist)) - edgeDist.x << ", " << -(Vector3::DotProduct(x, dist)) + edgeDist.x << std::endl;
+#endif // _DEBUG
+        if ((-(Vector3::DotProduct(x, dist)) - edgeDist.x > 0) || (-(Vector3::DotProduct(x, dist)) + edgeDist.x < 0))
+            return false;
+        else
+            return true;
+    }
+    float s3 =0 , s4=0;
+    dot = Vector3::DotProduct(y, m_xmf3Dir);
+    if (dot > FLT_EPSILON)
+    {
+        s3 = (Vector3::DotProduct(y, dist) + edgeDist.y) / dot;
+        s4 = (Vector3::DotProduct(y, dist) - edgeDist.y) / dot;
+#ifdef _DEBUG
+        //std::cout <<"y: " << s3 << ", " << s4 << std::endl;
+#endif // _DEBUG
+    }
+    else
+    {
+#ifdef _DEBUG
+        //std::cout << "y exit: " << -(Vector3::DotProduct(y, dist)) - edgeDist.y << ", " << -(Vector3::DotProduct(y, dist)) + edgeDist.y << std::endl;
+#endif // _DEBUG
+        if ((-(Vector3::DotProduct(y, dist)) - edgeDist.y > 0) || (-(Vector3::DotProduct(x, dist)) + edgeDist.y < 0))
+            return false;
+        else
+            return true;
+    }
+    float s5=0, s6=0;
+    dot = Vector3::DotProduct(z, m_xmf3Dir);
+    if (dot > FLT_EPSILON)
+    {
+        s5 = (Vector3::DotProduct(z, dist) + edgeDist.z) / dot;
+        s6 = (Vector3::DotProduct(z, dist) - edgeDist.z) / dot;
+#ifdef _DEBUG
+        //std::cout <<"z: " << s5 << ", " << s6 << std::endl;
+#endif // _DEBUG
+    }
+    else
+    {
+#ifdef _DEBUG
+        //std::cout << "z exit: " << -(Vector3::DotProduct(z, dist)) - edgeDist.z << ", " << -(Vector3::DotProduct(z, dist)) + edgeDist.z << std::endl;
+#endif // _DEBUG
+        if ((-(Vector3::DotProduct(z, dist)) - edgeDist.z > 0) || (-(Vector3::DotProduct(x, dist)) + edgeDist.z < 0))
+            return false;
+        else
+            return true;
+    }
 
-    float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
-    float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+    float tmin = max(max(min(s1, s2), min(s3, s4)), min(s5, s6));
+    float tmax = min(min(max(s1, s2), max(s3, s4)), max(s5, s6));
+
+    //float t1 = (aabbMin.x - m_vOriginal.x) / m_xmf3Dir.x;
+    //float t2 = (aabbMax.x - m_vOriginal.x) / m_xmf3Dir.x;
+    //float t3 = (aabbMin.y - m_vOriginal.y) / m_xmf3Dir.y;
+    //float t4 = (aabbMax.y - m_vOriginal.y) / m_xmf3Dir.y;
+    //float t5 = (aabbMin.z - m_vOriginal.z) / m_xmf3Dir.z;
+    //float t6 = (aabbMax.z - m_vOriginal.z) / m_xmf3Dir.z;
+
+    //float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+    //float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+
+#ifdef _DEBUG
+    //std::cout<<"inax" << tmin << ", " << tmax << std::endl;
+#endif // _DEBUG
 
     if (tmax < 0) // Ray의 방향이 AABB 뒤에 있는 경우
         return false;

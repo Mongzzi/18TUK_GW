@@ -373,15 +373,21 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 }
 
-CAABB* CFBXMesh::GetAABB()
+CAABB* CFBXMesh::GetAABB(XMFLOAT4X4 m_xmf4x4World)
 {
 	float xMin = FLT_MAX, yMin = FLT_MAX, zMin = FLT_MAX;
 	float xMax = FLT_MIN, yMax = FLT_MIN, zMax = FLT_MIN;
 
+	XMFLOAT3 ver;
+
 	for (int i = 0;i < m_nVertices;i++) {
-		float x = pVertices[i].GetVertex().x;
-		float y = pVertices[i].GetVertex().y;
-		float z = pVertices[i].GetVertex().z;
+		ver = pVertices[i].GetVertex();
+		
+		XMMATRIX mat = XMLoadFloat4x4(&m_xmf4x4World);
+		XMStoreFloat3(&ver, XMVector3TransformCoord(XMLoadFloat3(&ver), mat));
+		float x = ver.x;
+		float y = ver.y;
+		float z = ver.z;
 
 		if (x < xMin) xMin = x;
 		if (y < yMin) yMin = y;
@@ -392,7 +398,8 @@ CAABB* CFBXMesh::GetAABB()
 		if (z > zMax) zMax = z;
 	}
 
-	CAABB* aabb = new CAABB(XMFLOAT3((xMax + xMin) / 2, (yMax + yMin) / 2, (zMax + zMin) / 2), XMFLOAT3((xMax - xMin) / 2, (yMax - yMin) / 2, (zMax - zMin) / 2));
+	CAABB* aabb = new CAABB(XMFLOAT3((xMax + xMin) / 2, (yMax + yMin) / 2, (zMax + zMin) / 2 ), XMFLOAT3((xMax - xMin) / 2, (yMax - yMin) / 2, (zMax - zMin) / 2));
+	//CAABB* aabb = new CAABB(XMFLOAT3((xMax + xMin) / 2 + m_xmf4x4World._41, (yMax + yMin) / 2 + m_xmf4x4World._42, (zMax + zMin) / 2 + m_xmf4x4World._43 ), XMFLOAT3((xMax - xMin) / 2, (yMax - yMin) / 2, (zMax - zMin) / 2));
 	return aabb;
 }
 

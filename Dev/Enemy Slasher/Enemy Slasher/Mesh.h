@@ -129,7 +129,7 @@ public:
 	Vertex_Color* GetVertices() { return pVertices; };
 	UINT* GetUnit() { return pnIndices; };
 
-	CAABB* GetAABB();
+	CAABB* GetAABB(XMFLOAT4X4 m_xmf4x4World);
 };
 
 // ------------------------------- ≈Õ∑π¿Œ ∏  -----------------------------------
