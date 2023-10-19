@@ -408,10 +408,10 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 							CFBXObject* obj = (CFBXObject*)pOM[lc][i];
 							CAABB* aabb = obj->GetAABB();
 #ifdef _DEBUG
-							std::cout << "count: " << i << " IntersectsAABB: " << r.IntersectsAABB(*aabb) << std::endl;
-							std::cout << obj->GetPosition().x << ", " << obj->GetPosition().y << ", " << obj->GetPosition().z << std::endl;
-							std::cout << aabb->GetCenter().x << ", " << aabb->GetCenter().y << ", " << aabb->GetCenter().z << std::endl;
-							std::cout << aabb->GetEdgeDistances().x << ", " << aabb->GetEdgeDistances().y << ", " << aabb->GetEdgeDistances().z << std::endl;
+							//std::cout << "count: " << i << " IntersectsAABB: " << r.IntersectsAABB(*aabb) << std::endl;
+							//std::cout << obj->GetPosition().x << ", " << obj->GetPosition().y << ", " << obj->GetPosition().z << std::endl;
+							//std::cout << aabb->GetCenter().x << ", " << aabb->GetCenter().y << ", " << aabb->GetCenter().z << std::endl;
+							//std::cout << aabb->GetEdgeDistances().x << ", " << aabb->GetEdgeDistances().y << ", " << aabb->GetEdgeDistances().z << std::endl;
 #endif // _DEBUG
 							if (r.IntersectsAABB(*aabb))
 							{
