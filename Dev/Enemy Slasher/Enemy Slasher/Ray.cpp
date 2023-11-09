@@ -21,9 +21,15 @@ CRay CRay::RayAtWorldSpace(int x, int y, CCamera camera)
 	XMMATRIX mat = XMLoadFloat4x4(&invView);
 	XMStoreFloat3(&r.m_vOriginal, XMVector3TransformCoord(XMLoadFloat3(&r.m_vOriginal), mat));
 	// 뷰의 역행렬을 이용해서 방향벡터를 변환
-	XMStoreFloat3(&r.m_vOriginal, XMVector3TransformNormal(XMLoadFloat3(&r.m_vOriginal), mat));
+    XMStoreFloat3(&r.m_xmf3Dir, XMVector3TransformNormal(XMLoadFloat3(&r.m_xmf3Dir), mat));
+    auto tmp = r.m_xmf3Dir.z;
+    r.m_xmf3Dir.z = r.m_xmf3Dir.x;
+    r.m_xmf3Dir.x = -tmp;
 	// 방향벡터를 정규화
 	r.m_xmf3Dir = Vector3::Normalize(r.m_xmf3Dir);
+#ifdef _DEBUG
+    //std::cout << "m_vOriginal: " << int(r.m_vOriginal.x) << ", " << int(r.m_vOriginal.y) << ", " << int(r.m_vOriginal.z) << ", " << "m_xmf3Dir: " << r.m_xmf3Dir.x << ", " << r.m_xmf3Dir.y << ", " << r.m_xmf3Dir.z << ", " << std::endl;
+#endif // _DEBUG
 	return r;
 }
 
@@ -35,11 +41,20 @@ CRay CRay::RayAtViewSpace(int x, int y, CCamera camera)
 	XMFLOAT4X4 projection = camera.GetProjectionMatrix();
 
 	CRay r;
-
+    // 이거 축이 조 ㅁ이상한데? y, z
 	r.m_xmf3Dir.x = ((2.f * x) / viewPort.Width - 1.f) / projection._11;
 	r.m_xmf3Dir.y = ((-2.f * y) / viewPort.Height + 1.f) / projection._22;
 	r.m_xmf3Dir.z = 1.0;
+    //
+    r.m_vOriginal.x = ((2.f * x) / viewPort.Width - 1.f);
+    r.m_vOriginal.y = ((-2.f * y) / viewPort.Height + 1.f);
+    r.m_vOriginal.z = 0;
 
+#ifdef _DEBUG
+    /*std::cout << "projection._11: " << projection._11 << std::endl;
+    std::cout << "projection._22: " << projection._22 << std::endl;
+    std::cout << "m_xmf3Dir: " << r.m_xmf3Dir.x << ", " << r.m_xmf3Dir.y << ", " << r.m_xmf3Dir.z << ", " << std::endl;*/
+#endif // _DEBUG
 	return r;
 }
 
@@ -83,6 +98,9 @@ bool CRay::RayIntersectsTriangle(CRay& ray, XMFLOAT3& vertex1, XMFLOAT3& vertex2
 
 bool CRay::IntersectsAABB(CAABB& aabb)
 {
+#ifdef _DEBUG
+    //std::cout << "m_vOriginal: " << int(m_vOriginal.x) << ", " << int(m_vOriginal.y) << ", " << int(m_vOriginal.z) << ", " << "m_xmf3Dir: " << m_xmf3Dir.x << ", " << m_xmf3Dir.y << ", " << m_xmf3Dir.z << ", " << std::endl;
+#endif // _DEBUG
     XMFLOAT3 center = aabb.GetCenter();
     XMFLOAT3 edgeDist = aabb.GetEdgeDistances();
     XMFLOAT3 aabbMin = Vector3::Subtract(center, edgeDist);
