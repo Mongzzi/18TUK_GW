@@ -11,6 +11,8 @@ CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 
 CMesh::~CMesh()
 {
+	if (m_pVertices) delete m_pVertices;
+
 	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
 	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
@@ -269,6 +271,98 @@ CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 CBoxMesh::~CBoxMesh()
 {
 }
+
+
+CAABBMesh::CAABBMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices) : CMesh(pd3dDevice, pd3dCommandList)
+{
+
+}
+
+CAABBMesh::~CAABBMesh()
+{
+}
+
+void CAABBMesh::MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (!m_pVertices) return; // 만약 본래 Mesh가 없다면 만들지 않는다.
+
+	m_nAABBVertices = 8;			 // 꼭지점 개수
+	m_nAABBStride = sizeof(CVertex); // x , y, z 좌표
+	m_d3dAABBPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	float min_x = FLT_MIN, max_x = FLT_MAX,
+		min_y = FLT_MIN, max_y = FLT_MAX,
+		min_z = FLT_MIN, max_z = FLT_MAX;
+
+	XMFLOAT3 vertex;
+	for (int i = 0; i < m_nVertices; ++i) {
+		vertex = m_pVertices[i].m_xmf3Vertex;
+		if (vertex.x < min_x) min_x = vertex.x;
+		if (vertex.y < min_y) min_y = vertex.y;
+		if (vertex.z < min_z) min_z = vertex.z;
+		if (vertex.x > max_x) max_x = vertex.x;
+		if (vertex.y > max_y) max_y = vertex.y;
+		if (vertex.z > max_z) max_z = vertex.z;
+	}
+
+	m_pAABBVertices = new CVertex[m_nAABBVertices];
+	m_pAABBVertices[0] = CVertex(XMFLOAT3(min_x, max_y, min_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pAABBVertices[1] = CVertex(XMFLOAT3(max_x, max_y, min_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pAABBVertices[2] = CVertex(XMFLOAT3(max_x, max_y, max_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pAABBVertices[3] = CVertex(XMFLOAT3(min_x, max_y, max_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pAABBVertices[4] = CVertex(XMFLOAT3(min_x, min_y, min_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pAABBVertices[5] = CVertex(XMFLOAT3(max_x, min_y, min_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pAABBVertices[6] = CVertex(XMFLOAT3(max_x, min_y, max_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pAABBVertices[7] = CVertex(XMFLOAT3(min_x, min_y, max_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	// 버퍼생성
+	m_pd3dAABBVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pAABBVertices, m_nAABBStride * m_nAABBVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dAABBVertexUploadBuffer);
+
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dAABBVertexBufferView.BufferLocation = m_pd3dAABBVertexBuffer->GetGPUVirtualAddress();
+	m_d3dAABBVertexBufferView.StrideInBytes = m_nAABBStride;
+	m_d3dAABBVertexBufferView.SizeInBytes = m_nAABBStride * m_nAABBVertices;
+
+	m_nAABBIndices = 36;
+	UINT pnIndices[36];
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	pnIndices[0] = 3; pnIndices[1] = 1; pnIndices[2] = 0;
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	pnIndices[3] = 2; pnIndices[4] = 1; pnIndices[5] = 3;
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	pnIndices[6] = 0; pnIndices[7] = 5; pnIndices[8] = 4;
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	pnIndices[9] = 1; pnIndices[10] = 5; pnIndices[11] = 0;
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	pnIndices[12] = 3; pnIndices[13] = 4; pnIndices[14] = 7;
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	pnIndices[15] = 0; pnIndices[16] = 4; pnIndices[17] = 3;
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	pnIndices[18] = 1; pnIndices[19] = 6; pnIndices[20] = 5;
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	pnIndices[21] = 2; pnIndices[22] = 6; pnIndices[23] = 1;
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	pnIndices[24] = 2; pnIndices[25] = 7; pnIndices[26] = 6;
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	pnIndices[27] = 3; pnIndices[28] = 7; pnIndices[29] = 2;
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	pnIndices[30] = 6; pnIndices[31] = 4; pnIndices[32] = 5;
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	pnIndices[33] = 7; pnIndices[34] = 4; pnIndices[35] = 6;
+
+	//인덱스 버퍼를 생성한다. 
+	m_pd3dAABBIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nAABBIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dAABBIndexUploadBuffer);
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dAABBIndexBufferView.BufferLocation = m_pd3dAABBIndexBuffer->GetGPUVirtualAddress();
+	m_d3dAABBIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dAABBIndexBufferView.SizeInBytes = sizeof(UINT) * m_nAABBIndices;
+}
+
+void CAABBMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+
 
 CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {

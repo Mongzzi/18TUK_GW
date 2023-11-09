@@ -230,6 +230,49 @@ void CGameObject::SetShaderType(ShaderType shaderType)
 	if (m_pMaterial) m_pMaterial->SetShaderType(shaderType); 
 }
 
+
+
+CInteractiveObject::CInteractiveObject(int nMeshes) : CGameObject(nMeshes)
+{
+	if (m_nMeshes > 0)
+	{
+		m_ppAABBMeshes = new CAABBMesh * [m_nMeshes + 1];
+		for (int i = 0; i < m_nMeshes + 1; i++) m_ppAABBMeshes[i] = NULL;
+	}
+	CGameObject::SetShaderType(ShaderType::CObjectsShader);
+}
+
+CInteractiveObject::~CInteractiveObject()
+{
+	if (m_ppAABBMeshes)
+	{
+		for (int i = 0; i < m_nMeshes + 1; i++)
+		{
+			if (m_ppAABBMeshes[i]) m_ppAABBMeshes[i]->Release();
+			m_ppAABBMeshes[i] = NULL;
+		}
+		delete[] m_ppAABBMeshes;
+	}
+}
+
+void CInteractiveObject::SetMesh(int nIndex, CMesh* pMesh)
+{
+	if (m_ppAABBMeshes)
+	{
+		if (m_ppAABBMeshes[nIndex + 1]) m_ppAABBMeshes[nIndex + 1]->Release();
+
+		//m_ppAABBMeshes[nIndex + 1] = pMesh;
+		//if (pMesh) pMesh->AddRef();
+	}
+}
+
+void CInteractiveObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+
+}
+
+
+
 CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);

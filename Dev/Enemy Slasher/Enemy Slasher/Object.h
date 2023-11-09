@@ -120,6 +120,19 @@ public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 };
 
+class CInteractiveObject : CGameObject
+{
+public:
+	CInteractiveObject(int nMeshes = 1);
+	virtual ~CInteractiveObject();
+protected:
+	CAABBMesh** m_ppAABBMeshes = NULL;
+
+public:
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+};
+
 class CRotatingObject : public CGameObject
 {
 public:

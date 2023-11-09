@@ -2,6 +2,33 @@
 #include "FbxLoader.h"
 #include "BoundingBox.h"
 
+class CVertex
+{
+private:
+
+public:
+	XMFLOAT3 m_xmf3Vertex;
+	XMFLOAT4 m_xmf4Color;
+public:
+	CVertex(XMFLOAT3 v, XMFLOAT4 c) : m_xmf3Vertex{ v }, m_xmf4Color{ c } {}
+
+	CVertex() {
+		m_xmf3Vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_xmf4Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	}
+	CVertex(float x, float y, float z, XMFLOAT4 c) {
+		m_xmf3Vertex = XMFLOAT3(x, y, z);
+		m_xmf4Color = c;
+	}
+	~CVertex() { }
+
+	//XMFLOAT3 GetVertex() { return m_xmf3Vertex; };
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
 class CMesh
 {
 public:
@@ -17,6 +44,8 @@ public:
 	void ReleaseUploadBuffers();
 
 protected:
+	CVertex* m_pVertices = NULL;
+
 	ID3D12Resource* m_pd3dVertexBuffer = NULL;
 	ID3D12Resource* m_pd3dVertexUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW m_d3dVertexBufferView;
@@ -110,6 +139,41 @@ class CBoxMesh : public CMesh
 public:
 	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
 	virtual ~CBoxMesh();
+};
+
+
+class CAABBMesh : public CMesh
+{
+public:
+	CAABBMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
+	virtual ~CAABBMesh();
+
+protected:
+	CVertex* m_pAABBVertices = NULL;
+
+	ID3D12Resource* m_pd3dAABBVertexBuffer = NULL;
+	ID3D12Resource* m_pd3dAABBVertexUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW m_d3dAABBVertexBufferView;
+
+	D3D12_PRIMITIVE_TOPOLOGY m_d3dAABBPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	UINT m_nAABBSlot = 0;
+	UINT m_nAABBVertices = 0;
+	UINT m_nAABBStride = 0;
+	UINT m_nAABBOffset = 0;
+
+protected:
+	ID3D12Resource* m_pd3dAABBIndexBuffer = NULL;
+	ID3D12Resource* m_pd3dAABBIndexUploadBuffer = NULL;
+	D3D12_INDEX_BUFFER_VIEW m_d3dAABBIndexBufferView;
+
+	UINT m_nAABBIndices = 0;	// 인덱스 버퍼에 포함되는 인덱스의 개수
+	UINT m_nAABBStartIndex = 0; // 인덱스 버퍼에서 메쉬를 그리기 위해 사용되는 시작 인덱스
+	int m_nAABBBaseVertex = 0;  // 인덱스 버퍼의 인덱스에 더해질 인덱스
+
+public:
+	virtual void MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 // ------------------------------- FBX -----------------------------------
