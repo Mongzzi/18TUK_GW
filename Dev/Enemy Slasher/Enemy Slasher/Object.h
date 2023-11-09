@@ -120,6 +120,7 @@ public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 };
 
+
 class CInteractiveObject : public CGameObject
 {
 public:
@@ -128,7 +129,19 @@ public:
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+	XMFLOAT3 GetAABBMaxPos(int nIndex) {
+		XMFLOAT3 pos = ((CAABBMesh*)(m_ppMeshes[nIndex]))->GetAABBMaxPos();
+		XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
+		return pos;
+	}
+	XMFLOAT3 GetAABBMinPos(int nIndex) {
+		XMFLOAT3 pos = ((CAABBMesh*)(m_ppMeshes[nIndex]))->GetAABBMinPos();
+		XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
+		return pos;
+	}
 };
+
 
 class CRotatingObject : public CGameObject
 {

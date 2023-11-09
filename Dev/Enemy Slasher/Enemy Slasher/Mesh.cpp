@@ -324,6 +324,9 @@ void CAABBMesh::MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		if (vertex.z > max_z) max_z = vertex.z;
 	}
 
+	m_xmf3MaxPos = XMFLOAT3(max_x, max_y, max_z);
+	m_xmf3MinPos = XMFLOAT3(min_x, min_y, min_z);
+
 	m_pAABBVertices = new CVertex[m_nAABBVertices];
 	m_pAABBVertices[0] = CVertex(XMFLOAT3(min_x, max_y, min_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 	m_pAABBVertices[1] = CVertex(XMFLOAT3(max_x, max_y, min_z), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));

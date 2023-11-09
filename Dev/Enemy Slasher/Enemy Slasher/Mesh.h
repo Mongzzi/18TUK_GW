@@ -142,6 +142,9 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 protected:
+	XMFLOAT3 m_xmf3MinPos;
+	XMFLOAT3 m_xmf3MaxPos;
+
 	CVertex* m_pAABBVertices = NULL;
 
 	ID3D12Resource* m_pd3dAABBVertexBuffer = NULL;
@@ -167,6 +170,9 @@ protected:
 public:
 	virtual void MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	XMFLOAT3 GetAABBMinPos() { return m_xmf3MinPos; }
+	XMFLOAT3 GetAABBMaxPos() { return m_xmf3MaxPos; }
 };
 
 class CBoxMesh : public CAABBMesh
