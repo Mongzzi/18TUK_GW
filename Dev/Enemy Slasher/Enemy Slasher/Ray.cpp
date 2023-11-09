@@ -124,7 +124,7 @@ bool CRay::IntersectsAABB(CAABB& aabb)
     else 
     {
 #ifdef _DEBUG
-        std::cout << "x exit: " << -(Vector3::DotProduct(x, dist)) - edgeDist.x << ", " << -(Vector3::DotProduct(x, dist)) + edgeDist.x << std::endl;
+        //std::cout << "x exit: " << -(Vector3::DotProduct(x, dist)) - edgeDist.x << ", " << -(Vector3::DotProduct(x, dist)) + edgeDist.x << std::endl;
 #endif // _DEBUG
         if ((-(Vector3::DotProduct(x, dist)) - edgeDist.x > 0) || (-(Vector3::DotProduct(x, dist)) + edgeDist.x < 0))
             return false;
