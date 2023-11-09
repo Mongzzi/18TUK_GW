@@ -22,7 +22,7 @@ public:
 	}
 	~CVertex() { }
 
-	//XMFLOAT3 GetVertex() { return m_xmf3Vertex; };
+	XMFLOAT3 GetVertex() { return m_xmf3Vertex; };
 };
 
 
@@ -41,7 +41,7 @@ private:
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
-	void ReleaseUploadBuffers();
+	virtual void ReleaseUploadBuffers();
 
 protected:
 	CVertex* m_pVertices = NULL;
@@ -68,7 +68,7 @@ protected:
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-
+	virtual void RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList) {};
 };
 
 
@@ -132,21 +132,14 @@ public:
 	virtual ~CCubeMeshIlluminated();
 };
 
-
-class CBoxMesh : public CMesh
-{
-
-public:
-	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
-	virtual ~CBoxMesh();
-};
-
-
 class CAABBMesh : public CMesh
 {
 public:
-	CAABBMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
+	CAABBMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CAABBMesh();
+
+public:
+	virtual void ReleaseUploadBuffers();
 
 protected:
 	CVertex* m_pAABBVertices = NULL;
@@ -173,15 +166,22 @@ protected:
 
 public:
 	virtual void MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList);
+};
+
+class CBoxMesh : public CAABBMesh
+{
+
+public:
+	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
+	virtual ~CBoxMesh();
 };
 
 // ------------------------------- FBX -----------------------------------
 
-class CFBXMesh : public CMesh
+class CFBXMesh : public CAABBMesh
 {
 private:
-	Vertex_Color* pVertices;
 	UINT* pnIndices;
 
 public:
@@ -190,7 +190,7 @@ public:
 
 	void LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
 
-	Vertex_Color* GetVertices() { return pVertices; };
+	CVertex* GetVertices() { return m_pVertices; };
 	UINT* GetUnit() { return pnIndices; };
 
 	CAABB* GetAABB(XMFLOAT4X4 m_xmf4x4World);

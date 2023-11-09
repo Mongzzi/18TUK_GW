@@ -830,13 +830,11 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	{
 		CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-		CRotatingObject* pRotatingObject = NULL;
+		CInteractiveObject* pRotatingObject = NULL;
 
-		pRotatingObject = new CRotatingObject();
+		pRotatingObject = new CInteractiveObject();
 		pRotatingObject->SetMesh(0, pCubeMesh);
 		pRotatingObject->SetPosition(-50.0f, 40.0f, 100.0f);
-		pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-		pRotatingObject->SetRotationSpeed(0);
 		pRotatingObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
 	}

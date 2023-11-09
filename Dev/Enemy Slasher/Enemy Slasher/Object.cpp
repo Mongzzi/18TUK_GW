@@ -234,41 +234,31 @@ void CGameObject::SetShaderType(ShaderType shaderType)
 
 CInteractiveObject::CInteractiveObject(int nMeshes) : CGameObject(nMeshes)
 {
-	if (m_nMeshes > 0)
-	{
-		m_ppAABBMeshes = new CAABBMesh * [m_nMeshes + 1];
-		for (int i = 0; i < m_nMeshes + 1; i++) m_ppAABBMeshes[i] = NULL;
-	}
 	CGameObject::SetShaderType(ShaderType::CObjectsShader);
 }
 
 CInteractiveObject::~CInteractiveObject()
 {
-	if (m_ppAABBMeshes)
-	{
-		for (int i = 0; i < m_nMeshes + 1; i++)
-		{
-			if (m_ppAABBMeshes[i]) m_ppAABBMeshes[i]->Release();
-			m_ppAABBMeshes[i] = NULL;
-		}
-		delete[] m_ppAABBMeshes;
-	}
-}
-
-void CInteractiveObject::SetMesh(int nIndex, CMesh* pMesh)
-{
-	if (m_ppAABBMeshes)
-	{
-		if (m_ppAABBMeshes[nIndex + 1]) m_ppAABBMeshes[nIndex + 1]->Release();
-
-		//m_ppAABBMeshes[nIndex + 1] = pMesh;
-		//if (pMesh) pMesh->AddRef();
-	}
 }
 
 void CInteractiveObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	OnPrepareRender();
 
+	//객체의 정보를 셰이더 변수(상수 버퍼)로 복사한다. 
+	UpdateShaderVariables(pd3dCommandList);
+
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i])
+			{
+				m_ppMeshes[i]->Render(pd3dCommandList);
+				m_ppMeshes[i]->RenderAABB(pd3dCommandList);
+			}
+		}
+	}
 }
 
 
@@ -330,7 +320,7 @@ void CRotatingObject::Animate(float fTimeElapsed)
 }
 
 
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CGameObject(1)//  모델에 mesh가 한개만 생성되도록
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CInteractiveObject(1)//  모델에 mesh가 한개만 생성되도록
 {
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;

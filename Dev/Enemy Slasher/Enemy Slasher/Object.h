@@ -120,16 +120,13 @@ public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 };
 
-class CInteractiveObject : CGameObject
+class CInteractiveObject : public CGameObject
 {
 public:
 	CInteractiveObject(int nMeshes = 1);
 	virtual ~CInteractiveObject();
-protected:
-	CAABBMesh** m_ppAABBMeshes = NULL;
 
 public:
-	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
 
@@ -166,7 +163,7 @@ private:
 
 
 
-class CFBXObject : public CGameObject
+class CFBXObject : public CInteractiveObject
 {
 public:
 	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName = "fbxsdk/Box001.fbx");
