@@ -304,9 +304,25 @@ void CAABBMesh::MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 {
 	if (!m_pVertices) return; // 만약 본래 Mesh가 없다면 만들지 않는다.
 
+	if (m_pAABBVertices) { // 이미 AABB가 있다면 지우고 다시 만든다.
+		delete[] m_pAABBVertices;
+
+		if (m_pd3dAABBVertexBuffer) m_pd3dAABBVertexBuffer->Release();
+		m_pd3dAABBVertexBuffer = NULL;
+
+		if (m_pd3dAABBIndexBuffer) m_pd3dAABBIndexBuffer->Release();
+		m_pd3dAABBIndexBuffer = NULL;
+
+		if (m_pd3dAABBVertexUploadBuffer) m_pd3dAABBVertexUploadBuffer->Release();
+		m_pd3dAABBVertexUploadBuffer = NULL;
+
+		if (m_pd3dAABBIndexUploadBuffer) m_pd3dAABBIndexUploadBuffer->Release();
+		m_pd3dAABBIndexUploadBuffer = NULL;
+	}
+
+
 	m_nAABBVertices = 8;			 // 꼭지점 개수
 	m_nAABBStride = sizeof(CVertex); // x , y, z 좌표
-	//m_d3dAABBPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	m_d3dAABBPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
 
 	float min_x = FLT_MAX, max_x = FLT_MIN,
@@ -383,14 +399,12 @@ void CAABBMesh::RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList)
 	//메쉬의 정점 버퍼 뷰를 설정한다. 
 	pd3dCommandList->IASetVertexBuffers(m_nAABBSlot, 1, &m_d3dAABBVertexBufferView);
 
-
 	if (m_pd3dAABBIndexBuffer)
 	{
 		pd3dCommandList->IASetIndexBuffer(&m_d3dAABBIndexBufferView);
 		pd3dCommandList->DrawIndexedInstanced(m_nAABBIndices, 1, 0, 0, 0);
 		//인덱스 버퍼가 있으면 인덱스 버퍼를 파이프라인(IA: 입력 조립기)에 연결하고 인덱스를 사용하여 렌더링한다. 
 	}
-
 	else
 	{
 		//메쉬의 정점 버퍼 뷰를 렌더링한다(파이프라인(입력 조립기)을 작동하게 한다).
