@@ -234,6 +234,7 @@ void CGameObject::SetShaderType(ShaderType shaderType)
 
 CInteractiveObject::CInteractiveObject(int nMeshes) : CGameObject(nMeshes)
 {
+	XMStoreFloat4x4(&m_xmf4x4Rotate, XMMatrixIdentity());
 	CGameObject::SetShaderType(ShaderType::CObjectsShader);
 }
 
@@ -247,6 +248,7 @@ void CInteractiveObject::Rotate(float fPitch, float fYaw, float fRoll)
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch),
 		XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	m_xmf4x4Rotate = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Rotate);
 }
 
 void CInteractiveObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
@@ -254,6 +256,7 @@ void CInteractiveObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	m_xmf4x4Rotate = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Rotate);
 }
 
 void CInteractiveObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

@@ -281,6 +281,8 @@ CAABBMesh::CAABBMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 CAABBMesh::~CAABBMesh()
 {
+	if(m_pAABBVertices) delete[] m_pAABBVertices;
+	if(m_pnIndices) delete[] m_pnIndices;
 }
 
 void CAABBMesh::ReleaseUploadBuffers()
@@ -306,6 +308,8 @@ void CAABBMesh::MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	if (m_pAABBVertices) { // 이미 AABB가 있다면 지우고 다시 만든다.
 		delete[] m_pAABBVertices;
+
+		if(m_pnIndices) delete[] m_pnIndices;
 
 		if (m_pd3dAABBVertexBuffer) m_pd3dAABBVertexBuffer->Release();
 		m_pd3dAABBVertexBuffer = NULL;
@@ -363,28 +367,28 @@ void CAABBMesh::MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	m_nAABBIndices = 24;
 	int AABBIndexer = 0;
-	UINT pnIndices[24];
+	m_pnIndices = new UINT[m_nAABBIndices];
 	// 윗면
-	pnIndices[AABBIndexer++] = 0; pnIndices[AABBIndexer++] = 1;
-	pnIndices[AABBIndexer++] = 1; pnIndices[AABBIndexer++] = 2;
-	pnIndices[AABBIndexer++] = 2; pnIndices[AABBIndexer++] = 3;
-	pnIndices[AABBIndexer++] = 3; pnIndices[AABBIndexer++] = 0;
+	m_pnIndices[AABBIndexer++] = 0; m_pnIndices[AABBIndexer++] = 1;
+	m_pnIndices[AABBIndexer++] = 1; m_pnIndices[AABBIndexer++] = 2;
+	m_pnIndices[AABBIndexer++] = 2; m_pnIndices[AABBIndexer++] = 3;
+	m_pnIndices[AABBIndexer++] = 3; m_pnIndices[AABBIndexer++] = 0;
 
 	// 아랫면
-	pnIndices[AABBIndexer++] = 4; pnIndices[AABBIndexer++] = 5;
-	pnIndices[AABBIndexer++] = 5; pnIndices[AABBIndexer++] = 6;
-	pnIndices[AABBIndexer++] = 6; pnIndices[AABBIndexer++] = 7;
-	pnIndices[AABBIndexer++] = 7; pnIndices[AABBIndexer++] = 4;
+	m_pnIndices[AABBIndexer++] = 4; m_pnIndices[AABBIndexer++] = 5;
+	m_pnIndices[AABBIndexer++] = 5; m_pnIndices[AABBIndexer++] = 6;
+	m_pnIndices[AABBIndexer++] = 6; m_pnIndices[AABBIndexer++] = 7;
+	m_pnIndices[AABBIndexer++] = 7; m_pnIndices[AABBIndexer++] = 4;
 
 	// 기둥
-	pnIndices[AABBIndexer++] = 0; pnIndices[AABBIndexer++] = 4;
-	pnIndices[AABBIndexer++] = 1; pnIndices[AABBIndexer++] = 5;
-	pnIndices[AABBIndexer++] = 2; pnIndices[AABBIndexer++] = 6;
-	pnIndices[AABBIndexer++] = 3; pnIndices[AABBIndexer++] = 7;
+	m_pnIndices[AABBIndexer++] = 0; m_pnIndices[AABBIndexer++] = 4;
+	m_pnIndices[AABBIndexer++] = 1; m_pnIndices[AABBIndexer++] = 5;
+	m_pnIndices[AABBIndexer++] = 2; m_pnIndices[AABBIndexer++] = 6;
+	m_pnIndices[AABBIndexer++] = 3; m_pnIndices[AABBIndexer++] = 7;
 
 
 	//인덱스 버퍼를 생성한다. 
-	m_pd3dAABBIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nAABBIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dAABBIndexUploadBuffer);
+	m_pd3dAABBIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nAABBIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dAABBIndexUploadBuffer);
 	//인덱스 버퍼 뷰를 생성한다. 
 	m_d3dAABBIndexBufferView.BufferLocation = m_pd3dAABBIndexBuffer->GetGPUVirtualAddress();
 	m_d3dAABBIndexBufferView.Format = DXGI_FORMAT_R32_UINT;

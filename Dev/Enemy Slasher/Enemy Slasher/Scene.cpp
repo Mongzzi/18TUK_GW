@@ -899,9 +899,8 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 		pObject_cuttur->MoveStrafe(0.04);
 
 		if (CollisionCheck(pObject_stone, pObject_cuttur)) {
+			cout << "Collision\n";
 		}
-
-
 
 	}
 	//if (!pvObjectList[(int)ObjectLayer::Terrain].empty() && !pvObjectList[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면

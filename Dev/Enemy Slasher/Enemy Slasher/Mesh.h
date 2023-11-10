@@ -163,6 +163,8 @@ protected:
 	ID3D12Resource* m_pd3dAABBIndexUploadBuffer = NULL;
 	D3D12_INDEX_BUFFER_VIEW m_d3dAABBIndexBufferView;
 
+	UINT* m_pnIndices = NULL;
+
 	UINT m_nAABBIndices = 0;	// 인덱스 버퍼에 포함되는 인덱스의 개수
 	UINT m_nAABBStartIndex = 0; // 인덱스 버퍼에서 메쉬를 그리기 위해 사용되는 시작 인덱스
 	int m_nAABBBaseVertex = 0;  // 인덱스 버퍼의 인덱스에 더해질 인덱스

@@ -115,6 +115,7 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Render2D() {};
 
 public:
 	virtual void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
