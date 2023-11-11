@@ -403,7 +403,10 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 		if (cxDelta || cyDelta)
 		{
 			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+			{
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+
+			}
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
 				for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
@@ -430,6 +433,9 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 					{
 						CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
 						rayOb->Reset(r);
+#ifdef _DEBUG
+						std::cout << "m_xmf3Look: " << m_pPlayer->GetCamera()->GetLookVector().x << ", " << m_pPlayer->GetCamera()->GetLookVector().y << ", " << m_pPlayer->GetCamera()->GetLookVector().z << std::endl;
+#endif // _DEBUG
 					}
 				}
 			}
