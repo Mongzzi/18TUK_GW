@@ -557,3 +557,45 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext)
 	//	s_brushes[m_brush].Get()
 	//);
 }
+
+CRayObject::CRayObject() : CInteractiveObject()
+{
+	m_vOriginal = { 0,0,0 };
+	m_xmf3DirOld = { 1,0,0 };
+}
+
+CRayObject::~CRayObject()
+{
+}
+
+void CRayObject::Reset(CRay ray)
+{
+	m_vOriginal = ray.GetOriginal();
+
+	XMVECTOR vFrom = XMLoadFloat3(&m_xmf3DirOld);
+	XMFLOAT3 dir = ray.GetDir();
+	XMVECTOR vTo = XMLoadFloat3(&dir);
+
+	// 정규화된 벡터로 변환
+	vFrom = XMVector3Normalize(vFrom);
+	vTo = XMVector3Normalize(vTo);
+
+	// 축 벡터 계산
+	XMVECTOR axis = XMVector3Cross(vFrom, vTo);
+
+	if (!XMVector3Equal(axis, XMVectorZero()))
+	{
+		XMFLOAT3 fAxis;
+		XMStoreFloat3(&fAxis, axis);
+
+		// 두 벡터 간의 각도 계산
+		float angle = XMConvertToDegrees(XMVectorGetX(XMVector3AngleBetweenNormals(vFrom, vTo)));
+
+		// 결과값 설정
+		Rotate(&fAxis, angle);
+	}
+	// 결과값 설정
+	SetPosition(m_vOriginal);
+
+	m_xmf3DirOld = ray.GetDir();
+}

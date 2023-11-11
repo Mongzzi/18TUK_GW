@@ -13,6 +13,8 @@ public:
 	CRay RayAtWorldSpace(int x, int y, CCamera camera);
 	bool RayIntersectsTriangle(CRay& ray, XMFLOAT3& vertex1, XMFLOAT3& vertex2, XMFLOAT3& vertex3);
 	bool IntersectsAABB(CAABB& aabb);
+	XMFLOAT3 GetOriginal() { return m_vOriginal; };
+	XMFLOAT3 GetDir() { return m_xmf3Dir; };
 private:
 
 protected:

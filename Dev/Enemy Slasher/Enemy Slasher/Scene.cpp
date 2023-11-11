@@ -359,6 +359,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			}
 		}
 	}
+	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());
+
+	CRayObject* pRayObject = NULL;
+	pRayObject = new CRayObject();
+	pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
+	m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
 
 	//m_nShaders = 1;
 	//m_pShaders = new CObjectsShader[m_nShaders];
@@ -392,8 +398,8 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	{
 		GetCursorPos(&ptCursorPos);
 		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
-		std::vector<CGameObject*>* pOM = m_pObjectManager->GetObjectList();
-
+		std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
+		
 		if (cxDelta || cyDelta)
 		{
 			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
@@ -404,9 +410,10 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				{
 					if (lc == (int)ObjectLayer::Object)
 					{
-						for (int i = 0;i < pOM[lc].size();i++) {
-							CFBXObject* obj = (CFBXObject*)pOM[lc][i];
+						for (int i = 0;i < pObjectList[lc].size();i++) {
+							CFBXObject* obj = (CFBXObject*)pObjectList[lc][i];
 							CAABB* aabb = obj->GetAABB();
+
 #ifdef _DEBUG
 							//std::cout << "count: " << i << " IntersectsAABB: " << r.IntersectsAABB(*aabb) << std::endl;
 							//std::cout << obj->GetPosition().x << ", " << obj->GetPosition().y << ", " << obj->GetPosition().z << std::endl;
@@ -418,6 +425,11 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 								//m_pObjectManager->DelObj(obj, ObjectLayer::Count);
 							}
 						}
+					}
+					else if (lc == (int)ObjectLayer::Ray)
+					{
+						CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
+						rayOb->Reset(r);
 					}
 				}
 			}

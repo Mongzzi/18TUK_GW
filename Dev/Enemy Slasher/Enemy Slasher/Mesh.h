@@ -1,6 +1,7 @@
 #pragma once
 #include "FbxLoader.h"
 #include "BoundingBox.h"
+#include "Ray.h"
 
 class CVertex
 {
@@ -183,6 +184,13 @@ class CBoxMesh : public CAABBMesh
 public:
 	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
 	virtual ~CBoxMesh();
+};
+
+class CRayMesh : public CMesh
+{
+public:
+	CRayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CRay* ray);
+	virtual ~CRayMesh();
 };
 
 // ------------------------------- FBX -----------------------------------

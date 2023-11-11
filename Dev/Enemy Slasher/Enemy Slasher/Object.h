@@ -188,6 +188,18 @@ private:
 };
 
 
+class CRayObject : public CInteractiveObject
+{
+public:
+	CRayObject();
+	virtual ~CRayObject();
+
+	void Reset(CRay ray);
+private:
+	XMFLOAT3 m_vOriginal;
+	XMFLOAT3 m_xmf3DirOld;
+};
+
 
 class CFBXObject : public CInteractiveObject
 {

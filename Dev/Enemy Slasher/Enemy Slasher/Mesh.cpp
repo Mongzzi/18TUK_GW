@@ -811,3 +811,50 @@ XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* pContext)
 	XMFLOAT4 xmf4Color = Vector4::Multiply(fScale, xmf4IncidentLightColor);
 	return(xmf4Color);
 }
+
+CRayMesh::CRayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CRay* ray) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 2;				// 꼭지점 개수
+	m_nStride = sizeof(CVertex); // x , y, z 좌표
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINELIST;	// 직선
+
+	XMFLOAT3 Ori = { 0, 0, 0 };
+	XMFLOAT3 Dir = { 0, 0, 1 };
+	if (ray)
+	{
+		 Ori = ray->GetOriginal();
+		 Dir = ray->GetDir();
+	}
+	XMFLOAT3 End = Vector3::Add(Ori, Vector3::ScalarProduct(Dir, 10000, false));
+	
+
+	m_pVertices = new CVertex[m_nVertices];
+	m_pVertices[0] = CVertex(XMFLOAT3(Ori.x, Ori.y, Ori.z), XMFLOAT4(0.f, 0.f, 1.0f, 1.0f));
+	m_pVertices[1] = CVertex(XMFLOAT3(End.x, End.y, End.z), XMFLOAT4(0.f, 0.f, 1.0f, 1.0f));
+
+	// 버퍼생성
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_nIndices = 2;
+	UINT pnIndices[2];
+	// 시작
+	pnIndices[0] = 0;
+	// 끝
+	pnIndices[1] = 1;
+
+	//인덱스 버퍼를 생성한다. 
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
+CRayMesh::~CRayMesh()
+{
+}
