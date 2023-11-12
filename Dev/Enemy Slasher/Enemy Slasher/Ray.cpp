@@ -22,9 +22,6 @@ CRay CRay::RayAtWorldSpace(int x, int y, CCamera camera)
 	//XMStoreFloat3(&r.m_vOriginal, XMVector3TransformCoord(XMLoadFloat3(&r.m_vOriginal), mat));
 	//// 뷰의 역행렬을 이용해서 방향벡터를 변환
  //   XMStoreFloat3(&r.m_xmf3Dir, XMVector3TransformNormal(XMLoadFloat3(&r.m_xmf3Dir), mat));
- //   auto tmp = r.m_xmf3Dir.z;
- //   r.m_xmf3Dir.z = r.m_xmf3Dir.x;
- //   r.m_xmf3Dir.x = -tmp;
 	//// 방향벡터를 정규화
 	//r.m_xmf3Dir = Vector3::Normalize(r.m_xmf3Dir);
 #ifdef _DEBUG
@@ -50,11 +47,7 @@ CRay CRay::RayAtViewSpace(int x, int y, CCamera camera)
  //   r.m_vOriginal.y = ((-2.f * y) / viewPort.Height + 1.f);
  //   r.m_vOriginal.z = 0;
 
-#ifdef _DEBUG
-    /*std::cout << "projection._11: " << projection._11 << std::endl;
-    std::cout << "projection._22: " << projection._22 << std::endl;
-    std::cout << "m_xmf3Dir: " << r.m_xmf3Dir.x << ", " << r.m_xmf3Dir.y << ", " << r.m_xmf3Dir.z << ", " << std::endl;*/
-#endif // _DEBUG
+
 
     CRay r;
     D3D12_VIEWPORT viewPort = camera.GetViewport();
@@ -73,8 +66,19 @@ CRay CRay::RayAtViewSpace(int x, int y, CCamera camera)
 
     XMVECTOR rayDir = XMVector3Normalize(rayWorld);
 
-    r.m_vOriginal = camera.GetPosition();
     XMStoreFloat3(&r.m_xmf3Dir, rayDir);
+    //
+    XMFLOAT4 rayOri(ndcX, ndcY, -1.0f, 1.0f);// (x,y,-n)
+
+    XMVECTOR rayO = XMVector3TransformCoord(XMLoadFloat4(&rayOri), XMLoadFloat4x4(&projInv));
+
+    XMVECTOR rayW = XMVector3TransformCoord(rayO, XMLoadFloat4x4(&viewInv));
+
+    XMStoreFloat3(&r.m_vOriginal, rayW);
+
+#ifdef _DEBUG
+    //std::cout << r.m_vOriginal.x << ", " << r.m_vOriginal.y << ", " << r.m_vOriginal.z << ", " << std::endl;
+#endif // _DEBUG
 
 	return r;
 }
