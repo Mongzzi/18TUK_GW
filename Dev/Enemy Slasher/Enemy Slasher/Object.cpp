@@ -561,7 +561,7 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext)
 CRayObject::CRayObject() : CInteractiveObject()
 {
 	m_vOriginal = { 0,0,0 };
-	m_xmf3DirOld = { 1,0,0 };
+	m_xmf3DirOld = { 0,0,1 };
 }
 
 CRayObject::~CRayObject()
@@ -575,7 +575,7 @@ void CRayObject::Reset(CRay ray)
 	XMVECTOR vFrom = XMLoadFloat3(&m_xmf3DirOld);
 	XMFLOAT3 dir = ray.GetDir();
 	XMVECTOR vTo = XMLoadFloat3(&dir);
-
+	
 	// 정규화된 벡터로 변환
 	vFrom = XMVector3Normalize(vFrom);
 	vTo = XMVector3Normalize(vTo);
@@ -592,6 +592,7 @@ void CRayObject::Reset(CRay ray)
 		float angle = XMConvertToDegrees(XMVectorGetX(XMVector3AngleBetweenNormals(vFrom, vTo)));
 
 		// 결과값 설정
+		XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 		Rotate(&fAxis, angle);
 	}
 	// 결과값 설정
@@ -600,5 +601,4 @@ void CRayObject::Reset(CRay ray)
 	//std::cout << "m_xmf3Dir: " << ray.GetDir().x << ", " << ray.GetDir().y << ", " << ray.GetDir().z << std::endl;
 	//std::cout << "m_vOriginal: " << ray.GetOriginal().x << ", " << ray.GetOriginal().y << ", " << ray.GetOriginal().z << std::endl;
 #endif // _DEBUG
-	m_xmf3DirOld = ray.GetDir();
 }
