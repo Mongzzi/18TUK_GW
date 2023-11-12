@@ -359,6 +359,30 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			}
 		}
 	}
+
+	{
+		//Ray 충돌용 오브젝트 묶음
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
+		pFBXObject->SetPosition(0.0f, 20.0f, -300.0f);
+		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+
+		pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
+		pFBXObject->SetPosition(-100.0f, 20.0f, -300.0f);
+		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+
+		pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
+		pFBXObject->SetPosition(-200.0f, 20.0f, -300.0f);
+		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+
+		pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
+		pFBXObject->SetPosition(-300.0f, 20.0f, -300.0f);
+		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());
 
 	CRayObject* pRayObject = NULL;
@@ -387,23 +411,28 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	POINT ptCursorPos{ 0,0 }; //초기화를 하지 않을 시 낮은 확률로 아래의 if문에 진입하지 못하여 초기화되지 않은 값을 사용하게 된다.
 	if (GetCapture() == hWnd)
 	{
-		SetCursor(NULL);
+		//SetCursor(NULL);
 		GetCursorPos(&ptCursorPos);
 		cxDelta = (float)(ptCursorPos.x - ptOldCursorPos.x) / 3.0f;
 		cyDelta = (float)(ptCursorPos.y - ptOldCursorPos.y) / 3.0f;
-		SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+		//SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
 	}
 
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
 		GetCursorPos(&ptCursorPos);
+		ScreenToClient(hWnd, &ptCursorPos);
 		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+		
+		//CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 		std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
 		
 		if (cxDelta || cyDelta)
 		{
 			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
 			{
+				SetCursor(NULL);
+				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
 			}
@@ -427,6 +456,29 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 							{
 								//m_pObjectManager->DelObj(obj, ObjectLayer::Count);
 							}
+
+							XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
+							XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
+							XMFLOAT3 ray_dir = r.GetDir();
+							XMFLOAT3 ray_origin = r.GetOriginal();
+							XMFLOAT3 invDirection = XMFLOAT3(1.0f / ray_dir.x, 1.0f / ray_dir.y, 1.0f / ray_dir.z);
+
+							float t1 = (aabbMin.x - ray_origin.x) * invDirection.x;
+							float t2 = (aabbMax.x - ray_origin.x) * invDirection.x;
+							float t3 = (aabbMin.y - ray_origin.y) * invDirection.y;
+							float t4 = (aabbMax.y - ray_origin.y) * invDirection.y;
+							float t5 = (aabbMin.z - ray_origin.z) * invDirection.z;
+							float t6 = (aabbMax.z - ray_origin.z) * invDirection.z;
+
+							float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+							float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+
+							// 교차하지 않으면 tmax < 0
+							// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
+							bool result = tmax > 0 && tmin <= tmax;
+							if (result) {
+								cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
+							}
 						}
 					}
 					else if (lc == (int)ObjectLayer::Ray)
@@ -434,7 +486,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 						CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
 						rayOb->Reset(r);
 #ifdef _DEBUG
-						std::cout << "m_xmf3Look: " << m_pPlayer->GetCamera()->GetLookVector().x << ", " << m_pPlayer->GetCamera()->GetLookVector().y << ", " << m_pPlayer->GetCamera()->GetLookVector().z << std::endl;
+						//std::cout << "m_xmf3Look: " << m_pPlayer->GetCamera()->GetLookVector().x << ", " << m_pPlayer->GetCamera()->GetLookVector().y << ", " << m_pPlayer->GetCamera()->GetLookVector().z << std::endl;
 #endif // _DEBUG
 					}
 				}
@@ -917,7 +969,7 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 		pObject_cuttur->MoveStrafe(0.04);
 
 		if (CollisionCheck(pObject_stone, pObject_cuttur)) {
-			cout << "Collision\n";
+			//cout << "Collision\n";
 		}
 
 	}

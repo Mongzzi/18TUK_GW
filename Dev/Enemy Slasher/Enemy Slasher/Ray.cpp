@@ -12,21 +12,21 @@ CRay CRay::RayAtWorldSpace(int x, int y, CCamera camera)
 {
 	CRay r = CRay::RayAtViewSpace(x, y, camera);
 
-	XMFLOAT4X4 view, invView;
-	// view에 행렬 저장
-	view = camera.GetViewMatrix();
-	// invView에 역행렬 저장
-	invView = Matrix4x4::Inverse(view);
-	// 뷰의 역행렬을 이용해서 광선의 출발점을 변환
-	XMMATRIX mat = XMLoadFloat4x4(&invView);
-	XMStoreFloat3(&r.m_vOriginal, XMVector3TransformCoord(XMLoadFloat3(&r.m_vOriginal), mat));
-	// 뷰의 역행렬을 이용해서 방향벡터를 변환
-    XMStoreFloat3(&r.m_xmf3Dir, XMVector3TransformNormal(XMLoadFloat3(&r.m_xmf3Dir), mat));
-    auto tmp = r.m_xmf3Dir.z;
-    r.m_xmf3Dir.z = r.m_xmf3Dir.x;
-    r.m_xmf3Dir.x = -tmp;
-	// 방향벡터를 정규화
-	r.m_xmf3Dir = Vector3::Normalize(r.m_xmf3Dir);
+	//XMFLOAT4X4 view, invView;
+	//// view에 행렬 저장
+	//view = camera.GetViewMatrix();
+	//// invView에 역행렬 저장
+	//invView = Matrix4x4::Inverse(view);
+	//// 뷰의 역행렬을 이용해서 광선의 출발점을 변환
+	//XMMATRIX mat = XMLoadFloat4x4(&invView);
+	//XMStoreFloat3(&r.m_vOriginal, XMVector3TransformCoord(XMLoadFloat3(&r.m_vOriginal), mat));
+	//// 뷰의 역행렬을 이용해서 방향벡터를 변환
+ //   XMStoreFloat3(&r.m_xmf3Dir, XMVector3TransformNormal(XMLoadFloat3(&r.m_xmf3Dir), mat));
+ //   auto tmp = r.m_xmf3Dir.z;
+ //   r.m_xmf3Dir.z = r.m_xmf3Dir.x;
+ //   r.m_xmf3Dir.x = -tmp;
+	//// 방향벡터를 정규화
+	//r.m_xmf3Dir = Vector3::Normalize(r.m_xmf3Dir);
 #ifdef _DEBUG
     //std::cout << "m_vOriginal: " << int(r.m_vOriginal.x) << ", " << int(r.m_vOriginal.y) << ", " << int(r.m_vOriginal.z) << ", " << "m_xmf3Dir: " << r.m_xmf3Dir.x << ", " << r.m_xmf3Dir.y << ", " << r.m_xmf3Dir.z << ", " << std::endl;
 #endif // _DEBUG
@@ -36,25 +36,46 @@ CRay CRay::RayAtWorldSpace(int x, int y, CCamera camera)
 
 CRay CRay::RayAtViewSpace(int x, int y, CCamera camera)
 {
-	D3D12_VIEWPORT viewPort = camera.GetViewport();
+	//D3D12_VIEWPORT viewPort = camera.GetViewport();
 
-	XMFLOAT4X4 projection = camera.GetProjectionMatrix();
+	//XMFLOAT4X4 projection = camera.GetProjectionMatrix();
 
-	CRay r;
-    // 이거 축이 조 ㅁ이상한데? y, z
-	r.m_xmf3Dir.x = ((2.f * x) / viewPort.Width - 1.f) / projection._11;
-	r.m_xmf3Dir.y = ((-2.f * y) / viewPort.Height + 1.f) / projection._22;
-	r.m_xmf3Dir.z = 1.0;
-    //
-    r.m_vOriginal.x = ((2.f * x) / viewPort.Width - 1.f);
-    r.m_vOriginal.y = ((-2.f * y) / viewPort.Height + 1.f);
-    r.m_vOriginal.z = 0;
+	//CRay r;
+ //   // 이거 축이 조 ㅁ이상한데? y, z
+	//r.m_xmf3Dir.x = ((2.f * x) / viewPort.Width - 1.f) / projection._11;
+	//r.m_xmf3Dir.y = ((-2.f * y) / viewPort.Height + 1.f) / projection._22;
+	//r.m_xmf3Dir.z = 1.0;
+ //   //
+ //   r.m_vOriginal.x = ((2.f * x) / viewPort.Width - 1.f);
+ //   r.m_vOriginal.y = ((-2.f * y) / viewPort.Height + 1.f);
+ //   r.m_vOriginal.z = 0;
 
 #ifdef _DEBUG
     /*std::cout << "projection._11: " << projection._11 << std::endl;
     std::cout << "projection._22: " << projection._22 << std::endl;
     std::cout << "m_xmf3Dir: " << r.m_xmf3Dir.x << ", " << r.m_xmf3Dir.y << ", " << r.m_xmf3Dir.z << ", " << std::endl;*/
 #endif // _DEBUG
+
+    CRay r;
+    D3D12_VIEWPORT viewPort = camera.GetViewport();
+    XMFLOAT4X4 projMat = camera.GetProjectionMatrix();
+    XMFLOAT4X4 viewMat = camera.GetViewMatrix();
+    float ndcX = ((2.f * x) / viewPort.Width - 1.f);
+    float ndcY = ((-2.f * y) / viewPort.Height + 1.f);
+
+    XMFLOAT4 rayClip(ndcX, ndcY, 1.0f, 1.0f);
+
+    XMFLOAT4X4 projInv = Matrix4x4::Inverse(projMat);
+    XMVECTOR rayEye = XMVector3TransformCoord(XMLoadFloat4(&rayClip), XMLoadFloat4x4(&projInv));
+
+    XMFLOAT4X4 viewInv = Matrix4x4::Inverse(viewMat);
+    XMVECTOR rayWorld = XMVector3TransformCoord(rayEye, XMLoadFloat4x4(&viewInv));
+
+    XMVECTOR rayDir = XMVector3Normalize(rayWorld);
+
+    r.m_vOriginal = camera.GetPosition();
+    XMStoreFloat3(&r.m_xmf3Dir, rayDir);
+
 	return r;
 }
 

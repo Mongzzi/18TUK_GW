@@ -597,7 +597,7 @@ void CRayObject::Reset(CRay ray)
 	// 결과값 설정
 	SetPosition(m_vOriginal);
 #ifdef _DEBUG
-	std::cout << "m_xmf3Dir: " << ray.GetDir().x << ", " << ray.GetDir().y << ", " << ray.GetDir().z << std::endl;
+	//std::cout << "m_xmf3Dir: " << ray.GetDir().x << ", " << ray.GetDir().y << ", " << ray.GetDir().z << std::endl;
 	//std::cout << "m_vOriginal: " << ray.GetOriginal().x << ", " << ray.GetOriginal().y << ", " << ray.GetOriginal().z << std::endl;
 #endif // _DEBUG
 	m_xmf3DirOld = ray.GetDir();
