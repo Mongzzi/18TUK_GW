@@ -457,9 +457,9 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	for (i = 0; i < lControlPointsCount; i++)
 	{
-		fx = (float)lControlPoints[i][0];
-		fy = (float)lControlPoints[i][1];
-		fz = (float)lControlPoints[i][2];
+		fx = (float)lControlPoints[i][0]* 1;
+		fy = (float)lControlPoints[i][1] *1;
+		fz = (float)lControlPoints[i][2] *1;
 		m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
 
 		/*for (int j = 0; j < lMesh->GetElementNormalCount(); j++)

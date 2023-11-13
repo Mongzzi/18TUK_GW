@@ -328,8 +328,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		{
 			for (int y = 0; y < yObjects; y++)
 			{
-				if(x%2)pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_002_FBX);
-				else pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_003_FBX);
+				if(x%2)pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, AA2);
+				else pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, AA2);
 				//if(x%2) pRotatingObject->SetMesh(0, pCubeMesh);
 				//else pRotatingObject->SetMesh(0, pCubeMesh);
 
