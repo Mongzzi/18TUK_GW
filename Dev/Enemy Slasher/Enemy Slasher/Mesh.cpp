@@ -825,12 +825,12 @@ CRayMesh::CRayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		 Ori = ray->GetOriginal();
 		 Dir = ray->GetDir();
 	}
-	XMFLOAT3 End = Vector3::Add(Ori, Vector3::ScalarProduct(Dir, 2000, false));
+	XMFLOAT3 End = Vector3::Add(Ori, Vector3::ScalarProduct(Dir, 1000, false));
 	
 
 	m_pVertices = new CVertex[m_nVertices];
 	m_pVertices[0] = CVertex(XMFLOAT3(Ori.x, Ori.y, Ori.z), XMFLOAT4(0.f, 1.f, 0.0f, 1.0f));
-	m_pVertices[1] = CVertex(XMFLOAT3(End.x, End.y, End.z), XMFLOAT4(0.f, 0.f, 1.0f, 1.0f));
+	m_pVertices[1] = CVertex(XMFLOAT3(End.x, End.y, End.z), XMFLOAT4(1.f, 0.f, 0.0f, 1.0f));
 
 	// 버퍼생성
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
