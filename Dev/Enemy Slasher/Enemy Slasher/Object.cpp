@@ -664,6 +664,8 @@ CUIObject::~CUIObject()
 
 void CUIObject::ScreenSpaceToWorldSpace()
 {
+	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());// 초기화
+
 	D3D12_VIEWPORT viewPort = m_pCamera->GetViewport();
 	XMFLOAT4X4 projMat = m_pCamera->GetProjectionMatrix();
 	XMFLOAT4X4 viewMat = m_pCamera->GetViewMatrix();
@@ -680,13 +682,17 @@ void CUIObject::ScreenSpaceToWorldSpace()
 
 	XMVECTOR rayW = XMVector3TransformCoord(rayO, XMLoadFloat4x4(&viewInv));
 
+	// 카메라의 역행렬을 가져옴. 회전때문에
+	XMStoreFloat4x4(&m_xmf4x4World, XMLoadFloat4x4(&viewInv));
 
 	XMFLOAT3 position;
 	XMStoreFloat3(&position, rayW);
 
 	SetPosition(position);
 
+
 	// 회전은 항상 카메라를 향해야함.
+
 
 }
 
