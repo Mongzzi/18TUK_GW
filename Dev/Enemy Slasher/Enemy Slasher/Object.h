@@ -114,7 +114,7 @@ public:
 	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 	virtual void Render2D() {};
 
 public:
@@ -136,15 +136,13 @@ public:
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	virtual void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
 	XMFLOAT3 GetAABBMaxPos(int nIndex) {
-		XMFLOAT3 pos = ((CAABBMesh*)(m_ppMeshes[nIndex]))->GetAABBMaxPos();
+		XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMaxPos();
 		XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
 		return pos;
 	}
 	XMFLOAT3 GetAABBMinPos(int nIndex) {
-		XMFLOAT3 pos = ((CAABBMesh*)(m_ppMeshes[nIndex]))->GetAABBMinPos();
+		XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMinPos();
 		XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
 		return pos;
 	}

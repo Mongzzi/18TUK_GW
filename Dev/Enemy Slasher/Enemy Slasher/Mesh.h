@@ -1,34 +1,9 @@
 #pragma once
+#include "Vertex.h"
+#include "Collider.h"
 #include "FbxLoader.h"
 #include "BoundingBox.h"
 #include "Ray.h"
-
-class CVertex
-{
-private:
-
-public:
-	XMFLOAT3 m_xmf3Vertex;
-	XMFLOAT4 m_xmf4Color;
-public:
-	CVertex(XMFLOAT3 v, XMFLOAT4 c) : m_xmf3Vertex{ v }, m_xmf4Color{ c } {}
-
-	CVertex() {
-		m_xmf3Vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		m_xmf4Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	}
-	CVertex(float x, float y, float z, XMFLOAT4 c) {
-		m_xmf3Vertex = XMFLOAT3(x, y, z);
-		m_xmf4Color = c;
-	}
-	~CVertex() { }
-
-	XMFLOAT3 GetVertex() { return m_xmf3Vertex; };
-};
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
 
 class CMesh
 {
@@ -45,7 +20,7 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 protected:
-	CVertex* m_pVertices = NULL;
+	CVertex* m_pVertices = NULL; // 본래 mesh의 Virtices
 
 	ID3D12Resource* m_pd3dVertexBuffer = NULL;
 	ID3D12Resource* m_pd3dVertexUploadBuffer = NULL;
@@ -59,6 +34,8 @@ protected:
 	UINT m_nOffset = 0;
 
 protected:
+	UINT* m_pnIndices = NULL;
+
 	ID3D12Resource* m_pd3dIndexBuffer = NULL;
 	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
 	D3D12_INDEX_BUFFER_VIEW m_d3dIndexBufferView;
@@ -68,50 +45,22 @@ protected:
 	int m_nBaseVertex = 0;  // 인덱스 버퍼의 인덱스에 더해질 인덱스
 
 public:
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList) {};
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOption = false);
 };
 
-
-class Vertex_Color
+class CColliderMesh : public CMesh
 {
-private:
-	XMFLOAT3 vertex;
-	XMFLOAT4 color;
 public:
-	Vertex_Color(XMFLOAT3 v, XMFLOAT4 c) : vertex{ v }, color{ c } {}
+	CColliderMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	~CColliderMesh();
 
-	Vertex_Color() {
-		vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	}
-	Vertex_Color(float x, float y, float z, XMFLOAT4 c) {
-		vertex = XMFLOAT3(x, y, z);
-		color = c;
-	}
-	~Vertex_Color() { }
-
-	XMFLOAT3 GetVertex() { return vertex; };
-};
-
-class CIlluminatedVertex 
-{
 protected:
-	XMFLOAT3 m_xmf3Normal;
-	XMFLOAT3 m_xmf3Position;
+	CAABBColliderWithMesh* m_pCollider = NULL;
+
 public:
-	CIlluminatedVertex() {
-		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); 
-		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	}CIlluminatedVertex(float x, float y, float z, XMFLOAT3 xmf3Normal = XMFLOAT3(0.0f,0.0f, 0.0f)) {
-		m_xmf3Position = XMFLOAT3(x, y, z); 
-		m_xmf3Normal = xmf3Normal;
-	}
-	CIlluminatedVertex(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Normal = XMFLOAT3(0.0f, 0.0f,0.0f)) {
-		m_xmf3Position = xmf3Position; 
-		m_xmf3Normal = xmf3Normal;
-	}
-	~CIlluminatedVertex() { }
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderAABB = false);
+
+	virtual CAABBColliderWithMesh* GetCollider() { return m_pCollider; }
 };
 
 class CMeshIlluminated : public CMesh
@@ -133,54 +82,21 @@ public:
 	virtual ~CCubeMeshIlluminated();
 };
 
-class CAABBMesh : public CMesh
+class CDynamicShapeMesh : public CMesh
 {
 public:
-	CAABBMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual ~CAABBMesh();
+	CDynamicShapeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList) {};
+	virtual ~CDynamicShapeMesh() {};
 
+private:
+	bool m_bAllowCutting = false; // true 라면 다른 오브젝트를 자를 수 있다.
+	bool m_bCuttable = false; // true 라면 다른 오브젝트에 인해 잘릴 수 있다.
 public:
-	virtual void ReleaseUploadBuffers();
 
-protected:
-	XMFLOAT3 m_xmf3MinPos;
-	XMFLOAT3 m_xmf3MaxPos;
-
-	CVertex* m_pAABBVertices = NULL;
-
-	ID3D12Resource* m_pd3dAABBVertexBuffer = NULL;
-	ID3D12Resource* m_pd3dAABBVertexUploadBuffer = NULL;
-	D3D12_VERTEX_BUFFER_VIEW m_d3dAABBVertexBufferView;
-
-	D3D12_PRIMITIVE_TOPOLOGY m_d3dAABBPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	UINT m_nAABBSlot = 0;
-	UINT m_nAABBVertices = 0;
-	UINT m_nAABBStride = 0;
-	UINT m_nAABBOffset = 0;
-
-protected:
-	ID3D12Resource* m_pd3dAABBIndexBuffer = NULL;
-	ID3D12Resource* m_pd3dAABBIndexUploadBuffer = NULL;
-	D3D12_INDEX_BUFFER_VIEW m_d3dAABBIndexBufferView;
-
-	UINT* m_pnIndices = NULL;
-
-	UINT m_nAABBIndices = 0;	// 인덱스 버퍼에 포함되는 인덱스의 개수
-	UINT m_nAABBStartIndex = 0; // 인덱스 버퍼에서 메쉬를 그리기 위해 사용되는 시작 인덱스
-	int m_nAABBBaseVertex = 0;  // 인덱스 버퍼의 인덱스에 더해질 인덱스
-
-public:
-	virtual void MakeAABB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void RenderAABB(ID3D12GraphicsCommandList* pd3dCommandList);
-
-	XMFLOAT3 GetAABBMinPos() { return m_xmf3MinPos; }
-	XMFLOAT3 GetAABBMaxPos() { return m_xmf3MaxPos; }
 };
 
-class CBoxMesh : public CAABBMesh
+class CBoxMesh : public CColliderMesh
 {
-
 public:
 	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
 	virtual ~CBoxMesh();
@@ -195,10 +111,10 @@ public:
 
 // ------------------------------- FBX -----------------------------------
 
-class CFBXMesh : public CAABBMesh
+class CFBXMesh : public CColliderMesh
 {
 private:
-	UINT* pnIndices;
+	//UINT* m_pnIndices;
 
 public:
 	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -207,7 +123,7 @@ public:
 	void LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
 
 	CVertex* GetVertices() { return m_pVertices; };
-	UINT* GetUnit() { return pnIndices; };
+	UINT* GetUnit() { return m_pnIndices; };
 
 	CAABB* GetAABB(XMFLOAT4X4 m_xmf4x4World);
 };

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Scene.h"
+#include "FbxLoader.h"
 #include "ObjectManager.h"
 #include "ShaderManager.h"
 #include "Ray.h"
@@ -319,7 +320,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CFBXObject* pRotatingObject = NULL;
 	//CRotatingObject* pRotatingObject = NULL;
 
-	CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
+	//CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
 	//m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 
 	for (int i = 0, x = 0; x < 1; x++)
