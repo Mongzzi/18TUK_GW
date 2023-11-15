@@ -683,7 +683,10 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	XMVECTOR rayW = XMVector3TransformCoord(rayO, XMLoadFloat4x4(&viewInv));
 
 	// 카메라의 역행렬을 가져옴. 회전때문에
+	// 이걸 사용하면 카메라벡터의 반대를 보게됨.
+	// 카메라의Look의 반대, 카메라UP으로 만들어도 될듯? 아마?
 	XMStoreFloat4x4(&m_xmf4x4World, XMLoadFloat4x4(&viewInv));
+	// 카메라를 바라보게 만드는것도 좋을지도
 
 	XMFLOAT3 position;
 	XMStoreFloat3(&position, rayW);
