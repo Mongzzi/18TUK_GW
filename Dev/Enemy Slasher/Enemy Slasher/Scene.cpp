@@ -362,26 +362,26 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 
 	{
-		//Ray 충돌용 오브젝트 묶음
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
-		pFBXObject->SetPosition(0.0f, 20.0f, -300.0f);
-		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+		//카드 UI 테스트용 오브젝트.
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		pCardUIObject->SetPositionUI(100, 100);
+		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
-		pFBXObject->SetPosition(-100.0f, 20.0f, -300.0f);
-		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		pCardUIObject->SetPositionUI(200, 200);
+		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
-		pFBXObject->SetPosition(-200.0f, 20.0f, -300.0f);
-		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		pCardUIObject->SetPositionUI(300, 300);
+		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
-		pFBXObject->SetPosition(-300.0f, 20.0f, -300.0f);
-		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		pCardUIObject->SetPositionUI(400, 400);
+		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 	}
 
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());
@@ -409,13 +409,16 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
+	int xDelta = 0, yDelta = 0;
 	POINT ptCursorPos{ 0,0 }; //초기화를 하지 않을 시 낮은 확률로 아래의 if문에 진입하지 못하여 초기화되지 않은 값을 사용하게 된다.
 	if (GetCapture() == hWnd)
 	{
 		//SetCursor(NULL);
 		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - ptOldCursorPos.y) / 3.0f;
+		xDelta = ptCursorPos.x - ptOldCursorPos.x;
+		yDelta = ptCursorPos.y - ptOldCursorPos.y;
+		cxDelta = (float)(xDelta) / 3.0f;
+		cyDelta = (float)(yDelta) / 3.0f;
 		//SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
 	}
 
@@ -425,9 +428,51 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 		ScreenToClient(hWnd, &ptCursorPos);
 		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 		
-		//CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 		std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
 		
+		CCardUIObject* pPeekedCard = NULL;
+
+		for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
+		{
+			if (lc == (int)ObjectLayer::UIObject)
+			{
+				for (int i = 0;i < pObjectList[lc].size();i++) {
+					CCardUIObject* obj = (CCardUIObject*)pObjectList[lc][i];
+
+					XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
+					XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
+					XMFLOAT3 ray_dir = r.GetDir();
+					XMFLOAT3 ray_origin = r.GetOriginal();
+					XMFLOAT3 invDirection = XMFLOAT3(1.0f / ray_dir.x, 1.0f / ray_dir.y, 1.0f / ray_dir.z);
+
+					float t1 = (aabbMin.x - ray_origin.x) * invDirection.x;
+					float t2 = (aabbMax.x - ray_origin.x) * invDirection.x;
+					float t3 = (aabbMin.y - ray_origin.y) * invDirection.y;
+					float t4 = (aabbMax.y - ray_origin.y) * invDirection.y;
+					float t5 = (aabbMin.z - ray_origin.z) * invDirection.z;
+					float t6 = (aabbMax.z - ray_origin.z) * invDirection.z;
+
+					float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+					float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+
+					// 교차하지 않으면 tmax < 0
+					// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
+					bool result = tmax > 0 && tmin <= tmax;
+					if (result) {
+						pPeekedCard = obj;
+#ifdef _DEBUG
+						//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
+#endif // _DEBUG
+					}
+				}
+			}
+			else if (lc == (int)ObjectLayer::Ray)
+			{
+				CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
+				rayOb->Reset(r);
+			}
+		}
+
 		if (cxDelta || cyDelta)
 		{
 			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
@@ -439,59 +484,12 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			}
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
-				for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
+				if (pPeekedCard)
 				{
-					if (lc == (int)ObjectLayer::Object)
-					{
-						for (int i = 0;i < pObjectList[lc].size();i++) {
-							CFBXObject* obj = (CFBXObject*)pObjectList[lc][i];
-							CAABB* aabb = obj->GetAABB();
-
-#ifdef _DEBUG
-							//std::cout << "count: " << i << " IntersectsAABB: " << r.IntersectsAABB(*aabb) << std::endl;
-							//std::cout << obj->GetPosition().x << ", " << obj->GetPosition().y << ", " << obj->GetPosition().z << std::endl;
-							//std::cout << aabb->GetCenter().x << ", " << aabb->GetCenter().y << ", " << aabb->GetCenter().z << std::endl;
-							//std::cout << aabb->GetEdgeDistances().x << ", " << aabb->GetEdgeDistances().y << ", " << aabb->GetEdgeDistances().z << std::endl;
-#endif // _DEBUG
-							if (r.IntersectsAABB(*aabb))
-							{
-								//m_pObjectManager->DelObj(obj, ObjectLayer::Count);
-							}
-
-							XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
-							XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
-							XMFLOAT3 ray_dir = r.GetDir();
-							XMFLOAT3 ray_origin = r.GetOriginal();
-							XMFLOAT3 invDirection = XMFLOAT3(1.0f / ray_dir.x, 1.0f / ray_dir.y, 1.0f / ray_dir.z);
-
-							float t1 = (aabbMin.x - ray_origin.x) * invDirection.x;
-							float t2 = (aabbMax.x - ray_origin.x) * invDirection.x;
-							float t3 = (aabbMin.y - ray_origin.y) * invDirection.y;
-							float t4 = (aabbMax.y - ray_origin.y) * invDirection.y;
-							float t5 = (aabbMin.z - ray_origin.z) * invDirection.z;
-							float t6 = (aabbMax.z - ray_origin.z) * invDirection.z;
-
-							float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
-							float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
-
-							// 교차하지 않으면 tmax < 0
-							// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
-							bool result = tmax > 0 && tmin <= tmax;
-							if (result) {
-								cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
-							}
-						}
-					}
-					else if (lc == (int)ObjectLayer::Ray)
-					{
-						CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
-						rayOb->Reset(r);
-#ifdef _DEBUG
-						//std::cout << "m_xmf3Look: " << m_pPlayer->GetCamera()->GetLookVector().x << ", " << m_pPlayer->GetCamera()->GetLookVector().y << ", " << m_pPlayer->GetCamera()->GetLookVector().z << std::endl;
-#endif // _DEBUG
-					}
+					pPeekedCard->AddPositionUI(xDelta, yDelta);
 				}
 			}
+			//
 		}
 		if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
 	}

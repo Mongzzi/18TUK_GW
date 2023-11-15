@@ -515,18 +515,19 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	}
 }
 
-bool CFBXObject::IsCursorOverObject()
-{
-	return false;
-}
-
-void CFBXObject::ButtenDown()
-{
-}
-
-void CFBXObject::ButtenUp()
-{
-}
+// 
+//bool CFBXObject::IsCursorOverObject()
+//{
+//	return false;
+//}
+//
+//void CFBXObject::ButtenDown()
+//{
+//}
+//
+//void CFBXObject::ButtenUp()
+//{
+//}
 
 CAABB* CFBXObject::GetAABB()
 {
@@ -649,4 +650,133 @@ void CRayObject::Reset(CRay ray)
 	//std::cout << "m_xmf3Dir: " << ray.GetDir().x << ", " << ray.GetDir().y << ", " << ray.GetDir().z << std::endl;
 	//std::cout << "m_vOriginal: " << ray.GetOriginal().x << ", " << ray.GetOriginal().y << ", " << ray.GetOriginal().z << std::endl;
 #endif // _DEBUG
+}
+
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName)
+{
+	m_fCurrntScale = m_fTargetScale = 1.0f;
+	SetCamera(pCamera);
+}
+
+CUIObject::~CUIObject()
+{
+}
+
+void CUIObject::ScreenSpaceToWorldSpace()
+{
+	D3D12_VIEWPORT viewPort = m_pCamera->GetViewport();
+	XMFLOAT4X4 projMat = m_pCamera->GetProjectionMatrix();
+	XMFLOAT4X4 viewMat = m_pCamera->GetViewMatrix();
+	float ndcX = ((2.f * m_iXPosition) / viewPort.Width - 1.f);
+	float ndcY = ((-2.f * m_iYPosition) / viewPort.Height + 1.f);
+
+	XMFLOAT4 ClipPosition(ndcX, ndcY, 1.0f, 1.0f);// 
+
+	XMFLOAT4X4 projInv = Matrix4x4::Inverse(projMat);
+
+	XMFLOAT4X4 viewInv = Matrix4x4::Inverse(viewMat);
+
+	XMVECTOR rayO = XMVector3TransformCoord(XMLoadFloat4(&ClipPosition), XMLoadFloat4x4(&projInv));
+
+	XMVECTOR rayW = XMVector3TransformCoord(rayO, XMLoadFloat4x4(&viewInv));
+
+
+	XMFLOAT3 position;
+	XMStoreFloat3(&position, rayW);
+
+	SetPosition(position);
+
+	// 회전은 항상 카메라를 향해야함.
+
+}
+
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName)
+{
+}
+
+CCardUIObject::~CCardUIObject()
+{
+}
+
+void CCardUIObject::Animate(float fTimeElapsed)
+{
+	ScreenSpaceToWorldSpace();
+
+	if (std::fabs(m_fTargetScale - m_fTargetScale) > EPSILON)
+	{
+		if (m_fTargetScale > m_fTargetScale)
+			m_fTargetScale += fTimeElapsed * 0.5;
+		else
+			m_fTargetScale -= fTimeElapsed * 0.5;
+	}
+}
+
+void CCardUIObject::SetPositionUI(int x, int y)
+{
+	m_iXPosition = x;
+	m_iYPosition = y;
+
+	ScreenSpaceToWorldSpace();
+}
+
+void CCardUIObject::SetPositionUI(POINT pos)
+{
+	m_iXPosition = pos.x;
+	m_iYPosition = pos.y;
+
+	ScreenSpaceToWorldSpace();
+}
+
+void CCardUIObject::AddPositionUI(int x, int y)
+{
+	m_iXPosition += x;
+	m_iYPosition += y;
+
+	ScreenSpaceToWorldSpace();
+
+#ifdef _DEBUG
+	std::cout << m_iXPosition << ", " << m_iYPosition << std::endl;
+#endif // _DEBUG
+}
+
+void CCardUIObject::AddPositionUI(POINT pos)
+{
+	m_iXPosition += pos.x;
+	m_iYPosition += pos.y;
+
+	ScreenSpaceToWorldSpace();
+
+#ifdef _DEBUG
+	std::cout << m_iXPosition << ", " << m_iYPosition << std::endl;
+#endif // _DEBUG
+}
+
+void CCardUIObject::CursorOverObject(bool flag)
+{
+	if (flag)
+	{
+		m_fTargetScale = 1.2f;
+	}
+	else
+	{
+		m_fTargetScale = 1.0f;
+	}
+}
+
+void CCardUIObject::ButtenDown()
+{
+	// 선택 상태가 된다.
+}
+
+void CCardUIObject::ButtenUp()
+{
+	// 만약 선택상태라면
+		// 현재 위치를 검사해 작동한다.
+
+		// Hand Area
+
+		// Play Area
+	
+		
+	// 항상 선택 상태가 해제된다.
 }

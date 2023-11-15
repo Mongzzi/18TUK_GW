@@ -224,12 +224,58 @@ public:
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
 	virtual void Animate(float fTimeElapsed);
 
-	bool IsCursorOverObject();
-	void ButtenDown();
-	void ButtenUp();
+	//bool IsCursorOverObject();
+	//void ButtenDown();
+	//void ButtenUp();
 	CAABB* GetAABB();
 };
+//  UI
+class CUIObject : public CFBXObject
+{
+public:
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box001.fbx");
+	virtual ~CUIObject();
+protected:
+	float m_fCurrntScale;	
+	float m_fTargetScale;
+	CCamera* m_pCamera = NULL;
 
+	int m_iXPosition;
+	int m_iYPosition;
+
+public:
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };
+
+	void ScreenSpaceToWorldSpace();
+
+	virtual void CursorOverObject(bool flag) = 0;
+	virtual void ButtenDown() = 0;
+	virtual void ButtenUp() = 0;
+};
+
+class CCardUIObject : public CUIObject
+{
+public:
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box001.fbx");
+	virtual ~CCardUIObject();
+protected:
+
+
+public:
+	virtual void Animate(float fTimeElapsed);
+
+	void SetPositionUI(int x, int y);
+	void SetPositionUI(POINT pos);
+	void AddPositionUI(int x, int y);
+	void AddPositionUI(POINT pos);
+
+	void CursorOverObject(bool flag) override;
+	void ButtenDown() override;
+	void ButtenUp() override;
+};
+
+
+//
 class CHeightMapTerrain : public CGameObject
 {
 public:
