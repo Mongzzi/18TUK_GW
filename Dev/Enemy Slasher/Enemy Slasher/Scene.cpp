@@ -206,6 +206,21 @@ CTestScene::~CTestScene()
 
 bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		break;
+	case WM_RBUTTONDOWN:
+		if (pCoveredUI)
+			pSelectedUI = pCoveredUI;
+		break;
+	case WM_RBUTTONUP:
+		if (pSelectedUI)
+			pSelectedUI = NULL;
+		break;
+	default:
+		break;
+	}
 	return false;
 }
 
@@ -430,14 +445,14 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 		
 		std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
 		
-		CCardUIObject* pPeekedCard = NULL;
+		pCoveredUI = NULL;
 
 		for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
 		{
 			if (lc == (int)ObjectLayer::UIObject)
 			{
 				for (int i = 0;i < pObjectList[lc].size();i++) {
-					CCardUIObject* obj = (CCardUIObject*)pObjectList[lc][i];
+					CUIObject* obj = (CUIObject*)pObjectList[lc][i];
 
 					XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
 					XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
@@ -459,7 +474,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 					// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
 					bool result = tmax > 0 && tmin <= tmax;
 					if (result) {
-						pPeekedCard = obj;
+						pCoveredUI = obj;
 #ifdef _DEBUG
 						//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
 #endif // _DEBUG
@@ -484,9 +499,9 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			}
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
-				if (pPeekedCard)
+				if (pSelectedUI)
 				{
-					pPeekedCard->AddPositionUI(xDelta, yDelta);
+					pSelectedUI->SetPositionUI(ptCursorPos);
 				}
 			}
 			//

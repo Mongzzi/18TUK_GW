@@ -84,6 +84,11 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Enter();
 	virtual void Exit();
+
+private:
+	CUIObject* pCoveredUI = NULL;
+	CUIObject* pSelectedUI = NULL;
+
 };
 
 class CTestScene_Card : public CBasicScene

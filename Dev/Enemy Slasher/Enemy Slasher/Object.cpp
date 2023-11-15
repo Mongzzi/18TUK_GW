@@ -690,6 +690,38 @@ void CUIObject::ScreenSpaceToWorldSpace()
 
 }
 
+void CUIObject::SetPositionUI(int x, int y)
+{
+	m_iXPosition = x;
+	m_iYPosition = y;
+
+	ScreenSpaceToWorldSpace();
+}
+
+void CUIObject::SetPositionUI(POINT pos)
+{
+	m_iXPosition = pos.x;
+	m_iYPosition = pos.y;
+
+	ScreenSpaceToWorldSpace();
+}
+
+void CUIObject::AddPositionUI(int x, int y)
+{
+	m_iXPosition += x;
+	m_iYPosition += y;
+
+	ScreenSpaceToWorldSpace();
+}
+
+void CUIObject::AddPositionUI(POINT pos)
+{
+	m_iXPosition += pos.x;
+	m_iYPosition += pos.y;
+
+	ScreenSpaceToWorldSpace();
+}
+
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName)
 {
 }
@@ -709,46 +741,6 @@ void CCardUIObject::Animate(float fTimeElapsed)
 		else
 			m_fTargetScale -= fTimeElapsed * 0.5;
 	}
-}
-
-void CCardUIObject::SetPositionUI(int x, int y)
-{
-	m_iXPosition = x;
-	m_iYPosition = y;
-
-	ScreenSpaceToWorldSpace();
-}
-
-void CCardUIObject::SetPositionUI(POINT pos)
-{
-	m_iXPosition = pos.x;
-	m_iYPosition = pos.y;
-
-	ScreenSpaceToWorldSpace();
-}
-
-void CCardUIObject::AddPositionUI(int x, int y)
-{
-	m_iXPosition += x;
-	m_iYPosition += y;
-
-	ScreenSpaceToWorldSpace();
-
-#ifdef _DEBUG
-	std::cout << m_iXPosition << ", " << m_iYPosition << std::endl;
-#endif // _DEBUG
-}
-
-void CCardUIObject::AddPositionUI(POINT pos)
-{
-	m_iXPosition += pos.x;
-	m_iYPosition += pos.y;
-
-	ScreenSpaceToWorldSpace();
-
-#ifdef _DEBUG
-	std::cout << m_iXPosition << ", " << m_iYPosition << std::endl;
-#endif // _DEBUG
 }
 
 void CCardUIObject::CursorOverObject(bool flag)

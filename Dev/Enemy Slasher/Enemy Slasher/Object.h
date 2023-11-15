@@ -248,6 +248,11 @@ public:
 
 	void ScreenSpaceToWorldSpace();
 
+	void SetPositionUI(int x, int y);
+	void SetPositionUI(POINT pos);
+	void AddPositionUI(int x, int y);
+	void AddPositionUI(POINT pos);
+
 	virtual void CursorOverObject(bool flag) = 0;
 	virtual void ButtenDown() = 0;
 	virtual void ButtenUp() = 0;
@@ -263,11 +268,6 @@ protected:
 
 public:
 	virtual void Animate(float fTimeElapsed);
-
-	void SetPositionUI(int x, int y);
-	void SetPositionUI(POINT pos);
-	void AddPositionUI(int x, int y);
-	void AddPositionUI(POINT pos);
 
 	void CursorOverObject(bool flag) override;
 	void ButtenDown() override;
