@@ -242,7 +242,46 @@ CCubeMeshIlluminated::~CCubeMeshIlluminated()
 }
 
 
-CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height, float depth) : CColliderMesh(pd3dDevice, pd3dCommandList)
+CDynamicShapeMesh::CDynamicShapeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CColliderMesh(pd3dDevice, pd3dCommandList)
+{
+
+}
+
+CDynamicShapeMesh::~CDynamicShapeMesh()
+{
+
+}
+
+bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
+{
+	if (CDynamicShapeMesh* pDynamicShapeMesh = dynamic_cast<CDynamicShapeMesh*>(pOtherMesh)) { // OtherMesh가 DynamicShapeMesh 라면
+		// 절단할 수 있는 충돌체크를 한다.
+		// 자신이 잘릴 수 있고 OtherMesh가 절단 가능하다면
+		if (m_bCuttable && pDynamicShapeMesh->GetAllowCutting()) {
+			// 세부 충돌체크 있으면 좋음
+
+			if (true) { // Mesh 단위로 충돌한다면 절단한다.
+				return CollisionDynamicShaping(pDynamicShapeMesh);
+			}
+		}
+	}
+	return false;
+}
+bool CDynamicShapeMesh::CollisionDynamicShaping(CDynamicShapeMesh* pOtherMesh)
+{
+	CVertex* pCutterVertices = pOtherMesh->GetVertices();
+	UINT* pCutterIndices = pOtherMesh->GetIndices();
+	UINT pnCutterVertices = pOtherMesh->GetNumVertices();
+	UINT pnCutterIndices = pOtherMesh->GetNumIndices();
+
+	// 모든 메쉬는 TriangleList로 구성되어있다고 가정
+
+
+	return false;
+}
+
+
+CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height, float depth) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 8;				// 꼭지점 개수
 	m_nStride = sizeof(CVertex); // x , y, z 좌표
@@ -315,7 +354,7 @@ CBoxMesh::~CBoxMesh()
 }
 
 
-CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CColliderMesh(pd3dDevice, pd3dCommandList)
+CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
 {
 }
 

@@ -259,6 +259,74 @@ void CInteractiveObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 	m_xmf4x4Rotate = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Rotate);
 }
 
+XMFLOAT3 CInteractiveObject::GetAABBMaxPos(int nIndex) {
+	XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMaxPos();
+	XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
+	return pos;
+}
+
+XMFLOAT3 CInteractiveObject::GetAABBMinPos(int nIndex) {
+	XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMinPos();
+	XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
+	return pos;
+}
+
+bool CInteractiveObject::CollisionCheck(CGameObject* pOtherObject)
+{
+	if (CInteractiveObject* pInteractiveObject = dynamic_cast<CInteractiveObject*>(pOtherObject)) { // OtherObject가 InteractiveObject 라면
+
+		XMFLOAT3 aMax = GetAABBMaxPos(0);
+		XMFLOAT3 aMin = GetAABBMinPos(0);
+		XMFLOAT3 bMax = pInteractiveObject->GetAABBMaxPos(0);
+		XMFLOAT3 bMin = pInteractiveObject->GetAABBMinPos(0);
+
+		if (aMax.x < bMin.x || aMin.x > bMax.x) return false;
+		if (aMax.y < bMin.y || aMin.y > bMax.y) return false;
+		if (aMax.z < bMin.z || aMin.z > bMax.z) return false;
+
+		return true;
+	}
+	else {
+		// InteractiveObject가 아니라면 충돌체크를 하지 않는다.
+		return false;
+	}
+}
+
+
+bool CDynamicShapeObject::CollisionCheck(CGameObject* pOtherObject)
+{
+	if (CInteractiveObject* pInteractiveObject = dynamic_cast<CInteractiveObject*>(pOtherObject)) { // OtherObject가 InteractiveObject 라면
+		if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pOtherObject)) { // OtherObject가 DynamicShapeObject 라면
+			// 절단할 수 있는 충돌체크를 한다.
+			if (m_bAllowCutting && pDynamicShapeObject->GetCuttable()) {
+
+			}
+			if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
+
+			}
+
+			XMFLOAT3 aMax = GetAABBMaxPos(0);
+			XMFLOAT3 aMin = GetAABBMinPos(0);
+			XMFLOAT3 bMax = pInteractiveObject->GetAABBMaxPos(0);
+			XMFLOAT3 bMin = pInteractiveObject->GetAABBMinPos(0);
+
+			if (aMax.x < bMin.x || aMin.x > bMax.x) return false;
+			if (aMax.y < bMin.y || aMin.y > bMax.y) return false;
+			if (aMax.z < bMin.z || aMin.z > bMax.z) return false;
+
+			return true;
+
+		}
+		else {
+			// DynamicShapeObject가 아니라면 단순 충돌체크만 한다.
+			return CInteractiveObject::CollisionCheck(pOtherObject);
+		}
+	}
+	else {
+		// InteractiveObject가 아니라면 충돌체크를 하지 않는다.
+		return false;
+	}
+}
 
 
 CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)

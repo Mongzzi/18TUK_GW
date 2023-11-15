@@ -61,6 +61,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderAABB = false);
 
 	virtual CAABBColliderWithMesh* GetCollider() { return m_pCollider; }
+
+public:
+	virtual bool CollisionCheck(CColliderMesh* pOtherObject) = 0;
 };
 
 class CMeshIlluminated : public CMesh
@@ -82,20 +85,34 @@ public:
 	virtual ~CCubeMeshIlluminated();
 };
 
-class CDynamicShapeMesh : public CMesh
+class CDynamicShapeMesh : public CColliderMesh
 {
 public:
-	CDynamicShapeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList) {};
-	virtual ~CDynamicShapeMesh() {};
+	CDynamicShapeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CDynamicShapeMesh();
 
-private:
+protected:
 	bool m_bAllowCutting = false; // true 라면 다른 오브젝트를 자를 수 있다.
 	bool m_bCuttable = false; // true 라면 다른 오브젝트에 인해 잘릴 수 있다.
-public:
 
+public:
+	void SetAllowCutting(bool bState) { m_bAllowCutting = bState; }
+	void SetCuttable(bool bState) { m_bCuttable = bState; }
+	bool GetAllowCutting() { return m_bAllowCutting; }
+	bool GetCuttable() { return m_bCuttable; }
+
+public:
+	CVertex* GetVertices() { return m_pVertices; }
+	UINT* GetIndices() { return m_pnIndices; }
+	UINT GetNumVertices() { return m_nVertices; }
+	UINT GetNumIndices() { return m_nIndices; }
+
+public:
+	virtual bool CollisionCheck(CColliderMesh* pOtherMesh);
+	virtual bool CollisionDynamicShaping(CDynamicShapeMesh* pOtherMesh);
 };
 
-class CBoxMesh : public CColliderMesh
+class CBoxMesh : public CDynamicShapeMesh
 {
 public:
 	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
@@ -111,7 +128,7 @@ public:
 
 // ------------------------------- FBX -----------------------------------
 
-class CFBXMesh : public CColliderMesh
+class CFBXMesh : public CDynamicShapeMesh
 {
 private:
 	//UINT* m_pnIndices;

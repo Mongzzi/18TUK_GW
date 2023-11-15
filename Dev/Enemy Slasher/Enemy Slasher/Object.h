@@ -136,21 +136,33 @@ public:
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	virtual void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 
-	XMFLOAT3 GetAABBMaxPos(int nIndex) {
-		XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMaxPos();
-		XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
-		return pos;
-	}
-	XMFLOAT3 GetAABBMinPos(int nIndex) {
-		XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMinPos();
-		XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
-		return pos;
-	}
+	XMFLOAT3 GetAABBMaxPos(int nIndex);
+	XMFLOAT3 GetAABBMinPos(int nIndex);
+
+	int GetNumMeshes() { return m_nMeshes; }
+
+	virtual bool CollisionCheck(CGameObject* pOtherObject);
 };
 
 class CDynamicShapeObject : public CInteractiveObject
 {
+public:
+	CDynamicShapeObject(int nMeshes = 1);
+	virtual ~CDynamicShapeObject();
 
+protected:
+	bool m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
+	bool m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
+
+public:
+	void SetAllowCutting(bool bState) { m_bAllowCutting = bState; }
+	void SetCuttable(bool bState) { m_bCuttable = bState; }
+	bool GetAllowCutting() { return m_bAllowCutting; }
+	bool GetCuttable() { return m_bCuttable; }
+
+public:
+
+	virtual bool CollisionCheck(CGameObject* pOtherObject);
 };
 
 
