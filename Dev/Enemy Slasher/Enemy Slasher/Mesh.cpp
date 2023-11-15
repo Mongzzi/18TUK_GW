@@ -762,7 +762,7 @@ CRayMesh::CRayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		 Ori = ray->GetOriginal();
 		 Dir = ray->GetDir();
 	}
-	XMFLOAT3 End = Vector3::Add(Ori, Vector3::ScalarProduct(Dir, 1000, false));
+	XMFLOAT3 End = Vector3::Add(Ori, Vector3::ScalarProduct(Dir, 5000, false));
 	
 
 	m_pVertices = new CVertex[m_nVertices];

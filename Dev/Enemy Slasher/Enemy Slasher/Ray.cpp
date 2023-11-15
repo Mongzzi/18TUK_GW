@@ -56,19 +56,20 @@ CRay CRay::RayAtViewSpace(int x, int y, CCamera camera)
     float ndcX = ((2.f * x) / viewPort.Width - 1.f);
     float ndcY = ((-2.f * y) / viewPort.Height + 1.f);
 
-    XMFLOAT4 rayClip(ndcX, ndcY, 1.0f, 1.0f);
+    XMFLOAT4 rayClip(ndcX / projMat._11, ndcY / projMat._22, 1.0f, 1.0f);
+
 
     XMFLOAT4X4 projInv = Matrix4x4::Inverse(projMat);
-    XMVECTOR rayEye = XMVector3TransformCoord(XMLoadFloat4(&rayClip), XMLoadFloat4x4(&projInv));
+    //XMVECTOR rayEye = XMVector3TransformCoord(XMLoadFloat4(&rayClip), XMLoadFloat4x4(&projInv));
 
     XMFLOAT4X4 viewInv = Matrix4x4::Inverse(viewMat);
-    XMVECTOR rayWorld = XMVector3TransformCoord(rayEye, XMLoadFloat4x4(&viewInv));
+    XMVECTOR rayWorld = XMVector3TransformNormal(XMLoadFloat4(&rayClip), XMLoadFloat4x4(&viewInv));
 
     XMVECTOR rayDir = XMVector3Normalize(rayWorld);
 
     XMStoreFloat3(&r.m_xmf3Dir, rayDir);
     //
-    XMFLOAT4 rayOri(ndcX, ndcY, -1.0f, 1.0f);// (x,y,-n)
+    XMFLOAT4 rayOri(ndcX, ndcY, 0.0f, 1.0f);// (x,y,-n)
 
     XMVECTOR rayO = XMVector3TransformCoord(XMLoadFloat4(&rayOri), XMLoadFloat4x4(&projInv));
 
