@@ -573,6 +573,7 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::DynamicShaping()
 {
+	if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList);
 }
 
 void CGameFramework::WaitForGpuComplete()

@@ -69,14 +69,6 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 				}
 			}
 		}
-
-		CFBXObject* pObject_stone = (CFBXObject*)m_pvObjectManager[(int)ObjectLayer::Object][0];
-		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)m_pvObjectManager[(int)ObjectLayer::Object][1];
-
-		if (pObject_stone->CollisionCheck(pObject_cuttur)) {
-			cout << "Collision\n";
-		}
-
 	}
 }
 

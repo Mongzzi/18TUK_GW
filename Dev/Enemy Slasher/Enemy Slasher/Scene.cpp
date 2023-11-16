@@ -134,6 +134,7 @@ void CBasicScene::AnimateObjects(float fTimeElapsed)
 
 void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList);
 }
 
 void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -922,6 +923,8 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	{
 		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
+		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
+		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
 		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
@@ -929,9 +932,11 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	{
 		CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+		pCubeMesh->SetAllowCutting(true);
 		CDynamicShapeObject* pDynamicShapeObject = NULL;
 
 		pDynamicShapeObject = new CDynamicShapeObject();
+		pDynamicShapeObject->SetAllowCutting(true);
 		pDynamicShapeObject->SetMesh(0, pCubeMesh);
 		pDynamicShapeObject->SetPosition(-50.0f, 40.0f, 100.0f);
 		pDynamicShapeObject->SetShaderType(ShaderType::CObjectsShader);
@@ -985,7 +990,7 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 
 		
 		if (pObject_stone->CollisionCheck(pObject_cuttur)) {
-			cout << "Collision\n";
+			//cout << "Collision\n";
 		}
 
 	}

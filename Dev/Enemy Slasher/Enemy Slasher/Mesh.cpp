@@ -254,6 +254,10 @@ CDynamicShapeMesh::~CDynamicShapeMesh()
 
 bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 {
+	// 이 함수는 단순 충돌체크가 아닌
+	// 자신이 잘릴 수 있고 OtherMesh가 절단 가능할 때 세부 충돌체크를 하고 true를 반환하는 함수이다.
+	// 이름을 변경할 수도 있다
+
 	if (CDynamicShapeMesh* pDynamicShapeMesh = dynamic_cast<CDynamicShapeMesh*>(pOtherMesh)) { // OtherMesh가 DynamicShapeMesh 라면
 		// 절단할 수 있는 충돌체크를 한다.
 		// 자신이 잘릴 수 있고 OtherMesh가 절단 가능하다면
@@ -270,6 +274,9 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 }
 bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CDynamicShapeMesh* pOtherMesh)
 {
+	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
+	// 이 함수에 의해 자신의 Mesh가 변형된다.
+
 	CVertex* pCutterVertices = pOtherMesh->GetVertices();
 	UINT* pCutterIndices = pOtherMesh->GetIndices();
 	UINT pnCutterVertices = pOtherMesh->GetNumVertices();
@@ -277,7 +284,106 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	// 모든 메쉬는 TriangleList로 구성되어있다고 가정
 	
+	static int SlowCounter = 0;
+	++SlowCounter;
 
+	if (SlowCounter % 500 == 250) { // 테스트를 위한 제한
+		cout << "Collision in DynamicShapingMesh\n";
+		//테스트를 위해 첫번째 삼각형을 삭제해보자
+		if (false && m_nIndices > 3) {
+			m_nIndices -= 3;
+			UINT* pnIndices = new UINT[m_nIndices];
+			for (int i = 0; i < m_nIndices; ++i) {
+				pnIndices[i] = m_pnIndices[i + 3];
+			}
+			delete[] m_pnIndices;
+			m_pnIndices = pnIndices;
+
+			if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+			if (m_pd3dIndexUploadBuffer)m_pd3dIndexUploadBuffer->Release();
+			//인덱스 버퍼를 생성한다. 
+			m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+			//인덱스 버퍼 뷰를 생성한다. 
+			m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+			m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+			m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+			return true;
+		}
+
+		// 다른 테스트 메쉬의 모양을 바꿔보자
+
+		{
+			m_nVertices = 8;				// 꼭지점 개수
+			m_nStride = sizeof(CVertex); // x , y, z 좌표
+			m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+			std::random_device rd;
+			std::default_random_engine dre(rd());
+			std::uniform_real_distribution <> urd(0.0, 1.0);
+
+			float fx = 20 * 0.5f, fy = 20 * 0.5f, fz = 20 * 0.5f;
+
+			if (m_pVertices) delete[] m_pVertices;
+			m_pVertices = new CVertex[m_nVertices];
+			m_pVertices[0] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+			m_pVertices[1] = CVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+			m_pVertices[2] = CVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+			m_pVertices[3] = CVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+			m_pVertices[4] = CVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+			m_pVertices[5] = CVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+			m_pVertices[6] = CVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+			m_pVertices[7] = CVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+
+			// 버퍼생성
+			if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+			if (m_pd3dVertexUploadBuffer)m_pd3dVertexUploadBuffer->Release();
+			m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+			// 바인딩위해 버퍼뷰 초기화
+			m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+			m_d3dVertexBufferView.StrideInBytes = m_nStride;
+			m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+			m_nIndices = 36;
+			if (m_pnIndices) delete[] m_pnIndices;
+			m_pnIndices = new UINT[m_nIndices];
+
+			//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+			m_pnIndices[0] = 3; m_pnIndices[1] = 1; m_pnIndices[2] = 0;
+			//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+			m_pnIndices[3] = 2; m_pnIndices[4] = 1; m_pnIndices[5] = 3;
+			//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+			m_pnIndices[6] = 0; m_pnIndices[7] = 5; m_pnIndices[8] = 4;
+			//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+			m_pnIndices[9] = 1; m_pnIndices[10] = 5; m_pnIndices[11] = 0;
+			//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+			m_pnIndices[12] = 3; m_pnIndices[13] = 4; m_pnIndices[14] = 7;
+			//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+			m_pnIndices[15] = 0; m_pnIndices[16] = 4; m_pnIndices[17] = 3;
+			//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+			m_pnIndices[18] = 1; m_pnIndices[19] = 6; m_pnIndices[20] = 5;
+			//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+			m_pnIndices[21] = 2; m_pnIndices[22] = 6; m_pnIndices[23] = 1;
+			//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+			m_pnIndices[24] = 2; m_pnIndices[25] = 7; m_pnIndices[26] = 6;
+			//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+			m_pnIndices[27] = 3; m_pnIndices[28] = 7; m_pnIndices[29] = 2;
+			//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+			m_pnIndices[30] = 6; m_pnIndices[31] = 4; m_pnIndices[32] = 5;
+			//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+			m_pnIndices[33] = 7; m_pnIndices[34] = 4; m_pnIndices[35] = 6;
+
+			//인덱스 버퍼를 생성한다. 
+			if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+			if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
+			m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+			//인덱스 버퍼 뷰를 생성한다. 
+			m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+			m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+			m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+		}
+	}
 	return false;
 }
 
