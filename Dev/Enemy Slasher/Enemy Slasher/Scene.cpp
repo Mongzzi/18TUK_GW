@@ -212,11 +212,17 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		break;
 	case WM_RBUTTONDOWN:
 		if (pCoveredUI)
+		{
 			pSelectedUI = pCoveredUI;
+			pSelectedUI->ButtenDown();
+		}
 		break;
 	case WM_RBUTTONUP:
 		if (pSelectedUI)
+		{
 			pSelectedUI = NULL;
+			pSelectedUI->ButtenUp();
+		}
 		break;
 	default:
 		break;
@@ -437,56 +443,61 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 		//SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
 	}
 
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+	//-------------- 피킹
+	CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+
+	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
+
+	pCoveredUI = NULL;
+
+	for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
 	{
-		GetCursorPos(&ptCursorPos);
-		ScreenToClient(hWnd, &ptCursorPos);
-		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
-		
-		std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
-		
-		pCoveredUI = NULL;
-
-		for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
+		if (lc == (int)ObjectLayer::UIObject)
 		{
-			if (lc == (int)ObjectLayer::UIObject)
-			{
-				for (int i = 0;i < pObjectList[lc].size();i++) {
-					CUIObject* obj = (CUIObject*)pObjectList[lc][i];
+			for (int i = 0;i < pObjectList[lc].size();i++) {
+				CUIObject* obj = (CUIObject*)pObjectList[lc][i];
 
-					XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
-					XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
-					XMFLOAT3 ray_dir = r.GetDir();
-					XMFLOAT3 ray_origin = r.GetOriginal();
-					XMFLOAT3 invDirection = XMFLOAT3(1.0f / ray_dir.x, 1.0f / ray_dir.y, 1.0f / ray_dir.z);
+				XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
+				XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
+				XMFLOAT3 ray_dir = r.GetDir();
+				XMFLOAT3 ray_origin = r.GetOriginal();
+				XMFLOAT3 invDirection = XMFLOAT3(1.0f / ray_dir.x, 1.0f / ray_dir.y, 1.0f / ray_dir.z);
 
-					float t1 = (aabbMin.x - ray_origin.x) * invDirection.x;
-					float t2 = (aabbMax.x - ray_origin.x) * invDirection.x;
-					float t3 = (aabbMin.y - ray_origin.y) * invDirection.y;
-					float t4 = (aabbMax.y - ray_origin.y) * invDirection.y;
-					float t5 = (aabbMin.z - ray_origin.z) * invDirection.z;
-					float t6 = (aabbMax.z - ray_origin.z) * invDirection.z;
+				float t1 = (aabbMin.x - ray_origin.x) * invDirection.x;
+				float t2 = (aabbMax.x - ray_origin.x) * invDirection.x;
+				float t3 = (aabbMin.y - ray_origin.y) * invDirection.y;
+				float t4 = (aabbMax.y - ray_origin.y) * invDirection.y;
+				float t5 = (aabbMin.z - ray_origin.z) * invDirection.z;
+				float t6 = (aabbMax.z - ray_origin.z) * invDirection.z;
 
-					float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
-					float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+				float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
+				float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
 
-					// 교차하지 않으면 tmax < 0
-					// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
-					bool result = tmax > 0 && tmin <= tmax;
-					if (result) {
-						pCoveredUI = obj;
+				// 교차하지 않으면 tmax < 0
+				// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
+				bool result = tmax > 0 && tmin <= tmax;
+				if (result) {
+					pCoveredUI = obj;
+					pCoveredUI->CursorOverObject(true);
 #ifdef _DEBUG
-						//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
+					cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
 #endif // _DEBUG
-					}
 				}
-			}
-			else if (lc == (int)ObjectLayer::Ray)
-			{
-				CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
-				rayOb->Reset(r);
+				else
+					obj->CursorOverObject(false);
 			}
 		}
+		else if (lc == (int)ObjectLayer::Ray)
+		{
+			CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
+			rayOb->Reset(r);
+		}
+	}
+	//----------------
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
 
 		if (cxDelta || cyDelta)
 		{

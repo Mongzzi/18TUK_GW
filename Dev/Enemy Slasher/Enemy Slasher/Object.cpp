@@ -755,13 +755,9 @@ void CCardUIObject::Animate(float fTimeElapsed)
 void CCardUIObject::CursorOverObject(bool flag)
 {
 	if (flag)
-	{
 		m_fTargetScale = 1.2f;
-	}
 	else
-	{
 		m_fTargetScale = 1.0f;
-	}
 }
 
 void CCardUIObject::ButtenDown()

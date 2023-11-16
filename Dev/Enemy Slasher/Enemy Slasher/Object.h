@@ -253,7 +253,9 @@ public:
 	void AddPositionUI(int x, int y);
 	void AddPositionUI(POINT pos);
 
+	// 계속 불리는 함수
 	virtual void CursorOverObject(bool flag) = 0;
+	// 한번 불리는 함수
 	virtual void ButtenDown() = 0;
 	virtual void ButtenUp() = 0;
 };
