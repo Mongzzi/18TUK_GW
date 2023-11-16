@@ -139,6 +139,7 @@ public:
 	XMFLOAT3 GetAABBMaxPos(int nIndex);
 	XMFLOAT3 GetAABBMinPos(int nIndex);
 
+	XMFLOAT4X4 GetWorldMat() { return m_xmf4x4World; }
 	CMesh** GetMeshes() { return m_ppMeshes; }
 	int GetNumMeshes() { return m_nMeshes; }
 

@@ -303,6 +303,13 @@ bool CDynamicShapeMesh::DSM_Triangle::LineTriangleIntersect(DSM_Line& dsmLine, f
 }
 
 
+XMFLOAT3 CDynamicShapeMesh::TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xmf4x4Mat)
+{
+	XMFLOAT3 pos = xmf3Vertex;
+	XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&xmf4x4Mat)));
+	return pos;
+}
+
 bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 {
 	// 이 함수는 단순 충돌체크가 아닌
@@ -323,15 +330,28 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	}
 	return false;
 }
-bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh)
+bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& xmf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat)
 {
 	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
 	// 이 함수에 의해 자신의 Mesh가 변형된다.
 
-	CVertex* pCutterVertices = pOtherMesh->GetVertices();
-	UINT* pnCutterIndices = pOtherMesh->GetIndices();
-	UINT nCutterVertices = pOtherMesh->GetNumVertices();
-	UINT nCutterIndices = pOtherMesh->GetNumIndices();
+	CVertex*	pCutterVertices = pOtherMesh->GetVertices();
+	UINT		nCutterVertices = pOtherMesh->GetNumVertices();
+	UINT*		pnCutterIndices = pOtherMesh->GetIndices();
+	UINT		nCutterIndices  = pOtherMesh->GetNumIndices();
+
+	// Cutter의 Vertex를 자신의 좌표계로 변환하여 Vertex 변환 처리를 하는 것이 좋다.
+	// Cutter의 좌표계 -> 월드 좌표계(월드 행렬 곱) -> 자신의 좌표계(자신의 역행렬 곱)
+
+	vector<XMFLOAT3> vCutterVerices;
+	XMFLOAT3 xmfVertex;
+	XMFLOAT4X4 xmf4x4InvThisMat = Matrix4x4::Inverse(xmf4x4ThisMat);
+	for (int i = 0; i < nCutterVertices; ++i) {
+		xmfVertex = pCutterVertices[i].GetVertex();
+		xmfVertex = TransformVertex(xmfVertex, xmf4x4OtherMat); // World변환
+		xmfVertex = TransformVertex(xmfVertex, xmf4x4InvThisMat); // 자기 좌표계 변환
+		vCutterVerices.emplace_back(xmfVertex);
+	}
 
 	// 모든 메쉬는 TriangleList로 구성되어있다고 가정
 
@@ -339,18 +359,18 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	XMFLOAT3 xmfAABBMaxPos = pOtherMesh->GetCollider()->GetAABBMaxPos();
 	XMFLOAT3 xmfAABBMinPos = pOtherMesh->GetCollider()->GetAABBMinPos();
+	cout << xmfAABBMaxPos.x << '\t' << xmfAABBMaxPos.y << '\t' << xmfAABBMaxPos.z << "\t\t\t";
+	cout << xmfAABBMinPos.x << '\t' << xmfAABBMinPos.y << '\t' << xmfAABBMinPos.z << '\n';
 
 	vector<XMFLOAT3> vCollisionVertex;
-	XMFLOAT3 xmfCutterVertex;
-	for (int i = 0; i < nCutterVertices; ++i) {
-		xmfCutterVertex = pCutterVertices[i].GetVertex();
+	for (XMFLOAT3& xmfCutterVertex : vCutterVerices) {
 		if (xmfCutterVertex.x < xmfAABBMinPos.x) continue;
 		if (xmfCutterVertex.x > xmfAABBMaxPos.x) continue;
 		if (xmfCutterVertex.y < xmfAABBMinPos.y) continue;
 		if (xmfCutterVertex.y > xmfAABBMaxPos.y) continue;
 		if (xmfCutterVertex.z < xmfAABBMinPos.z) continue;
 		if (xmfCutterVertex.z > xmfAABBMaxPos.z) continue;
-		vCollisionVertex.push_back(xmfCutterVertex);
+		vCollisionVertex.emplace_back(xmfCutterVertex);
 	}
 
 	DSM_Line dsmLine;
@@ -392,55 +412,70 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 			}
 		}
 	}
-
-	m_nVertices = vCollisionVertex.size();				// 꼭지점 개수
-	m_nStride = sizeof(CVertex); // x , y, z 좌표
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	std::random_device rd;
-	std::default_random_engine dre(rd());
-	std::uniform_real_distribution <> urd(0.0, 1.0);
-
-	if (m_pVertices) delete[] m_pVertices;
-	m_pVertices = new CVertex[m_nVertices];
-	for (int i = 0; i < m_nVertices; ++i) {
-		m_pVertices[i] = CVertex(vCollisionVertex[i], XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	{
+		XMFLOAT3 xmfMaxPos(FLT_MIN, FLT_MIN, FLT_MIN);
+		XMFLOAT3 xmfMinPos(FLT_MAX, FLT_MAX, FLT_MAX);
+		for (XMFLOAT3& a : vCollisionVertex) {
+			if (xmfMaxPos.x < a.x) xmfMaxPos.x = a.x;
+			if (xmfMinPos.x > a.x) xmfMinPos.x = a.x;
+			if (xmfMaxPos.y < a.y) xmfMaxPos.y = a.y;
+			if (xmfMinPos.y > a.y) xmfMinPos.y = a.y;
+			if (xmfMaxPos.z < a.z) xmfMaxPos.z = a.z;
+			if (xmfMinPos.z > a.z) xmfMinPos.z = a.z;
+		}
+		//cout << "NewCollisionArea\n" <<
+		//	"\t\tMax =\t" << xmfMaxPos.x << "\t\t" << xmfMaxPos.y << "\t\t" << xmfMaxPos.z << "\n" <<
+		//	"\t\tMin =\t" << xmfMinPos.x << "\t\t" << xmfMinPos.y << "\t\t" << xmfMinPos.z << "\n";
 	}
 
-	// 버퍼생성
-	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
-	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	//m_nVertices = vCollisionVertex.size();				// 꼭지점 개수
+	//m_nStride = sizeof(CVertex); // x , y, z 좌표
+	//m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	// 바인딩위해 버퍼뷰 초기화
-	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	//std::random_device rd;
+	//std::default_random_engine dre(rd());
+	//std::uniform_real_distribution <> urd(0.0, 1.0);
 
-	m_nIndices = m_nVertices * 3;
-	if(m_pnIndices) delete[] m_pnIndices;
-	m_pnIndices = new UINT[m_nIndices];
+	//if (m_pVertices) delete[] m_pVertices;
+	//m_pVertices = new CVertex[m_nVertices];
+	//for (int i = 0; i < m_nVertices; ++i) {
+	//	m_pVertices[i] = CVertex(vCollisionVertex[i], XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	//}
 
-	vector<UINT> numbers(m_nVertices - 1);
-	std::iota(numbers.begin(), numbers.end(), 1);
-	std::shuffle(numbers.begin(), numbers.end(), dre);
-	for (int i = 0; i < m_nVertices; ++i) {
-		std::vector<int> selectedNumbers(numbers.begin(), numbers.begin() + 3);
-		m_pnIndices[i * 3 + 0] = selectedNumbers[0];
-		m_pnIndices[i * 3 + 1] = selectedNumbers[1];
-		m_pnIndices[i * 3 + 2] = selectedNumbers[2];
-	}
+	//// 버퍼생성
+	//if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+	//if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	//m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
-	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
-	if (m_pd3dIndexUploadBuffer)m_pd3dIndexUploadBuffer->Release();
-	//인덱스 버퍼를 생성한다. 
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
-	//인덱스 버퍼 뷰를 생성한다. 
-	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+	//// 바인딩위해 버퍼뷰 초기화
+	//m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	//m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	//m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	m_bCuttable = false;
+	//m_nIndices = m_nVertices * 3;
+	//if(m_pnIndices) delete[] m_pnIndices;
+	//m_pnIndices = new UINT[m_nIndices];
+
+	//vector<UINT> numbers(m_nVertices - 1);
+	//std::iota(numbers.begin(), numbers.end(), 1);
+	//std::shuffle(numbers.begin(), numbers.end(), dre);
+	//for (int i = 0; i < m_nVertices; ++i) {
+	//	std::vector<int> selectedNumbers(numbers.begin(), numbers.begin() + 3);
+	//	m_pnIndices[i * 3 + 0] = selectedNumbers[0];
+	//	m_pnIndices[i * 3 + 1] = selectedNumbers[1];
+	//	m_pnIndices[i * 3 + 2] = selectedNumbers[2];
+	//}
+
+	//if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+	//if (m_pd3dIndexUploadBuffer)m_pd3dIndexUploadBuffer->Release();
+	////인덱스 버퍼를 생성한다. 
+	//m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	////인덱스 버퍼 뷰를 생성한다. 
+	//m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	//m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	//m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	//m_bCuttable = false;
 	return true;
 }
 

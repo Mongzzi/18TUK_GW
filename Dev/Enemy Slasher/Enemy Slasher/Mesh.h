@@ -122,9 +122,10 @@ public:
 	UINT GetNumVertices() { return m_nVertices; }
 	UINT GetNumIndices() { return m_nIndices; }
 
+	XMFLOAT3 TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xmf4x4Mat);
 public:
 	virtual bool CollisionCheck(CColliderMesh* pOtherMesh);
-	virtual bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh); // true - 절단 성공 / false - 절단 실패
+	virtual bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& mxf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat); // true - 절단 성공 / false - 절단 실패
 };
 
 class CBoxMesh : public CDynamicShapeMesh
