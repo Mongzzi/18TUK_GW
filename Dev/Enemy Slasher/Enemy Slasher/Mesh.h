@@ -109,7 +109,7 @@ public:
 
 public:
 	virtual bool CollisionCheck(CColliderMesh* pOtherMesh);
-	virtual bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CDynamicShapeMesh* pOtherMesh); // true - 절단 성공 / false - 절단 실패
+	virtual bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh); // true - 절단 성공 / false - 절단 실패
 };
 
 class CBoxMesh : public CDynamicShapeMesh

@@ -333,7 +333,7 @@ bool CDynamicShapeObject::CollisionCheck(CGameObject* pOtherObject)
 	}
 }
 
-bool CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pOtherObject)
+bool CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pOtherObject)
 {
 	if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pOtherObject)) { // OtherObject가 DynamicShapeObject 라면
 
@@ -347,7 +347,7 @@ bool CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12Graphic
 			for (int i = 0; i < m_nMeshes; ++i) {
 				for (int j = 0; j < nOtherMeshes; ++j) {
 					if (ppMeshes[i]->CollisionCheck(ppOtherMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
-						ppOtherMeshes[j]->DynamicShaping(pd3dDevice, pd3dCommandList, ppMeshes[i]);
+						ppOtherMeshes[j]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, ppMeshes[i]);
 					}
 				}
 			}
@@ -360,7 +360,7 @@ bool CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12Graphic
 			for (int i = 0; i < m_nMeshes; ++i) {
 				for (int j = 0; j < nOtherMeshes; ++j) {
 					if (ppMeshes[i]->CollisionCheck(ppOtherMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
-						ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, ppOtherMeshes[j]);
+						ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, ppOtherMeshes[j]);
 					}
 				}
 			}

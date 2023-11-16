@@ -573,17 +573,27 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::DynamicShaping()
 {
-	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+	static float fDynamicShapingTimer = 0.0f;
 
-	if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList);
+	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+	fDynamicShapingTimer += fTimeElapsed;
 
-	m_pd3dCommandList->Close();
-	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
-	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	if(fDynamicShapingTimer > 0.5f) // DynamicShaping이 너무 자주 불리지 않도록 시간 제한. 조정 필요
+	{
+		fDynamicShapingTimer = 0.0f;
 
-	WaitForGpuComplete();
+		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	if (m_pScene) m_pScene->ReleaseUploadBuffers();
+		if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList, fTimeElapsed);
+
+		m_pd3dCommandList->Close();
+		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+		WaitForGpuComplete();
+
+		if (m_pScene) m_pScene->ReleaseUploadBuffers();
+	}
 }
 
 void CGameFramework::WaitForGpuComplete()

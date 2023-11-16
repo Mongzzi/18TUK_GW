@@ -42,7 +42,7 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 			b->Animate(fTimeElapsed);
 }
 
-void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
@@ -62,7 +62,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 					// 이 오브젝트가 DynamicShapeObject라면 처리
 					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObjects[i])) {
 						if (pDynamicShapeObject->CollisionCheck(pObjects[j])) {
-							pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, pObjects[j]);
+							pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pObjects[j]);
 						}
 					}
 

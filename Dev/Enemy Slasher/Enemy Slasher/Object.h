@@ -165,7 +165,7 @@ public:
 public:
 
 	virtual bool CollisionCheck(CGameObject* pOtherObject);
-	bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pOtherObject);
+	bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pOtherObject);
 };
 
 

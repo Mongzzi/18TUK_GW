@@ -132,9 +132,9 @@ void CBasicScene::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 }
 
-void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
-	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList);
+	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
 }
 
 void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -1009,9 +1009,9 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	//}
 }
 
-void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
-	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList);
+	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
 }
 
 void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)

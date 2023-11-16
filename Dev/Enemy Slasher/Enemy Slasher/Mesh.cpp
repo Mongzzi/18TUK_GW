@@ -272,7 +272,7 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	}
 	return false;
 }
-bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CDynamicShapeMesh* pOtherMesh)
+bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh)
 {
 	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
 	// 이 함수에 의해 자신의 Mesh가 변형된다.
@@ -290,7 +290,7 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	if (SlowCounter % 500 == 250) { // 테스트를 위한 제한
 		cout << "Collision in DynamicShapingMesh\n";
 		//테스트를 위해 첫번째 삼각형을 삭제해보자
-		if (false && m_nIndices > 3) {
+		if (m_nIndices > 3) {
 			m_nIndices -= 3;
 			UINT* pnIndices = new UINT[m_nIndices];
 			for (int i = 0; i < m_nIndices; ++i) {

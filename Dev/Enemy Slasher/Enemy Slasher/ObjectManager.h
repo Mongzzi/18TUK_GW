@@ -34,7 +34,7 @@ public:
 	void DelObj(CGameObject* object, ObjectLayer layer);
 
 	void AnimateObjects(float fTimeElapsed);
-	void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 
 	void ReleaseObjects();
 	void ReleaseUploadBuffers();
