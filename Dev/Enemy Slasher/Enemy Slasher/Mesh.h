@@ -95,6 +95,21 @@ protected:
 	bool m_bAllowCutting = false; // true 라면 다른 오브젝트를 자를 수 있다.
 	bool m_bCuttable = false; // true 라면 다른 오브젝트에 인해 잘릴 수 있다.
 
+protected:
+	class DSM_Line {
+	public:
+		XMFLOAT3 m_xmfStart;
+		XMFLOAT3 m_xmfEnd;
+		XMFLOAT3 m_xmfDir;
+		void MakeLine(XMFLOAT3 xmfStart, XMFLOAT3 xmfEnd);
+	};
+	class DSM_Triangle {
+	public:
+		XMFLOAT3 m_xmfPos[3];
+		void MakeTriangle(XMFLOAT3 xmfPos1, XMFLOAT3 xmfPos2, XMFLOAT3 xmfPos3);
+		bool LineTriangleIntersect(DSM_Line& dsmLine, float& t, XMFLOAT3& xmfIntersectionPoint);
+	};
+
 public:
 	void SetAllowCutting(bool bState) { m_bAllowCutting = bState; }
 	void SetCuttable(bool bState) { m_bCuttable = bState; }
