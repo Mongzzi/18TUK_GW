@@ -11,8 +11,13 @@
 
 #define AA1 "fbxsdk/tower.fbx"
 #define AA2 "fbxsdk/torreMoba.fbx"
-#define AA3 "fbxsdk/house.fbx"
+#define HOUSE_FBX "fbxsdk/house.fbx"
 
+#define TREE1 "fbxsdk/Tree_temp_climate_001.fbx"
+#define TREE2 "fbxsdk/Tree_temp_climate_002.fbx"
+#define TREE3 "fbxsdk/Tree_temp_climate_003.fbx"
+#define TREE4 "fbxsdk/Tree_temp_climate_004.fbx"
+#define TREE5 "fbxsdk/Tree_temp_climate_005.fbx"
 
 enum class LoadResult : int {
 	False,

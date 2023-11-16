@@ -312,7 +312,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 // ------------------------------------       터레인      -------------------------------
 //지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다. 
-	XMFLOAT3 xmf3Scale(8.0f, 8.0f, 8.0f);
+	XMFLOAT3 xmf3Scale(24.0f, 6.0f, 24.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
 	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다. 
@@ -328,64 +328,164 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 #endif
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
 
-	float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
-	float fxPitch = 12.0f * 3.5f;
-	float fyPitch = 12.0f * 3.5f;
-	float fzPitch = 12.0f * 3.5f;
+	//float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
+	//float fxPitch = 12.0f * 3.5f;
+	//float fyPitch = 12.0f * 3.5f;
+	//float fzPitch = 12.0f * 3.5f;
 
-	//직육면체를 지형 표면에 그리고 지형보다 높은 위치에 일정한 간격으로 배치한다. 
-	int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch);
+	////직육면체를 지형 표면에 그리고 지형보다 높은 위치에 일정한 간격으로 배치한다. 
+	//int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch);
 
-	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+	//CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-	//CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");
-	//CFBXMesh* pFBXMesh2 = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/box.fbx");
+	////CFBXMesh* pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/Stone_lit_001.fbx");
+	////CFBXMesh* pFBXMesh2 = new CFBXMesh(pd3dDevice, pd3dCommandList, plSdkManager, plScene, "fbxsdk/box.fbx");
 
-	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	//CRotatingObject* pRotatingObject = NULL;
-	CFBXObject* pRotatingObject = NULL;
-	//CRotatingObject* pRotatingObject = NULL;
+	//XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
+	////CRotatingObject* pRotatingObject = NULL;
+	//CFBXObject* pRotatingObject = NULL;
+	////CRotatingObject* pRotatingObject = NULL;
 
-	//CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
-	//m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	////CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbx는 mesh가 3개라 지금 코드로는 버그 생김.
+	////m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 
-	for (int i = 0, x = 0; x < 1; x++)
+	//for (int i = 0, x = 0; x < 1; x++)
+	//{
+	//	for (int z = 0; z < zObjects; z++)
+	//	{
+	//		for (int y = 0; y < yObjects; y++)
+	//		{
+	//			if(x%2)pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, AA2);
+	//			else pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, AA2);
+	//			//if(x%2) pRotatingObject->SetMesh(0, pCubeMesh);
+	//			//else pRotatingObject->SetMesh(0, pCubeMesh);
+
+	//			float xPosition = x * fxPitch;
+	//			float zPosition = z * fzPitch;
+	//			float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//			pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
+
+	//			if (y == 0)
+	//			{
+	//				/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선 벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
+	//				xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
+
+	//				XMFLOAT3 temp = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	//				xmf3RotateAxis = Vector3::CrossProduct(temp, xmf3SurfaceNormal);
+
+	//				if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+	//				float fAngle = acos(Vector3::DotProduct(temp, xmf3SurfaceNormal));
+
+	//				pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
+	//			}
+	//			//pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	//			//pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
+	//			pRotatingObject->SetShaderType(ShaderType::CObjectsShader);
+	//			m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
+	//		}
+	//	}
+	//}
+	
+	// house
 	{
-		for (int z = 0; z < zObjects; z++)
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, HOUSE_FBX);
+		float xPosition = 257.0f / 4.0f * 24.0f;
+		float zPosition = 257.0f / 4.0f * 24.0f;
+		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+
+		pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
+	// tree
+	{
+		CFBXObject* pFBXObject = NULL;
+
+
+		float xpitch = 257.0f * 24.0f / 10.0f;
+		float zpitch = 257.0f * 24.0f / 7.0f;
+
+		for (int x = 0; x < 10; x++)
 		{
-			for (int y = 0; y < yObjects; y++)
+			for (int z = 0; z < 20; z++)
 			{
-				if(x%2)pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, AA2);
-				else pRotatingObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, AA2);
-				//if(x%2) pRotatingObject->SetMesh(0, pCubeMesh);
-				//else pRotatingObject->SetMesh(0, pCubeMesh);
+				if (x % 5 == 0) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-				float xPosition = x * fxPitch;
-				float zPosition = z * fzPitch;
-				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				pRotatingObject->SetPosition(xPosition, fHeight + (y * 10.0f * fyPitch) + 6.0f, zPosition);
-
-				if (y == 0)
-				{
-					/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선 벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
-					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
-
-					XMFLOAT3 temp = XMFLOAT3(0.0f, 1.0f, 0.0f);
-					xmf3RotateAxis = Vector3::CrossProduct(temp, xmf3SurfaceNormal);
-
-					if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-					float fAngle = acos(Vector3::DotProduct(temp, xmf3SurfaceNormal));
-
-					pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
+					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 				}
-				//pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				//pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
-				pRotatingObject->SetShaderType(ShaderType::CObjectsShader);
-				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::Object);
+				else if (x % 5 == 1) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+
+					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+				}
+				else if (x % 5 == 2) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+
+					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+				}
+				else if (x % 5 == 3) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+
+					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+				}
+				else if (x % 5 == 4) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+
+					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+				}
+				else if (x % 5 == 0) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+				}
 			}
 		}
 	}
+
 
 	{
 		//카드 UI 테스트용 오브젝트.
