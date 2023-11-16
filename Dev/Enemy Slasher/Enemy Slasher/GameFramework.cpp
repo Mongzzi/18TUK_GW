@@ -573,7 +573,17 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::DynamicShaping()
 {
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+
 	if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList);
+
+	m_pd3dCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	WaitForGpuComplete();
+
+	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 }
 
 void CGameFramework::WaitForGpuComplete()

@@ -1009,6 +1009,11 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	//}
 }
 
+void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList);
+}
+
 void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
 {
 	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
