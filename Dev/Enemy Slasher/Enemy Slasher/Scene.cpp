@@ -132,6 +132,10 @@ void CBasicScene::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 }
 
+void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
 void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -899,13 +903,13 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	{
 		CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
-		CInteractiveObject* pInteractiveObject = NULL;
+		CDynamicShapeObject* pDynamicShapeObject = NULL;
 
-		pInteractiveObject = new CInteractiveObject();
-		pInteractiveObject->SetMesh(0, pCubeMesh);
-		pInteractiveObject->SetPosition(-50.0f, 40.0f, 100.0f);
-		pInteractiveObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pInteractiveObject, ObjectLayer::Object);
+		pDynamicShapeObject = new CDynamicShapeObject();
+		pDynamicShapeObject->SetMesh(0, pCubeMesh);
+		pDynamicShapeObject->SetPosition(-50.0f, 40.0f, 100.0f);
+		pDynamicShapeObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pDynamicShapeObject, ObjectLayer::Object);
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -943,20 +947,6 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 	return(true);
 }
 
-bool CollisionCheck(CInteractiveObject* a, CInteractiveObject* b)
-{
-	XMFLOAT3 aMax = a->GetAABBMaxPos(0);
-	XMFLOAT3 aMin = a->GetAABBMinPos(0);
-	XMFLOAT3 bMax = b->GetAABBMaxPos(0);
-	XMFLOAT3 bMin = b->GetAABBMinPos(0);
-
-	if (aMax.x < bMin.x || aMin.x > bMax.x) return false;
-	if (aMax.y < bMin.y || aMin.y > bMax.y) return false;
-	if (aMax.z < bMin.z || aMin.z > bMax.z) return false;
-
-	return true;
-}
-
 void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 {
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
@@ -964,11 +954,12 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 	if (!pvObjectList[(int)ObjectLayer::Object].empty()) {
 		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][0];
-		CInteractiveObject* pObject_cuttur = (CInteractiveObject*)pvObjectList[(int)ObjectLayer::Object][1];
+		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)pvObjectList[(int)ObjectLayer::Object][1];
 		pObject_cuttur->MoveStrafe(0.04);
 
-		if (CollisionCheck(pObject_stone, pObject_cuttur)) {
-			//cout << "Collision\n";
+		
+		if (pObject_stone->CollisionCheck(pObject_cuttur)) {
+			cout << "Collision\n";
 		}
 
 	}

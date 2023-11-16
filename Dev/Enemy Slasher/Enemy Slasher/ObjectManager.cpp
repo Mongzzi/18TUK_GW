@@ -42,6 +42,44 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 			b->Animate(fTimeElapsed);
 }
 
+void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (std::vector<CGameObject*> a : m_pvObjectManager)
+		for (CGameObject* b : a) {
+			if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(b)) {
+
+			}
+		}
+
+	if (!m_pvObjectManager[(int)ObjectLayer::Object].empty()) {
+		vector<CGameObject*> pObjects = m_pvObjectManager[(int)ObjectLayer::Object];
+		if (1 < pObjects.size()) { // 2개 이상의 오브젝트가 있다면 충돌 후 다이나믹 쉐이핑을 진행한다.
+
+			// 두 오브젝트의 충돌처리를 위한 이중 for문
+			for (int i = 0; i < (pObjects.size() - 1); ++i) {
+				for (int j = i + 1; j < (pObjects.size()); ++j) {
+
+					// 이 오브젝트가 DynamicShapeObject라면 처리
+					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObjects[i])) {
+						if (pDynamicShapeObject->CollisionCheck(pObjects[j])) {
+							pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, pObjects[j]);
+						}
+					}
+
+				}
+			}
+		}
+
+		CFBXObject* pObject_stone = (CFBXObject*)m_pvObjectManager[(int)ObjectLayer::Object][0];
+		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)m_pvObjectManager[(int)ObjectLayer::Object][1];
+
+		if (pObject_stone->CollisionCheck(pObject_cuttur)) {
+			cout << "Collision\n";
+		}
+
+	}
+}
+
 void CObjectManager::ReleaseObjects()
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager) {

@@ -293,29 +293,34 @@ bool CInteractiveObject::CollisionCheck(CGameObject* pOtherObject)
 }
 
 
+CDynamicShapeObject::CDynamicShapeObject(int nMeshes)
+{
+}
+
+CDynamicShapeObject::~CDynamicShapeObject()
+{
+}
+
 bool CDynamicShapeObject::CollisionCheck(CGameObject* pOtherObject)
 {
+	// 충돌체크만 한다면 아래의 복잡한 처리가 필요 없다.
+	return CInteractiveObject::CollisionCheck(pOtherObject);
+
 	if (CInteractiveObject* pInteractiveObject = dynamic_cast<CInteractiveObject*>(pOtherObject)) { // OtherObject가 InteractiveObject 라면
 		if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pOtherObject)) { // OtherObject가 DynamicShapeObject 라면
 			// 절단할 수 있는 충돌체크를 한다.
 			if (m_bAllowCutting && pDynamicShapeObject->GetCuttable()) {
-
+				// 내가 다른 오브젝트를 자르는 처리는 나중에
+				return true;
 			}
-			if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
-
+			else if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
+				// 다른 오브젝트에 의해 내가 잘릴 수 있을 때
+				return true; // 이 함수는 충돌 체크 함수이니 외부에서 처리하자
 			}
-
-			XMFLOAT3 aMax = GetAABBMaxPos(0);
-			XMFLOAT3 aMin = GetAABBMinPos(0);
-			XMFLOAT3 bMax = pInteractiveObject->GetAABBMaxPos(0);
-			XMFLOAT3 bMin = pInteractiveObject->GetAABBMinPos(0);
-
-			if (aMax.x < bMin.x || aMin.x > bMax.x) return false;
-			if (aMax.y < bMin.y || aMin.y > bMax.y) return false;
-			if (aMax.z < bMin.z || aMin.z > bMax.z) return false;
-
-			return true;
-
+			else {
+				// 둘다 절단이 일어날 수 없다면 단순 충돌체크만 한다.
+				return CInteractiveObject::CollisionCheck(pOtherObject);
+			}
 		}
 		else {
 			// DynamicShapeObject가 아니라면 단순 충돌체크만 한다.
@@ -326,6 +331,44 @@ bool CDynamicShapeObject::CollisionCheck(CGameObject* pOtherObject)
 		// InteractiveObject가 아니라면 충돌체크를 하지 않는다.
 		return false;
 	}
+}
+
+bool CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pOtherObject)
+{
+	if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pOtherObject)) { // OtherObject가 DynamicShapeObject 라면
+
+		int nOtherMeshes = pDynamicShapeObject->GetNumMeshes();
+		CDynamicShapeMesh** ppOtherMeshes = (CDynamicShapeMesh**)pDynamicShapeObject->GetMeshes();
+		CDynamicShapeMesh** ppMeshes = (CDynamicShapeMesh**)m_ppMeshes;
+
+		if (m_bAllowCutting && pDynamicShapeObject->GetCuttable()) {
+			// 내가 다른 오브젝트를 자를때
+
+			for (int i = 0; i < m_nMeshes; ++i) {
+				for (int j = 0; j < nOtherMeshes; ++j) {
+					if (ppMeshes[i]->CollisionCheck(ppOtherMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
+						ppOtherMeshes[j]->DynamicShaping(pd3dDevice, pd3dCommandList, ppMeshes[i]);
+					}
+				}
+			}
+
+			return true;
+		}
+		else if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
+			// 다른 오브젝트에 의해 내가 잘릴 수 있을 때
+
+			for (int i = 0; i < m_nMeshes; ++i) {
+				for (int j = 0; j < nOtherMeshes; ++j) {
+					if (ppMeshes[i]->CollisionCheck(ppOtherMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
+						ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, ppOtherMeshes[j]);
+					}
+				}
+			}
+
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -386,7 +429,7 @@ void CRotatingObject::Animate(float fTimeElapsed)
 }
 
 
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CInteractiveObject(1)//  모델에 mesh가 한개만 생성되도록
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CDynamicShapeObject(1)//  모델에 mesh가 한개만 생성되도록
 {
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;

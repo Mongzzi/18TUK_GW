@@ -261,13 +261,14 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 			// 세부 충돌체크 있으면 좋음
 
 			if (true) { // Mesh 단위로 충돌한다면 절단한다.
-				return CollisionDynamicShaping(pDynamicShapeMesh);
+				return true;
+				//return DynamicShaping(pDynamicShapeMesh);
 			}
 		}
 	}
 	return false;
 }
-bool CDynamicShapeMesh::CollisionDynamicShaping(CDynamicShapeMesh* pOtherMesh)
+bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CDynamicShapeMesh* pOtherMesh)
 {
 	CVertex* pCutterVertices = pOtherMesh->GetVertices();
 	UINT* pCutterIndices = pOtherMesh->GetIndices();
@@ -275,7 +276,7 @@ bool CDynamicShapeMesh::CollisionDynamicShaping(CDynamicShapeMesh* pOtherMesh)
 	UINT pnCutterIndices = pOtherMesh->GetNumIndices();
 
 	// 모든 메쉬는 TriangleList로 구성되어있다고 가정
-
+	
 
 	return false;
 }

@@ -571,6 +571,10 @@ void CGameFramework::AnimateObjects()
 	//m_pPlayer->Animate(fTimeElapsed);
 }
 
+void CGameFramework::DynamicShaping()
+{
+}
+
 void CGameFramework::WaitForGpuComplete()
 {
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
@@ -607,6 +611,8 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
 	AnimateObjects();
+
+	DynamicShaping();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);

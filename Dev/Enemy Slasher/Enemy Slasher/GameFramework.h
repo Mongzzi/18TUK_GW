@@ -34,6 +34,7 @@ public:
 	void ProcessInput();
 	void AnimateObjects();
 	void FrameAdvance();
+	void DynamicShaping();
 
 	void Render2D();
 

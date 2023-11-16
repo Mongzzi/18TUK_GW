@@ -139,6 +139,7 @@ public:
 	XMFLOAT3 GetAABBMaxPos(int nIndex);
 	XMFLOAT3 GetAABBMinPos(int nIndex);
 
+	CMesh** GetMeshes() { return m_ppMeshes; }
 	int GetNumMeshes() { return m_nMeshes; }
 
 	virtual bool CollisionCheck(CGameObject* pOtherObject);
@@ -146,6 +147,7 @@ public:
 
 class CDynamicShapeObject : public CInteractiveObject
 {
+	// dynamic_cast 로 처리를 하고 있지만 이것은 런타임시 코스트가 높은 작업이다. 주의할 것
 public:
 	CDynamicShapeObject(int nMeshes = 1);
 	virtual ~CDynamicShapeObject();
@@ -163,6 +165,7 @@ public:
 public:
 
 	virtual bool CollisionCheck(CGameObject* pOtherObject);
+	bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pOtherObject);
 };
 
 
@@ -211,7 +214,7 @@ private:
 };
 
 
-class CFBXObject : public CInteractiveObject
+class CFBXObject : public CDynamicShapeObject
 {
 public:
 	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName = "fbxsdk/Box001.fbx");
