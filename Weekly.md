@@ -212,10 +212,24 @@
     > 광선의 확인용 Object, Mesh, UIObject 클래스 생성\
     > ┗ 우클릭시 피킹에서 항상 하도록 변경\
     > ┗ UI의 경우 상호작용 가능
+    > 충돌 전용 class Collider 와 하위 class 생성 후 .h/.cpp 파일 분리\
+    > ┗ CAABBCollider - 충돌체크만 하는 Collider\
+    > ┗ CAABBColliderWithMesh - 충돌체크와 충돌영역 출력하는 Collider\
+    > 충돌 이후 변형 처리를 위해 기존 Mesh의 Vertex와 Index 저장\
+    > CDynamicShapeObject / CDynamicShapeMesh 작성\
+    > ┗ 충돌 이후 변형이 일어나거나 변형을 줄 수 있는 오브젝트와 메쉬를 표현하는 class\
+    > ┗ 함수 Collision() 과 DynamicShaping() 을 가진다.\
+    > ┗ 충돌 시 충돌 접면의 Vertex 추출 및 해당 Vertex로 확인용 Mesh 구성\
+    > CGameFramework 에 DynamicShape() 추가\
+    > ┗ 이 함수는 일정 시간마다 작동하며 Animate() 이후 Render() 이전에 불린다.\
+    > ┗ 이 함수에서 오브젝트의 생성 삭제, 변형이 일어날 수 있다.
 
 
     - 다음 주 할 작업
     > 작성한 코드 정리\
     > FBX 파일에서 axis 옵션 확인, 여러개의 Mesh 로드가능하도록 변경\
     > UIShader 추가\
-    > 카드 관련 기능 추가
+    > 카드 관련 기능 추가\
+    > CDynamicShapeMesh에서 추출한 Vertex로 충돌접면 표현\
+    > 정육면체 오브젝트에 대한 절단 구현\
+    > Texture 추가
