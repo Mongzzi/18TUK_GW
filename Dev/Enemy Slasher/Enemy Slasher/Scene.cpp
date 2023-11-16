@@ -224,8 +224,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_RBUTTONUP:
 		if (pSelectedUI)
 		{
-			pSelectedUI = NULL;
 			pSelectedUI->ButtenUp();
+			pSelectedUI = NULL;
 		}
 		break;
 	default:
