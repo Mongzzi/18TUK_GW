@@ -96,6 +96,15 @@ protected:
 	bool m_bCuttable = false; // true 라면 다른 오브젝트에 인해 잘릴 수 있다.
 
 protected:
+	// 절단 평면 - 다른 오브젝트를 자르려면 무조건 가지고 있어야 한다.
+	XMFLOAT3 m_xmf3PlaneNormal;
+	XMFLOAT3 m_xmf3PlanePoint;
+
+public:
+	XMFLOAT3 GetCutPlaneNormal() { return m_xmf3PlaneNormal; }
+	XMFLOAT3 GetCutPlanePoint() { return m_xmf3PlanePoint; }
+
+protected:
 	class DSM_Line {
 	public:
 		XMFLOAT3 m_xmfStart;
@@ -123,6 +132,7 @@ public:
 	UINT GetNumIndices() { return m_nIndices; }
 
 	XMFLOAT3 TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xmf4x4Mat);
+	bool IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint);
 public:
 	virtual bool CollisionCheck(CColliderMesh* pOtherMesh);
 	virtual bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& mxf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat); // true - 절단 성공 / false - 절단 실패
@@ -133,6 +143,13 @@ class CBoxMesh : public CDynamicShapeMesh
 public:
 	CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
 	virtual ~CBoxMesh();
+};
+
+class CCutterBoxMesh : public CDynamicShapeMesh
+{
+public:
+	CCutterBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
+	virtual ~CCutterBoxMesh();
 };
 
 class CRayMesh : public CMesh

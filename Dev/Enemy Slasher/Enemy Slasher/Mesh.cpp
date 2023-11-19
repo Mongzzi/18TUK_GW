@@ -310,6 +310,22 @@ XMFLOAT3 CDynamicShapeMesh::TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xm
 	return pos;
 }
 
+bool CDynamicShapeMesh::IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint)
+{
+	// 평면 방정식의 계수 추출
+	float A = planeNormal.x;
+	float B = planeNormal.y;
+	float C = planeNormal.z;
+	float D = -XMVectorGetX(XMVector3Dot(XMLoadFloat3(&planePoint), XMLoadFloat3(&planeNormal)));
+
+	// 점의 좌표를 평면 방정식에 대입하여 부호 판단
+	float result = A * vertex.x + B * vertex.y + C * vertex.z + D;
+
+	// 평면 위에 있다면 true, 아니면 false 반환
+	return result > 0.0f;
+}
+
+
 bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 {
 	// 이 함수는 단순 충돌체크가 아닌
@@ -330,7 +346,8 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	}
 	return false;
 }
-bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& xmf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat)
+
+/*bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& xmf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat)
 {
 	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
 	// 이 함수에 의해 자신의 Mesh가 변형된다.
@@ -355,127 +372,223 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	// 모든 메쉬는 TriangleList로 구성되어있다고 가정
 
-	// 지금 절단 메쉬는 정육면체이다. 지금은 복잡한 충돌은 어려우니 이것을 기반으로 체크하자
 
-	XMFLOAT3 xmfAABBMaxPos = pOtherMesh->GetCollider()->GetAABBMaxPos();
-	XMFLOAT3 xmfAABBMinPos = pOtherMesh->GetCollider()->GetAABBMinPos();
-	cout << xmfAABBMaxPos.x << '\t' << xmfAABBMaxPos.y << '\t' << xmfAABBMaxPos.z << "\t\t\t";
-	cout << xmfAABBMinPos.x << '\t' << xmfAABBMinPos.y << '\t' << xmfAABBMinPos.z << '\n';
+	{ // 이 코드는 충돌지점의 Vertex를 기반으로 모델 변형을 하고자 한다. 지금 구현이 힘들어보인다.
 
-	vector<XMFLOAT3> vCollisionVertex;
-	for (XMFLOAT3& xmfCutterVertex : vCutterVerices) {
-		if (xmfCutterVertex.x < xmfAABBMinPos.x) continue;
-		if (xmfCutterVertex.x > xmfAABBMaxPos.x) continue;
-		if (xmfCutterVertex.y < xmfAABBMinPos.y) continue;
-		if (xmfCutterVertex.y > xmfAABBMaxPos.y) continue;
-		if (xmfCutterVertex.z < xmfAABBMinPos.z) continue;
-		if (xmfCutterVertex.z > xmfAABBMaxPos.z) continue;
-		vCollisionVertex.emplace_back(xmfCutterVertex);
-	}
+		// 지금 절단 메쉬는 정육면체이다. 지금은 복잡한 충돌은 어려우니 이것을 기반으로 체크하자
 
-	DSM_Line dsmLine;
-	DSM_Triangle dsmTri;
-	float t;
-	XMFLOAT3 xmfIntersectionPoint;
-	{
-		for (int i = 0; i < (nCutterIndices / 3); ++i) {
-			for (int j = 0; j < (m_nIndices / 3); ++j) {
-				dsmTri.MakeTriangle(
-					m_pVertices[m_pnIndices[j * 3 + 0]].GetVertex(),
-					m_pVertices[m_pnIndices[j * 3 + 1]].GetVertex(),
-					m_pVertices[m_pnIndices[j * 3 + 2]].GetVertex()
-				);
+		XMFLOAT3 xmfAABBMaxPos = pOtherMesh->GetCollider()->GetAABBMaxPos();
+		XMFLOAT3 xmfAABBMinPos = pOtherMesh->GetCollider()->GetAABBMinPos();
+		//cout << xmfAABBMaxPos.x << '\t' << xmfAABBMaxPos.y << '\t' << xmfAABBMaxPos.z << "\t\t\t";
+		//cout << xmfAABBMinPos.x << '\t' << xmfAABBMinPos.y << '\t' << xmfAABBMinPos.z << '\n';
 
-				dsmLine.MakeLine(
-					pCutterVertices[pnCutterIndices[i * 3 + 0]].GetVertex(),
-					pCutterVertices[pnCutterIndices[i * 3 + 1]].GetVertex()
-				);
-				if (dsmTri.LineTriangleIntersect(dsmLine, t, xmfIntersectionPoint)) {
-					vCollisionVertex.push_back(xmfIntersectionPoint);
-				}
+		vector<XMFLOAT3> vCollisionVertex;
+		for (XMFLOAT3& xmfCutterVertex : vCutterVerices) {
+			if (xmfCutterVertex.x < xmfAABBMinPos.x) continue;
+			if (xmfCutterVertex.x > xmfAABBMaxPos.x) continue;
+			if (xmfCutterVertex.y < xmfAABBMinPos.y) continue;
+			if (xmfCutterVertex.y > xmfAABBMaxPos.y) continue;
+			if (xmfCutterVertex.z < xmfAABBMinPos.z) continue;
+			if (xmfCutterVertex.z > xmfAABBMaxPos.z) continue;
+			vCollisionVertex.emplace_back(xmfCutterVertex);
+		}
 
-				dsmLine.MakeLine(
-					pCutterVertices[pnCutterIndices[i * 3 + 1]].GetVertex(),
-					pCutterVertices[pnCutterIndices[i * 3 + 2]].GetVertex()
-				);
-				if (dsmTri.LineTriangleIntersect(dsmLine, t, xmfIntersectionPoint)) {
-					vCollisionVertex.push_back(xmfIntersectionPoint);
-				}
+		DSM_Line dsmLine;
+		DSM_Triangle dsmTri;
+		float t;
+		XMFLOAT3 xmfIntersectionPoint;
+		{
+			for (int i = 0; i < (nCutterIndices / 3); ++i) {
+				for (int j = 0; j < (m_nIndices / 3); ++j) {
+					dsmTri.MakeTriangle(
+						m_pVertices[m_pnIndices[j * 3 + 0]].GetVertex(),
+						m_pVertices[m_pnIndices[j * 3 + 1]].GetVertex(),
+						m_pVertices[m_pnIndices[j * 3 + 2]].GetVertex()
+					);
 
-				dsmLine.MakeLine(
-					pCutterVertices[pnCutterIndices[i * 3 + 2]].GetVertex(),
-					pCutterVertices[pnCutterIndices[i * 3 + 0]].GetVertex()
-				);
-				if (dsmTri.LineTriangleIntersect(dsmLine, t, xmfIntersectionPoint)) {
-					vCollisionVertex.push_back(xmfIntersectionPoint);
+					dsmLine.MakeLine(
+						pCutterVertices[pnCutterIndices[i * 3 + 0]].GetVertex(),
+						pCutterVertices[pnCutterIndices[i * 3 + 1]].GetVertex()
+					);
+					if (dsmTri.LineTriangleIntersect(dsmLine, t, xmfIntersectionPoint)) {
+						vCollisionVertex.push_back(xmfIntersectionPoint);
+					}
+
+					dsmLine.MakeLine(
+						pCutterVertices[pnCutterIndices[i * 3 + 1]].GetVertex(),
+						pCutterVertices[pnCutterIndices[i * 3 + 2]].GetVertex()
+					);
+					if (dsmTri.LineTriangleIntersect(dsmLine, t, xmfIntersectionPoint)) {
+						vCollisionVertex.push_back(xmfIntersectionPoint);
+					}
+
+					dsmLine.MakeLine(
+						pCutterVertices[pnCutterIndices[i * 3 + 2]].GetVertex(),
+						pCutterVertices[pnCutterIndices[i * 3 + 0]].GetVertex()
+					);
+					if (dsmTri.LineTriangleIntersect(dsmLine, t, xmfIntersectionPoint)) {
+						vCollisionVertex.push_back(xmfIntersectionPoint);
+					}
 				}
 			}
 		}
-	}
-	{
-		XMFLOAT3 xmfMaxPos(FLT_MIN, FLT_MIN, FLT_MIN);
-		XMFLOAT3 xmfMinPos(FLT_MAX, FLT_MAX, FLT_MAX);
-		for (XMFLOAT3& a : vCollisionVertex) {
-			if (xmfMaxPos.x < a.x) xmfMaxPos.x = a.x;
-			if (xmfMinPos.x > a.x) xmfMinPos.x = a.x;
-			if (xmfMaxPos.y < a.y) xmfMaxPos.y = a.y;
-			if (xmfMinPos.y > a.y) xmfMinPos.y = a.y;
-			if (xmfMaxPos.z < a.z) xmfMaxPos.z = a.z;
-			if (xmfMinPos.z > a.z) xmfMinPos.z = a.z;
+		{
+			XMFLOAT3 xmfMaxPos(FLT_MIN, FLT_MIN, FLT_MIN);
+			XMFLOAT3 xmfMinPos(FLT_MAX, FLT_MAX, FLT_MAX);
+			for (XMFLOAT3& a : vCollisionVertex) {
+				if (xmfMaxPos.x < a.x) xmfMaxPos.x = a.x;
+				if (xmfMinPos.x > a.x) xmfMinPos.x = a.x;
+				if (xmfMaxPos.y < a.y) xmfMaxPos.y = a.y;
+				if (xmfMinPos.y > a.y) xmfMinPos.y = a.y;
+				if (xmfMaxPos.z < a.z) xmfMaxPos.z = a.z;
+				if (xmfMinPos.z > a.z) xmfMinPos.z = a.z;
+			}
+			//cout << "NewCollisionArea\n" <<
+			//	"\t\tMax =\t" << xmfMaxPos.x << "\t\t" << xmfMaxPos.y << "\t\t" << xmfMaxPos.z << "\n" <<
+			//	"\t\tMin =\t" << xmfMinPos.x << "\t\t" << xmfMinPos.y << "\t\t" << xmfMinPos.z << "\n";
 		}
-		//cout << "NewCollisionArea\n" <<
-		//	"\t\tMax =\t" << xmfMaxPos.x << "\t\t" << xmfMaxPos.y << "\t\t" << xmfMaxPos.z << "\n" <<
-		//	"\t\tMin =\t" << xmfMinPos.x << "\t\t" << xmfMinPos.y << "\t\t" << xmfMinPos.z << "\n";
+
+		//m_nVertices = vCollisionVertex.size();				// 꼭지점 개수
+		//m_nStride = sizeof(CVertex); // x , y, z 좌표
+		//m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+		//std::random_device rd;
+		//std::default_random_engine dre(rd());
+		//std::uniform_real_distribution <> urd(0.0, 1.0);
+
+		//if (m_pVertices) delete[] m_pVertices;
+		//m_pVertices = new CVertex[m_nVertices];
+		//for (int i = 0; i < m_nVertices; ++i) {
+		//	m_pVertices[i] = CVertex(vCollisionVertex[i], XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+		//}
+
+		//// 버퍼생성
+		//if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+		//if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+		//m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+		//// 바인딩위해 버퍼뷰 초기화
+		//m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+		//m_d3dVertexBufferView.StrideInBytes = m_nStride;
+		//m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+		//m_nIndices = m_nVertices * 3;
+		//if(m_pnIndices) delete[] m_pnIndices;
+		//m_pnIndices = new UINT[m_nIndices];
+
+		//vector<UINT> numbers(m_nVertices - 1);
+		//std::iota(numbers.begin(), numbers.end(), 1);
+		//std::shuffle(numbers.begin(), numbers.end(), dre);
+		//for (int i = 0; i < m_nVertices; ++i) {
+		//	std::vector<int> selectedNumbers(numbers.begin(), numbers.begin() + 3);
+		//	m_pnIndices[i * 3 + 0] = selectedNumbers[0];
+		//	m_pnIndices[i * 3 + 1] = selectedNumbers[1];
+		//	m_pnIndices[i * 3 + 2] = selectedNumbers[2];
+		//}
+
+		//if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+		//if (m_pd3dIndexUploadBuffer)m_pd3dIndexUploadBuffer->Release();
+		////인덱스 버퍼를 생성한다. 
+		//m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+		////인덱스 버퍼 뷰를 생성한다. 
+		//m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+		//m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+		//m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+		//m_bCuttable = false;
+	}
+	return true;
+}*/
+
+bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& xmf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat)
+{
+	// 이 절단은 절단 Object의 절단평면을 사용하여 절단한다.
+	
+	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
+	// 이 함수에 의해 자신의 Mesh가 변형된다.
+
+	CVertex*	pCutterVertices = pOtherMesh->GetVertices();
+	UINT		nCutterVertices = pOtherMesh->GetNumVertices();
+	UINT*		pnCutterIndices = pOtherMesh->GetIndices();
+	UINT		 nCutterIndices = pOtherMesh->GetNumIndices();
+
+	XMFLOAT3 xmf3CutNormal = pOtherMesh->GetCutPlaneNormal();
+	XMFLOAT3 xmf3CutPoint = pOtherMesh->GetCutPlanePoint();
+
+	// Cutter의 Plain 값을 자신의 좌표계로 변환하여 Vertex 변환 처리를 하는 것이 좋다.
+	// Cutter의 좌표계 -> 월드 좌표계(월드 행렬 곱) -> 자신의 좌표계(자신의 역행렬 곱)
+
+	XMFLOAT4X4 xmf4x4InvThisMat = Matrix4x4::Inverse(xmf4x4ThisMat);
+	XMFLOAT4X4 xmf4x4InvTransposeThisMat = Matrix4x4::Transpose(xmf4x4InvThisMat);
+	XMFLOAT4X4 xmf4x4TransposeOtherMat = Matrix4x4::Transpose(xmf4x4OtherMat);
+
+	XMFLOAT3 xmf3LPlaneNormal, xmf3LPlanePoint;
+	xmf3LPlaneNormal = xmf3CutNormal;
+	//xmf3LPlaneNormal = TransformVertex(xmf3CutNormal, xmf4x4OtherMat);
+	//xmf3LPlaneNormal = TransformVertex(xmf3LPlaneNormal, xmf4x4InvThisMat);
+	//xmf3LPlaneNormal = Vector3::Normalize(xmf3LPlaneNormal);
+	xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4OtherMat);
+	xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
+
+	vector<CVertex> vnewVertices;
+	CVertex* newVertices;
+	UINT* pnewIndices;
+
+	map<UINT, UINT> vertexMap; // 원래 Vertex의 Index를 넣으면 새로운 배열의 Index를 리턴
+
+	int vertexCounter = 0;
+	for (int i = 0; i < m_nVertices; ++i) {
+		if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
+			vnewVertices.emplace_back(m_pVertices[i]);
+			vertexMap[i] = vertexCounter++;
+		}
 	}
 
-	//m_nVertices = vCollisionVertex.size();				// 꼭지점 개수
-	//m_nStride = sizeof(CVertex); // x , y, z 좌표
-	//m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	// 모든 메쉬는 TriangleList로 구성되어있다고 가정
+	vector<UINT> vnewIndices;
+	for (int i = 0; i < (m_nIndices / 3); ++i) {
+		if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 0]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
+		if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 1]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
+		if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 2]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
+		vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 0]]);
+		vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 1]]);
+		vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 2]]);
+	}
 
-	//std::random_device rd;
-	//std::default_random_engine dre(rd());
-	//std::uniform_real_distribution <> urd(0.0, 1.0);
+	if (vnewVertices.size() != 0 && vnewIndices.size() != 0) {
+		m_nVertices = vnewVertices.size();
+		m_nIndices = vnewIndices.size();
 
-	//if (m_pVertices) delete[] m_pVertices;
-	//m_pVertices = new CVertex[m_nVertices];
-	//for (int i = 0; i < m_nVertices; ++i) {
-	//	m_pVertices[i] = CVertex(vCollisionVertex[i], XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
-	//}
+		delete[] m_pVertices;
+		delete[] m_pnIndices;
+		m_pVertices = new CVertex[m_nVertices];
+		m_pnIndices = new UINT[m_nIndices];
 
-	//// 버퍼생성
-	//if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-	//if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
-	//m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+		copy(vnewVertices.begin(), vnewVertices.end(), m_pVertices);
+		copy(vnewIndices.begin(), vnewIndices.end(), m_pnIndices);
 
-	//// 바인딩위해 버퍼뷰 초기화
-	//m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	//m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	//m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+		if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+		if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+		// 버퍼생성
+		m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
-	//m_nIndices = m_nVertices * 3;
-	//if(m_pnIndices) delete[] m_pnIndices;
-	//m_pnIndices = new UINT[m_nIndices];
+		// 바인딩위해 버퍼뷰 초기화
+		m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+		m_d3dVertexBufferView.StrideInBytes = m_nStride;
+		m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	//vector<UINT> numbers(m_nVertices - 1);
-	//std::iota(numbers.begin(), numbers.end(), 1);
-	//std::shuffle(numbers.begin(), numbers.end(), dre);
-	//for (int i = 0; i < m_nVertices; ++i) {
-	//	std::vector<int> selectedNumbers(numbers.begin(), numbers.begin() + 3);
-	//	m_pnIndices[i * 3 + 0] = selectedNumbers[0];
-	//	m_pnIndices[i * 3 + 1] = selectedNumbers[1];
-	//	m_pnIndices[i * 3 + 2] = selectedNumbers[2];
-	//}
+		if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+		if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
+		//인덱스 버퍼를 생성한다. 
+		m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+		//인덱스 버퍼 뷰를 생성한다. 
+		m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+		m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+		m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	//if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
-	//if (m_pd3dIndexUploadBuffer)m_pd3dIndexUploadBuffer->Release();
-	////인덱스 버퍼를 생성한다. 
-	//m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
-	////인덱스 버퍼 뷰를 생성한다. 
-	//m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-	//m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	//m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
-
-	//m_bCuttable = false;
+		if (m_pCollider) delete m_pCollider;
+		m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	}
 	return true;
 }
 
@@ -551,6 +664,84 @@ CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 CBoxMesh::~CBoxMesh()
 {
 }
+
+
+CCutterBoxMesh::CCutterBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height, float depth) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 8;				// 꼭지점 개수
+	m_nStride = sizeof(CVertex); // x , y, z 좌표
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_xmf3PlanePoint = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3PlaneNormal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	m_xmf3PlaneNormal = Vector3::Normalize(m_xmf3PlaneNormal);
+
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution <> urd(0.0, 1.0);
+
+	float fx = width * 0.5f, fy = height * 0.5f, fz = depth * 0.5f;
+
+	m_pVertices = new CVertex[m_nVertices];
+	m_pVertices[0] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	m_pVertices[1] = CVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	m_pVertices[2] = CVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	m_pVertices[3] = CVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	m_pVertices[4] = CVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	m_pVertices[5] = CVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	m_pVertices[6] = CVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+	m_pVertices[7] = CVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+
+	// 버퍼생성
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_nIndices = 36;
+	m_pnIndices = new UINT[m_nIndices];
+
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	m_pnIndices[0] = 3; m_pnIndices[1] = 1; m_pnIndices[2] = 0;
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	m_pnIndices[3] = 2; m_pnIndices[4] = 1; m_pnIndices[5] = 3;
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	m_pnIndices[6] = 0; m_pnIndices[7] = 5; m_pnIndices[8] = 4;
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	m_pnIndices[9] = 1; m_pnIndices[10] = 5; m_pnIndices[11] = 0;
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	m_pnIndices[12] = 3; m_pnIndices[13] = 4; m_pnIndices[14] = 7;
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	m_pnIndices[15] = 0; m_pnIndices[16] = 4; m_pnIndices[17] = 3;
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	m_pnIndices[18] = 1; m_pnIndices[19] = 6; m_pnIndices[20] = 5;
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	m_pnIndices[21] = 2; m_pnIndices[22] = 6; m_pnIndices[23] = 1;
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	m_pnIndices[24] = 2; m_pnIndices[25] = 7; m_pnIndices[26] = 6;
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	m_pnIndices[27] = 3; m_pnIndices[28] = 7; m_pnIndices[29] = 2;
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	m_pnIndices[30] = 6; m_pnIndices[31] = 4; m_pnIndices[32] = 5;
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	m_pnIndices[33] = 7; m_pnIndices[34] = 4; m_pnIndices[35] = 6;
+
+	//인덱스 버퍼를 생성한다. 
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+}
+
+CCutterBoxMesh::~CCutterBoxMesh()
+{
+}
+
 
 
 CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)

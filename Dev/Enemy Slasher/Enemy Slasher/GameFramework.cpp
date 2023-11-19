@@ -578,7 +578,7 @@ void CGameFramework::DynamicShaping()
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 	fDynamicShapingTimer += fTimeElapsed;
 
-	if(fDynamicShapingTimer > 0.5f) // DynamicShaping이 너무 자주 불리지 않도록 시간 제한. 조정 필요
+	if(fDynamicShapingTimer > 0.1f) // DynamicShaping이 너무 자주 불리지 않도록 시간 제한. 조정 필요
 	{
 		fDynamicShapingTimer = 0.0f;
 

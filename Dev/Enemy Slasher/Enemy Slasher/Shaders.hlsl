@@ -121,7 +121,7 @@ output.normalW = normalW;
 
 
 
-//�ȼ� ���̴� �Լ�
+//�ȼ� ���̴� �Լ�
 float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 {
 #ifdef _WITH_VERTEX_LIGHTING
@@ -132,3 +132,48 @@ float4 color = Lighting(input.positionW, normalW);
 return(color);
 #endif
 }
+
+
+
+// // 카툰 랜더링을 위한 버텍스 쉐이더
+// struct VertexInput {
+//     float3 position : POSITION;
+//     float3 normal : NORMAL;
+// };
+
+// struct VertexOutput {
+//     float4 position : SV_POSITION;
+//     float3 normal : NORMAL;
+// };
+
+// VertexOutput CartoonVertexShader(VertexInput input) {
+//     VertexOutput output;
+
+//     // 기존 위치 전달
+//     output.position = mul(float4(input.position, 1.0f), gWorldViewProj);
+
+//     // 기존 노말 전달
+//     output.normal = mul(input.normal, (float3x3)gWorld);
+
+//     return output;
+// }
+
+// // 카툰 랜더링을 위한 픽셀 쉐이더
+// float4 CartoonPixelShader(VertexOutput input) : SV_TARGET {
+//     // 단순한 조명 계산 (여기에서는 빛의 방향이 예시로 주어짐)
+//     float3 lightDir = normalize(float3(1.0f, -1.0f, 0.0f));
+//     float3 normal = normalize(input.normal);
+//     float lighting = max(0.0f, dot(normal, lightDir));
+
+//     // 윤곽선을 강조하기 위해 노말 정보를 사용
+//     float outline = 1.0f - smoothstep(0.95f, 1.0f, dot(normal, -lightDir));
+
+//     // 최종 색상 계산 (여기에서는 흰색과 검은색을 사용하여 음영을 단순화)
+//     float3 baseColor = float3(1.0f, 1.0f, 1.0f);
+//     float3 cartoonColor = lerp(baseColor, float3(0.0f, 0.0f, 0.0f), lighting);
+
+//     // 윤곽선 색상과 믹스
+//     float3 finalColor = lerp(cartoonColor, float3(0.0f, 0.0f, 0.0f), outline);
+
+//     return float4(finalColor, 1.0f);
+// }

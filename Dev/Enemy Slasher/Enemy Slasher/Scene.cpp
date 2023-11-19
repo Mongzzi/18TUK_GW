@@ -1031,14 +1031,14 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	{
-		CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
+		CCutterBoxMesh* pCubeMesh = new CCutterBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 40.0f, 2.0f);
 		pCubeMesh->SetAllowCutting(true);
 		CDynamicShapeObject* pDynamicShapeObject = NULL;
 
 		pDynamicShapeObject = new CDynamicShapeObject();
 		pDynamicShapeObject->SetAllowCutting(true);
 		pDynamicShapeObject->SetMesh(0, pCubeMesh);
-		pDynamicShapeObject->SetPosition(-50.0f, 40.0f, 100.0f);
+		pDynamicShapeObject->SetPosition(-50.0f, 60.0f, 100.0f);
 		pDynamicShapeObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pDynamicShapeObject, ObjectLayer::Object);
 	}
@@ -1086,7 +1086,7 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	if (!pvObjectList[(int)ObjectLayer::Object].empty()) {
 		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][0];
 		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)pvObjectList[(int)ObjectLayer::Object][1];
-		pObject_cuttur->MoveStrafe(0.04);
+		pObject_cuttur->MoveStrafe(0.5);
 
 		
 		if (pObject_stone->CollisionCheck(pObject_cuttur)) {
