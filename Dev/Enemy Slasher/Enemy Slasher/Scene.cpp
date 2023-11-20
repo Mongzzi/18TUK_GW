@@ -489,7 +489,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	{
 		//카드 UI 테스트용 오브젝트.
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARDHIERARCHY_FBX);
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);

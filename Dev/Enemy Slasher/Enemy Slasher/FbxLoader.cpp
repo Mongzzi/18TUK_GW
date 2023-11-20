@@ -86,7 +86,12 @@ LoadResult CFBXLoader::LoadScene(const char* pFilename, CFBXLoader* pFBXLoader)
 #endif // _DEBUG
         }
         else
+        {
             result = LoadResult::False;
+#ifdef _DEBUG
+            FBXSDK_printf("insertResult::False, File name : %s\n", pFilename);
+#endif // _DEBUG
+        }
     }
 
 #ifdef _DEBUG
