@@ -8,6 +8,7 @@
 #define STONE_LIT_003_FBX "fbxsdk/Stone_lit_003.fbx"
 #define STONE_BIG_001_FBX "fbxsdk/Stone_big_001.fbx"
 #define CARD_FBX "fbxsdk/Card.fbx"
+#define CARDHIERARCHY_FBX "fbxsdk/CardHierarchy.fbx"
 
 #define AA1 "fbxsdk/tower.fbx"
 #define AA2 "fbxsdk/torreMoba.fbx"

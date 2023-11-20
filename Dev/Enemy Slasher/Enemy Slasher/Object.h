@@ -112,6 +112,7 @@ public:
 public:
 	void ReleaseUploadBuffers();
 	virtual void SetMesh(int nIndex, CMesh* pMesh);
+	virtual void SetMesh(int nIndexSize);
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
@@ -218,14 +219,14 @@ private:
 class CFBXObject : public CDynamicShapeObject
 {
 public:
-	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName = "fbxsdk/Box001.fbx");
+	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName = "fbxsdk/Box.fbx");
 	virtual ~CFBXObject();
 private:
 	XMFLOAT3 m_xmf3RotationAxis;
 	float m_fRotationSpeed;
 public:	
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
-	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
+	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId);
 	virtual void Animate(float fTimeElapsed);
 
 	//bool IsCursorOverObject();
@@ -237,7 +238,7 @@ public:
 class CUIObject : public CFBXObject
 {
 public:
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box001.fbx");
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box.fbx");
 	virtual ~CUIObject();
 protected:
 	float m_fCurrntScale;	
@@ -267,7 +268,7 @@ public:
 class CCardUIObject : public CUIObject
 {
 public:
-	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box001.fbx");
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box.fbx");
 	virtual ~CCardUIObject();
 protected:
 

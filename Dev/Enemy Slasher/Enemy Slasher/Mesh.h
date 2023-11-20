@@ -170,7 +170,7 @@ public:
 	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CFBXMesh();
 
-	void LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
+	bool LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
 
 	CVertex* GetVertices() { return m_pVertices; };
 	UINT* GetUnit() { return m_pnIndices; };

@@ -58,6 +58,8 @@ void CGameObject::SetMaterial(UINT nReflection)
 
 void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
 {
+	if (m_ppMeshes==NULL || nIndex >= m_nMeshes)
+		SetMesh(nIndex+1);
 	if (m_ppMeshes)
 	{
 		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
@@ -65,6 +67,19 @@ void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
 		m_ppMeshes[nIndex] = pMesh;
 		if (pMesh) pMesh->AddRef();
 	}
+}
+
+void CGameObject::SetMesh(int nIndexSize)
+{
+	CMesh** NewMeshes = NULL;
+
+	NewMeshes = new CMesh * [nIndexSize];
+	for (int i = 0; i < nIndexSize; i++) NewMeshes[i] = NULL;
+	if (m_ppMeshes)
+		for (int i = 0; i < m_nMeshes; i++) NewMeshes[i] = m_ppMeshes[i];
+	if (m_ppMeshes)
+		delete[] m_ppMeshes;
+	m_ppMeshes = NewMeshes;
 }
 
 void CGameObject::ReleaseUploadBuffers()
@@ -293,7 +308,7 @@ bool CInteractiveObject::CollisionCheck(CGameObject* pOtherObject)
 }
 
 
-CDynamicShapeObject::CDynamicShapeObject(int nMeshes)
+CDynamicShapeObject::CDynamicShapeObject(int nMeshes) : CInteractiveObject(nMeshes)
 {
 }
 
@@ -429,7 +444,7 @@ void CRotatingObject::Animate(float fTimeElapsed)
 }
 
 
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CDynamicShapeObject(1)//  모델에 mesh가 한개만 생성되도록
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CDynamicShapeObject(0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
 {
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;
@@ -459,7 +474,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	if (lResult == LoadResult::False)
 	{
 #ifdef _DEBUG
-		FBXSDK_printf("\n\nAn error occurred while loading the scene...");
+		FBXSDK_printf("\n\nAn error occurred while loading the scene...\n");
 #endif // _DEBUG
 
 	}
@@ -487,16 +502,16 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	{
 		for (i = 0; i < lNode->GetChildCount(); i++)
 		{
-			LoadContent(pd3dDevice, pd3dCommandList, lNode->GetChild(i));
+			LoadContent(pd3dDevice, pd3dCommandList, lNode->GetChild(i), i);
 		}
 	}
 }
 
-void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
+void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId)
 {
 	FbxNodeAttribute::EType lAttributeType;
-	int i;
 	CFBXMesh* pFBXMesh = NULL;
+	int p=0;
 
 	if (pNode->GetNodeAttribute() == NULL)
 	{
@@ -520,8 +535,12 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 		case FbxNodeAttribute::eMesh:
 			pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList);
-			pFBXMesh->LoadMesh(pd3dDevice, pd3dCommandList, pNode);
-			SetMesh(0, pFBXMesh);
+			if (pFBXMesh->LoadMesh(pd3dDevice, pd3dCommandList, pNode))
+			{
+				// 지금은 Mesh 가 아니면 아무것도 안 하므로 이렇게 한다.
+				SetMesh(m_nMeshes, pFBXMesh);
+				m_nMeshes++;
+			}
 			break;
 
 		case FbxNodeAttribute::eNurbs:
@@ -552,9 +571,9 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//DisplayTransformPropagation(pNode);
 	//DisplayGeometricTransform(pNode);
 
-	for (i = 0; i < pNode->GetChildCount(); i++)
+	for (int i = 0; i < pNode->GetChildCount(); i++)
 	{
-		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i));
+		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i), i);
 	}
 }
 

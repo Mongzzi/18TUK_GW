@@ -753,7 +753,7 @@ CFBXMesh::~CFBXMesh()
 }
 
 
-void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
+bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode)
 {
 	FbxMesh* lMesh = (FbxMesh*)pNode->GetNodeAttribute();
 
@@ -847,6 +847,7 @@ void CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	if (m_pCollider) delete m_pCollider;
 	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	return true;
 }
 
 CAABB* CFBXMesh::GetAABB(XMFLOAT4X4 m_xmf4x4World)
