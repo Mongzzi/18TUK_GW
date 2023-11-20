@@ -14,7 +14,9 @@ CMaterial::~CMaterial()
 
 CGameObject::CGameObject(int nMeshes)
 {
-	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
+	m_xmf4x4Transform = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
+
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
 
@@ -40,6 +42,21 @@ CGameObject::~CGameObject()
 	if (m_pMaterial) m_pMaterial->Release();
 }
 
+void CGameObject::AddRef()
+{
+	m_nReferences++;
+
+	if (m_pSibling) m_pSibling->AddRef();
+	if (m_pChild) m_pChild->AddRef();
+}
+
+void CGameObject::Release()
+{
+	if (m_pSibling) m_pSibling->Release();
+	if (m_pChild) m_pChild->Release();
+
+	if (--m_nReferences <= 0) delete this;
+}
 
 
 void CGameObject::SetMaterial(CMaterial* pMaterial)
@@ -86,18 +103,25 @@ void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다. 
 
-	if (m_ppMeshes)
+	for (int i = 0; i < m_nMeshes; i++)
 	{
-		for (int i = 0; i < m_nMeshes; i++)
-		{
-			if (m_ppMeshes[i]) m_ppMeshes[i]->ReleaseUploadBuffers();
-		}
+		if (m_ppMeshes[i]) m_ppMeshes[i]->ReleaseUploadBuffers();
 	}
+
+	//for (int i = 0; i < m_nMaterials; i++)
+	//{
+	//	if (m_ppMaterials[i]) m_ppMaterials[i]->ReleaseUploadBuffers();
+	//}
+
+	if (m_pSibling) m_pSibling->ReleaseUploadBuffers();
+	if (m_pChild) m_pChild->ReleaseUploadBuffers();
 
 }
 
-void CGameObject::Animate(float fTimeElapsed)
+void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
+	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
 }
 
 void CGameObject::OnPrepareRender()
@@ -109,7 +133,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	OnPrepareRender();
 
 	//객체의 정보를 셰이더 변수(상수 버퍼)로 복사한다. 
-	UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World);
 
 
 	//if (m_pMaterial)
@@ -129,6 +153,26 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, pRenderOption);
 		}
 	}
+
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+}
+
+void CGameObject::SetChild(CGameObject* pChild)
+{
+	if (m_pChild)
+	{
+		if (pChild) pChild->m_pSibling = m_pChild->m_pSibling;
+		m_pChild->m_pSibling = pChild;
+	}
+	else
+	{
+		m_pChild = pChild;
+	}
+	if (pChild)
+	{
+		pChild->m_pParent = this;
+	}
 }
 
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -147,29 +191,42 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
+void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
+{
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+}
+
 void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
-}
 
-void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
-{
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis),
-		XMConvertToRadians(fAngle));
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
+	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 }
 
 
 void CGameObject::SetPosition(float x, float y, float z)
 {
-	m_xmf4x4World._41 = x;
-	m_xmf4x4World._42 = y;
-	m_xmf4x4World._43 = z;
+	m_xmf4x4Transform._41 = x;
+	m_xmf4x4Transform._42 = y;
+	m_xmf4x4Transform._43 = z;
+
+	UpdateTransform(NULL);
 }
 
 void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 {
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+}
+
+void CGameObject::SetScale(float x, float y, float z)
+{
+	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
 }
 
 XMFLOAT3 CGameObject::GetPosition()
@@ -229,9 +286,26 @@ void CGameObject::MoveForward(float fDistance)
 //게임 객체를 주어진 각도로 회전한다. 
 void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch),
-		XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
 }
 
 void CGameObject::SetShaderType(ShaderType shaderType)
@@ -257,22 +331,6 @@ CInteractiveObject::~CInteractiveObject()
 {
 }
 
-//게임 객체를 주어진 각도로 회전한다. 
-void CInteractiveObject::Rotate(float fPitch, float fYaw, float fRoll)
-{
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch),
-		XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
-	m_xmf4x4Rotate = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Rotate);
-}
-
-void CInteractiveObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
-{
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis),
-		XMConvertToRadians(fAngle));
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
-	m_xmf4x4Rotate = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Rotate);
-}
 
 XMFLOAT3 CInteractiveObject::GetAABBMaxPos(int nIndex) {
 	XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMaxPos();
@@ -438,9 +496,11 @@ void CRotatingNormalObject::ReleaseShaderVariables()
 }
 
 
-void CRotatingObject::Animate(float fTimeElapsed)
+void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
 
@@ -598,8 +658,9 @@ CAABB* CFBXObject::GetAABB()
 	return tmp->GetAABB(m_xmf4x4World);
 }
 
-void CFBXObject::Animate(float fTimeElapsed)
+void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
 
@@ -703,7 +764,7 @@ void CRayObject::Reset(CRay ray)
 		float angle = XMConvertToDegrees(XMVectorGetX(XMVector3AngleBetweenNormals(vFrom, vTo)));
 
 		// 결과값 설정
-		XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
+		XMStoreFloat4x4(&m_xmf4x4Transform, XMMatrixIdentity());
 		Rotate(&fAxis, angle);
 	}
 	// 결과값 설정
@@ -726,7 +787,7 @@ CUIObject::~CUIObject()
 
 void CUIObject::ScreenSpaceToWorldSpace()
 {
-	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());// 초기화
+	XMStoreFloat4x4(&m_xmf4x4Transform, XMMatrixIdentity());// 초기화
 
 	D3D12_VIEWPORT viewPort = m_pCamera->GetViewport();
 	XMFLOAT4X4 projMat = m_pCamera->GetProjectionMatrix();
@@ -747,7 +808,8 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	// 카메라의 역행렬을 가져옴. 회전때문에
 	// 이걸 사용하면 카메라벡터의 반대를 보게됨.
 	// 카메라의Look의 반대, 카메라UP으로 만들어도 될듯? 아마?
-	XMStoreFloat4x4(&m_xmf4x4World, XMLoadFloat4x4(&viewInv));
+	XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
+
 	// 카메라를 바라보게 만드는것도 좋을지도
 
 	XMFLOAT3 position;
@@ -801,7 +863,7 @@ CCardUIObject::~CCardUIObject()
 {
 }
 
-void CCardUIObject::Animate(float fTimeElapsed)
+void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	ScreenSpaceToWorldSpace();
 
@@ -812,6 +874,8 @@ void CCardUIObject::Animate(float fTimeElapsed)
 		else
 			m_fTargetScale -= fTimeElapsed * 0.5;
 	}
+
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
 void CCardUIObject::CursorOverObject(bool flag)

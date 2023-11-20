@@ -116,8 +116,14 @@ void CCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComm
 
 void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
+	XMFLOAT4X4 xmf4x4View;
+	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
+	::memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
+
+	XMFLOAT4X4 xmf4x4Projection;
+	XMStoreFloat4x4(&xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
+	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
+
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
@@ -340,65 +346,4 @@ void CCardFightCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 void CCardFightCamera::SetLookAt(XMFLOAT3& vLookAt)
 {
-}
-
-
-
-void get_world_pos_from_scrn_pos(
-	XMFLOAT3 camera_pos,
-	float fov,
-	XMFLOAT2 scrn_size,
-	float distance,
-	XMFLOAT2 scrn_pos,
-	XMFLOAT3 world_pos) {
-	//https://m.blog.naver.com/hermet/86032772
-
-	//먼저 0 ~ 800 과 0 ~ 600 이라는 스크린 사이즈가 실제 월드 공간 상의 범위는 어떻게 되는지 파악합니다. 
-	//네개의 XMFLOAT3는 각 화면 모퉁이의 월드 공간 상의 정점을 저장합니다.
-	XMFLOAT3 bg_pos[4];
-
-	//fov 가 각도라면 라디안 단위로 변경해 줍니다. 여기서는 라디안으로 가정합니다.
-	//월드 공간 상에 위치하는 x축과 y축의 범위를 구합니다.
-	float half_height = tan(fov * 0.5f) * distance;
-	float half_width = half_height * (scrn_size.x / scrn_size.y);
-
-	//월드 공간 상의 화면 좌측 하단 위치 정점
-	bg_pos[0].x = camera_pos.x - half_width;
-	bg_pos[0].y = camera_pos.y - half_height;
-	bg_pos[0].z = camera_pos.z + distance;
-
-	//월드 공간 상의 화면 좌측 상단 위치 정점 
-	bg_pos[1].x = camera_pos.x - half_width;
-	bg_pos[1].y = camera_pos.y + half_height;
-	bg_pos[1].z = camera_pos.z + distance;
-
-	//월드 공간 상의 화면 우측 상단 위치 정점 
-	bg_pos[2].x = camera_pos.x + half_width;
-	bg_pos[2].y = camera_pos.y + half_height;
-	bg_pos[2].z = camera_pos.z + distance;
-
-	//월드 공간 상의 화면 우측 하단 위치 정점 
-	bg_pos[3].x = camera_pos.x + half_width;
-	bg_pos[3].y = camera_pos.y - half_height;
-	bg_pos[3].z = camera_pos.z + distance;
-
-	//구하고자 하는 위치가 월드 공간 상의 범위에서 어느 비율만큼 존재하는가 파악합니다.
-	//Z값은 필요 없으며 위 예제는 50, 50 위치가 800, 600 위치 상에 존재하므로
-	//50 : 800 = X : 1 ,  50 : 600 = Y : 1 과 같은 식으로 구할 수 있죠.
-	float x_rate = scrn_pos.x / scrn_size.x;
-	float y_rate = scrn_pos.y / scrn_size.y;
-
-	//그리고 월드 공간 상의 시야 범위 사이즈를 구합니다. 역시 z는 필요없습니다.
-	float x_length = bg_pos[2].x - bg_pos[1].x;         //가로 사이즈
-	float y_length = bg_pos[0].y - bg_pos[1].y;         //세로 사이즈
-
-	//이제 스크린 공간 상의 위치 비율을 월드 공간 상의 비율로 변환할 수 있습니다.
-	x_rate = x_length * x_rate;
-	y_rate = y_length * y_rate;
-
-	//그리고 월드 공간상의 위치가 나오죠.
-	//좌표계에 따라 부호가 바뀔 수 있다는 것을 염두하세요.
-	world_pos.x = bg_pos[0].x + x_rate;
-	world_pos.y = bg_pos[0].y + y_rate;
-	world_pos.z = camera_pos.z + distance;
 }

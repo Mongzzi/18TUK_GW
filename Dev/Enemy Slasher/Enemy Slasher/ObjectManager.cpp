@@ -38,8 +38,10 @@ void CObjectManager::DelObj(CGameObject* object, ObjectLayer layer)
 void CObjectManager::AnimateObjects(float fTimeElapsed)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
-		for (CGameObject* b : a)
+		for (CGameObject* b : a) {
 			b->Animate(fTimeElapsed);
+			//b->UpdateTransform(NULL);
+		}
 }
 
 void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)

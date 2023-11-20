@@ -60,17 +60,27 @@ private:
 	int m_nReferences = 0;
 
 public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
+	void AddRef();
+	void Release();
 
 protected:
 	XMFLOAT4X4						m_xmf4x4World;
 	XMFLOAT4X4						m_xmf4x4Transform;
 
-	CMesh** m_ppMeshes = NULL;
-	int m_nMeshes = 0;
+	int								m_nMeshes = 0;
+	CMesh**							m_ppMeshes = NULL;
 
-	CMaterial* m_pMaterial = NULL;
+	int								m_nMaterial = 0;
+	CMaterial*						m_pMaterial = NULL;
+
+	CGameObject*					m_pParent = NULL;
+	CGameObject*					m_pChild = NULL;
+	CGameObject*					m_pSibling = NULL;
+
+public:
+	void SetChild(CGameObject* pChild);
+
+	CGameObject* GetParent() { return(m_pParent); }
 
 public:
 	//상수 버퍼를 생성한다. 
@@ -78,9 +88,10 @@ public:
 
 	//상수 버퍼의 내용을 갱신한다. 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
 	virtual void ReleaseShaderVariables();
 
-	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent);
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 
 public:
@@ -94,6 +105,9 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 
+	//게임 객체의 크기를 조정한다
+	virtual void SetScale(float x, float y, float z);
+
 	//게임 객체를 로컬 x-축, y-축, z-축 방향으로 이동한다.
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -101,6 +115,8 @@ public:
 
 	//게임 객체를 회전(x-축, y-축, z-축)한다. 
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	virtual void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	virtual void Rotate(XMFLOAT4* pxmf4Quaternion);
 
 	//m_pShader
 	void SetShaderType(ShaderType shaderType);
@@ -113,13 +129,10 @@ public:
 	void ReleaseUploadBuffers();
 	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void SetMesh(int nIndexSize);
-	virtual void Animate(float fTimeElapsed);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 	virtual void Render2D() {};
-
-public:
-	virtual void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 };
 
 
@@ -133,10 +146,6 @@ public:
 	virtual ~CInteractiveObject();
 
 public:
-	//게임 객체를 회전(x-축, y-축, z-축)한다. 
-	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
-	virtual void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
-
 	XMFLOAT3 GetAABBMaxPos(int nIndex);
 	XMFLOAT3 GetAABBMinPos(int nIndex);
 
@@ -182,7 +191,7 @@ protected:
 public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
-	virtual void Animate(float fTimeElapsed);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };
 
 class CRotatingNormalObject : public CRotatingObject
@@ -227,7 +236,7 @@ private:
 public:	
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId);
-	virtual void Animate(float fTimeElapsed);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	//bool IsCursorOverObject();
 	//void ButtenDown();
@@ -274,7 +283,7 @@ protected:
 
 
 public:
-	virtual void Animate(float fTimeElapsed);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	void CursorOverObject(bool flag) override;
 	void ButtenDown() override;

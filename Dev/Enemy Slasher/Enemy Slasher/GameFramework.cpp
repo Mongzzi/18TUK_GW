@@ -282,15 +282,6 @@ void CGameFramework::CreateD2DDevice()
 	DX::ThrowIfFailed(m_pd2dFactory->CreateDevice(m_cdxgiDevice.Get(), reinterpret_cast<ID2D1Device2**>(&m_pd2dDevice)));
 	DX::ThrowIfFailed(m_pd2dDevice->CreateDeviceContext(deviceContextOption, &m_pd2dDeviceContext));
 	DX::ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&m_pdWriteFactory)));
-
-	//// 사용이 끝난 후에는 해제합니다.
-	//if (d2d1Factory) {
-	//	d2d1Factory->Release();
-	//}
-
-	//if (dwriteFactory) {
-	//	dwriteFactory->Release();
-	//}
 }
 
 void CGameFramework::CreateD3D11On12Device()
@@ -457,6 +448,10 @@ void CGameFramework::OnDestroy()
 	if (m_pd3dDevice) m_pd3dDevice->Release();
 	if (m_pdxgiFactory) m_pdxgiFactory->Release();
 
+	if (m_pd2dFactory) m_pd2dFactory->Release();
+
+	if (m_pdWriteFactory) m_pdWriteFactory->Release();
+
 #if defined(_DEBUG)
 	IDXGIDebug1* pdxgiDebug = NULL;
 	DXGIGetDebugInterface1(0, __uuidof(IDXGIDebug1), (void**)&pdxgiDebug);
@@ -516,7 +511,7 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {
-	//if (m_pPlayer) m_pPlayer->Release();
+	if (m_pPlayer) m_pPlayer->Release();
 
 	if (m_pScene) m_pScene->ReleaseObjects();
 	if (m_pScene) delete m_pScene;
@@ -568,7 +563,7 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
-	//m_pPlayer->Animate(fTimeElapsed);
+	//m_pPlayer->Animate(fTimeElapsed, NULL);
 }
 
 void CGameFramework::DynamicShaping()
