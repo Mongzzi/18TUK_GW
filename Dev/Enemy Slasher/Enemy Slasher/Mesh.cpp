@@ -522,13 +522,17 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	XMFLOAT4X4 xmf4x4InvTransposeThisMat = Matrix4x4::Transpose(xmf4x4InvThisMat);
 	XMFLOAT4X4 xmf4x4TransposeOtherMat = Matrix4x4::Transpose(xmf4x4OtherMat);
 
+	// 행렬 적용으로 변환된 값
 	XMFLOAT3 xmf3LPlaneNormal, xmf3LPlanePoint;
-	xmf3LPlaneNormal = xmf3CutNormal;
-	//xmf3LPlaneNormal = TransformVertex(xmf3CutNormal, xmf4x4OtherMat);
-	//xmf3LPlaneNormal = TransformVertex(xmf3LPlaneNormal, xmf4x4InvThisMat);
-	//xmf3LPlaneNormal = Vector3::Normalize(xmf3LPlaneNormal);
+	xmf3LPlaneNormal = TransformVertex(xmf3CutNormal, xmf4x4TransposeOtherMat);
+	xmf3LPlaneNormal = TransformVertex(xmf3LPlaneNormal, xmf4x4InvTransposeThisMat);
+	xmf3LPlaneNormal = Vector3::Normalize(xmf3LPlaneNormal);
 	xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4OtherMat);
 	xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
+
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution <> urd(0.0, 1.0);
 
 	vector<CVertex> vnewVertices;
 	CVertex* newVertices;
