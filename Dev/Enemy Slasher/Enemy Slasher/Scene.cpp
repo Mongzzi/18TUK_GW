@@ -245,7 +245,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			{
 				// 카드 사용
 				// 자신 삭제
-				m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::UIObject);
+				m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
 				cout << "삭제 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 			}
 			pSelectedUI = NULL;
@@ -504,25 +504,32 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	{
 		//카드 UI 테스트용 오브젝트.
+		CCardUIObject* pUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), TREE4, ShaderType::CUIObjectsShader);
+		CMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 0.0f, 0.0f, 10.0f, 10.0f, 10.0f);
+		pUIObject->SetMesh(0, pBoxMesh);
+		pUIObject->SetPositionUI(320, 440);
+		pUIObject->SetScale(1000, 100, 1);
+		m_pObjectManager->AddObj(pUIObject, ObjectLayer::UIObject);
+
 		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARDHIERARCHY_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(200, 200);
 		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(300, 300);
 		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 	}
 
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());
@@ -574,7 +581,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
 	{
-		if (lc == (int)ObjectLayer::UIObject)
+		if (lc == (int)ObjectLayer::InteractiveUIObject)
 		{
 			for (int i = 0;i < pObjectList[lc].size();i++) {
 				CUIObject* obj = (CUIObject*)pObjectList[lc][i];

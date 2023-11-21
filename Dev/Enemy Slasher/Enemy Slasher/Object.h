@@ -330,7 +330,7 @@ public:
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
 	virtual ~CUIObject();
 protected:
-	float m_fCurrntScale;	
+	float m_fCurrntScale;
 	float m_fTargetScale;
 	CCamera* m_pCamera = NULL;
 
