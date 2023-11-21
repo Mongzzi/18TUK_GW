@@ -16,13 +16,13 @@ CMesh::~CMesh()
 	if (m_pnIndices) delete[] m_pnIndices;
 	if (m_pxmfUV)
 	{
-		for (int i = 0;i < m_nIndices;i++)
+		for (int i = 0;i < m_nInElementUVCount;i++)
 			delete[]m_pxmfUV[i];
 		delete[]m_pxmfUV;
 	}
 	if (m_pxmfNormal)
 	{
-		for (int i = 0;i < m_nIndices;i++)
+		for (int i = 0;i < m_nInElementNormalCount;i++)
 			delete[]m_pxmfNormal[i];
 		delete[]m_pxmfNormal;
 	}
@@ -831,19 +831,19 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_nIndices = lPolygonCount * lPolygonSize;
 	m_pnIndices = new UINT[m_nIndices];
 
-	int ElementUVCount = lMesh->GetElementUVCount();
-	if (ElementUVCount)
+	m_nInElementUVCount = lMesh->GetElementUVCount();
+	if (m_nInElementUVCount)
 	{
-		m_pxmfUV = new XMFLOAT2*[ElementUVCount];
-		for (int i = 0;i < ElementUVCount;i++)
+		m_pxmfUV = new XMFLOAT2*[m_nInElementUVCount];
+		for (int i = 0;i < m_nInElementUVCount;i++)
 			m_pxmfUV[i] = new XMFLOAT2[m_nIndices];
 	}
 
-	int ElementNormalCount = lMesh->GetElementNormalCount();
-	if (ElementNormalCount)
+	m_nInElementNormalCount = lMesh->GetElementNormalCount();
+	if (m_nInElementNormalCount)
 	{
-		m_pxmfNormal = new XMFLOAT3 * [ElementNormalCount];
-		for (int i = 0;i < ElementNormalCount;i++)
+		m_pxmfNormal = new XMFLOAT3 * [m_nInElementNormalCount];
+		for (int i = 0;i < m_nInElementNormalCount;i++)
 			m_pxmfNormal[i] = new XMFLOAT3[m_nIndices];
 	}
 
@@ -854,7 +854,7 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 			int lControlPointIndex = lMesh->GetPolygonVertex(i, j);
 			m_pnIndices[i * 3 + j] = lControlPointIndex;
 
-			for (int k = 0; k < ElementUVCount; ++k)
+			for (int k = 0; k < m_nInElementUVCount; ++k)
 			{
 				XMFLOAT2 xmfUV;
 				FbxVector2 fvUV;
@@ -907,7 +907,7 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 				m_pxmfUV[k][i * 3 + j] = xmfUV;
 			}
 
-			for (int k = 0; k < ElementNormalCount; ++k)
+			for (int k = 0; k < m_nInElementNormalCount; ++k)
 			{
 
 				XMFLOAT3 xmfNormal;
