@@ -265,6 +265,25 @@ CDynamicShapeMesh::~CDynamicShapeMesh()
 
 }
 
+XMFLOAT3 CDynamicShapeMesh::ProjectVertexToPlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint)
+{
+	// 평면의 방정식에서의 상수와 정점 간의 거리를 계산
+	XMFLOAT3 toVertex;
+	toVertex.x = vertex.x - planePoint.x;
+	toVertex.y = vertex.y - planePoint.y;
+	toVertex.z = vertex.z - planePoint.z;
+
+	float distance = XMVector3Dot(XMLoadFloat3(&toVertex), XMLoadFloat3(&planeNormal)).m128_f32[0];
+
+	// 평면의 노멀 벡터를 이용하여 정점을 평면에 수직으로 투영
+	XMFLOAT3 projectedVertex;
+	projectedVertex.x = vertex.x - distance * planeNormal.x;
+	projectedVertex.y = vertex.y - distance * planeNormal.y;
+	projectedVertex.z = vertex.z - distance * planeNormal.z;
+
+	return projectedVertex;
+}
+
 void CDynamicShapeMesh::DSM_Line::MakeLine(XMFLOAT3 xmfStart, XMFLOAT3 xmfEnd)
 {
 	m_xmfStart = xmfStart;
@@ -333,7 +352,7 @@ bool CDynamicShapeMesh::IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT
 	// 점의 좌표를 평면 방정식에 대입하여 부호 판단
 	float result = A * vertex.x + B * vertex.y + C * vertex.z + D;
 
-	// 평면 위에 있다면 true, 아니면 false 반환
+	// 평면보다 위에 있다면 true, 아니면 false 반환
 	return result > 0.0f;
 }
 
@@ -550,60 +569,98 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CVertex* newVertices;
 	UINT* pnewIndices;
 
-	map<UINT, UINT> vertexMap; // 원래 Vertex의 Index를 넣으면 새로운 배열의 Index를 리턴
+	//map<UINT, UINT> vertexMap; // 원래 Vertex의 Index를 넣으면 새로운 배열의 Index를 리턴
 
 	int vertexCounter = 0;
 	for (int i = 0; i < m_nVertices; ++i) {
 		if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
 			vnewVertices.emplace_back(m_pVertices[i]);
-			vertexMap[i] = vertexCounter++;
+		}
+		else {
+			XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
+			XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
+			XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
+			vnewVertices.emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
 		}
 	}
+	delete[] m_pVertices;
+	m_pVertices = new CVertex[m_nVertices];
+	copy(vnewVertices.begin(), vnewVertices.end(), m_pVertices);
 
-	// 모든 메쉬는 TriangleList로 구성되어있다고 가정
-	vector<UINT> vnewIndices;
-	for (int i = 0; i < (m_nIndices / 3); ++i) {
-		if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 0]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
-		if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 1]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
-		if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 2]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
-		vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 0]]);
-		vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 1]]);
-		vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 2]]);
-	}
+	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	// 버퍼생성
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
-	if (vnewVertices.size() != 0 && vnewIndices.size() != 0) {
-		m_nVertices = vnewVertices.size();
-		m_nIndices = vnewIndices.size();
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-		delete[] m_pVertices;
-		delete[] m_pnIndices;
-		m_pVertices = new CVertex[m_nVertices];
-		m_pnIndices = new UINT[m_nIndices];
+	if (m_pCollider) delete m_pCollider;
+	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	return true;
+	{
+		//int vertexCounter = 0;
+		//for (int i = 0; i < m_nVertices; ++i) {
+		//	if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
+		//		vnewVertices.emplace_back(m_pVertices[i]);
+		//		vertexMap[i] = vertexCounter++;
+		//	}
+		//}
 
-		copy(vnewVertices.begin(), vnewVertices.end(), m_pVertices);
-		copy(vnewIndices.begin(), vnewIndices.end(), m_pnIndices);
+		//// 모든 메쉬는 TriangleList로 구성되어있다고 가정
+		//vector<UINT> vnewIndices;
+		//for (int i = 0; i < (m_nIndices / 3); ++i) {
+		//	if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 0]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
+		//	if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 1]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
+		//	if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 2]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
+		//	vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 0]]);
+		//	vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 1]]);
+		//	vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 2]]);
+		//}
 
-		if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-		if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
-		// 버퍼생성
-		m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+		vector<UINT> vnewIndices;
+		for (int i = 0; i < (m_nIndices / 3); ++i) {
+			vnewIndices.push_back(m_pnIndices[i * 3 + 0]);
+			vnewIndices.push_back(m_pnIndices[i * 3 + 1]);
+			vnewIndices.push_back(m_pnIndices[i * 3 + 2]);
+		}
 
-		// 바인딩위해 버퍼뷰 초기화
-		m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-		m_d3dVertexBufferView.StrideInBytes = m_nStride;
-		m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+		if (vnewVertices.size() != 0 && vnewIndices.size() != 0) {
+			m_nVertices = vnewVertices.size();
+			m_nIndices = vnewIndices.size();
 
-		if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
-		if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
-		//인덱스 버퍼를 생성한다. 
-		m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
-		//인덱스 버퍼 뷰를 생성한다. 
-		m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-		m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-		m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+			delete[] m_pVertices;
+			delete[] m_pnIndices;
+			m_pVertices = new CVertex[m_nVertices];
+			m_pnIndices = new UINT[m_nIndices];
 
-		if (m_pCollider) delete m_pCollider;
-		m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+			copy(vnewVertices.begin(), vnewVertices.end(), m_pVertices);
+			copy(vnewIndices.begin(), vnewIndices.end(), m_pnIndices);
+
+			if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+			if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+			// 버퍼생성
+			m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+			// 바인딩위해 버퍼뷰 초기화
+			m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+			m_d3dVertexBufferView.StrideInBytes = m_nStride;
+			m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+			if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+			if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
+			//인덱스 버퍼를 생성한다. 
+			m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+			//인덱스 버퍼 뷰를 생성한다. 
+			m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+			m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+			m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+			if (m_pCollider) delete m_pCollider;
+			m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+		}
 	}
 	return true;
 }

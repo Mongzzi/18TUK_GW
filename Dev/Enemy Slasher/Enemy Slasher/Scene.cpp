@@ -291,7 +291,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
-	m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
@@ -1067,10 +1067,9 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	{
-		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
-		//m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList);
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, NULL, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
-		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, -100.0f, 0.0f));
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 	}
@@ -1139,7 +1138,7 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	if (!pvObjectList[(int)ObjectLayer::Object].empty()) {
 		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][0];
 		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)pvObjectList[(int)ObjectLayer::Object][1];
-		pObject_cuttur->MoveStrafe(0.5);
+		pObject_cuttur->MoveStrafe(0.2);
 
 		
 		if (pObject_stone->CollisionCheck(pObject_cuttur)) {

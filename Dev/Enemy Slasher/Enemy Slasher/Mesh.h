@@ -107,6 +107,7 @@ protected:
 public:
 	XMFLOAT3 GetCutPlaneNormal() { return m_xmf3PlaneNormal; }
 	XMFLOAT3 GetCutPlanePoint() { return m_xmf3PlanePoint; }
+	XMFLOAT3 ProjectVertexToPlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint);
 
 protected:
 	class DSM_Line {
