@@ -70,7 +70,7 @@ LoadResult CFBXLoader::LoadScene(const char* pFilename, CFBXLoader* pFBXLoader)
     {
         result = LoadResult::Overlapping;
 #ifdef _DEBUG
-        //FBXSDK_printf("insertResult::Overlapping, File name : %s\n", pFilename);
+        FBXSDK_printf("insertResult::Overlapping, File name : %s\n", pFilename);
 #endif // _DEBUG
     }
     else {
