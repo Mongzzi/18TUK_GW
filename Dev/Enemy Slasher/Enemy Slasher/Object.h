@@ -228,11 +228,11 @@ private:
 class CFBXObject : public CDynamicShapeObject
 {
 public:
-	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName = "fbxsdk/Box.fbx");
+	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
 	virtual ~CFBXObject();
 private:
-	XMFLOAT3 m_xmf3RotationAxis;
-	float m_fRotationSpeed;
+	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	float m_fRotationSpeed = 0.0f;
 public:	
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId);
@@ -247,7 +247,7 @@ public:
 class CUIObject : public CFBXObject
 {
 public:
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box.fbx");
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
 	virtual ~CUIObject();
 protected:
 	float m_fCurrntScale;	
@@ -277,7 +277,7 @@ public:
 class CCardUIObject : public CUIObject
 {
 public:
-	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName = "fbxsdk/Box.fbx");
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
 	virtual ~CCardUIObject();
 protected:
 
