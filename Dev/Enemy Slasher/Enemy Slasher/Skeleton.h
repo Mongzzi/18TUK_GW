@@ -14,7 +14,7 @@ public:
 
 	void LoadHierarchy(FbxNode* pNode);
 	void LoadHierarchyFromMesh(CFBXMesh* pMesh);
-	void SetData(int indiceNum, double weight, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix);
+	void SetData(string name, int indiceNum, double weight, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix);
 
 
 	string GetName() { return m_strName; };
@@ -28,7 +28,7 @@ public:
 private:
 	string m_strName;
 
-	CSkeleton* m_pChild = NULL;
+	CSkeleton** m_pChild = NULL;
 	CSkeleton* m_pParent = NULL;
 
 	int m_inChildNum;

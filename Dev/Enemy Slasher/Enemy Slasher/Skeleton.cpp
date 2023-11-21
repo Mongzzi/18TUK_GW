@@ -8,6 +8,10 @@ CSkeleton::CSkeleton()
 CSkeleton::CSkeleton(string name, int childNum) {
 	m_strName = name;
 	m_inChildNum = childNum;
+	if(m_inChildNum)
+		m_pChild = new CSkeleton*[m_inChildNum];
+	else
+		m_pChild = NULL;
 }
 
 CSkeleton::~CSkeleton()
@@ -33,8 +37,8 @@ void CSkeleton::LoadHierarchy(FbxNode* pNode)
 
 			if (lAttributeType == FbxNodeAttribute::eSkeleton)
 			{
-				m_pChild = new CSkeleton(childNode->GetName(), childNode->GetChildCount());
-				m_pChild->LoadHierarchy(childNode);
+				m_pChild[i] = new CSkeleton(childNode->GetName(), childNode->GetChildCount());
+				m_pChild[i]->LoadHierarchy(childNode);
 			}
 		}
 	}
@@ -60,13 +64,14 @@ void CSkeleton::LoadHierarchyFromMesh(CFBXMesh* pMesh)
 	{
 		for (int i = 0;i < m_inChildNum;i++)
 		{
-			m_pChild[i].LoadHierarchyFromMesh(pMesh);
+			m_pChild[i]->LoadHierarchyFromMesh(pMesh);
 		}
 	}
 }
 
-void CSkeleton::SetData(int indiceNum, double weight, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix)
+void CSkeleton::SetData(string name, int indiceNum, double weight, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix)
 {
+	m_strName = name;
 	m_iIndiceNUm = indiceNum;
 	m_iWeight = weight;
 

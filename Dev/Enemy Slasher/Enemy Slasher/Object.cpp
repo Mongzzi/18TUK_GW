@@ -877,7 +877,8 @@ void CFBXObject::LoadHierarchyFromMesh()
 	if (m_ppMeshes[0])
 	{
 		pMesh = (CFBXMesh*)m_ppMeshes[0];
-		m_skelRoot->LoadHierarchyFromMesh(pMesh);
+		if(m_skelRoot)
+			m_skelRoot->LoadHierarchyFromMesh(pMesh);
 	}
 
 }

@@ -1076,6 +1076,7 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	{
 		int lSkinCount = lMesh->GetDeformerCount(FbxDeformer::eSkin);
 		FbxCluster* lCluster;
+		string name;
 
 		for (int i = 0;i != lSkinCount;i++)
 		{
@@ -1089,7 +1090,7 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 				if (lCluster->GetLink() != NULL)
 				{
-					(char*)lCluster->GetLink()->GetName();
+					name = (char*)lCluster->GetLink()->GetName();
 				}
 				int lIndexCount = lCluster->GetControlPointIndicesCount();
 				int* lIndices = lCluster->GetControlPointIndices();
@@ -1098,7 +1099,7 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 				FbxAMatrix transMatrix = lCluster->GetTransformMatrix(transMatrix);
 				FbxAMatrix transLinkMatrix = lCluster->GetTransformLinkMatrix(transLinkMatrix);
 
-				m_skelList[j].SetData(lIndices[j], lWeights[j], transMatrix, transLinkMatrix);
+				m_skelList[j].SetData(name,lIndices[j], lWeights[j], transMatrix, transLinkMatrix);
 				
 			}
 
