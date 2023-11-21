@@ -815,19 +815,78 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	//DisplayPolygons(lMesh);
 	int j, lPolygonCount = lMesh->GetPolygonCount();
-	m_nIndices = lPolygonCount;
-	m_nIndices *= 3;
+	int lPolygonSize = lMesh->GetPolygonSize(i);
+	m_nIndices = lPolygonCount * lPolygonSize;
 	m_pnIndices = new UINT[m_nIndices];
+
+	int ElementUVCount = lMesh->GetElementUVCount();
+	if (ElementUVCount)
+	{
+		m_pxmfUV = new XMFLOAT2*[ElementUVCount];
+		for (int i = 0;i < ElementUVCount;i++)
+			m_pxmfUV[i] = new XMFLOAT2[m_nIndices];
+	}
 
 	for (i = 0; i < lPolygonCount; i++)
 	{
-		int lPolygonSize = lMesh->GetPolygonSize(i);
 		for (j = 0; j < lPolygonSize; j++)
 		{
 			int lControlPointIndex = lMesh->GetPolygonVertex(i, j);
 			m_pnIndices[i * 3 + j] = lControlPointIndex;
-		}
 
+			for (int k = 0; k < ElementUVCount; ++k)
+			{
+				XMFLOAT2 xmfUV;
+				FbxVector2 fvUV;
+				FbxGeometryElementUV* leUV = lMesh->GetElementUV(k);
+				switch (leUV->GetMappingMode())
+				{
+				default:
+					break;
+				case FbxGeometryElement::eByControlPoint:
+					switch (leUV->GetReferenceMode())
+					{
+					case FbxGeometryElement::eDirect:
+						fvUV = leUV->GetDirectArray().GetAt(lControlPointIndex);
+						break;
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						int id = leUV->GetIndexArray().GetAt(lControlPointIndex);
+						fvUV = leUV->GetDirectArray().GetAt(id);
+					}
+					break;
+					default:
+						break; // other reference modes not shown here!
+					}
+					break;
+
+				case FbxGeometryElement::eByPolygonVertex:
+				{
+					int lTextureUVIndex = lMesh->GetTextureUVIndex(i, j);
+					switch (leUV->GetReferenceMode())
+					{
+					case FbxGeometryElement::eDirect:
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						fvUV = leUV->GetDirectArray().GetAt(lTextureUVIndex);
+					}
+					break;
+					default:
+						break; // other reference modes not shown here!
+					}
+				}
+				break;
+
+				case FbxGeometryElement::eByPolygon: // doesn't make much sense for UVs
+				case FbxGeometryElement::eAllSame:   // doesn't make much sense for UVs
+				case FbxGeometryElement::eNone:       // doesn't make much sense for UVs
+					break;
+				}
+				xmfUV.x = fvUV[0];
+				xmfUV.y = fvUV[1];
+				m_pxmfUV[k][i * 3 + j] = xmfUV;
+			}
+		}
 	}
 
 	//인덱스 버퍼를 생성한다.

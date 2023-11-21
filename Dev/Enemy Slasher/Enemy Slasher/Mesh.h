@@ -35,6 +35,7 @@ protected:
 
 protected:
 	UINT* m_pnIndices = NULL;
+	XMFLOAT2** m_pxmfUV = NULL;
 
 	ID3D12Resource* m_pd3dIndexBuffer = NULL;
 	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
