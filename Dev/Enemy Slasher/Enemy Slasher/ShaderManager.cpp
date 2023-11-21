@@ -25,6 +25,7 @@ void CShaderManager::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_vShaderManager.push_back(new CShader());
 
 	m_vShaderManager.push_back(new CObjectsShader());
+	m_vShaderManager.push_back(new CUIObjectsShader());
 	m_vShaderManager.push_back(new CObjectsNormalShader());
 	m_vShaderManager.push_back(new CTerrainShader());
 	m_vShaderManager.push_back(new CTextShader());
