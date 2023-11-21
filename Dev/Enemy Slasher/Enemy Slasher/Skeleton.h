@@ -14,16 +14,26 @@ public:
 
 	void LoadHierarchy(FbxNode* pNode);
 	void LoadHierarchyFromMesh(CFBXMesh* pMesh);
-	void SetData(string name, int indiceNum, double weight, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix);
+	void SetData(string name, int indexCount, int* indices, double* weights, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix);
 
 
 	string GetName() { return m_strName; };
 
-	int GetIndiceNum() { return m_iIndiceNUm; };
-	int GetWeight() { return m_iWeight; };
+	int GetIndexCount() { return m_iIndexCount; };
+
+	int* GetIndices() { return m_ipIndices; };
+	double* GetWeights() { return m_dpWeights; };
 
 	XMFLOAT4X4 GetTransformMatrix() { return m_xmf4x4TransformMatrix; };
 	XMFLOAT4X4 GetTransformLinkMatrix() { return m_xmf4x4TransformLinkMatrix; };
+
+
+	friend std::ostream& operator << (std::ostream& out, const CSkeleton& skel)
+	{
+		out << "name " << skel.m_strName << ", childNum " << skel.m_inChildNum << ", indexCount " << skel.m_iIndexCount << endl << "indices " << skel.m_ipIndices[0] << endl << "weights " << skel.m_dpWeights[0] << " )";
+
+		return out;
+	}
 
 private:
 	string m_strName;
@@ -32,8 +42,10 @@ private:
 	CSkeleton* m_pParent = NULL;
 
 	int m_inChildNum;
-	int m_iIndiceNUm;
-	int m_iWeight;
+	int m_iIndexCount;
+
+	int* m_ipIndices;
+	double* m_dpWeights;
 
 	XMFLOAT4X4 m_xmf4x4TransformMatrix;
 	XMFLOAT4X4 m_xmf4x4TransformLinkMatrix;

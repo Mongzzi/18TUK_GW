@@ -53,10 +53,13 @@ void CSkeleton::LoadHierarchyFromMesh(CFBXMesh* pMesh)
 	{
 		if (m_strName == skelList[j].GetName())
 		{
-			m_iIndiceNUm = skelList[j].GetIndiceNum();
-			m_iWeight = skelList[j].GetWeight();
+			m_iIndexCount = skelList[j].GetIndexCount();
+			m_ipIndices = skelList[j].GetIndices();
+			m_dpWeights = skelList[j].GetWeights();
 			m_xmf4x4TransformMatrix = skelList[j].GetTransformMatrix();
 			m_xmf4x4TransformLinkMatrix = skelList[j].GetTransformLinkMatrix();
+
+			cout << *this << endl;
 			break;
 		}
 	}
@@ -69,11 +72,12 @@ void CSkeleton::LoadHierarchyFromMesh(CFBXMesh* pMesh)
 	}
 }
 
-void CSkeleton::SetData(string name, int indiceNum, double weight, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix)
+void CSkeleton::SetData(string name, int indexCount, int* indices, double* weights, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix)
 {
 	m_strName = name;
-	m_iIndiceNUm = indiceNum;
-	m_iWeight = weight;
+	m_iIndexCount = indexCount;
+	m_ipIndices = indices;
+	m_dpWeights = weights;
 
 	XMFLOAT4X4 result;
 
