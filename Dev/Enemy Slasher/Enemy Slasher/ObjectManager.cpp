@@ -31,8 +31,8 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 
 void CObjectManager::DelObj(CGameObject* object, ObjectLayer layer)
 {
-	std::vector<CGameObject*> target = m_pvObjectManager[(int)layer];
-	target.erase(remove(target.begin(), target.end(), object), target.end());
+	std::vector<CGameObject*>* target = &(m_pvObjectManager[(int)layer]);
+	target->erase(remove(target->begin(), target->end(), object), target->end());
 }
 
 void CObjectManager::AnimateObjects(float fTimeElapsed)

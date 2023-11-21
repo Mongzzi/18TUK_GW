@@ -430,7 +430,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		for (int x = 0; x < 10; x++)
 		{
-			for (int z = 0; z < 20; z++)
+			for (int z = 0; z < 7; z++)
 			{
 				if (x % 5 == 0) {
 					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
@@ -671,12 +671,6 @@ void CTestScene::Enter()
 
 void CTestScene::Exit()
 {
-}
-
-void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
-{
-	if(pSelectedUI)
-		m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::UIObject);
 }
 
 
