@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-CPlayer::CPlayer()
+CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
 {
 	m_pCamera = NULL;
 
@@ -240,6 +240,13 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	}
 }
 
+TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) :CPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
+{
+	ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+
 CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
@@ -277,7 +284,7 @@ CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 150.0f, -300.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);

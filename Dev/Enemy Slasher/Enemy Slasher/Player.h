@@ -10,7 +10,7 @@
 #include "Object.h"
 #include "Camera.h"
 
-class CPlayer : public CGameObject
+class CPlayer : public CFBXObject
 {
 protected:
 	XMFLOAT3					m_xmf3Position;
@@ -38,7 +38,8 @@ protected:
 	CShader* m_pShader = NULL;
 
 public:
-	CPlayer();
+	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
+
 	virtual ~CPlayer();
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
@@ -67,7 +68,7 @@ public:
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
-	void Rotate(float x, float y, float z);
+	virtual void Rotate(float x, float y, float z);
 
 	void Update(float fTimeElapsed);
 
@@ -91,11 +92,13 @@ public:
 class TestPlayer : public CPlayer 
 {
 public:
-	TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-	{
-		ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-		CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	}
+	TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
+
+	//TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+	//{
+	//	ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	//	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//}
 
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 };
