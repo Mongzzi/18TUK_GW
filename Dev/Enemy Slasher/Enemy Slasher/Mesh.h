@@ -6,6 +6,7 @@
 #include "Ray.h"
 #include "Skeleton.h"
 
+class CSkeleton;
 
 class CMesh
 {

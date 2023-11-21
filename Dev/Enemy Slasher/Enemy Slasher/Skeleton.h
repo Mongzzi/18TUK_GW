@@ -3,6 +3,8 @@
 #include "Mesh.h"
 #include "FbxLoader.h"
 
+class CFBXMesh;
+
 class CSkeleton
 {
 public:
