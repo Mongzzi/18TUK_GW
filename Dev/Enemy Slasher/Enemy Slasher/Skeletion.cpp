@@ -30,3 +30,20 @@ void CSkeleton::LoadHierarchy(FbxNode* pNode)
 		}
 	}
 }
+
+void CSkeleton::SetData(int indiceNum, double weight, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix)
+{
+	m_iIndiceNUm = indiceNum;
+	m_iWeight = weight;
+
+	XMFLOAT4X4 result;
+
+	FbxAMatrix lMatrix = transformMatrix;
+
+	for (int row = 0; row < 4; ++row) {
+		for (int col = 0; col < 4; ++col) {
+			// FbxAMatrix는 행 우선이므로 행과 열을 바꿔주어야 합니다.?
+			result.m[row][col] = static_cast<float>(lMatrix[col][row]);
+		}
+	}
+}

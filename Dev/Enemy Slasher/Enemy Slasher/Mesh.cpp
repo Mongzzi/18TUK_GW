@@ -1073,7 +1073,39 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	//DisplayMaterialConnections(lMesh);
 
 	//DisplayLink(lMesh);
+	{
+		int lSkinCount = lMesh->GetDeformerCount(FbxDeformer::eSkin);
+		int lClusterCount = 0;
+		FbxCluster* lCluster;
 
+		for (int i = 0;i != lSkinCount;i++)
+		{
+			lClusterCount = ((FbxSkin*)lMesh->GetDeformer(i, FbxDeformer::eSkin))->GetClusterCount();
+
+			m_skelList = new CSkeleton[lClusterCount];
+
+			for (int j = 0; j != lClusterCount; ++j)
+			{
+				lCluster = ((FbxSkin*)lMesh->GetDeformer(i, FbxDeformer::eSkin))->GetCluster(j);
+
+				if (lCluster->GetLink() != NULL)
+				{
+					(char*)lCluster->GetLink()->GetName();
+				}
+				int lIndexCount = lCluster->GetControlPointIndicesCount();
+				int* lIndices = lCluster->GetControlPointIndices();
+				double* lWeights = lCluster->GetControlPointWeights();
+
+				FbxAMatrix transMatrix = lCluster->GetTransformMatrix(transMatrix);
+				FbxAMatrix transLinkMatrix = lCluster->GetTransformLinkMatrix(transLinkMatrix);
+
+				m_skelList[j].SetData(lIndices[j], lWeights[j], transMatrix, transLinkMatrix);
+				
+			}
+
+		}
+
+	}
 	//DisplayShape(lMesh);
 
 	//DisplayCache(lMesh);

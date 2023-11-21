@@ -4,6 +4,8 @@
 #include "FbxLoader.h"
 #include "BoundingBox.h"
 #include "Ray.h"
+#include "Skeleton.h"
+
 
 class CMesh
 {
@@ -170,8 +172,7 @@ public:
 class CFBXMesh : public CDynamicShapeMesh
 {
 private:
-	//UINT* m_pnIndices;
-
+	CSkeleton* m_skelList = NULL;	// lSkinCount가 늘어나면 2중배열로 바꿔야함.
 public:
 	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CFBXMesh();
