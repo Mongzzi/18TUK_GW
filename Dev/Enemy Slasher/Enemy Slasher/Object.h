@@ -107,6 +107,7 @@ public:
 
 	//게임 객체의 크기를 조정한다
 	virtual void SetScale(float x, float y, float z);
+	virtual void SetScale(XMFLOAT3 scale);
 
 	//게임 객체를 로컬 x-축, y-축, z-축 방향으로 이동한다.
 	void MoveStrafe(float fDistance = 1.0f);
@@ -257,6 +258,8 @@ protected:
 	int m_iXPosition;
 	int m_iYPosition;
 
+	XMFLOAT3 m_xmfScale;
+
 public:
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };
 
@@ -272,6 +275,9 @@ public:
 	// 한번 불리는 함수
 	virtual void ButtenDown() = 0;
 	virtual void ButtenUp() = 0;
+
+	virtual void SetScale(float x, float y, float z);
+	virtual void SetScale(XMFLOAT3 scale);
 };
 
 class CCardUIObject : public CUIObject

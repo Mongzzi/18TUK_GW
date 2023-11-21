@@ -14,8 +14,10 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	DestroyedObject,		// 파괴된 오브젝트
 	Enemy,					// 적 오브젝트
 	Player,					// 플레이어 오브젝트
-	UIObject,				// 플레이어 UI 오브젝트	 depth/stancil 무시하고 항상 앞에 그려져야 함
 	Ray,					// 광선 테스트용 레이어
+	// ------------------------이 아래는 depth/stancil 무시
+	// ------------------------따라서 앞에 그려질지를 결정하려면 vector상에서의 순서를 바꿔야함.
+	UIObject,				// 플레이어 UI 오브젝트	
 	Count					// Layer 개수
 };
 

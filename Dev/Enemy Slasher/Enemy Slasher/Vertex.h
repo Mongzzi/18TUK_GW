@@ -6,12 +6,14 @@ private:
 
 public:
 	XMFLOAT3 m_xmf3Vertex;
+	XMFLOAT3 m_xmf3Normal;
 	XMFLOAT4 m_xmf4Color;
 public:
-	CVertex(XMFLOAT3 v, XMFLOAT4 c) : m_xmf3Vertex{ v }, m_xmf4Color{ c } {}
+	CVertex(XMFLOAT3 v, XMFLOAT3 n, XMFLOAT4 c) : m_xmf3Vertex{ v }, m_xmf3Normal(n), m_xmf4Color{ c } {}
 
 	CVertex() {
 		m_xmf3Vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_xmf4Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 	CVertex(float x, float y, float z, XMFLOAT4 c) {

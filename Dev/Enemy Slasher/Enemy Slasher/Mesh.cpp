@@ -797,24 +797,24 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	m_pVertices = new CVertex[m_nVertices];
 
+	FbxVector4 fvNormal;
+
 	for (i = 0; i < lControlPointsCount; i++)
 	{
 		fx = (float)lControlPoints[i][0]* 1;
 		fy = (float)lControlPoints[i][1] *1;
 		fz = (float)lControlPoints[i][2] *1;
-		m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
 
-		/*for (int j = 0; j < lMesh->GetElementNormalCount(); j++)
+		for (int j = 0; j < lMesh->GetElementNormalCount(); j++)
 		{
 			FbxGeometryElementNormal* leNormals = lMesh->GetElementNormal(j);
 			if (leNormals->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 			{
-				char header[100];
-				FBXSDK_sprintf(header, 100, "            Normal Vector: ");
 				if (leNormals->GetReferenceMode() == FbxGeometryElement::eDirect)
-					Display3DVector(header, leNormals->GetDirectArray().GetAt(i));
+					fvNormal = leNormals->GetDirectArray().GetAt(i);
 			}
-		}*/
+		}
+		m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
 	}
 	////////////////////////////////////////////////////////////// - 여기 문제가 있음. - //////////////////////////////////////////////////////////////
 	// 버퍼생성 
@@ -863,11 +863,11 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 				{
 				default:
 					break;
-				case FbxGeometryElement::eByControlPoint:
+				case FbxGeometryElement::eByControlPoint:	// 더 찾아보던가
 					switch (leUV->GetReferenceMode())
 					{
 					case FbxGeometryElement::eDirect:
-						fvUV = leUV->GetDirectArray().GetAt(lControlPointIndex);
+						fvUV = leUV->GetDirectArray().GetAt(lControlPointIndex);	// 이거 쓰면 될듯?
 						break;
 					case FbxGeometryElement::eIndexToDirect:
 					{

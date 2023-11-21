@@ -229,6 +229,14 @@ void CGameObject::SetScale(float x, float y, float z)
 	UpdateTransform(NULL);
 }
 
+void CGameObject::SetScale(XMFLOAT3 scale)
+{
+	XMMATRIX mtxScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
 XMFLOAT3 CGameObject::GetPosition()
 {
 	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
@@ -779,6 +787,8 @@ void CRayObject::Reset(CRay ray)
 
 CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
 {
+	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
+
 	m_fCurrntScale = m_fTargetScale = 1.0f;
 	SetCamera(pCamera);
 }
@@ -811,6 +821,9 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	// 이걸 사용하면 카메라벡터의 반대를 보게됨.
 	// 카메라의Look의 반대, 카메라UP으로 만들어도 될듯? 아마?
 	XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
+	
+	// 스케일 적용.
+	CGameObject::SetScale(m_xmfScale);
 
 	// 카메라를 바라보게 만드는것도 좋을지도
 
@@ -855,6 +868,21 @@ void CUIObject::AddPositionUI(POINT pos)
 	m_iYPosition += pos.y;
 
 	ScreenSpaceToWorldSpace();
+}
+
+void CUIObject::SetScale(float x, float y, float z)
+{
+	m_xmfScale.x = x;
+	m_xmfScale.y = y;
+	m_xmfScale.z = z;
+
+	CGameObject::SetScale(x, y, z);
+}
+
+void CUIObject::SetScale(XMFLOAT3 scale)
+{
+	m_xmfScale = scale;
+	CGameObject::SetScale(m_xmfScale);
 }
 
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName, shaderType)
