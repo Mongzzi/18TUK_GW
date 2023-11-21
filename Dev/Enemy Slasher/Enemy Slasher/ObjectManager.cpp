@@ -76,10 +76,15 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CObjectManager::ReleaseObjects()
 {
+	int  i = 0;
 	for (std::vector<CGameObject*> a : m_pvObjectManager) {
-		for (CGameObject* b : a)
-			delete b;
+		std::cout << i << std::endl;
+		if(i != 8)
+			for (CGameObject* b : a)
+				delete b;
 		a.clear();
+		std::cout << i << " end" << std::endl;
+		i++;
 	}
 
 }
