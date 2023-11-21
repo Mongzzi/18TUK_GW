@@ -211,6 +211,16 @@ CTestScene::~CTestScene()
 
 bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	POINT ptCursorPos{ 0,0 }; 
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int clientWidth = clientRect.right - clientRect.left;
+	int clientHeight = clientRect.bottom - clientRect.top;
+
+
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
@@ -226,6 +236,18 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		if (pSelectedUI)
 		{
 			pSelectedUI->ButtenUp();
+			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
+			{
+				// 원위치로 돌아감.
+				cout << "원위치 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+			}
+			else
+			{
+				// 카드 사용
+				// 자신 삭제
+				m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::UIObject);
+				cout << "삭제 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+			}
 			pSelectedUI = NULL;
 		}
 		break;
@@ -556,6 +578,8 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 		{
 			for (int i = 0;i < pObjectList[lc].size();i++) {
 				CUIObject* obj = (CUIObject*)pObjectList[lc][i];
+				if (!obj)
+					continue;
 
 				XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
 				XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
@@ -580,7 +604,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 					pCoveredUI = obj;
 					pCoveredUI->CursorOverObject(true);
 #ifdef _DEBUG
-					cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
+					//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
 #endif // _DEBUG
 				}
 				else
@@ -649,7 +673,11 @@ void CTestScene::Exit()
 {
 }
 
-
+void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+{
+	if(pSelectedUI)
+		m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::UIObject);
+}
 
 
 CTestScene_Card::CTestScene_Card()

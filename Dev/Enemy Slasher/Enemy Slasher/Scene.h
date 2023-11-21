@@ -86,6 +86,7 @@ public:
 	virtual void Enter();
 	virtual void Exit();
 
+	virtual void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 private:
 	CUIObject* pCoveredUI = NULL;
 	CUIObject* pSelectedUI = NULL;
