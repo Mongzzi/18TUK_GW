@@ -482,22 +482,22 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	{
 		//카드 UI 테스트용 오브젝트.
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARDHIERARCHY_FBX, ShaderType::CObjectsShader);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARDHIERARCHY_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(200, 200);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(300, 300);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);

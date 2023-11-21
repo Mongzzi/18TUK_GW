@@ -7,6 +7,7 @@ enum class ShaderType : int;
 enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로 명시적 형변환을 해야 함
 	NON,					// mesh 생성 코드부분에 쉐이더 연결을 안 하면 나오는 회색 바둑판
 	CObjectsShader,
+	CUIObjectsShader,
 	CObjectNormalShader,
 	CTerrainShader,
 	CTextShader,
@@ -80,6 +81,7 @@ public:
 	void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
 	void CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
 
+
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandleForHeapStart() { return(m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart()); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandleForHeapStart() { return(m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()); }
 
@@ -109,6 +111,15 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
+};
+
+class CUIObjectsShader : public CObjectsShader
+{
+public:
+	CUIObjectsShader() {};
+	virtual ~CUIObjectsShader() {};
+
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 };
 
 class CObjectsNormalShader : public CShader
