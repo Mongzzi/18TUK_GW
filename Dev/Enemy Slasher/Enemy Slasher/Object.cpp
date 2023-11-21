@@ -727,9 +727,11 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 		LoadHierarchy(pFBXLoader, lFilePath.Buffer()); // 이 함수가 true 를 반환해야 본이 있는것. false를 반환하면 없어야함.
+		LoadHierarchyFromMesh();
 	}
 	else if (lResult == LoadResult::Overlapping)
 	{
+		// 일단 아직 위와 동일한 코드를 넣어놓는다.
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 	}
 
@@ -852,7 +854,7 @@ bool CFBXObject::LoadHierarchy(FbxNode* pNode)
 
 		if (lAttributeType == FbxNodeAttribute::eSkeleton)
 		{
-			m_skelRoot = new CSkeleton(pNode->GetName());
+			m_skelRoot = new CSkeleton(pNode->GetName(), pNode->GetChildCount());
 			m_skelRoot->LoadHierarchy(pNode);
 			return true;
 		}
@@ -866,6 +868,18 @@ bool CFBXObject::LoadHierarchy(FbxNode* pNode)
 		}
 	}
 	return false;
+}
+
+void CFBXObject::LoadHierarchyFromMesh()
+{
+	CFBXMesh* pMesh;
+
+	if (m_ppMeshes[0])
+	{
+		pMesh = (CFBXMesh*)m_ppMeshes[0];
+		m_skelRoot->LoadHierarchyFromMesh(pMesh);
+	}
+
 }
 
 // 

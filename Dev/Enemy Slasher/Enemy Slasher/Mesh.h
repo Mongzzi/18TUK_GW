@@ -173,6 +173,8 @@ class CFBXMesh : public CDynamicShapeMesh
 {
 private:
 	CSkeleton* m_skelList = NULL;	// lSkinCount가 늘어나면 2중배열로 바꿔야함.
+
+	int m_nICluster;
 public:
 	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CFBXMesh();
@@ -181,6 +183,9 @@ public:
 
 	CVertex* GetVertices() { return m_pVertices; };
 	UINT* GetUnit() { return m_pnIndices; };
+	CSkeleton* GetSkeletonList() { return m_skelList; };
+
+	int GetClusterCount() { return m_nICluster; };
 
 	CAABB* GetAABB(XMFLOAT4X4 m_xmf4x4World);
 };

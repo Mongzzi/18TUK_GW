@@ -322,6 +322,7 @@ public:
 	
 	bool LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName);
 	bool LoadHierarchy(FbxNode* pNode);
+	void LoadHierarchyFromMesh();
 	
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
