@@ -9,6 +9,7 @@ public:
 	XMFLOAT3 m_xmf3Normal;
 	XMFLOAT4 m_xmf4Color;
 public:
+	CVertex(XMFLOAT3 v, XMFLOAT4 c) : m_xmf3Vertex{ v }, m_xmf4Color{ c } {}
 	CVertex(XMFLOAT3 v, XMFLOAT3 n, XMFLOAT4 c) : m_xmf3Vertex{ v }, m_xmf3Normal(n), m_xmf4Color{ c } {}
 
 	CVertex() {
