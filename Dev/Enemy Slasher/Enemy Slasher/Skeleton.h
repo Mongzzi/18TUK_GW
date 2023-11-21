@@ -1,13 +1,18 @@
 #pragma once
 #include "stdafx.h"
+#include "fbxLoader.h"
 
 class CSkeleton {
 public:
 	CSkeleton();
+	CSkeleton(string name);
 	~CSkeleton();
 
+	void LoadHierarchy(FbxNode* pNode);
+	void SetDeta();
+
 private:
-	string name;
+	string m_strName;
 
 	CSkeleton* m_pChild = NULL;
 	CSkeleton* m_pParent = NULL;

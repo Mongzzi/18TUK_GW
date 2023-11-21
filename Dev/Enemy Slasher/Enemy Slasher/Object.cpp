@@ -726,6 +726,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	else if (lResult == LoadResult::First)
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
+		LoadHierarchy(pFBXLoader, lFilePath.Buffer()); // 이 함수가 true 를 반환해야 본이 있는것. false를 반환하면 없어야함.
 	}
 	else if (lResult == LoadResult::Overlapping)
 	{
@@ -822,6 +823,49 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	{
 		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i), i);
 	}
+}
+
+bool CFBXObject::LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName)
+{
+	int i;
+	FbxNode* lNode = pFBXLoader->GetNode(fileName);
+
+	for (i = 0; i < lNode->GetChildCount(); i++)
+	{
+		if (LoadHierarchy(lNode->GetChild(i)))
+			return true;
+	}
+	return false;
+}
+
+bool CFBXObject::LoadHierarchy(FbxNode* pNode)
+{
+	FbxNodeAttribute::EType lAttributeType;
+
+	if (pNode->GetNodeAttribute() == NULL)
+	{
+		//FBXSDK_printf("NULL Node Attribute\n\n");
+	}
+	else
+	{
+		lAttributeType = (pNode->GetNodeAttribute()->GetAttributeType());
+
+		if (lAttributeType == FbxNodeAttribute::eSkeleton)
+		{
+			m_skelRoot = new CSkeleton(pNode->GetName());
+			m_skelRoot->LoadHierarchy(pNode);
+			return true;
+		}
+		else
+		{
+			for (int i = 0; i < pNode->GetChildCount(); i++)
+			{
+				if (LoadHierarchy(pNode->GetChild(i)))
+					return true;
+			}
+		}
+	}
+	return false;
 }
 
 // 
