@@ -10,6 +10,9 @@
 #define CARD_FBX "fbxsdk/Card.fbx"
 #define CARDHIERARCHY_FBX "fbxsdk/CardHierarchy.fbx"
 
+#define PEASANT_1_FBX "fbxsdk/peasant_1.fbx"
+
+
 #define AA1 "fbxsdk/tower.fbx"
 #define AA2 "fbxsdk/torreMoba.fbx"
 #define HOUSE_FBX "fbxsdk/house.fbx"
