@@ -138,6 +138,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Collider.h" />
+    <ClInclude Include="Skeleton.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DirectXHelper.h">
@@ -171,6 +172,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="Skeletion.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="Enemy Slasher.cpp" />
     <ClCompile Include="FbxLoader.cpp" />
