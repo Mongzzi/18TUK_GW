@@ -602,14 +602,16 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				bool result = tmax > 0 && tmin <= tmax;
 				if (result) {
 					pCoveredUI = obj;
-					pCoveredUI->CursorOverObject(true);
 #ifdef _DEBUG
 					//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
 #endif // _DEBUG
 				}
 				else
-					obj->CursorOverObject(false);
+					;
+				obj->CursorOverObject(false);
 			}
+			if(pCoveredUI)
+				pCoveredUI->CursorOverObject(true);
 		}
 		else if (lc == (int)ObjectLayer::Ray)
 		{

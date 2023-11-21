@@ -1000,7 +1000,7 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
 	
 	// 스케일 적용.
-	CGameObject::SetScale(m_xmfScale);
+	SetScale(m_xmfScale);
 
 	// 카메라를 바라보게 만드는것도 좋을지도
 
@@ -1053,13 +1053,15 @@ void CUIObject::SetScale(float x, float y, float z)
 	m_xmfScale.y = y;
 	m_xmfScale.z = z;
 
-	CGameObject::SetScale(x, y, z);
+	m_xmfScale = Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false);
+	CGameObject::SetScale(m_xmfScale.x, m_xmfScale.y, m_xmfScale.z);
 }
 
 void CUIObject::SetScale(XMFLOAT3 scale)
 {
 	m_xmfScale = scale;
-	CGameObject::SetScale(m_xmfScale);
+	
+	CGameObject::SetScale(Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false));
 }
 
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName, shaderType)
@@ -1074,14 +1076,21 @@ void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	ScreenSpaceToWorldSpace();
 
-	if (std::fabs(m_fTargetScale - m_fTargetScale) > EPSILON)
+	if (std::fabs(m_fTargetScale - m_fCurrntScale) > EPSILON)
 	{
-		if (m_fTargetScale > m_fTargetScale)
-			m_fTargetScale += fTimeElapsed * 0.5;
+		if (m_fTargetScale > m_fCurrntScale)
+		{
+			m_fCurrntScale += fTimeElapsed * 0.5;
+			if(m_fTargetScale < m_fCurrntScale)
+				m_fCurrntScale = m_fTargetScale;
+		}
 		else
-			m_fTargetScale -= fTimeElapsed * 0.5;
+		{
+			m_fCurrntScale -= fTimeElapsed * 0.5;
+			if (m_fTargetScale > m_fCurrntScale)
+				m_fCurrntScale = m_fTargetScale;
+		}
 	}
-
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
