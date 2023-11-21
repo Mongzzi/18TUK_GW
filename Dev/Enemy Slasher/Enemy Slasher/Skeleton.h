@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "fbxLoader.h"
+#include "FbxLoader.h"
 
 class CSkeleton {
 public:

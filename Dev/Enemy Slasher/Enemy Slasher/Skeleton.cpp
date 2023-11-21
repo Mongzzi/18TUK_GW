@@ -1,8 +1,16 @@
 #include "Skeleton.h"
 
 
+CSkeleton::CSkeleton()
+{
+}
+
 CSkeleton::CSkeleton(string name) {
 	m_strName = name;
+}
+
+CSkeleton::~CSkeleton()
+{
 }
 
 void CSkeleton::LoadHierarchy(FbxNode* pNode)
