@@ -14,6 +14,18 @@ CMesh::~CMesh()
 {
 	if (m_pVertices) delete[] m_pVertices;
 	if (m_pnIndices) delete[] m_pnIndices;
+	if (m_pxmfUV)
+	{
+		for (int i = 0;i < m_nIndices;i++)
+			delete[]m_pxmfUV[i];
+		delete[]m_pxmfUV;
+	}
+	if (m_pxmfNormal)
+	{
+		for (int i = 0;i < m_nIndices;i++)
+			delete[]m_pxmfNormal[i];
+		delete[]m_pxmfNormal;
+	}
 
 	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
@@ -815,19 +827,115 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	//DisplayPolygons(lMesh);
 	int j, lPolygonCount = lMesh->GetPolygonCount();
-	m_nIndices = lPolygonCount;
-	m_nIndices *= 3;
+	int lPolygonSize = lMesh->GetPolygonSize(i);
+	m_nIndices = lPolygonCount * lPolygonSize;
 	m_pnIndices = new UINT[m_nIndices];
+
+	int ElementUVCount = lMesh->GetElementUVCount();
+	if (ElementUVCount)
+	{
+		m_pxmfUV = new XMFLOAT2*[ElementUVCount];
+		for (int i = 0;i < ElementUVCount;i++)
+			m_pxmfUV[i] = new XMFLOAT2[m_nIndices];
+	}
+
+	int ElementNormalCount = lMesh->GetElementNormalCount();
+	if (ElementNormalCount)
+	{
+		m_pxmfNormal = new XMFLOAT3 * [ElementNormalCount];
+		for (int i = 0;i < ElementNormalCount;i++)
+			m_pxmfNormal[i] = new XMFLOAT3[m_nIndices];
+	}
 
 	for (i = 0; i < lPolygonCount; i++)
 	{
-		int lPolygonSize = lMesh->GetPolygonSize(i);
 		for (j = 0; j < lPolygonSize; j++)
 		{
 			int lControlPointIndex = lMesh->GetPolygonVertex(i, j);
 			m_pnIndices[i * 3 + j] = lControlPointIndex;
-		}
 
+			for (int k = 0; k < ElementUVCount; ++k)
+			{
+				XMFLOAT2 xmfUV;
+				FbxVector2 fvUV;
+				FbxGeometryElementUV* leUV = lMesh->GetElementUV(k);
+				switch (leUV->GetMappingMode())
+				{
+				default:
+					break;
+				case FbxGeometryElement::eByControlPoint:
+					switch (leUV->GetReferenceMode())
+					{
+					case FbxGeometryElement::eDirect:
+						fvUV = leUV->GetDirectArray().GetAt(lControlPointIndex);
+						break;
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						int id = leUV->GetIndexArray().GetAt(lControlPointIndex);
+						fvUV = leUV->GetDirectArray().GetAt(id);
+					}
+					break;
+					default:
+						break; // other reference modes not shown here!
+					}
+					break;
+
+				case FbxGeometryElement::eByPolygonVertex:
+				{
+					int lTextureUVIndex = lMesh->GetTextureUVIndex(i, j);
+					switch (leUV->GetReferenceMode())
+					{
+					case FbxGeometryElement::eDirect:
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						fvUV = leUV->GetDirectArray().GetAt(lTextureUVIndex);
+					}
+					break;
+					default:
+						break; // other reference modes not shown here!
+					}
+				}
+				break;
+
+				case FbxGeometryElement::eByPolygon: // doesn't make much sense for UVs
+				case FbxGeometryElement::eAllSame:   // doesn't make much sense for UVs
+				case FbxGeometryElement::eNone:       // doesn't make much sense for UVs
+					break;
+				}
+				xmfUV.x = fvUV[0];
+				xmfUV.y = fvUV[1];
+				m_pxmfUV[k][i * 3 + j] = xmfUV;
+			}
+
+			for (int k = 0; k < ElementNormalCount; ++k)
+			{
+
+				XMFLOAT3 xmfNormal;
+				FbxVector4 fvNormal;
+				FbxGeometryElementNormal* leNormal = lMesh->GetElementNormal(k);
+
+				if (leNormal->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
+				{
+					switch (leNormal->GetReferenceMode())
+					{
+					case FbxGeometryElement::eDirect:
+						fvNormal = leNormal->GetDirectArray().GetAt(lControlPointIndex);
+						break;
+					case FbxGeometryElement::eIndexToDirect:
+					{
+						int id = leNormal->GetIndexArray().GetAt(lControlPointIndex);
+						fvNormal = leNormal->GetDirectArray().GetAt(id);
+					}
+					break;
+					default:
+						break; // other reference modes not shown here!
+					}
+				}
+				xmfNormal.x = fvNormal[0];
+				xmfNormal.y = fvNormal[1];
+				xmfNormal.z = fvNormal[2];
+			}
+		}
 	}
 
 	//인덱스 버퍼를 생성한다.
