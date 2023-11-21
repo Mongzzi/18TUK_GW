@@ -222,6 +222,15 @@ namespace Vector3
 		return(xmf3Result);
 	}
 
+	inline XMFLOAT3 TransformNormal(XMFLOAT3& xmf3Vector, XMFLOAT4X4& xmmtx4x4Matrix)
+	{
+		XMFLOAT3 xmf3Result;
+		XMStoreFloat3(&xmf3Result, XMVector3TransformNormal(XMLoadFloat3(&xmf3Vector), XMLoadFloat4x4(&xmmtx4x4Matrix)));
+		return(xmf3Result);
+
+		//return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
+	}
+
 	inline XMFLOAT3 TransformCoord(XMFLOAT3& xmf3Vector, XMMATRIX& xmmtxTransform)
 	{
 		XMFLOAT3 xmf3Result;
