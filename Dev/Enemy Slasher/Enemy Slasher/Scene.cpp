@@ -240,6 +240,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			{
 				// 원위치로 돌아감.
 				cout << "원위치 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+				pSelectedUI->SetPositionUI(pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
+
 			}
 			else
 			{
@@ -505,13 +507,13 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	{
 		//카드 UI 테스트용 오브젝트.
 		CCardUIObject* pUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), TREE4, ShaderType::CUIObjectsShader);
-		CMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 0.0f, 0.0f, 10.0f, 10.0f, 10.0f);
+		CMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 0.2f, 0.5f, 0.2f, 10.0f, 10.0f, 10.0f);
 		pUIObject->SetMesh(0, pBoxMesh);
 		pUIObject->SetPositionUI(320, 440);
 		pUIObject->SetScale(1000, 100, 1);
 		m_pObjectManager->AddObj(pUIObject, ObjectLayer::UIObject);
 
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARDHIERARCHY_FBX, ShaderType::CUIObjectsShader);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
@@ -523,6 +525,11 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetPositionUI(300, 300);
+		pCardUIObject->SetScale(2, 2, 1);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
@@ -614,7 +621,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 #endif // _DEBUG
 				}
 				else
-					;
+					;//obj->CursorOverObject(false);
 				obj->CursorOverObject(false);
 			}
 			if(pCoveredUI)
@@ -649,6 +656,22 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			//
 		}
 		if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
+	}
+
+
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int clientWidth = clientRect.right - clientRect.left;
+	int clientHeight = clientRect.bottom - clientRect.top;
+	
+	int count = pObjectList[(int)ObjectLayer::InteractiveUIObject].size();
+
+	for (int i = 0;i < count;i++)
+	{
+		CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+		if(obj != pSelectedUI)
+			obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)count / 2) * (clientWidth / 12)+ (clientWidth / 24), (float)clientHeight / 10 * 9);
 	}
 
 	return(true);

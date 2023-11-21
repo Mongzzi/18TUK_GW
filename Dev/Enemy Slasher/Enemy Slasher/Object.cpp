@@ -1080,13 +1080,13 @@ void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		if (m_fTargetScale > m_fCurrntScale)
 		{
-			m_fCurrntScale += fTimeElapsed * 0.5;
+			m_fCurrntScale += fTimeElapsed* TIME_ELAPSE_RATIO;
 			if(m_fTargetScale < m_fCurrntScale)
 				m_fCurrntScale = m_fTargetScale;
 		}
 		else
 		{
-			m_fCurrntScale -= fTimeElapsed * 0.5;
+			m_fCurrntScale -= fTimeElapsed * TIME_ELAPSE_RATIO;
 			if (m_fTargetScale > m_fCurrntScale)
 				m_fCurrntScale = m_fTargetScale;
 		}
@@ -1097,9 +1097,9 @@ void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 void CCardUIObject::CursorOverObject(bool flag)
 {
 	if (flag)
-		m_fTargetScale = 1.2f;
+		m_fTargetScale = TARGET_SCALE;
 	else
-		m_fTargetScale = 1.0f;
+		m_fTargetScale = DEFUALT_SCALE;
 }
 
 void CCardUIObject::ButtenDown()

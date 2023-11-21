@@ -330,6 +330,10 @@ public:
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
 	virtual ~CUIObject();
 protected:
+	static constexpr float TARGET_SCALE = 1.5f;
+	static constexpr float DEFUALT_SCALE = 1.0f;
+	static constexpr float TIME_ELAPSE_RATIO = 1.0f;
+
 	float m_fCurrntScale;
 	float m_fTargetScale;
 	CCamera* m_pCamera = NULL;
@@ -348,6 +352,8 @@ public:
 	void SetPositionUI(POINT pos);
 	void AddPositionUI(int x, int y);
 	void AddPositionUI(POINT pos);
+
+	POINT GetPositionUI() { return POINT(m_iXPosition, m_iYPosition); }
 
 	// 계속 불리는 함수
 	virtual void CursorOverObject(bool flag) = 0;
