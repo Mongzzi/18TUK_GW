@@ -38,7 +38,7 @@ public:
 private:
 	string m_strName;
 
-	CSkeleton** m_pChild = NULL;
+	CSkeleton** m_ppChild = NULL;
 	CSkeleton* m_pParent = NULL;
 
 	int m_inChildNum;

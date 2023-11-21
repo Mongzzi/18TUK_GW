@@ -9,9 +9,9 @@ CSkeleton::CSkeleton(string name, int childNum) {
 	m_strName = name;
 	m_inChildNum = childNum;
 	if(m_inChildNum)
-		m_pChild = new CSkeleton*[m_inChildNum];
+		m_ppChild = new CSkeleton*[m_inChildNum];
 	else
-		m_pChild = NULL;
+		m_ppChild = NULL;
 }
 
 CSkeleton::~CSkeleton()
@@ -37,8 +37,8 @@ void CSkeleton::LoadHierarchy(FbxNode* pNode)
 
 			if (lAttributeType == FbxNodeAttribute::eSkeleton)
 			{
-				m_pChild[i] = new CSkeleton(childNode->GetName(), childNode->GetChildCount());
-				m_pChild[i]->LoadHierarchy(childNode);
+				m_ppChild[i] = new CSkeleton(childNode->GetName(), childNode->GetChildCount());
+				m_ppChild[i]->LoadHierarchy(childNode);
 			}
 		}
 	}
@@ -58,16 +58,14 @@ void CSkeleton::LoadHierarchyFromMesh(CFBXMesh* pMesh)
 			m_dpWeights = skelList[j].GetWeights();
 			m_xmf4x4TransformMatrix = skelList[j].GetTransformMatrix();
 			m_xmf4x4TransformLinkMatrix = skelList[j].GetTransformLinkMatrix();
-
-			cout << *this << endl;
 			break;
 		}
 	}
-	if (m_pChild)
+	if (m_ppChild)
 	{
 		for (int i = 0;i < m_inChildNum;i++)
 		{
-			m_pChild[i]->LoadHierarchyFromMesh(pMesh);
+			m_ppChild[i]->LoadHierarchyFromMesh(pMesh);
 		}
 	}
 }
@@ -82,7 +80,6 @@ void CSkeleton::SetData(string name, int indexCount, int* indices, double* weigh
 	XMFLOAT4X4 result;
 
 	FbxAMatrix lMatrix = transformMatrix;
-
 	for (int row = 0; row < 4; ++row) {
 		for (int col = 0; col < 4; ++col) {
 			// FbxAMatrix는 행 우선이므로 행과 열을 바꿔주어야 합니다.? 아닐텐데?
@@ -90,4 +87,13 @@ void CSkeleton::SetData(string name, int indexCount, int* indices, double* weigh
 			result.m[row][col] = static_cast<float>(lMatrix[row][col]);
 		}
 	}
+	m_xmf4x4TransformMatrix = result;
+
+	lMatrix = transformLinkMatrix;
+	for (int row = 0; row < 4; ++row) {
+		for (int col = 0; col < 4; ++col) {
+			result.m[row][col] = static_cast<float>(lMatrix[row][col]);
+		}
+	}
+	m_xmf4x4TransformLinkMatrix = result;
 }

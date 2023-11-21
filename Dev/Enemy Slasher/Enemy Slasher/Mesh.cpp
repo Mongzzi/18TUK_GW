@@ -1096,8 +1096,10 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 				int* lIndices = lCluster->GetControlPointIndices();
 				double* lWeights = lCluster->GetControlPointWeights();
 
-				FbxAMatrix transMatrix = lCluster->GetTransformMatrix(transMatrix);
-				FbxAMatrix transLinkMatrix = lCluster->GetTransformLinkMatrix(transLinkMatrix);
+				FbxAMatrix transMatrix;
+				transMatrix = lCluster->GetTransformMatrix(transMatrix);
+				FbxAMatrix transLinkMatrix;
+				transLinkMatrix = lCluster->GetTransformLinkMatrix(transLinkMatrix);
 
 				m_skelList[j].SetData(name, lIndexCount, lIndices, lWeights, transMatrix, transLinkMatrix);
 				
