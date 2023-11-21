@@ -19,12 +19,14 @@ cbuffer cbGameObjectInfo : register(b1)
 struct VS_STANDARD_INPUT
 {
     float3 position : POSITION;
+    float3 normal : NORMAL;
     float4 color : COLOR;
 };
 
 struct VS_STANDARD_OUTPUT
 {
     float4 position : SV_POSITION;
+    float3 normal : NORMAL;
     float4 color : COLOR;
 	
 };
@@ -54,6 +56,36 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 	//cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
 
+    return (input.color);
+}
+
+////////////////////////////////////////////////////////
+
+struct VS_COLOR_INPUT
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+
+struct VS_COLOR_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+
+};
+
+VS_COLOR_OUTPUT VSColor(VS_COLOR_INPUT input)
+{
+    VS_COLOR_OUTPUT output;
+
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.color = input.color;
+
+    return (output);
+}
+
+float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
+{
     return (input.color);
 }
 

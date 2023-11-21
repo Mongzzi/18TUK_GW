@@ -897,7 +897,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		}
 	}
 
-	CGameObject::SetShaderType(ShaderType::CObjectsShader);
+	CGameObject::SetShaderType(ShaderType::CTerrainShader);
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)
