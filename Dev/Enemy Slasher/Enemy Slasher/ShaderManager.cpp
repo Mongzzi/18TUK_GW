@@ -39,3 +39,19 @@ void CShaderManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	// 퍼포먼스적 문제가 있을 경우 쓸데없는 쉐이더 등록을 많이 하고 있을 수 있음
 	m_vShaderManager[(int)pShaderType]->Render(pd3dCommandList, pCamera);
 }
+
+void CShaderManager::CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews, ShaderType pShaderType)
+{
+	m_vShaderManager[(int)pShaderType]->CreateCbvSrvDescriptorHeaps(pd3dDevice, nConstantBufferViews, nShaderResourceViews);
+}
+
+void CShaderManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex, ShaderType pShaderType)
+{
+	m_vShaderManager[(int)pShaderType]->CreateShaderResourceViews(pd3dDevice,  pTexture,  nDescriptorHeapIndex,  nRootParameterStartIndex);
+}
+
+void CShaderManager::CreateShaderResourceView(ID3D12Device* pd3dDevice, CTexture* pTexture, int nIndex, ShaderType pShaderType)
+{
+	m_vShaderManager[(int)pShaderType]->CreateShaderResourceView(pd3dDevice, pTexture, nIndex);
+}
+
