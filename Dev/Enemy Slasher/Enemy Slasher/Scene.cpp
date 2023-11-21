@@ -389,13 +389,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	
 	// house
 	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, HOUSE_FBX);
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, HOUSE_FBX, ShaderType::CObjectsShader);
 		float xPosition = 257.0f / 4.0f * 24.0f;
 		float zPosition = 257.0f / 4.0f * 24.0f;
 		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 
 		pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 	}
 
@@ -412,7 +411,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			for (int z = 0; z < 20; z++)
 			{
 				if (x % 5 == 0) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -420,11 +419,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 				}
 				else if (x % 5 == 1) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -432,11 +430,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 				}
 				else if (x % 5 == 2) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5, ShaderType::CObjectsShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -444,11 +441,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 				}
 				else if (x % 5 == 3) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2, ShaderType::CObjectsShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -456,11 +452,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 				}
 				else if (x % 5 == 4) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3, ShaderType::CObjectsShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -468,18 +463,17 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 				}
 				else if (x % 5 == 0) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4, ShaderType::CObjectsShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
-					pFBXObject->SetShaderType(ShaderType::CObjectsShader);
+
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 				}
 			}
@@ -489,24 +483,20 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	{
 		//카드 UI 테스트용 오브젝트.
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARDHIERARCHY_FBX);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARDHIERARCHY_FBX, ShaderType::CObjectsShader);
 		pCardUIObject->SetPositionUI(100, 100);
-		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CObjectsShader);
 		pCardUIObject->SetPositionUI(200, 200);
-		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CObjectsShader);
 		pCardUIObject->SetPositionUI(300, 300);
-		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CObjectsShader);
 		pCardUIObject->SetPositionUI(400, 400);
-		pCardUIObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::UIObject);
 	}
 
@@ -1022,11 +1012,10 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
-		pFBXObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 	}
 

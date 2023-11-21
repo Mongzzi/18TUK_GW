@@ -252,8 +252,8 @@ void CGameObject::SetMaterial(UINT nReflection)
 
 void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
 {
-	if (m_ppMeshes==NULL || nIndex >= m_nMeshes)
-		SetMesh(nIndex+1);
+	if (m_ppMeshes == NULL || nIndex >= m_nMeshes)
+		SetMesh(nIndex + 1);
 	if (m_ppMeshes)
 	{
 		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
@@ -681,7 +681,7 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 }
 
 
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName) : CDynamicShapeObject(0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) : CDynamicShapeObject(0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
 {
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;
@@ -725,6 +725,8 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	}
 
 	//------------------------------------------------------------------------------------------
+
+	SetShaderType(shaderType);
 }
 
 CFBXObject::~CFBXObject()
@@ -952,7 +954,7 @@ void CRayObject::Reset(CRay ray)
 #endif // _DEBUG
 }
 
-CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName)
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
 {
 	m_fCurrntScale = m_fTargetScale = 1.0f;
 	SetCamera(pCamera);
@@ -1032,7 +1034,7 @@ void CUIObject::AddPositionUI(POINT pos)
 	ScreenSpaceToWorldSpace();
 }
 
-CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName)
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName, shaderType)
 {
 }
 
