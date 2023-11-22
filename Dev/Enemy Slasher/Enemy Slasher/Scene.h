@@ -157,4 +157,9 @@ public:
 
 protected:
 	bool m_bAddCutter = false;
+	bool m_bMoveObj = false;
+
+	POINT m_ptOldCursorPos;
+	CInteractiveObject* m_pSelectedObj = NULL;
+
 };

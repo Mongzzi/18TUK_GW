@@ -1017,15 +1017,36 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 	switch (nMessageID)
 	{
 	case WM_RBUTTONDOWN:
-		if (false == m_bAddCutter) {
-			m_bAddCutter = true;
+		{
+			m_pSelectedObj = NULL;
 
 			POINT ptCursorPos{ 0,0 };
 			GetCursorPos(&ptCursorPos);
 			ScreenToClient(hWnd, &ptCursorPos);
 			CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
-			((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
+
+			float nearestDist = FLT_MAX;
+
+			vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+			for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
+				if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
+					float tmin, tmax;
+					if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
+						if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
+							nearestDist = tmin;
+							m_pSelectedObj = pInterObj;
+						}
+					}
+				}
+			}
+			if (NULL != m_pSelectedObj) m_bMoveObj = true;
 		}
+		::GetCursorPos(&m_ptOldCursorPos);
+		break;
+	case WM_RBUTTONUP:
+		m_bMoveObj = false;
+		break;
+	case WM_MOUSEMOVE:
 		break;
 	default:
 		break;
@@ -1048,6 +1069,18 @@ bool CTestScene_Slice::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+
+		case VK_SPACE:
+			if (false == m_bAddCutter) {
+				m_bAddCutter = true;
+
+				POINT ptCursorPos{ 0,0 };
+				GetCursorPos(&ptCursorPos);
+				ScreenToClient(hWnd, &ptCursorPos);
+				CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+				((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
+			}
+			break;
 		default:
 			break;
 		}
@@ -1102,36 +1135,31 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 	POINT ptCursorPos;
 	if (GetCapture() == hWnd)
 	{
-		SetCursor(NULL);
 		GetCursorPos(&ptCursorPos);
 		cxDelta = (float)(ptCursorPos.x - ptOldCursorPos.x) / 3.0f;
 		cyDelta = (float)(ptCursorPos.y - ptOldCursorPos.y) / 3.0f;
-		SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
 	}
 
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
 		if (cxDelta || cyDelta)
 		{
-			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+			if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
+				SetCursor(NULL);
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+			}
 
 			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // 우클릭시 오브젝트를 잡아서 이동
-				POINT ptCursorPos{ 0,0 };
-				GetCursorPos(&ptCursorPos);
-				ScreenToClient(hWnd, &ptCursorPos);
-				CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+				if (m_bMoveObj) {
+					if (NULL != m_pSelectedObj) {
+						XMFLOAT3 t0((float)(ptCursorPos.x - m_ptOldCursorPos.x), (float)(ptCursorPos.y - m_ptOldCursorPos.y), 0.0f);
 
-				vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-				for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
-					if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
-						float tmin, tmax;
-						if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
+						m_pObjectManager->ScreenBasedObjectMove(m_pSelectedObj, m_pPlayer->GetCamera(), t0.x, t0.y);
 
-						}
+						m_ptOldCursorPos = ptCursorPos;
 					}
 				}
-				((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
 			}
 		}
 		if (dwDirection) m_pPlayer->Move(dwDirection, 0.5f, false);
@@ -1145,7 +1173,6 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-	cout << pvObjectList[(int)ObjectLayer::Object].size() << '\t' << pvObjectList[(int)ObjectLayer::DestroyedObject].size() << '\n';
 
 	for (const auto& object : pvObjectList[(int)ObjectLayer::CutterObject])
 		object->MoveStrafe(0.2);

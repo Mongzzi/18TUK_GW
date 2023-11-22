@@ -130,7 +130,11 @@ void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		}
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
 // Utility
+
 bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CInteractiveObject* obj, float& tmin, float& tmax)
 {
 	XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
@@ -161,4 +165,21 @@ bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CInteractiveObject* o
 	}
 
 	return result;
+}
+
+void CObjectManager::ScreenBasedObjectMove(CInteractiveObject* obj, CCamera* pCamera, float cxDelta, float cyDelta, float fSensitivity)
+{
+	XMFLOAT3 CameraRight = pCamera->GetRightVector();
+	XMFLOAT3 CameraUp = pCamera->GetUpVector();
+
+	XMFLOAT3 t0(cxDelta, cyDelta, 0.0f);
+	XMFLOAT3 xmf3Delta = Vector3::Normalize(t0);
+
+	XMFLOAT3 t1 = Vector3::ScalarProduct(CameraRight, xmf3Delta.x * fSensitivity);
+	XMFLOAT3 t2 = Vector3::ScalarProduct(CameraUp, -xmf3Delta.y * fSensitivity);
+	XMFLOAT3 moveVector = Vector3::Add(t1, t2);
+	XMFLOAT3 oldPos = obj->GetPosition();
+	XMFLOAT3 newPos = Vector3::Add(oldPos, moveVector);
+
+	obj->SetPosition(newPos);
 }
