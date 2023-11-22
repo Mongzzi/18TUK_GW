@@ -68,6 +68,39 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOptio
 	}
 }
 
+void CMesh::SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride, CVertex* pVertices, UINT nVertices, UINT* pnIndices, UINT nIndices)
+{
+	m_nVertices = nVertices;
+	m_nStride = nStride;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	if (m_pVertices) delete[] m_pVertices;
+	m_pVertices = pVertices;
+
+	// 버퍼생성
+	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_nIndices = nIndices;
+	if (m_pnIndices) delete[] m_pnIndices;
+	m_pnIndices = pnIndices;
+
+	//인덱스 버퍼를 생성한다. 
+	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+	if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
 
 CColliderMesh::CColliderMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {
@@ -102,6 +135,14 @@ void CColliderMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRen
 
 	if (true == pRenderAABB && nullptr != m_pCollider)
 		m_pCollider->RenderCollider(pd3dCommandList);
+}
+
+void CColliderMesh::CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_pVertices) {
+		if (m_pCollider) delete m_pCollider;
+		m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	}
 }
 
 
@@ -531,17 +572,13 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	return true;
 }*/
 
-bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& xmf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat)
+CMesh** CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& xmf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat)
 {
 	// 이 절단은 절단 Object의 절단평면을 사용하여 절단한다.
 	
 	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
 	// 이 함수에 의해 자신의 Mesh가 변형된다.
-
-	CVertex*	pCutterVertices = pOtherMesh->GetVertices();
-	UINT		nCutterVertices = pOtherMesh->GetNumVertices();
-	UINT*		pnCutterIndices = pOtherMesh->GetIndices();
-	UINT		 nCutterIndices = pOtherMesh->GetNumIndices();
+	// 절단된 CMesh 2개를 리턴한다.
 
 	XMFLOAT3 xmf3CutNormal = pOtherMesh->GetCutPlaneNormal();
 	XMFLOAT3 xmf3CutPoint = pOtherMesh->GetCutPlanePoint();
@@ -561,108 +598,63 @@ bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4OtherMat);
 	xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
 
-	std::random_device rd;
-	std::default_random_engine dre(rd());
-	std::uniform_real_distribution <> urd(0.0, 1.0);
+	vector<CVertex> vnewVertices_1;
+	vector<CVertex> vnewVertices_2;
 
-	vector<CVertex> vnewVertices;
-	CVertex* newVertices;
-	UINT* pnewIndices;
-
-	//map<UINT, UINT> vertexMap; // 원래 Vertex의 Index를 넣으면 새로운 배열의 Index를 리턴
-
-	int vertexCounter = 0;
 	for (int i = 0; i < m_nVertices; ++i) {
 		if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
-			vnewVertices.emplace_back(m_pVertices[i]);
+			XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
+			XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
+			XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
+			vnewVertices_2.emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+
+			vnewVertices_1.emplace_back(m_pVertices[i]);
 		}
 		else {
 			XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
 			XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
 			XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-			vnewVertices.emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+			vnewVertices_1.emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+
+			vnewVertices_2.emplace_back(m_pVertices[i]);
 		}
 	}
-	delete[] m_pVertices;
-	m_pVertices = new CVertex[m_nVertices];
-	copy(vnewVertices.begin(), vnewVertices.end(), m_pVertices);
+	//if (vnewVertices_2.size() != 0) {
 
-	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
-	// 버퍼생성
-	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	//	CVertex* tv = new CVertex[m_nVertices];
+	//	copy(vnewVertices_2.begin(), vnewVertices_2.end(), tv);
+	//	UINT* ui = new UINT[m_nIndices];
+	//	memcpy(ui, m_pnIndices, sizeof(UINT) * m_nIndices);
 
-	// 바인딩위해 버퍼뷰 초기화
-	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	//	SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, tv, m_nVertices, ui, m_nIndices);
+	//	CreateCollider(pd3dDevice, pd3dCommandList);
+	//}
+	//return NULL;
 
-	if (m_pCollider) delete m_pCollider;
-	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
-	return true;
-	{
-		//int vertexCounter = 0;
-		//for (int i = 0; i < m_nVertices; ++i) {
-		//	if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
-		//		vnewVertices.emplace_back(m_pVertices[i]);
-		//		vertexMap[i] = vertexCounter++;
-		//	}
-		//}
+	CVertex* pNewVertices_1, * pNewVertices_2;
+	pNewVertices_1 = new CVertex[m_nVertices];
+	pNewVertices_2 = new CVertex[m_nVertices];
 
-		//// 모든 메쉬는 TriangleList로 구성되어있다고 가정
-		//vector<UINT> vnewIndices;
-		//for (int i = 0; i < (m_nIndices / 3); ++i) {
-		//	if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 0]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
-		//	if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 1]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
-		//	if (false == IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + 2]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) continue;
-		//	vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 0]]);
-		//	vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 1]]);
-		//	vnewIndices.push_back(vertexMap[m_pnIndices[i * 3 + 2]]);
-		//}
+	copy(vnewVertices_1.begin(), vnewVertices_1.end(), pNewVertices_1);
+	copy(vnewVertices_2.begin(), vnewVertices_2.end(), pNewVertices_2);
 
-		vector<UINT> vnewIndices;
-		for (int i = 0; i < (m_nIndices / 3); ++i) {
-			vnewIndices.push_back(m_pnIndices[i * 3 + 0]);
-			vnewIndices.push_back(m_pnIndices[i * 3 + 1]);
-			vnewIndices.push_back(m_pnIndices[i * 3 + 2]);
-		}
+	UINT* pnNewIndices_1, * pnNewIndices_2;
+	pnNewIndices_1 = new UINT[m_nIndices];
+	pnNewIndices_2 = new UINT[m_nIndices];
+	memcpy(pnNewIndices_1, m_pnIndices, sizeof(UINT) * m_nIndices);
+	memcpy(pnNewIndices_2, m_pnIndices, sizeof(UINT) * m_nIndices);
 
-		if (vnewVertices.size() != 0 && vnewIndices.size() != 0) {
-			m_nVertices = vnewVertices.size();
-			m_nIndices = vnewIndices.size();
+	CMesh** newMeshs = new CMesh*[2];
+	newMeshs[0] = new CDynamicShapeMesh(pd3dDevice, pd3dCommandList);
+	newMeshs[0]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pNewVertices_1, m_nVertices, pnNewIndices_1, m_nIndices);
+	((CDynamicShapeMesh*)newMeshs[0])->CreateCollider(pd3dDevice, pd3dCommandList);
+	((CDynamicShapeMesh*)newMeshs[0])->SetCuttable(true);
+	newMeshs[1] = new CDynamicShapeMesh(pd3dDevice, pd3dCommandList);
+	newMeshs[1]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pNewVertices_2, m_nVertices, pnNewIndices_2, m_nIndices);
+	((CDynamicShapeMesh*)newMeshs[1])->CreateCollider(pd3dDevice, pd3dCommandList);
+	((CDynamicShapeMesh*)newMeshs[1])->SetCuttable(true);
 
-			delete[] m_pVertices;
-			delete[] m_pnIndices;
-			m_pVertices = new CVertex[m_nVertices];
-			m_pnIndices = new UINT[m_nIndices];
-
-			copy(vnewVertices.begin(), vnewVertices.end(), m_pVertices);
-			copy(vnewIndices.begin(), vnewIndices.end(), m_pnIndices);
-
-			if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-			if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
-			// 버퍼생성
-			m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-
-			// 바인딩위해 버퍼뷰 초기화
-			m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-			m_d3dVertexBufferView.StrideInBytes = m_nStride;
-			m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
-
-			if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
-			if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
-			//인덱스 버퍼를 생성한다. 
-			m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
-			//인덱스 버퍼 뷰를 생성한다. 
-			m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-			m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-			m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
-
-			if (m_pCollider) delete m_pCollider;
-			m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
-		}
-	}
-	return true;
+	return newMeshs;
 }
 
 
@@ -731,7 +723,7 @@ CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	CreateCollider(pd3dDevice, pd3dCommandList);
 }
 
 CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float r, float g, float b, float width, float height, float depth) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
@@ -795,7 +787,7 @@ CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	CreateCollider(pd3dDevice, pd3dCommandList);
 }
 
 CBoxMesh::~CBoxMesh()
@@ -872,7 +864,7 @@ CCutterBoxMesh::CCutterBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	CreateCollider(pd3dDevice, pd3dCommandList);
 }
 
 CCutterBoxMesh::~CCutterBoxMesh()
@@ -1112,8 +1104,7 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	//DisplayCache(lMesh);
 
-	if (m_pCollider) delete m_pCollider;
-	m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+	CreateCollider(pd3dDevice, pd3dCommandList);
 	return true;
 }
 

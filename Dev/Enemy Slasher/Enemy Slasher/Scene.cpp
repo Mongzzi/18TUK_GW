@@ -1075,14 +1075,6 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
-		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
-		pFBXObject->SetCuttable(true);
-		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	}
-
-	{
 		CCutterBoxMesh* pCubeMesh = new CCutterBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 40.0f, 2.0f);
 		pCubeMesh->SetAllowCutting(true);
 		CDynamicShapeObject* pDynamicShapeObject = NULL;
@@ -1093,6 +1085,14 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		pDynamicShapeObject->SetPosition(-50.0f, 60.0f, 100.0f);
 		pDynamicShapeObject->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pDynamicShapeObject, ObjectLayer::Object);
+	}
+
+	{
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
+		pFBXObject->SetCuttable(true);
+		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1135,9 +1135,9 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-	if (!pvObjectList[(int)ObjectLayer::Object].empty()) {
-		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][0];
-		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)pvObjectList[(int)ObjectLayer::Object][1];
+	if (pvObjectList[(int)ObjectLayer::Object].size() >= 2) {
+		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)pvObjectList[(int)ObjectLayer::Object][0];
+		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][1];
 		pObject_cuttur->MoveStrafe(0.2);
 
 		

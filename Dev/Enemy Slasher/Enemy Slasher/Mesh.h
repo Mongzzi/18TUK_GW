@@ -53,6 +53,8 @@ protected:
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOption = false);
+
+	void SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride, CVertex* pVertices, UINT nVertices, UINT* pnIndices, UINT nIndices);
 };
 
 class CColliderMesh : public CMesh
@@ -71,6 +73,7 @@ public:
 
 public:
 	virtual bool CollisionCheck(CColliderMesh* pOtherObject) = 0;
+	virtual void CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 class CMeshIlluminated : public CMesh
@@ -143,7 +146,7 @@ public:
 	bool IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint);
 public:
 	virtual bool CollisionCheck(CColliderMesh* pOtherMesh);
-	virtual bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& mxf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat); // true - 절단 성공 / false - 절단 실패
+	CMesh** DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& mxf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat); // 절단된 CMesh 2개 배열을 리턴한다.
 };
 
 class CBoxMesh : public CDynamicShapeMesh

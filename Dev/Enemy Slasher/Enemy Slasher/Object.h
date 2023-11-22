@@ -161,6 +161,10 @@ public:
 	void SetChild(CGameObject* pChild);
 
 	CGameObject* GetParent() { return(m_pParent); }
+	void SetWorldMat(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
+	void SetTransMat(XMFLOAT4X4 xmf4x4Transform) { m_xmf4x4Transform = xmf4x4Transform; }
+	XMFLOAT4X4 GetWorldMat() { return m_xmf4x4World; }
+	XMFLOAT4X4 GetTransMat() { return m_xmf4x4Transform; }
 
 public:
 	//상수 버퍼를 생성한다. 
@@ -230,7 +234,6 @@ public:
 	XMFLOAT3 GetAABBMaxPos(int nIndex);
 	XMFLOAT3 GetAABBMinPos(int nIndex);
 
-	XMFLOAT4X4 GetWorldMat() { return m_xmf4x4World; }
 	CMesh** GetMeshes() { return m_ppMeshes; }
 	int GetNumMeshes() { return m_nMeshes; }
 
@@ -257,7 +260,7 @@ public:
 public:
 
 	virtual bool CollisionCheck(CGameObject* pOtherObject);
-	bool DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pOtherObject);
+	CGameObject** DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pOtherObject); // 절단된 오브젝트 2개를 리턴한다.
 };
 
 

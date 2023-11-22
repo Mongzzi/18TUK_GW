@@ -57,6 +57,10 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		vector<CGameObject*> pObjects = m_pvObjectManager[(int)ObjectLayer::Object];
 		if (1 < pObjects.size()) { // 2개 이상의 오브젝트가 있다면 충돌 후 다이나믹 쉐이핑을 진행한다.
 
+			vector<CGameObject*> newObjects;
+			vector<CGameObject*> deleteObjects;
+			CGameObject** ppDynamicShapedObjects = NULL;
+
 			// 두 오브젝트의 충돌처리를 위한 이중 for문
 			for (int i = 0; i < (pObjects.size() - 1); ++i) {
 				for (int j = i + 1; j < (pObjects.size()); ++j) {
@@ -64,11 +68,27 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 					// 이 오브젝트가 DynamicShapeObject라면 처리
 					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObjects[i])) {
 						if (pDynamicShapeObject->CollisionCheck(pObjects[j])) {
-							pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pObjects[j]);
+							ppDynamicShapedObjects = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pObjects[j]);
+							if (NULL != ppDynamicShapedObjects) {
+								newObjects.push_back(ppDynamicShapedObjects[0]);
+								newObjects.push_back(ppDynamicShapedObjects[1]);
+
+								if(pDynamicShapeObject->GetCuttable())
+									deleteObjects.push_back(pDynamicShapeObject);
+								else
+									deleteObjects.push_back(pObjects[j]);
+							}
 						}
 					}
 
 				}
+			}
+			for (const auto& a : deleteObjects) {
+				DelObj(a, ObjectLayer::Object);
+			}
+
+			for (const auto& a : newObjects) {
+				AddObj(a, ObjectLayer::DestroyedObject);
 			}
 		}
 	}
