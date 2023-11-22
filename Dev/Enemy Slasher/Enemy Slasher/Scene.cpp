@@ -602,17 +602,20 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
 				XMFLOAT3 ray_dir = r.GetDir();
 				XMFLOAT3 ray_origin = r.GetOriginal();
-				XMFLOAT3 invDirection = XMFLOAT3(1.0f / ray_dir.x, 1.0f / ray_dir.y, 1.0f / ray_dir.z);
+				XMVECTOR invDirection = XMVectorReciprocal(XMLoadFloat3(&ray_dir));
 
-				float t1 = (aabbMin.x - ray_origin.x) * invDirection.x;
-				float t2 = (aabbMax.x - ray_origin.x) * invDirection.x;
-				float t3 = (aabbMin.y - ray_origin.y) * invDirection.y;
-				float t4 = (aabbMax.y - ray_origin.y) * invDirection.y;
-				float t5 = (aabbMin.z - ray_origin.z) * invDirection.z;
-				float t6 = (aabbMax.z - ray_origin.z) * invDirection.z;
+				XMVECTOR t1 = (XMLoadFloat3(&aabbMin) - XMLoadFloat3(&ray_origin)) * invDirection;
+				XMVECTOR t2 = (XMLoadFloat3(&aabbMax) - XMLoadFloat3(&ray_origin)) * invDirection;
 
-				float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
-				float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
+				XMVECTOR tmin_vec = XMVectorMax(XMVectorMin(t1, t2), XMVectorZero());
+				XMVECTOR tmax_vec = XMVectorMin(XMVectorMax(t1, t2), XMVectorReplicate(FLT_MAX));
+
+				XMFLOAT3 tmin_array, tmax_array;
+				XMStoreFloat3(&tmin_array, tmin_vec);
+				XMStoreFloat3(&tmax_array, tmax_vec);
+
+				float tmin = max(max(tmin_array.x, tmin_array.y), tmin_array.z);
+				float tmax = min(min(tmax_array.x, tmax_array.y), tmax_array.z);
 
 				// 교차하지 않으면 tmax < 0
 				// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
@@ -1034,8 +1037,6 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 {
 	switch (nMessageID)
 	{
-	case WM_LBUTTONDOWN:
-		break;
 	case WM_RBUTTONDOWN:
 		if (false == m_bAddCutter) {
 			m_bAddCutter = true;
@@ -1046,9 +1047,6 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 			CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 			((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
 		}
-		break;
-	case WM_RBUTTONUP:
-		if (true == m_bAddCutter) m_bAddCutter = false;
 		break;
 	default:
 		break;
@@ -1138,6 +1136,47 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 		{
 			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // 우클릭시 오브젝트를 잡아서 이동
+				POINT ptCursorPos{ 0,0 };
+				GetCursorPos(&ptCursorPos);
+				ScreenToClient(hWnd, &ptCursorPos);
+				CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+
+				vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+				for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
+					if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
+
+						XMFLOAT3 aabbMax = pInterObj->GetAABBMaxPos(0);
+						XMFLOAT3 aabbMin = pInterObj->GetAABBMinPos(0);
+						XMFLOAT3 ray_dir = r.GetDir();
+						XMFLOAT3 ray_origin = r.GetOriginal();
+						XMVECTOR invDirection = XMVectorReciprocal(XMLoadFloat3(&ray_dir));
+
+						XMVECTOR t1 = (XMLoadFloat3(&aabbMin) - XMLoadFloat3(&ray_origin)) * invDirection;
+						XMVECTOR t2 = (XMLoadFloat3(&aabbMax) - XMLoadFloat3(&ray_origin)) * invDirection;
+
+						XMVECTOR tmin_vec = XMVectorMax(XMVectorMin(t1, t2), XMVectorZero());
+						XMVECTOR tmax_vec = XMVectorMin(XMVectorMax(t1, t2), XMVectorReplicate(FLT_MAX));
+
+						XMFLOAT3 tmin_array, tmax_array;
+						XMStoreFloat3(&tmin_array, tmin_vec);
+						XMStoreFloat3(&tmax_array, tmax_vec);
+
+						float tmin = max(max(tmin_array.x, tmin_array.y), tmin_array.z);
+						float tmax = min(min(tmax_array.x, tmax_array.y), tmax_array.z);
+
+						// 교차하지 않으면 tmax < 0
+						// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
+						bool result = tmax > 0 && tmin <= tmax;
+						if (result) {
+							tmin; // 충돌한 근접점
+							//pCoveredUI = objects;
+						}
+					}
+				}
+				((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
+			}
 		}
 		if (dwDirection) m_pPlayer->Move(dwDirection, 0.5f, false);
 	}
