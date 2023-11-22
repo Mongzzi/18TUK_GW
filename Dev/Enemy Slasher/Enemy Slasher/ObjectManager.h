@@ -48,4 +48,8 @@ public:
 	void ReleaseShaderVariables();
 
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager);
+
+public:
+	// Utility
+	bool CollisionCheck_RayWithAABB(CRay* ray, CInteractiveObject* obj, float& tmin, float& tmax);
 };

@@ -129,3 +129,36 @@ void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 			}
 		}
 }
+
+// Utility
+bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CInteractiveObject* obj, float& tmin, float& tmax)
+{
+	XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
+	XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
+	XMFLOAT3 ray_dir = ray->GetDir();
+	XMFLOAT3 ray_origin = ray->GetOriginal();
+	XMVECTOR invDirection = XMVectorReciprocal(XMLoadFloat3(&ray_dir));
+
+	XMVECTOR t1 = (XMLoadFloat3(&aabbMin) - XMLoadFloat3(&ray_origin)) * invDirection;
+	XMVECTOR t2 = (XMLoadFloat3(&aabbMax) - XMLoadFloat3(&ray_origin)) * invDirection;
+
+	XMVECTOR tmin_vec = XMVectorMax(XMVectorMin(t1, t2), XMVectorZero());
+	XMVECTOR tmax_vec = XMVectorMin(XMVectorMax(t1, t2), XMVectorReplicate(FLT_MAX));
+
+	XMFLOAT3 tmin_array, tmax_array;
+	XMStoreFloat3(&tmin_array, tmin_vec);
+	XMStoreFloat3(&tmax_array, tmax_vec);
+
+	float tmin_value = max(max(tmin_array.x, tmin_array.y), tmin_array.z);
+	float tmax_value = min(min(tmax_array.x, tmax_array.y), tmax_array.z);
+
+	// 교차하지 않으면 tmax < 0
+	// tmin_value > tmax_value는 뒤집힌 AABB와의 교차를 피하기 위한 조건
+	bool result = tmax_value > 0 && tmin_value <= tmax_value;
+	if (result) { // 충돌했다면 최소점, 최대점 또한 넘겨준다.
+		tmin = tmin_value;
+		tmax = tmax_value;
+	}
+
+	return result;
+}

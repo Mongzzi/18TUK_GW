@@ -598,29 +598,8 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				if (!obj)
 					continue;
 
-				XMFLOAT3 aabbMax = obj->GetAABBMaxPos(0);
-				XMFLOAT3 aabbMin = obj->GetAABBMinPos(0);
-				XMFLOAT3 ray_dir = r.GetDir();
-				XMFLOAT3 ray_origin = r.GetOriginal();
-				XMVECTOR invDirection = XMVectorReciprocal(XMLoadFloat3(&ray_dir));
-
-				XMVECTOR t1 = (XMLoadFloat3(&aabbMin) - XMLoadFloat3(&ray_origin)) * invDirection;
-				XMVECTOR t2 = (XMLoadFloat3(&aabbMax) - XMLoadFloat3(&ray_origin)) * invDirection;
-
-				XMVECTOR tmin_vec = XMVectorMax(XMVectorMin(t1, t2), XMVectorZero());
-				XMVECTOR tmax_vec = XMVectorMin(XMVectorMax(t1, t2), XMVectorReplicate(FLT_MAX));
-
-				XMFLOAT3 tmin_array, tmax_array;
-				XMStoreFloat3(&tmin_array, tmin_vec);
-				XMStoreFloat3(&tmax_array, tmax_vec);
-
-				float tmin = max(max(tmin_array.x, tmin_array.y), tmin_array.z);
-				float tmax = min(min(tmax_array.x, tmax_array.y), tmax_array.z);
-
-				// 교차하지 않으면 tmax < 0
-				// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
-				bool result = tmax > 0 && tmin <= tmax;
-				if (result) {
+				float tmin, tmax;
+				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, obj, tmin, tmax)) {
 					pCoveredUI = obj;
 #ifdef _DEBUG
 					//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
@@ -1146,32 +1125,9 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 				vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 				for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
 					if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
+						float tmin, tmax;
+						if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
 
-						XMFLOAT3 aabbMax = pInterObj->GetAABBMaxPos(0);
-						XMFLOAT3 aabbMin = pInterObj->GetAABBMinPos(0);
-						XMFLOAT3 ray_dir = r.GetDir();
-						XMFLOAT3 ray_origin = r.GetOriginal();
-						XMVECTOR invDirection = XMVectorReciprocal(XMLoadFloat3(&ray_dir));
-
-						XMVECTOR t1 = (XMLoadFloat3(&aabbMin) - XMLoadFloat3(&ray_origin)) * invDirection;
-						XMVECTOR t2 = (XMLoadFloat3(&aabbMax) - XMLoadFloat3(&ray_origin)) * invDirection;
-
-						XMVECTOR tmin_vec = XMVectorMax(XMVectorMin(t1, t2), XMVectorZero());
-						XMVECTOR tmax_vec = XMVectorMin(XMVectorMax(t1, t2), XMVectorReplicate(FLT_MAX));
-
-						XMFLOAT3 tmin_array, tmax_array;
-						XMStoreFloat3(&tmin_array, tmin_vec);
-						XMStoreFloat3(&tmax_array, tmax_vec);
-
-						float tmin = max(max(tmin_array.x, tmin_array.y), tmin_array.z);
-						float tmax = min(min(tmax_array.x, tmax_array.y), tmax_array.z);
-
-						// 교차하지 않으면 tmax < 0
-						// tmin > tmax는 뒤집힌 AABB와의 교차를 피하기 위한 조건
-						bool result = tmax > 0 && tmin <= tmax;
-						if (result) {
-							tmin; // 충돌한 근접점
-							//pCoveredUI = objects;
 						}
 					}
 				}
