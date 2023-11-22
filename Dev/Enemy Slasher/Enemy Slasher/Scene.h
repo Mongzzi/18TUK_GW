@@ -154,4 +154,7 @@ public:
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
 	virtual void Enter();
 	virtual void Exit();
+
+protected:
+	bool m_bAddCutter = false;
 };

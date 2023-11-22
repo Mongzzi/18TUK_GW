@@ -260,7 +260,7 @@ public:
 public:
 
 	virtual bool CollisionCheck(CGameObject* pOtherObject);
-	CGameObject** DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pOtherObject); // 절단된 오브젝트 2개를 리턴한다.
+	CGameObject** DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject); // 절단된 오브젝트 2개를 리턴한다.
 };
 
 
@@ -303,9 +303,15 @@ public:
 	virtual ~CRayObject();
 
 	void Reset(CRay ray);
+
 private:
 	XMFLOAT3 m_vOriginal;
 	XMFLOAT3 m_xmf3DirOld;
+	XMFLOAT3 m_xmf3Dir;
+
+public:
+	XMFLOAT3 GetRayOrigin() { return m_vOriginal; }
+	XMFLOAT3 GetRayDir() { return m_xmf3Dir; }
 };
 
 

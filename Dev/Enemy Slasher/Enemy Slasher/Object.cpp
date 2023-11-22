@@ -591,76 +591,60 @@ bool CDynamicShapeObject::CollisionCheck(CGameObject* pOtherObject)
 	}
 }
 
-CGameObject** CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pOtherObject)
+CGameObject** CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject)
 {
-	if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pOtherObject)) { // OtherObject가 DynamicShapeObject 라면
+	CDynamicShapeObject* pDynamicShapeObject = static_cast<CDynamicShapeObject*>(pCutterObject);
 
-		int nOtherMeshes = pDynamicShapeObject->GetNumMeshes();
-		CDynamicShapeMesh** ppOtherMeshes = (CDynamicShapeMesh**)pDynamicShapeObject->GetMeshes();
-		CDynamicShapeMesh** ppMeshes = (CDynamicShapeMesh**)m_ppMeshes;
-		XMFLOAT4X4 pxmfOtherMat = pDynamicShapeObject->GetWorldMat();
+	int nCutterMeshes = pDynamicShapeObject->GetNumMeshes();
+	CCutterMesh** ppCutterMeshes = (CCutterMesh**)pDynamicShapeObject->GetMeshes();
+	CCutterMesh** ppMeshes = (CCutterMesh**)m_ppMeshes;
+	XMFLOAT4X4 pxmfCutterMat = pDynamicShapeObject->GetWorldMat();
 
-		vector<CMesh**> newMeshs;
-		XMFLOAT4X4 newWorldMat = Matrix4x4::Identity();
-		XMFLOAT4X4 newTransformMat = Matrix4x4::Identity();
+	// 절단 후 생성될 Mesh들을 받기위한 데이터 정의
+	vector<CMesh**> newMeshs;
+	XMFLOAT4X4 newWorldMat = Matrix4x4::Identity();
+	XMFLOAT4X4 newTransformMat = Matrix4x4::Identity();
 
-		if (m_bAllowCutting && pDynamicShapeObject->GetCuttable()) {
-			// 내가 다른 오브젝트를 자를때
+	if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
+		// 다른 오브젝트에 의해 내가 잘릴 수 있을 때
 
-			for (int i = 0; i < m_nMeshes; ++i) {
-				for (int j = 0; j < nOtherMeshes; ++j) {
-					if (ppOtherMeshes[j]->CollisionCheck(ppMeshes[i])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
-						CMesh** m = ppOtherMeshes[j]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, ppMeshes[i], pxmfOtherMat, m_xmf4x4World);
-						if (NULL != m) newMeshs.push_back(m);
-					}
+		for (int i = 0; i < m_nMeshes; ++i) {
+			for (int j = 0; j < nCutterMeshes; ++j) {
+				if (ppMeshes[i]->CollisionCheck(ppCutterMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
+					CMesh** m = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat);
+					if (NULL != m) newMeshs.push_back(m);
 				}
 			}
-			if (!newMeshs.empty()) {
-				newWorldMat = pDynamicShapeObject->GetWorldMat();
-				newTransformMat = pDynamicShapeObject->GetTransMat();
-			}
 		}
-		else if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
-			// 다른 오브젝트에 의해 내가 잘릴 수 있을 때
+		if (!newMeshs.empty()) {
+			newWorldMat = GetWorldMat();
+			newTransformMat = GetTransMat();
+		}
+	}
 
-			for (int i = 0; i < m_nMeshes; ++i) {
-				for (int j = 0; j < nOtherMeshes; ++j) {
-					if (ppMeshes[i]->CollisionCheck(ppOtherMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
-						CMesh** m = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, ppOtherMeshes[j], m_xmf4x4World, pxmfOtherMat);
-						if (NULL != m) newMeshs.push_back(m);
-					}
-				}
-			}
-			if (!newMeshs.empty()) {
-				newWorldMat = GetWorldMat();
-				newTransformMat = GetTransMat();
-			}
+	// 만약 절단이 일어나 새로운 Mesh가 생겼다면 2개의 오브젝트를 생성한다.
+	if (newMeshs.size() > 0) {
+		CGameObject** newGameObjects = new CGameObject * [2];
+		newGameObjects[0] = new CDynamicShapeObject();
+		newGameObjects[1] = new CDynamicShapeObject();
+
+		int LoopCounter = 0;
+		for (auto& a : newMeshs) {
+			newGameObjects[0]->SetMesh(LoopCounter, a[0]);
+			newGameObjects[1]->SetMesh(LoopCounter, a[1]);
 		}
 
-		// 만약 절단이 일어나 새로운 Mesh가 생겼다면 2개의 오브젝트를 생성한다.
-		if (newMeshs.size() > 0) {
-			CGameObject** newGameObjects = new CGameObject * [2];
-			newGameObjects[0] = new CDynamicShapeObject();
-			newGameObjects[1] = new CDynamicShapeObject();
+		newGameObjects[0]->SetWorldMat(newWorldMat);
+		newGameObjects[0]->SetTransMat(newTransformMat);
+		newGameObjects[0]->SetShaderType(ShaderType::CObjectsShader);
+		((CDynamicShapeObject*)newGameObjects[0])->SetCuttable(true);
 
-			int LoopCounter = 0;
-			for (auto& a : newMeshs) {
-				newGameObjects[0]->SetMesh(LoopCounter, a[0]);
-				newGameObjects[1]->SetMesh(LoopCounter, a[1]);
-			}
+		newGameObjects[1]->SetWorldMat(newWorldMat);
+		newGameObjects[1]->SetTransMat(newTransformMat);
+		newGameObjects[1]->SetShaderType(ShaderType::CObjectsShader);
+		((CDynamicShapeObject*)newGameObjects[1])->SetCuttable(true);
 
-			newGameObjects[0]->SetWorldMat(newWorldMat);
-			newGameObjects[0]->SetTransMat(newTransformMat);
-			newGameObjects[0]->SetShaderType(ShaderType::CObjectsShader);
-			((CDynamicShapeObject*)newGameObjects[0])->SetCuttable(true);
-
-			newGameObjects[1]->SetWorldMat(newWorldMat);
-			newGameObjects[1]->SetTransMat(newTransformMat);
-			newGameObjects[1]->SetShaderType(ShaderType::CObjectsShader);
-			((CDynamicShapeObject*)newGameObjects[1])->SetCuttable(true);
-
-			return newGameObjects;
-		}
+		return newGameObjects;
 	}
 	return NULL;
 }
@@ -1025,6 +1009,7 @@ CRayObject::~CRayObject()
 void CRayObject::Reset(CRay ray)
 {
 	m_vOriginal = ray.GetOriginal();
+	m_xmf3Dir = ray.GetDir();
 
 	XMVECTOR vFrom = XMLoadFloat3(&m_xmf3DirOld);
 	XMFLOAT3 dir = ray.GetDir();

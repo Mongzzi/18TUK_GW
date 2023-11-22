@@ -35,6 +35,13 @@ void CObjectManager::DelObj(CGameObject* object, ObjectLayer layer)
 	target->erase(remove(target->begin(), target->end(), object), target->end());
 }
 
+void CObjectManager::DelObj(CGameObject* object)
+{
+	for (auto& target : m_pvObjectManager) {
+		target.erase(remove(target.begin(), target.end(), object), target.end());
+	}
+}
+
 void CObjectManager::AnimateObjects(float fTimeElapsed)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
@@ -52,45 +59,38 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 			}
 		}
-
-	if (!m_pvObjectManager[(int)ObjectLayer::Object].empty()) {
-		vector<CGameObject*> pObjects = m_pvObjectManager[(int)ObjectLayer::Object];
-		if (1 < pObjects.size()) { // 2개 이상의 오브젝트가 있다면 충돌 후 다이나믹 쉐이핑을 진행한다.
+	
+	if (false == m_pvObjectManager[(int)ObjectLayer::CutterObject].empty()) { // 비어있지 않다면
+		vector<CGameObject*>* pvCutters = &m_pvObjectManager[(int)ObjectLayer::CutterObject];
+		if (false == m_pvObjectManager[(int)ObjectLayer::Object].empty()) { // 비어있지 않다면
+			vector<CGameObject*> pObjects = m_pvObjectManager[(int)ObjectLayer::Object];
 
 			vector<CGameObject*> newObjects;
 			vector<CGameObject*> deleteObjects;
 			CGameObject** ppDynamicShapedObjects = NULL;
 
-			// 두 오브젝트의 충돌처리를 위한 이중 for문
-			for (int i = 0; i < (pObjects.size() - 1); ++i) {
-				for (int j = i + 1; j < (pObjects.size()); ++j) {
+			for (const auto& pCutter : *pvCutters) {
+				for (const auto& pObject : pObjects) {
 
 					// 이 오브젝트가 DynamicShapeObject라면 처리
-					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObjects[i])) {
-						if (pDynamicShapeObject->CollisionCheck(pObjects[j])) {
-							ppDynamicShapedObjects = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pObjects[j]);
-							if (NULL != ppDynamicShapedObjects) {
+					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObject)) {
+						if (pDynamicShapeObject->CollisionCheck(pCutter)) {
+							ppDynamicShapedObjects = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pCutter);
+
+							if (NULL != ppDynamicShapedObjects) { // 절단에 성공했다면 데이터를 준비한다.
 								newObjects.push_back(ppDynamicShapedObjects[0]);
 								newObjects.push_back(ppDynamicShapedObjects[1]);
 
-								if(pDynamicShapeObject->GetCuttable())
-									deleteObjects.push_back(pDynamicShapeObject);
-								else
-									deleteObjects.push_back(pObjects[j]);
+								deleteObjects.push_back(pDynamicShapeObject);
 							}
 						}
 					}
-
 				}
 			}
-			for (const auto& a : deleteObjects) {
-				DelObj(a, ObjectLayer::Object);
-			}
-
-			for (const auto& a : newObjects) {
-				AddObj(a, ObjectLayer::DestroyedObject);
-			}
+			for (const auto& a : deleteObjects) DelObj(a, ObjectLayer::Object);	// 원본 오브젝트 삭제
+			for (const auto& a : newObjects) AddObj(a, ObjectLayer::Object); // 절단된 오브젝트 추가
 		}
+		while (false == pvCutters->empty()) { pvCutters->pop_back(); } // 항상 CutterObjectLayer는 비어있어야 한다.
 	}
 }
 

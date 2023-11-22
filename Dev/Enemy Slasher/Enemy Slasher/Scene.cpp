@@ -1032,6 +1032,27 @@ CTestScene_Slice::~CTestScene_Slice()
 
 bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		break;
+	case WM_RBUTTONDOWN:
+		if (false == m_bAddCutter) {
+			m_bAddCutter = true;
+
+			POINT ptCursorPos{ 0,0 };
+			GetCursorPos(&ptCursorPos);
+			ScreenToClient(hWnd, &ptCursorPos);
+			CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+			((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
+		}
+		break;
+	case WM_RBUTTONUP:
+		if (true == m_bAddCutter) m_bAddCutter = false;
+		break;
+	default:
+		break;
+	}
 	return false;
 }
 
@@ -1075,24 +1096,18 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	{
-		CCutterBoxMesh* pCubeMesh = new CCutterBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 40.0f, 2.0f);
-		pCubeMesh->SetAllowCutting(true);
-		CDynamicShapeObject* pDynamicShapeObject = NULL;
-
-		pDynamicShapeObject = new CDynamicShapeObject();
-		pDynamicShapeObject->SetAllowCutting(true);
-		pDynamicShapeObject->SetMesh(0, pCubeMesh);
-		pDynamicShapeObject->SetPosition(-50.0f, 60.0f, 100.0f);
-		pDynamicShapeObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pDynamicShapeObject, ObjectLayer::Object);
-	}
-
-	{
 		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
+	{
+		CRayObject* pRayObject = NULL;
+		pRayObject = new CRayObject();
+		pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
+		m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1135,34 +1150,39 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-	if (pvObjectList[(int)ObjectLayer::Object].size() >= 2) {
-		CDynamicShapeObject* pObject_cuttur = (CDynamicShapeObject*)pvObjectList[(int)ObjectLayer::Object][0];
-		CFBXObject* pObject_stone = (CFBXObject*)pvObjectList[(int)ObjectLayer::Object][1];
-		pObject_cuttur->MoveStrafe(0.2);
+	cout << pvObjectList[(int)ObjectLayer::Object].size() << '\t' << pvObjectList[(int)ObjectLayer::DestroyedObject].size() << '\n';
 
-		
-		if (pObject_stone->CollisionCheck(pObject_cuttur)) {
-			//cout << "Collision\n";
-		}
-
-	}
-	//if (!pvObjectList[(int)ObjectLayer::Terrain].empty() && !pvObjectList[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면
-	//	CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
-	//	XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
-	//	float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
-
-	//	if (xmfPlayerPos.y < fHeight) {
-	//		xmfPlayerPos.y = fHeight;
-	//		pPlayer->SetPosition(xmfPlayerPos);
-	//		XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
-	//		xmfVelocity.y = 0.0f;
-	//		pPlayer->SetVelocity(xmfVelocity);
-	//	}
-	//}
+	for (const auto& object : pvObjectList[(int)ObjectLayer::CutterObject])
+		object->MoveStrafe(0.2);
 }
 
 void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
 {
+	if (m_bAddCutter) {
+		m_bAddCutter = false;
+		float fBoxSize = 100.0f;
+		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
+		XMFLOAT3 ray_dir = pRayObj->GetRayDir();
+		XMFLOAT3 ray_origin = pRayObj->GetRayOrigin();
+
+		std::random_device rd;
+		std::default_random_engine dre(rd());
+		std::uniform_real_distribution <float> urd(-1.0, 1.0);
+
+		XMFLOAT3 randomVector(urd(dre), urd(dre), urd(dre));
+		// 외적 계산 (수직인 벡터)
+		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
+
+		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);
+		cutterMesh->SetCutPlaneNormal(planeNormal);
+		cutterObject->SetMesh(0, cutterMesh);
+		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize)));
+		cutterObject->SetAllowCutting(true);
+		cutterObject->SetShaderType(ShaderType::CObjectsShader);
+
+		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
+	}
 	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
 }
 

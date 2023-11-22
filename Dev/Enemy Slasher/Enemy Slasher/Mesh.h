@@ -102,17 +102,9 @@ public:
 	virtual ~CDynamicShapeMesh();
 
 protected:
-	bool m_bAllowCutting = false; // true 라면 다른 오브젝트를 자를 수 있다.
 	bool m_bCuttable = false; // true 라면 다른 오브젝트에 인해 잘릴 수 있다.
 
-protected:
-	// 절단 평면 - 다른 오브젝트를 자르려면 무조건 가지고 있어야 한다.
-	XMFLOAT3 m_xmf3PlaneNormal;
-	XMFLOAT3 m_xmf3PlanePoint;
-
 public:
-	XMFLOAT3 GetCutPlaneNormal() { return m_xmf3PlaneNormal; }
-	XMFLOAT3 GetCutPlanePoint() { return m_xmf3PlanePoint; }
 	XMFLOAT3 ProjectVertexToPlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint);
 
 protected:
@@ -131,9 +123,7 @@ protected:
 	};
 
 public:
-	void SetAllowCutting(bool bState) { m_bAllowCutting = bState; }
 	void SetCuttable(bool bState) { m_bCuttable = bState; }
-	bool GetAllowCutting() { return m_bAllowCutting; }
 	bool GetCuttable() { return m_bCuttable; }
 
 public:
@@ -146,7 +136,7 @@ public:
 	bool IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint);
 public:
 	virtual bool CollisionCheck(CColliderMesh* pOtherMesh);
-	CMesh** DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& mxf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat); // 절단된 CMesh 2개 배열을 리턴한다.
+	CMesh** DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
 };
 
 class CBoxMesh : public CDynamicShapeMesh
@@ -157,11 +147,31 @@ public:
 	virtual ~CBoxMesh();
 };
 
-class CCutterBoxMesh : public CDynamicShapeMesh
+class CCutterMesh : public CDynamicShapeMesh // Cutter용 가상클래스
 {
 public:
-	CCutterBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
-	virtual ~CCutterBoxMesh();
+	CCutterMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CCutterMesh();
+
+protected:
+	// 절단 평면 - 다른 오브젝트를 자르려면 무조건 가지고 있어야 한다.
+	XMFLOAT3 m_xmf3PlaneNormal;
+	XMFLOAT3 m_xmf3PlanePoint;
+
+public:
+	void SetCutPlaneNormal(XMFLOAT3 xmf3PlaneNormal) { m_xmf3PlaneNormal = Vector3::Normalize(xmf3PlaneNormal); }
+	void SetCutPlanePoint(XMFLOAT3 xmf3PlanePoint) { m_xmf3PlanePoint = xmf3PlanePoint; }
+	XMFLOAT3 GetCutPlaneNormal() { return m_xmf3PlaneNormal; }
+	XMFLOAT3 GetCutPlanePoint() { return m_xmf3PlanePoint; }
+};
+
+class CCutterBox_NonMesh : public CCutterMesh
+{
+public:
+	CCutterBox_NonMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width = 20.0f, float height = 20.0f, float depth = 20.0f);
+	virtual ~CCutterBox_NonMesh();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderAABB = false);
 };
 
 class CRayMesh : public CMesh
