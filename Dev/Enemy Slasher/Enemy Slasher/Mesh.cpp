@@ -602,13 +602,13 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 		xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4CutterMat);
 		xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
 
-		vector<vector<CVertex>*> vvNewVertices;
+		vector<pair<vector<CVertex>*, bool>> vvNewVertices; // first = vertex, second = PlainInObject
 		int nNewVertices = 0;
 		{
 			// 이곳에 절단시 평면이 몇개가 생기는지 확인하면 좋다.
 			// 현재는 절단 평면 기준 좌우로 총 2개만 생기는 것을 가정한다.
-			vvNewVertices.push_back(new vector<CVertex>);
-			vvNewVertices.push_back(new vector<CVertex>);
+			vvNewVertices.emplace_back(new vector<CVertex>, false);
+			vvNewVertices.emplace_back(new vector<CVertex>, false);
 
 			nNewVertices = vvNewVertices.size();
 		}
@@ -618,27 +618,31 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
 				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
 				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vvNewVertices[1]->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+				vvNewVertices[1].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
 
-				vvNewVertices[0]->emplace_back(m_pVertices[i]);
+				vvNewVertices[0].first->emplace_back(m_pVertices[i]);
+				vvNewVertices[0].second = true;
 			}
 			else {
 				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
 				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
 				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vvNewVertices[0]->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+				vvNewVertices[0].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
 
-				vvNewVertices[1]->emplace_back(m_pVertices[i]);
+				vvNewVertices[1].first->emplace_back(m_pVertices[i]);
+				vvNewVertices[1].second = true;
 			}
 		}
 		{
-			// 만약 비어있는 벡터가 있다면 제거
+			// 만약 비어있는 벡터가 있다면 / 평면과 오브젝트가 겹치지 않았다면 제거
 			auto it = std::remove_if(vvNewVertices.begin(), vvNewVertices.end(),
-				[](const std::vector<CVertex>* pVector) { return pVector->empty(); });
-
-			for (auto toRemove = it; toRemove != vvNewVertices.end(); ++toRemove) {
-				delete* toRemove;
-			}
+				[](const pair<vector<CVertex>*, bool> pVector) {
+					if (pVector.first->empty() || false == pVector.second) {
+						delete pVector.first;
+						return true;
+					}
+					return false;
+				});
 			vvNewVertices.erase(it, vvNewVertices.end());
 			nNewVertices = vvNewVertices.size();
 		}
@@ -650,12 +654,12 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 		vector<UINT*> pvNewIndices;
 		for (int i = 0; i < nNewVertices; ++i) {
 			pvNewVertices.push_back(new CVertex[m_nVertices]);
-			copy(vvNewVertices[i]->begin(), vvNewVertices[i]->end(), pvNewVertices[i]);
+			copy(vvNewVertices[i].first->begin(), vvNewVertices[i].first->end(), pvNewVertices[i]);
 
 			pvNewIndices.push_back(new UINT[m_nIndices]);
 			memcpy(pvNewIndices[i], m_pnIndices, sizeof(UINT) * m_nIndices);
 
-			delete vvNewVertices[i]; // 다 사용한 Vertex vector 삭제
+			delete vvNewVertices[i].first; // 다 사용한 Vertex vector 삭제
 		}
 		
 		for (int i = 0; i < nNewVertices; ++i) {
