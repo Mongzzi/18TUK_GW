@@ -439,11 +439,13 @@ XMFLOAT3 CDynamicShapeMesh::TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xm
 
 bool CDynamicShapeMesh::IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint)
 {
+	XMFLOAT3 calNormal = planeNormal;
+
 	// 평면 방정식의 계수 추출
-	float A = planeNormal.x;
-	float B = planeNormal.y;
-	float C = planeNormal.z;
-	float D = -XMVectorGetX(XMVector3Dot(XMLoadFloat3(&planePoint), XMLoadFloat3(&planeNormal)));
+	float A = calNormal.x;
+	float B = calNormal.y;
+	float C = calNormal.z;
+	float D = -XMVectorGetX(XMVector3Dot(XMLoadFloat3(&planePoint), XMLoadFloat3(&calNormal)));
 
 	// 점의 좌표를 평면 방정식에 대입하여 부호 판단
 	float result = A * vertex.x + B * vertex.y + C * vertex.z + D;
@@ -795,6 +797,9 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 					nNewPlaneIndex.emplace_back(vConvexHullVertex[0].second);
 					nNewPlaneIndex.emplace_back(vConvexHullVertex[i - 1].second);
 					nNewPlaneIndex.emplace_back(vConvexHullVertex[i].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[0].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i - 1].second);
 				}
 				vvnNewIndices[PLANE_UP].insert(vvnNewIndices[PLANE_UP].end(), nNewPlaneIndex.begin(), nNewPlaneIndex.end());
 			}
@@ -802,6 +807,9 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 				vConvexHullVertex = ConvexHull(vvPlaneVertices[PLANE_DOWN]);
 				vector<UINT> nNewPlaneIndex;
 				for (int i = 2; i < vConvexHullVertex.size(); ++i) {
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[0].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i - 1].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i].second);
 					nNewPlaneIndex.emplace_back(vConvexHullVertex[0].second);
 					nNewPlaneIndex.emplace_back(vConvexHullVertex[i].second);
 					nNewPlaneIndex.emplace_back(vConvexHullVertex[i - 1].second);
