@@ -13,6 +13,10 @@ cbuffer cbGameObjectInfo : register(b1)
     uint gnMaterial : packoffset(c4);
 };
 
+
+SamplerState gSamplerState : register(s0);
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -30,6 +34,8 @@ struct VS_STANDARD_OUTPUT
     float4 color : COLOR;
 	
 };
+
+
 
 
 #include "Light.hlsl"
