@@ -55,3 +55,8 @@ void CShaderManager::CreateShaderResourceView(ID3D12Device* pd3dDevice, CTexture
 	m_vShaderManager[(int)pShaderType]->CreateShaderResourceView(pd3dDevice, pTexture, nIndex);
 }
 
+void CShaderManager::CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride, ShaderType pShaderType)
+{
+	m_vShaderManager[(int)pShaderType]->CreateConstantBufferViews(pd3dDevice, nConstantBufferViews, pd3dConstantBuffers, nStride);
+}
+
