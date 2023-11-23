@@ -199,6 +199,212 @@ void CBasicScene::Exit()
 {
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CTitleScene::CTitleScene()
+{
+}
+
+CTitleScene::~CTitleScene()
+{
+}
+
+bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		break;
+	case WM_RBUTTONDOWN:
+		break;
+	case WM_RBUTTONUP:
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+
+bool CTitleScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return(false);
+}
+
+void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+{
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	{
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);
+		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+	}
+
+	{
+		CGameObject* pBackGround = new CGameObject();
+		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 0.0f, 0.0f, 0.0f, 10000, 10000);
+		pBackGround->SetMesh(0, pBox);
+		pBackGround->SetPosition(0.0f, 0.0f, 1000);
+		pBackGround->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
+	}
+
+	{
+		float objectDepth = 100.0f;
+		CGameObject* pBackGround = new CGameObject(); 
+		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, 230, 100);
+		pBackGround->SetMesh(0, pBox);
+		pBackGround->SetPosition(180.0f, -130.0f, objectDepth);
+		pBackGround->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
+
+		pBackGround = new CGameObject();
+		pBackGround->SetMesh(0, pBox);
+		pBackGround->SetPosition(200.0f, -280.0f, objectDepth - 30);
+		pBackGround->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
+	}
+
+	//{
+	//	CRayObject* pRayObject = NULL;
+	//	pRayObject = new CRayObject();
+	//	pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
+	//	m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
+	//}
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+bool CTitleScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
+{
+	return (true);
+
+	DWORD dwDirection = 0;
+	if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
+	if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
+	if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
+	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
+
+	float cxDelta = 0.0f, cyDelta = 0.0f;
+	int xDelta = 0, yDelta = 0;
+	POINT ptCursorPos{ 0,0 }; //초기화를 하지 않을 시 낮은 확률로 아래의 if문에 진입하지 못하여 초기화되지 않은 값을 사용하게 된다.
+	if (GetCapture() == hWnd)
+	{
+		//SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		xDelta = ptCursorPos.x - ptOldCursorPos.x;
+		yDelta = ptCursorPos.y - ptOldCursorPos.y;
+		cxDelta = (float)(xDelta) / 3.0f;
+		cyDelta = (float)(yDelta) / 3.0f;
+		//SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+	}
+
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
+		if (cxDelta || cyDelta)
+		{
+			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+			{
+			}
+			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+			{
+			}
+		}
+	}
+	return(true);
+}
+
+void CTitleScene::AnimateObjects(float fTimeElapsed)
+{
+}
+
+void CTitleScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 2);
+	static const WCHAR text[] = L"Enemy Slasher";
+
+	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
+	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
+
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::RosyBrown), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		60,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+
+
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		40,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 4 * 3);
+	static const WCHAR text2[] = L"게임 시작";
+	pd2dDeviceContext->DrawText(text2, _countof(text2) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+
+	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 4 * 3, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	static const WCHAR text3[] = L"게임 종료";
+	pd2dDeviceContext->DrawText(text3, _countof(text3) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+}
+
+void CTitleScene::Enter()
+{
+}
+
+void CTitleScene::Exit()
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 CTestScene::CTestScene()

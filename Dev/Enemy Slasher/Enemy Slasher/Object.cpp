@@ -711,6 +711,10 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) : CDynamicShapeObject(0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
 {
+	if (NULL == fileName) {
+		SetShaderType(shaderType);
+		return;
+	}
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;
 	//FbxScene* plScene = NULL;

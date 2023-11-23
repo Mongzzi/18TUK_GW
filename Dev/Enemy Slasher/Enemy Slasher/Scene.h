@@ -70,6 +70,34 @@ public:
 	CShaderManager* m_pShaderManager = NULL;
 };
 
+class CTitleScene : public CBasicScene
+{
+public:
+	CTitleScene();
+	~CTitleScene();
+
+	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
+
+	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
+	virtual void Enter();
+	virtual void Exit();
+
+private:
+	CUIObject* pCoveredUI = NULL;
+	CUIObject* pSelectedUI = NULL;
+
+};
+
+class CLoadingScene : public CBasicScene
+{
+
+};
+
 class CTestScene : public CBasicScene
 {
 public:
