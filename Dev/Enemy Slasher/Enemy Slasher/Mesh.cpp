@@ -476,6 +476,21 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	return false;
 }
 
+vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat, int DynamicShapeAlgorithm)
+{
+	switch (DynamicShapeAlgorithm)
+	{
+	case DSM_ALGORITHM_PUSH:
+		return DynamicShaping_Push(pd3dDevice, pd3dCommandList, fTimeElapsed, mxf4x4ThisMat, pCutterMesh, xmf4x4CutterMat);
+	case DSM_ALGORITHM_CONVEXHULL:
+		return DynamicShaping_ConvexHull(pd3dDevice, pd3dCommandList, fTimeElapsed, mxf4x4ThisMat, pCutterMesh, xmf4x4CutterMat);
+	default:
+		break;
+	}
+
+	return DynamicShaping_Push(pd3dDevice, pd3dCommandList, fTimeElapsed, mxf4x4ThisMat, pCutterMesh, xmf4x4CutterMat);
+}
+
 /*bool CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh* pOtherMesh, XMFLOAT4X4& xmf4x4ThisMat, XMFLOAT4X4& xmf4x4OtherMat)
 {
 	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
@@ -629,7 +644,107 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	return true;
 }*/
 
-vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat)
+vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Push(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat)
+{
+	// 이 절단은 절단 Object의 절단평면을 사용하여 절단한다.
+
+	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
+	// 이 함수에 의해 자신의 Mesh가 변형된다.
+	// 절단된 CMesh 2개 이상을 리턴한다.
+
+	vector<CMesh*> pvNewMeshs; // 새로 생긴 메쉬들을 저장할 벡터
+
+	if (CCutterMesh* pCutter = dynamic_cast<CCutterMesh*>(pCutterMesh)) {
+
+		XMFLOAT3 xmf3CutNormal = pCutter->GetCutPlaneNormal();
+		XMFLOAT3 xmf3CutPoint = pCutter->GetCutPlanePoint();
+
+		// Cutter의 Plain 값을 자신의 좌표계로 변환하여 Vertex 변환 처리를 하는 것이 좋다.
+		// Cutter의 좌표계 -> 월드 좌표계(월드 행렬 곱) -> 자신의 좌표계(자신의 역행렬 곱)
+
+		XMFLOAT4X4 xmf4x4InvThisMat = Matrix4x4::Inverse(xmf4x4ThisMat);
+		XMFLOAT4X4 xmf4x4InvTransposeThisMat = Matrix4x4::Transpose(xmf4x4InvThisMat);
+		XMFLOAT4X4 xmf4x4TransposeCutterMat = Matrix4x4::Transpose(xmf4x4CutterMat);
+
+		// 행렬 적용으로 변환된 값
+		XMFLOAT3 xmf3LPlaneNormal, xmf3LPlanePoint;
+		xmf3LPlaneNormal = TransformVertex(xmf3CutNormal, xmf4x4TransposeCutterMat);
+		xmf3LPlaneNormal = TransformVertex(xmf3LPlaneNormal, xmf4x4InvTransposeThisMat);
+		xmf3LPlaneNormal = Vector3::Normalize(xmf3LPlaneNormal);
+		xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4CutterMat);
+		xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
+
+		vector<pair<vector<CVertex>*, bool>> vvNewVertices; // first = vertex, second = PlainInObject
+		int nNewVertices = 0;
+		{
+			// 이곳에 절단시 평면이 몇개가 생기는지 확인하면 좋다.
+			// 현재는 절단 평면 기준 좌우로 총 2개만 생기는 것을 가정한다.
+			vvNewVertices.emplace_back(new vector<CVertex>, false);
+			vvNewVertices.emplace_back(new vector<CVertex>, false);
+
+			nNewVertices = vvNewVertices.size();
+		}
+
+		for (int i = 0; i < m_nVertices; ++i) {
+			if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
+				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
+				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
+				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
+				vvNewVertices[1].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+
+				vvNewVertices[0].first->emplace_back(m_pVertices[i]);
+				vvNewVertices[0].second = true;
+			}
+			else {
+				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
+				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
+				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
+				vvNewVertices[0].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+
+				vvNewVertices[1].first->emplace_back(m_pVertices[i]);
+				vvNewVertices[1].second = true;
+			}
+		}
+		{
+			// 만약 비어있는 벡터가 있다면 / 평면과 오브젝트가 겹치지 않았다면 제거
+			auto it = std::remove_if(vvNewVertices.begin(), vvNewVertices.end(),
+				[](const pair<vector<CVertex>*, bool> pVector) {
+					if (pVector.first->empty() || false == pVector.second) {
+						delete pVector.first;
+						return true;
+					}
+			return false;
+				});
+			vvNewVertices.erase(it, vvNewVertices.end());
+			nNewVertices = vvNewVertices.size();
+		}
+
+		if (nNewVertices < 2) return pvNewMeshs; // 절단면 기준으로 2개 이상으로 나뉘어지지 않으면 절단을 수행할 이유가 없다.
+
+
+		vector<CVertex*> pvNewVertices;
+		vector<UINT*> pvNewIndices;
+		for (int i = 0; i < nNewVertices; ++i) {
+			pvNewVertices.push_back(new CVertex[m_nVertices]);
+			copy(vvNewVertices[i].first->begin(), vvNewVertices[i].first->end(), pvNewVertices[i]);
+
+			pvNewIndices.push_back(new UINT[m_nIndices]);
+			memcpy(pvNewIndices[i], m_pnIndices, sizeof(UINT) * m_nIndices);
+
+			delete vvNewVertices[i].first; // 다 사용한 Vertex vector 삭제
+		}
+
+		for (int i = 0; i < nNewVertices; ++i) {
+			pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
+			pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pvNewVertices[i], m_nVertices, pvNewIndices[i], m_nIndices);
+			((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
+			((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
+		}
+	}
+	return pvNewMeshs;
+}
+
+vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat)
 {
 	// 이 절단은 절단 Object의 절단평면을 사용하여 절단한다.
 	
