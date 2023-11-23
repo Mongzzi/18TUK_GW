@@ -374,6 +374,61 @@ bool CDynamicShapeMesh::DSM_Triangle::LineTriangleIntersect(DSM_Line& dsmLine, f
 	return false;
 }
 
+XMFLOAT3 CDynamicShapeMesh::CrossProduct(const XMFLOAT3& O, const XMFLOAT3& A, const XMFLOAT3& B) {
+	// O = 원점 | A = 벡터A | B = 벡터B
+	return {
+		(A.y - O.y) * (B.z - O.z) - (A.z - O.z) * (B.y - O.y),
+		(A.z - O.z) * (B.x - O.x) - (A.x - O.x) * (B.z - O.z),
+		(A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x)
+	};
+}
+
+vector<pair<CVertex, UINT>> CDynamicShapeMesh::ConvexHull(vector<pair<CVertex, UINT>>& vVertex) {
+	// Convex Hull을 생성하는 Graham's Scan 알고리즘
+	// Vertex와 Index의 한쌍 vector를 받고 리턴
+
+	int n = vVertex.size();
+	if (n <= 1) return vVertex;
+
+	// 점들을 x, y, z 좌표 순서대로 정렬
+	std::sort(vVertex.begin(), vVertex.end(),
+		[](const pair<CVertex, UINT>& a, const pair<CVertex, UINT>& b) {
+			return (a.first.m_xmf3Vertex.x < b.first.m_xmf3Vertex.x ||
+			(a.first.m_xmf3Vertex.x == b.first.m_xmf3Vertex.x && a.first.m_xmf3Vertex.y < b.first.m_xmf3Vertex.y) ||
+				(a.first.m_xmf3Vertex.x == b.first.m_xmf3Vertex.x && a.first.m_xmf3Vertex.y == b.first.m_xmf3Vertex.y && a.first.m_xmf3Vertex.z < b.first.m_xmf3Vertex.z));
+		});
+
+	// 중복 제거
+	auto last = std::unique(vVertex.begin(), vVertex.end(), [](const auto& a, const auto& b) {
+		return a.first.m_xmf3Vertex.x == b.first.m_xmf3Vertex.x &&
+		a.first.m_xmf3Vertex.y == b.first.m_xmf3Vertex.y &&
+		a.first.m_xmf3Vertex.z == b.first.m_xmf3Vertex.z;
+		});
+	vVertex.erase(last, vVertex.end());
+	n = vVertex.size();
+
+	// Lower hull 생성
+	vector<pair<CVertex, UINT>> lowerHull;
+	for (int i = 0; i < n; ++i) {
+		while (lowerHull.size() >= 2 && CrossProduct(lowerHull[lowerHull.size() - 2].first.m_xmf3Vertex, lowerHull.back().first.m_xmf3Vertex, vVertex[i].first.m_xmf3Vertex).z <= 0) {
+			lowerHull.pop_back();
+		}
+		lowerHull.emplace_back(vVertex[i]);
+	}
+
+	// Upper hull 생성
+	std::vector<pair<CVertex, UINT>> upperHull;
+	for (int i = n - 1; i >= 0; --i) {
+		while (upperHull.size() >= 2 && CrossProduct(upperHull[upperHull.size() - 2].first.m_xmf3Vertex, upperHull.back().first.m_xmf3Vertex, vVertex[i].first.m_xmf3Vertex).z <= 0) {
+			upperHull.pop_back();
+		}
+		upperHull.emplace_back(vVertex[i]);
+	}
+
+	// Lower hull과 Upper hull 합치기
+	lowerHull.insert(lowerHull.end(), upperHull.begin() + 1, upperHull.end());
+	return lowerHull;
+}
 
 XMFLOAT3 CDynamicShapeMesh::TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xmf4x4Mat)
 {
@@ -602,12 +657,14 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 		xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4CutterMat);
 		xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
 
-		vector<pair<vector<CVertex>, bool>> vvNewVertices; // first = vertex, second = PlainInObject
-		vector<map<UINT, UINT>> vmIndicesMap;
-		vector<vector<UINT>> vvnNewIndices;
+		vector<pair<vector<CVertex>, bool>> vvNewVertices; // first = vertex, second = PlainInObject | 새로운 정점 vertex
+		vector<map<UINT, UINT>> vmIndicesMap;	// 기존 Index를 새로운 오브젝트의 Index로 mapping해줄 map
+		vector<vector<UINT>> vvnNewIndices;		// 각각 절단 오브젝트들의 새로운 Index들을 저장할 vector
 
 		constexpr int PLANE_UP = 0;
 		constexpr int PLANE_DOWN = 1;
+
+		
 
 		int nNewVertices = 0;
 		{
@@ -645,6 +702,12 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 			}
 		}
 		
+		vector<pair<CVertex, UINT>> vConvexHullVertex;			// 절단 평면 외곽점으로 ConvexHull을 한 결과값을 저장할 vector
+		vector<vector<pair<CVertex, UINT>>> vvPlaneVertices;	// 절단 평면 외곽점과 Index를 저장할 vector
+		for (int i = 0; i < nNewVertices; ++i) {
+			vConvexHullVertex.emplace_back();
+			vvPlaneVertices.emplace_back();
+		}
 		{
 			// IndexList 구분에 따른 Vertex 재분류
 			for (int i = 0; i < m_nIndices / 3; ++i) {
@@ -658,22 +721,43 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 					XMFLOAT3 xmf3Vertex;
 					for (int j = 0; j < 3; ++j) {
 						xmf3Vertex = ProjectVertexToPlane(m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
-						if (IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + j]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
+						if (IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + j]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) { // 점이 평면 위
 							vvNewVertices[PLANE_DOWN].first.emplace_back(
 								xmf3Vertex,
 								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
 								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color);
-							vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]] = nPlainUnderCounter++;
+							vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]] = nPlainUnderCounter;
+
+							{
+								// ConvexHull 계산을 위해 Vertex를 별도 저장
+								vvPlaneVertices[PLANE_DOWN].emplace_back(
+									CVertex(xmf3Vertex,
+									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
+									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainUnderCounter);
+							}
+
+							nPlainUnderCounter++;
 						}
-						else {
+						else { // 점이 평면 아래
 							vvNewVertices[PLANE_UP].first.emplace_back(
 								xmf3Vertex,
 								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
 								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color);
-							vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]] = nPlainAboveCounter++;
+							vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]] = nPlainAboveCounter;
+
+							{
+								// ConvexHull 계산을 위해 Vertex를 별도 저장
+								vvPlaneVertices[PLANE_UP].emplace_back(
+									CVertex(xmf3Vertex,
+									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
+									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainAboveCounter);
+							}
+
+							nPlainAboveCounter++;
 						}
 						vvnNewIndices[PLANE_UP].emplace_back(vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]]);
 						vvnNewIndices[PLANE_DOWN].emplace_back(vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]]);
+
 					}
 				}
 				else { // 평면 아래
@@ -681,7 +765,6 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 				}
 			}
 		}
-
 
 		{
 			// 만약 비어있는 벡터가 있다면 / 평면과 오브젝트가 겹치지 않았다면 제거
@@ -701,6 +784,30 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 			nNewVertices = vvNewVertices.size();
 
 			if (nNewVertices < 2) return pvNewMeshs; // 절단면 기준으로 2개 이상으로 나뉘어지지 않으면 절단을 수행할 이유가 없다.
+		}
+
+		{
+			// ConvexHull 을 통해 절단면 생성
+			{
+				vConvexHullVertex = ConvexHull(vvPlaneVertices[PLANE_UP]);
+				vector<UINT> nNewPlaneIndex;
+				for (int i = 2; i < vConvexHullVertex.size(); ++i) {
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[0].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i - 1].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i].second);
+				}
+				vvnNewIndices[PLANE_UP].insert(vvnNewIndices[PLANE_UP].end(), nNewPlaneIndex.begin(), nNewPlaneIndex.end());
+			}
+			{
+				vConvexHullVertex = ConvexHull(vvPlaneVertices[PLANE_DOWN]);
+				vector<UINT> nNewPlaneIndex;
+				for (int i = 2; i < vConvexHullVertex.size(); ++i) {
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[0].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i].second);
+					nNewPlaneIndex.emplace_back(vConvexHullVertex[i - 1].second);
+				}
+				vvnNewIndices[PLANE_DOWN].insert(vvnNewIndices[PLANE_DOWN].end(), nNewPlaneIndex.begin(), nNewPlaneIndex.end());
+			}
 		}
 
 		{

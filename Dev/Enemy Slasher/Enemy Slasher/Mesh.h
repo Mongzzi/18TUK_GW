@@ -123,6 +123,10 @@ protected:
 	};
 
 public:
+	XMFLOAT3 CrossProduct(const XMFLOAT3& O, const XMFLOAT3& A, const XMFLOAT3& B);
+	vector<pair<CVertex, UINT>> ConvexHull(vector<pair<CVertex, UINT>>& vVertex);
+
+public:
 	void SetCuttable(bool bState) { m_bCuttable = bState; }
 	bool GetCuttable() { return m_bCuttable; }
 
