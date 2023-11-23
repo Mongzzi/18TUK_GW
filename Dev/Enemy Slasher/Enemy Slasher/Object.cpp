@@ -613,7 +613,7 @@ bool CDynamicShapeObject::CollisionCheck(CGameObject* pOtherObject)
 	}
 }
 
-CGameObject** CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject)
+vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject)
 {
 	CDynamicShapeObject* pDynamicShapeObject = static_cast<CDynamicShapeObject*>(pCutterObject);
 
@@ -623,7 +623,7 @@ CGameObject** CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D
 	XMFLOAT4X4 pxmfCutterMat = pDynamicShapeObject->GetWorldMat();
 
 	// 절단 후 생성될 Mesh들을 받기위한 데이터 정의
-	vector<CMesh**> newMeshs;
+	vector<CMesh*> newMeshs;
 	XMFLOAT4X4 newWorldMat = Matrix4x4::Identity();
 	XMFLOAT4X4 newTransformMat = Matrix4x4::Identity();
 
@@ -633,42 +633,32 @@ CGameObject** CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D
 		for (int i = 0; i < m_nMeshes; ++i) {
 			for (int j = 0; j < nCutterMeshes; ++j) {
 				if (ppMeshes[i]->CollisionCheck(ppCutterMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
-					CMesh** m = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat);
-					if (NULL != m) newMeshs.push_back(m);
+					vector<CMesh*> vRetVec = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat);
+					newMeshs.insert(newMeshs.end(), vRetVec.begin(), vRetVec.end());
 				}
 			}
 		}
-		if (!newMeshs.empty()) {
+		if (false == newMeshs.empty()) {
 			newWorldMat = GetWorldMat();
 			newTransformMat = GetTransMat();
 		}
 	}
 
-	// 만약 절단이 일어나 새로운 Mesh가 생겼다면 2개의 오브젝트를 생성한다.
-	if (newMeshs.size() > 0) {
-		CGameObject** newGameObjects = new CGameObject * [2];
-		newGameObjects[0] = new CDynamicShapeObject();
-		newGameObjects[1] = new CDynamicShapeObject();
+	// 만약 절단이 일어나 새로운 Mesh가 생겼다면 2개 이상의 오브젝트를 생성한다.
+	// 하나의 Mesh 는 하나의 Object가 되도록 하자. - 나중에 변경할 수도 있다
+	vector<CGameObject*> newGameObjects;
+	for (int i = 0; i < newMeshs.size(); ++i) {
+		newGameObjects.push_back(new CDynamicShapeObject());
 
-		int LoopCounter = 0;
-		for (auto& a : newMeshs) {
-			newGameObjects[0]->SetMesh(LoopCounter, a[0]);
-			newGameObjects[1]->SetMesh(LoopCounter, a[1]);
-		}
+		newGameObjects[i]->SetMesh(0, newMeshs[i]);
 
-		newGameObjects[0]->SetWorldMat(newWorldMat);
-		newGameObjects[0]->SetTransMat(newTransformMat);
-		newGameObjects[0]->SetShaderType(ShaderType::CObjectsShader);
-		((CDynamicShapeObject*)newGameObjects[0])->SetCuttable(true);
-
-		newGameObjects[1]->SetWorldMat(newWorldMat);
-		newGameObjects[1]->SetTransMat(newTransformMat);
-		newGameObjects[1]->SetShaderType(ShaderType::CObjectsShader);
-		((CDynamicShapeObject*)newGameObjects[1])->SetCuttable(true);
-
-		return newGameObjects;
+		newGameObjects[i]->SetWorldMat(newWorldMat);
+		newGameObjects[i]->SetTransMat(newTransformMat);
+		newGameObjects[i]->SetShaderType(ShaderType::CObjectsShader);
+		((CDynamicShapeObject*)newGameObjects[i])->SetCuttable(true);
 	}
-	return NULL;
+
+	return newGameObjects;
 }
 
 

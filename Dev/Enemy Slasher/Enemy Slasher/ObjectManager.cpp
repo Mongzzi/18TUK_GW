@@ -67,7 +67,6 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 			vector<CGameObject*> newObjects;
 			vector<CGameObject*> deleteObjects;
-			CGameObject** ppDynamicShapedObjects = NULL;
 
 			for (const auto& pCutter : *pvCutters) {
 				for (const auto& pObject : pObjects) {
@@ -75,12 +74,10 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 					// 이 오브젝트가 DynamicShapeObject라면 처리
 					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObject)) {
 						if (pDynamicShapeObject->CollisionCheck(pCutter)) {
-							ppDynamicShapedObjects = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pCutter);
+							 vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pCutter);
 
-							if (NULL != ppDynamicShapedObjects) { // 절단에 성공했다면 데이터를 준비한다.
-								newObjects.push_back(ppDynamicShapedObjects[0]);
-								newObjects.push_back(ppDynamicShapedObjects[1]);
-
+							if (false == vRetVec.empty()) { // 절단에 성공했다면 데이터를 준비한다.
+								newObjects.insert(newObjects.end(), vRetVec.begin(), vRetVec.end());
 								deleteObjects.push_back(pDynamicShapeObject);
 							}
 						}

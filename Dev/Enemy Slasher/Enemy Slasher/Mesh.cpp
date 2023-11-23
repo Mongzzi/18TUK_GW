@@ -572,13 +572,15 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	return true;
 }*/
 
-CMesh** CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat)
+vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat)
 {
 	// 이 절단은 절단 Object의 절단평면을 사용하여 절단한다.
 	
 	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
 	// 이 함수에 의해 자신의 Mesh가 변형된다.
-	// 절단된 CMesh 2개를 리턴한다.
+	// 절단된 CMesh 2개 이상을 리턴한다.
+
+	vector<CMesh*> pvNewMeshs; // 새로 생긴 메쉬들을 저장할 벡터
 
 	if (CCutterMesh* pCutter = dynamic_cast<CCutterMesh*>(pCutterMesh)) {
 
@@ -600,55 +602,70 @@ CMesh** CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12Graphi
 		xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4CutterMat);
 		xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
 
-		vector<CVertex> vnewVertices_1;
-		vector<CVertex> vnewVertices_2;
+		vector<vector<CVertex>*> vvNewVertices;
+		int nNewVertices = 0;
+		{
+			// 이곳에 절단시 평면이 몇개가 생기는지 확인하면 좋다.
+			// 현재는 절단 평면 기준 좌우로 총 2개만 생기는 것을 가정한다.
+			vvNewVertices.push_back(new vector<CVertex>);
+			vvNewVertices.push_back(new vector<CVertex>);
+
+			nNewVertices = vvNewVertices.size();
+		}
 
 		for (int i = 0; i < m_nVertices; ++i) {
 			if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
 				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
 				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
 				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vnewVertices_2.emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+				vvNewVertices[1]->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
 
-				vnewVertices_1.emplace_back(m_pVertices[i]);
+				vvNewVertices[0]->emplace_back(m_pVertices[i]);
 			}
 			else {
 				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
 				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
 				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vnewVertices_1.emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+				vvNewVertices[0]->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
 
-				vnewVertices_2.emplace_back(m_pVertices[i]);
+				vvNewVertices[1]->emplace_back(m_pVertices[i]);
 			}
 		}
-		if (vnewVertices_1.empty() || vnewVertices_2.empty()) return NULL; // 절단면 기준으로 2개로 나뉘어지지 않으면 절단을 수행할 이유가 없다.
+		{
+			// 만약 비어있는 벡터가 있다면 제거
+			auto it = std::remove_if(vvNewVertices.begin(), vvNewVertices.end(),
+				[](const std::vector<CVertex>* pVector) { return pVector->empty(); });
 
-		CVertex* pNewVertices_1, * pNewVertices_2;
-		pNewVertices_1 = new CVertex[m_nVertices];
-		pNewVertices_2 = new CVertex[m_nVertices];
+			for (auto toRemove = it; toRemove != vvNewVertices.end(); ++toRemove) {
+				delete* toRemove;
+			}
+			vvNewVertices.erase(it, vvNewVertices.end());
+			nNewVertices = vvNewVertices.size();
+		}
 
-		copy(vnewVertices_1.begin(), vnewVertices_1.end(), pNewVertices_1);
-		copy(vnewVertices_2.begin(), vnewVertices_2.end(), pNewVertices_2);
+		if (nNewVertices < 2) return pvNewMeshs; // 절단면 기준으로 2개 이상으로 나뉘어지지 않으면 절단을 수행할 이유가 없다.
 
-		UINT* pnNewIndices_1, * pnNewIndices_2;
-		pnNewIndices_1 = new UINT[m_nIndices];
-		pnNewIndices_2 = new UINT[m_nIndices];
-		memcpy(pnNewIndices_1, m_pnIndices, sizeof(UINT) * m_nIndices);
-		memcpy(pnNewIndices_2, m_pnIndices, sizeof(UINT) * m_nIndices);
 
-		CMesh** newMeshs = new CMesh * [2];
-		newMeshs[0] = new CDynamicShapeMesh(pd3dDevice, pd3dCommandList);
-		newMeshs[0]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pNewVertices_1, m_nVertices, pnNewIndices_1, m_nIndices);
-		((CDynamicShapeMesh*)newMeshs[0])->CreateCollider(pd3dDevice, pd3dCommandList);
-		((CDynamicShapeMesh*)newMeshs[0])->SetCuttable(true);
-		newMeshs[1] = new CDynamicShapeMesh(pd3dDevice, pd3dCommandList);
-		newMeshs[1]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pNewVertices_2, m_nVertices, pnNewIndices_2, m_nIndices);
-		((CDynamicShapeMesh*)newMeshs[1])->CreateCollider(pd3dDevice, pd3dCommandList);
-		((CDynamicShapeMesh*)newMeshs[1])->SetCuttable(true);
+		vector<CVertex*> pvNewVertices;
+		vector<UINT*> pvNewIndices;
+		for (int i = 0; i < nNewVertices; ++i) {
+			pvNewVertices.push_back(new CVertex[m_nVertices]);
+			copy(vvNewVertices[i]->begin(), vvNewVertices[i]->end(), pvNewVertices[i]);
 
-		return newMeshs;
+			pvNewIndices.push_back(new UINT[m_nIndices]);
+			memcpy(pvNewIndices[i], m_pnIndices, sizeof(UINT) * m_nIndices);
+
+			delete vvNewVertices[i]; // 다 사용한 Vertex vector 삭제
+		}
+		
+		for (int i = 0; i < nNewVertices; ++i) {
+			pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
+			pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pvNewVertices[i], m_nVertices, pvNewIndices[i], m_nIndices);
+			((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
+			((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
+		}
 	}
-	return NULL;
+	return pvNewMeshs;
 }
 
 
