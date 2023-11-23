@@ -602,71 +602,122 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D1
 		xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4CutterMat);
 		xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
 
-		vector<pair<vector<CVertex>*, bool>> vvNewVertices; // first = vertex, second = PlainInObject
+		vector<pair<vector<CVertex>, bool>> vvNewVertices; // first = vertex, second = PlainInObject
+		vector<map<UINT, UINT>> vmIndicesMap;
+		vector<vector<UINT>> vvnNewIndices;
+
+		constexpr int PLANE_UP = 0;
+		constexpr int PLANE_DOWN = 1;
+
 		int nNewVertices = 0;
 		{
 			// 이곳에 절단시 평면이 몇개가 생기는지 확인하면 좋다.
 			// 현재는 절단 평면 기준 좌우로 총 2개만 생기는 것을 가정한다.
-			vvNewVertices.emplace_back(new vector<CVertex>, false);
-			vvNewVertices.emplace_back(new vector<CVertex>, false);
+			vvNewVertices.emplace_back();
+			vvNewVertices.emplace_back();
 
 			nNewVertices = vvNewVertices.size();
 		}
 
-		for (int i = 0; i < m_nVertices; ++i) {
-			if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
-				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
-				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
-				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vvNewVertices[1].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
-
-				vvNewVertices[0].first->emplace_back(m_pVertices[i]);
-				vvNewVertices[0].second = true;
-			}
-			else {
-				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
-				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
-				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vvNewVertices[0].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
-
-				vvNewVertices[1].first->emplace_back(m_pVertices[i]);
-				vvNewVertices[1].second = true;
-			}
-		}
-		{
-			// 만약 비어있는 벡터가 있다면 / 평면과 오브젝트가 겹치지 않았다면 제거
-			auto it = std::remove_if(vvNewVertices.begin(), vvNewVertices.end(),
-				[](const pair<vector<CVertex>*, bool> pVector) {
-					if (pVector.first->empty() || false == pVector.second) {
-						delete pVector.first;
-						return true;
-					}
-					return false;
-				});
-			vvNewVertices.erase(it, vvNewVertices.end());
-			nNewVertices = vvNewVertices.size();
-		}
-
-		if (nNewVertices < 2) return pvNewMeshs; // 절단면 기준으로 2개 이상으로 나뉘어지지 않으면 절단을 수행할 이유가 없다.
-
-
-		vector<CVertex*> pvNewVertices;
-		vector<UINT*> pvNewIndices;
 		for (int i = 0; i < nNewVertices; ++i) {
-			pvNewVertices.push_back(new CVertex[m_nVertices]);
-			copy(vvNewVertices[i].first->begin(), vvNewVertices[i].first->end(), pvNewVertices[i]);
+			vvNewVertices[i].second = false;
+			vmIndicesMap.emplace_back();
+			vvnNewIndices.emplace_back();
+		}
 
-			pvNewIndices.push_back(new UINT[m_nIndices]);
-			memcpy(pvNewIndices[i], m_pnIndices, sizeof(UINT) * m_nIndices);
+		int nPlainAboveCounter = 0;
+		int nPlainUnderCounter = 0;
+		{
+			// Vertex 평면 기준 분리
+			for (int i = 0; i < m_nVertices; ++i) {
+				if (IsVertexAbovePlane(m_pVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) { // 평면 위
+					vvNewVertices[PLANE_UP].first.emplace_back(m_pVertices[i]);
+					vmIndicesMap[PLANE_UP][i] = nPlainAboveCounter++;
 
-			delete vvNewVertices[i].first; // 다 사용한 Vertex vector 삭제
+					vvNewVertices[PLANE_UP].second = true;
+				}
+				else { // 평면 아래
+					vvNewVertices[PLANE_DOWN].first.emplace_back(m_pVertices[i]);
+					vmIndicesMap[PLANE_DOWN][i] = nPlainUnderCounter++;
+
+					vvNewVertices[PLANE_DOWN].second = true;
+				}
+			}
 		}
 		
-		for (int i = 0; i < nNewVertices; ++i) {
-			pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
-			pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pvNewVertices[i], m_nVertices, pvNewIndices[i], m_nIndices);
-			((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
-			((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
+		{
+			// IndexList 구분에 따른 Vertex 재분류
+			for (int i = 0; i < m_nIndices / 3; ++i) {
+				bool bVal[3];
+				for (int j = 0; j < 3; ++j) bVal[j] = IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + j]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint);
+
+				if (bVal[0] && bVal[1] && bVal[2]) { // 평면 위
+					for (int j = 0; j < 3; ++j) vvnNewIndices[PLANE_UP].emplace_back(vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]]);
+				}
+				else if (bVal[0] || bVal[1] || bVal[2]) { // 평면과 겹치는 프리미티브
+					XMFLOAT3 xmf3Vertex;
+					for (int j = 0; j < 3; ++j) {
+						xmf3Vertex = ProjectVertexToPlane(m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
+						if (IsVertexAbovePlane(m_pVertices[m_pnIndices[i * 3 + j]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) {
+							vvNewVertices[PLANE_DOWN].first.emplace_back(
+								xmf3Vertex,
+								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
+								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color);
+							vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]] = nPlainUnderCounter++;
+						}
+						else {
+							vvNewVertices[PLANE_UP].first.emplace_back(
+								xmf3Vertex,
+								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
+								m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color);
+							vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]] = nPlainAboveCounter++;
+						}
+						vvnNewIndices[PLANE_UP].emplace_back(vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]]);
+						vvnNewIndices[PLANE_DOWN].emplace_back(vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]]);
+					}
+				}
+				else { // 평면 아래
+					for (int j = 0; j < 3; ++j) vvnNewIndices[PLANE_DOWN].emplace_back(vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]]);
+				}
+			}
+		}
+
+
+		{
+			// 만약 비어있는 벡터가 있다면 / 평면과 오브젝트가 겹치지 않았다면 제거
+			auto itVertices = vvNewVertices.begin();
+			auto itIndices = vmIndicesMap.begin();
+
+			while (itVertices != vvNewVertices.end()) {
+				if (itVertices->first.empty() || false == itVertices->second) {
+					itVertices = vvNewVertices.erase(itVertices);
+					itIndices = vmIndicesMap.erase(itIndices);
+				}
+				else {
+					++itVertices;
+					++itIndices;
+				}
+			}
+			nNewVertices = vvNewVertices.size();
+
+			if (nNewVertices < 2) return pvNewMeshs; // 절단면 기준으로 2개 이상으로 나뉘어지지 않으면 절단을 수행할 이유가 없다.
+		}
+
+		{
+			CVertex* pNewVertices;
+			UINT* pNewIndices;
+			for (int i = 0; i < nNewVertices; ++i) {
+				pNewVertices = new CVertex[vvNewVertices[i].first.size()];
+				copy(vvNewVertices[i].first.begin(), vvNewVertices[i].first.end(), pNewVertices);
+
+				pNewIndices = new UINT[vvnNewIndices[i].size()];
+				copy(vvnNewIndices[i].begin(), vvnNewIndices[i].end(), pNewIndices);
+
+				pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
+				pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pNewVertices, vvNewVertices[i].first.size(), pNewIndices, vvnNewIndices[i].size());
+				((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
+				((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
+			}
 		}
 	}
 	return pvNewMeshs;
