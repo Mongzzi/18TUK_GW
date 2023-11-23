@@ -14,8 +14,6 @@ enum class ShaderType : int;
 struct CB_GAMEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4World;
-	//객체에 적용될 재질 번호
-	UINT m_nMaterial;
 };
 
 
@@ -124,10 +122,16 @@ public:
 	//재질을 적용하여 렌더링을 하기 위한 쉐이더
 	ShaderType m_ShaderType;
 
+	CTexture* m_pTexture = NULL;
+
 	void SetAlbedo(XMFLOAT4& xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
+	void SetTexture(CTexture* pTexture);
 	void SetShaderType(ShaderType type) { m_ShaderType = type; }
 
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
+	void ReleaseUploadBuffers();
 };
 
 class CGameObject
