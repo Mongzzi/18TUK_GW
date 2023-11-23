@@ -270,7 +270,7 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, NULL, ShaderType::CObjectsShader);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);
+		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 	}
 
@@ -284,35 +284,34 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 
 	{
-		float objectDepth = 100.0f;
-		CGameObject* pBackGround = new CGameObject(); 
-		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, 230, 100);
-		pBackGround->SetMesh(0, pBox);
-		pBackGround->SetPosition(180.0f, -130.0f, objectDepth);
-		pBackGround->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
+		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, 100, 100, 1000);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), NULL, ShaderType::CUIObjectsShader);
+		pCardUIObject->SetMesh(0, pBox);
+		pCardUIObject->SetPositionUI(480, 300);
+		pCardUIObject->SetScale(1, 1, 1);
+		pCardUIObject->SetShaderType(ShaderType::CUIObjectsShader);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pBackGround = new CGameObject();
-		pBackGround->SetMesh(0, pBox);
-		pBackGround->SetPosition(200.0f, -280.0f, objectDepth - 30);
-		pBackGround->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), NULL, ShaderType::CUIObjectsShader);
+		pCardUIObject->SetMesh(0, pBox);
+		pCardUIObject->SetPositionUI(480, 420);
+		pCardUIObject->SetScale(1, 1, 1);
+		pCardUIObject->SetShaderType(ShaderType::CUIObjectsShader);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 	}
 
-	//{
-	//	CRayObject* pRayObject = NULL;
-	//	pRayObject = new CRayObject();
-	//	pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
-	//	m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
-	//}
+	{
+		//CRayObject* pRayObject = NULL;
+		//pRayObject = new CRayObject();
+		//pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
+		//m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
+	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 bool CTitleScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
-	return (true);
-
 	DWORD dwDirection = 0;
 	if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
 	if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
@@ -348,6 +347,23 @@ bool CTitleScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 			}
 		}
 	}
+
+	//vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
+
+	//RECT clientRect;
+	//GetClientRect(hWnd, &clientRect);
+
+	//int clientWidth = clientRect.right - clientRect.left;
+	//int clientHeight = clientRect.bottom - clientRect.top;
+
+	//int count = pObjectList[(int)ObjectLayer::InteractiveUIObject].size();
+
+	//for (int i = 0; i < count; i++)
+	//{
+	//	CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+	//	obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)count / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
+	//}
+
 	return(true);
 }
 
