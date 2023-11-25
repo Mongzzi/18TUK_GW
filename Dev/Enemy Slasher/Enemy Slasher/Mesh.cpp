@@ -476,13 +476,13 @@ bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
 	return false;
 }
 
-vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat, int DynamicShapeAlgorithm)
+vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat, CutAlgorithm DynamicShapeAlgorithm)
 {
 	switch (DynamicShapeAlgorithm)
 	{
-	case DSM_ALGORITHM_PUSH:
+	case CutAlgorithm::Push:
 		return DynamicShaping_Push(pd3dDevice, pd3dCommandList, fTimeElapsed, mxf4x4ThisMat, pCutterMesh, xmf4x4CutterMat);
-	case DSM_ALGORITHM_CONVEXHULL:
+	case CutAlgorithm::ConvexHull:
 		return DynamicShaping_ConvexHull(pd3dDevice, pd3dCommandList, fTimeElapsed, mxf4x4ThisMat, pCutterMesh, xmf4x4CutterMat);
 	default:
 		break;

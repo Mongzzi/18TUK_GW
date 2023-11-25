@@ -633,7 +633,7 @@ vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevic
 		for (int i = 0; i < m_nMeshes; ++i) {
 			for (int j = 0; j < nCutterMeshes; ++j) {
 				if (ppMeshes[i]->CollisionCheck(ppCutterMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
-					vector<CMesh*> vRetVec = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat);
+					vector<CMesh*> vRetVec = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat, CDynamicShapeMesh::CutAlgorithm::Push);
 					newMeshs.insert(newMeshs.end(), vRetVec.begin(), vRetVec.end());
 				}
 			}
