@@ -530,45 +530,28 @@ void CGameObject::SetShaderType(ShaderType shaderType)
 
 CInteractiveObject::CInteractiveObject(int nMeshes) : CGameObject(nMeshes)
 {
-	XMStoreFloat4x4(&m_xmf4x4Rotate, XMMatrixIdentity());
 	CGameObject::SetShaderType(ShaderType::CObjectsShader);
 }
 
 CInteractiveObject::~CInteractiveObject()
 {
+	if (m_pCollider) delete m_pCollider;
 }
 
-
-XMFLOAT3 CInteractiveObject::GetAABBMaxPos(int nIndex) {
-	XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMaxPos();
-	XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
-	return pos;
-}
-
-XMFLOAT3 CInteractiveObject::GetAABBMinPos(int nIndex) {
-	XMFLOAT3 pos = ((CColliderMesh*)(m_ppMeshes[nIndex]))->GetCollider()->GetAABBMinPos();
-	XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), XMLoadFloat4x4(&m_xmf4x4World)));
-	return pos;
-}
-
-bool CInteractiveObject::CollisionCheck(CGameObject* pOtherObject)
+void CInteractiveObject::SetMesh(int nIndex, CMesh* pMesh)
 {
-	if (CInteractiveObject* pInteractiveObject = dynamic_cast<CInteractiveObject*>(pOtherObject)) { // OtherObject가 InteractiveObject 라면
+	CGameObject::SetMesh(nIndex, pMesh);
+	MakeCollider();
+}
 
-		XMFLOAT3 aMax = GetAABBMaxPos(0);
-		XMFLOAT3 aMin = GetAABBMinPos(0);
-		XMFLOAT3 bMax = pInteractiveObject->GetAABBMaxPos(0);
-		XMFLOAT3 bMin = pInteractiveObject->GetAABBMinPos(0);
-
-		if (aMax.x < bMin.x || aMin.x > bMax.x) return false;
-		if (aMax.y < bMin.y || aMin.y > bMax.y) return false;
-		if (aMax.z < bMin.z || aMin.z > bMax.z) return false;
-
-		return true;
-	}
-	else {
-		// InteractiveObject가 아니라면 충돌체크를 하지 않는다.
-		return false;
+void CInteractiveObject::MakeCollider()
+{
+	if (m_pCollider) delete m_pCollider;
+	m_pCollider = new COBBColliderWithMesh;
+	XMFLOAT4X4 myWorldMat = GetWorldMat();
+	for (int i = 0; i < m_nMeshes; ++i) {
+		if(CColliderMesh* colliderMesh = dynamic_cast<CColliderMesh*>(m_ppMeshes[i]))
+		m_pCollider->UpdateColliderWithOBB((colliderMesh)->GetCollider(), myWorldMat);
 	}
 }
 
@@ -579,38 +562,6 @@ CDynamicShapeObject::CDynamicShapeObject(int nMeshes) : CInteractiveObject(nMesh
 
 CDynamicShapeObject::~CDynamicShapeObject()
 {
-}
-
-bool CDynamicShapeObject::CollisionCheck(CGameObject* pOtherObject)
-{
-	// 충돌체크만 한다면 아래의 복잡한 처리가 필요 없다.
-	return CInteractiveObject::CollisionCheck(pOtherObject);
-
-	if (CInteractiveObject* pInteractiveObject = dynamic_cast<CInteractiveObject*>(pOtherObject)) { // OtherObject가 InteractiveObject 라면
-		if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pOtherObject)) { // OtherObject가 DynamicShapeObject 라면
-			// 절단할 수 있는 충돌체크를 한다.
-			if (m_bAllowCutting && pDynamicShapeObject->GetCuttable()) {
-				// 내가 다른 오브젝트를 자르는 처리는 나중에
-				return true;
-			}
-			else if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
-				// 다른 오브젝트에 의해 내가 잘릴 수 있을 때
-				return true; // 이 함수는 충돌 체크 함수이니 외부에서 처리하자
-			}
-			else {
-				// 둘다 절단이 일어날 수 없다면 단순 충돌체크만 한다.
-				return CInteractiveObject::CollisionCheck(pOtherObject);
-			}
-		}
-		else {
-			// DynamicShapeObject가 아니라면 단순 충돌체크만 한다.
-			return CInteractiveObject::CollisionCheck(pOtherObject);
-		}
-	}
-	else {
-		// InteractiveObject가 아니라면 충돌체크를 하지 않는다.
-		return false;
-	}
 }
 
 vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject)
@@ -630,9 +581,13 @@ vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevic
 	if (m_bCuttable && pDynamicShapeObject->GetAllowCutting()) {
 		// 다른 오브젝트에 의해 내가 잘릴 수 있을 때
 
+		XMFLOAT4X4 myWorldMat = GetWorldMat();
+		XMFLOAT4X4 otherWorldMat = pDynamicShapeObject->GetWorldMat();
+
 		for (int i = 0; i < m_nMeshes; ++i) {
 			for (int j = 0; j < nCutterMeshes; ++j) {
-				if (ppMeshes[i]->CollisionCheck(ppCutterMeshes[j])) { // 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
+				if (CollisionCheck(ppMeshes[i]->GetCollider(), myWorldMat, ppCutterMeshes[j]->GetCollider(), otherWorldMat)) {
+					// 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
 					vector<CMesh*> vRetVec = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat, CDynamicShapeMesh::CutAlgorithm::Push);
 					newMeshs.insert(newMeshs.end(), vRetVec.begin(), vRetVec.end());
 				}
@@ -770,6 +725,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	//------------------------------------------------------------------------------------------
 
 	SetShaderType(shaderType);
+	MakeCollider();
 }
 
 CFBXObject::~CFBXObject()

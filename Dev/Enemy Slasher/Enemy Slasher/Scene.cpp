@@ -1347,11 +1347,35 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
-		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
-		pFBXObject->SetCuttable(true);
-		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+		//CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		//((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
+		//pFBXObject->SetCuttable(true);
+		//pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
+		//m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
+	{
+		CBoxMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList);
+		CDynamicShapeObject * newObject = new CDynamicShapeObject;
+		newObject->SetMesh(0, pBoxMesh);
+		newObject->SetPosition(200.0f, 40.0f, 100.0f);
+		newObject->Rotate(45.0f, 45.0f, 45.0f);
+		newObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+
+		newObject = new CDynamicShapeObject;
+		newObject->SetMesh(0, pBoxMesh);
+		newObject->SetPosition(200.0f, 40.0f, 200.0f);
+		newObject->Rotate(45.0f, 45.0f, 45.0f);
+		newObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+
+		newObject = new CDynamicShapeObject;
+		newObject->SetMesh(0, pBoxMesh);
+		newObject->SetPosition(200.0f, 40.0f, 300.0f);
+		newObject->Rotate(0.0f, 0.0f, 0.0f);
+		newObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
 	}
 
 	{
@@ -1415,8 +1439,24 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 
-	for (const auto& object : pvObjectList[(int)ObjectLayer::CutterObject])
-		object->MoveStrafe(0.2);
+#ifdef _DEBUG
+	std::vector<CGameObject*> pvOL = pvObjectList[(int)ObjectLayer::Object];
+	if (pvOL.size() < 2) return;
+	XMFLOAT4X4 MatA, MatB;
+	for (int i = 0; i < pvOL.size() - 1; ++i) {
+		if (CInteractiveObject* ObjA = dynamic_cast<CInteractiveObject*>(pvOL[i])) {
+			for (int j = i + 1; j < pvOL.size(); ++j) {
+				if (CInteractiveObject* ObjB = dynamic_cast<CInteractiveObject*>(pvOL[j])) {
+					MatA = ObjA->GetWorldMat();
+					MatB = ObjB->GetWorldMat();
+					if (CollisionCheck(ObjA->GetCollider(), MatA, ObjB->GetCollider(), MatB)) {
+						cout << "Collision! ObjectNum = " << i << '\t' << j << '\n';
+					}
+				}
+			}
+		}
+	}
+#endif // DEBUG
 }
 
 void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)

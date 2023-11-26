@@ -4,6 +4,7 @@
 class CCollider
 {
 public:
+	CCollider();
 	CCollider(CVertex* pVertices, UINT nVertices);
 	virtual ~CCollider();
 
@@ -16,6 +17,7 @@ public:
 class CAABBCollider : public CCollider
 {
 public:
+	CAABBCollider();
 	CAABBCollider(CVertex* pVertices, UINT nVertices);
 	virtual ~CAABBCollider();
 
@@ -25,65 +27,33 @@ protected:
 
 public:
 	virtual void MakeCollider(CVertex* pVertices, UINT nVertices);
+	void UpdateColliderWithAABB(CAABBCollider* pOtherCollider, XMFLOAT4X4& xmf4x4WorldMat);
 
 	XMFLOAT3 GetAABBMinPos() { return m_xmf3MinPos; }
 	XMFLOAT3 GetAABBMaxPos() { return m_xmf3MaxPos; }
 };
 
-
-
-
-class CColliderWithMesh
+class COBBCollider : public CAABBCollider
 {
 public:
-	CColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
-	virtual ~CColliderWithMesh();
-
-public:
-	virtual void ReleaseUploadBuffers();
+	COBBCollider();
+	COBBCollider(CVertex* pVertices, UINT nVertices);
+	virtual ~COBBCollider();
 
 protected:
-	CVertex* m_pVertices = NULL;
+	XMFLOAT3 m_xmf3Center;
+	XMFLOAT3 m_xmf3HalfExtents;
+	XMFLOAT3 m_xmf3Orientation[3]; // 로컬 축
 
-	ID3D12Resource* m_pd3dVertexBuffer = NULL;
-	ID3D12Resource* m_pd3dVertexUploadBuffer = NULL;
-	D3D12_VERTEX_BUFFER_VIEW m_d3dVertexBufferView;
-
-	D3D12_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	UINT m_nSlot = 0;
-	UINT m_nVertices = 0;
-	UINT m_nStride = 0;
-	UINT m_nOffset = 0;
-
-protected:
-	ID3D12Resource* m_pd3dIndexBuffer = NULL;
-	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
-	D3D12_INDEX_BUFFER_VIEW m_d3dIndexBufferView;
-
-	UINT* m_pnIndices = NULL;
-
-	UINT m_nIndices = 0;	// 인덱스 버퍼에 포함되는 인덱스의 개수
-	UINT m_nStartIndex = 0; // 인덱스 버퍼에서 메쉬를 그리기 위해 사용되는 시작 인덱스
-	int m_nBaseVertex = 0;  // 인덱스 버퍼의 인덱스에 더해질 인덱스
-
+	void MakeOBBData();
 public:
-	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices) = 0;
-	virtual void RenderCollider(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void MakeCollider(CVertex* pVertices, UINT nVertices);
+	void UpdateColliderWithOBB(COBBCollider* pOtherCollider, XMFLOAT4X4& xmf4x4WorldMat);
+
+	XMFLOAT3 GetOBBCenter() { return m_xmf3Center; }
+	XMFLOAT3 GetOBBHalfExtents() { return m_xmf3HalfExtents; }
+	XMFLOAT3* GetOBBOrientation() { return m_xmf3Orientation; }
 };
 
-class CAABBColliderWithMesh : public CColliderWithMesh
-{
-public:
-	CAABBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
-	virtual ~CAABBColliderWithMesh();
-
-protected:
-	CAABBCollider* m_pAABBColider;
-
-public:
-	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
-
-	XMFLOAT3 GetAABBMinPos() { return m_pAABBColider->GetAABBMinPos(); }
-	XMFLOAT3 GetAABBMaxPos() { return m_pAABBColider->GetAABBMaxPos(); }
-};
+bool CollisionCheck(CAABBCollider* pACollider, XMFLOAT4X4& AWorldMat, CAABBCollider* pBCollider, XMFLOAT4X4& BWorldMat);
+bool CollisionCheck(COBBCollider* pACollider, XMFLOAT4X4& AWorldMat, COBBCollider* pBCollider, XMFLOAT4X4& BWorldMat);
