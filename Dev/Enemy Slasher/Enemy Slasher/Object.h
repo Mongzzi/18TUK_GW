@@ -351,6 +351,7 @@ class CUIObject : public CFBXObject
 {
 public:
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum);
 	virtual ~CUIObject();
 protected:
 	static constexpr float TARGET_SCALE = 1.5f;
@@ -366,6 +367,7 @@ protected:
 
 	XMFLOAT3 m_xmfScale;
 
+	int m_iUInum;
 public:
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };
 
@@ -377,6 +379,7 @@ public:
 	void AddPositionUI(POINT pos);
 
 	POINT GetPositionUI() { return POINT(m_iXPosition, m_iYPosition); }
+	int GetUInum() { return m_iUInum; };
 
 	// 계속 불리는 함수
 	virtual void CursorOverObject(bool flag) = 0;
@@ -392,6 +395,7 @@ class CCardUIObject : public CUIObject
 {
 public:
 	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum);
 	virtual ~CCardUIObject();
 protected:
 

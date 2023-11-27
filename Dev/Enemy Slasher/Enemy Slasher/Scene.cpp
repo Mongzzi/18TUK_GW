@@ -274,7 +274,7 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 					if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
 						nearestDist = tmin;
 						if (pSelectedUI == pInterObj) {
-
+							//pInterObj->ButtenUp();
 						}
 					}
 				}
@@ -524,6 +524,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_RBUTTONUP:
 		if (pSelectedUI)
 		{
+			SelectedUInum = pSelectedUI->GetUInum();
 			pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
@@ -585,7 +586,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
-
+	// 임시
+	SelectedUInum = -1;
 
 	// ------------------------------------       큐브 메쉬      -------------------------------
 
@@ -813,27 +815,27 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pUIObject->SetScale(1000, 100, 1);
 		m_pObjectManager->AddObj(pUIObject, ObjectLayer::UIObject);
 
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader, 0);
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,1);
 		pCardUIObject->SetPositionUI(200, 200);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,2);
 		pCardUIObject->SetPositionUI(300, 300);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,3);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,4);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
@@ -1012,6 +1014,66 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 			}
 		}
 	}
+}
+
+void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+{
+	if (SelectedUInum != -1) {
+		float fBoxSize = 200.0f;
+
+
+		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
+		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// 둘 다 해봐
+
+		std::random_device rd;
+		std::default_random_engine dre(rd());
+		std::uniform_real_distribution <float> urd(-1.0, 1.0);
+
+		XMFLOAT3 playerLook = m_pPlayer->GetLook();
+		XMFLOAT3 Vector1;
+		XMFLOAT3 Vector2 = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		XMFLOAT3 planeNormal;
+
+		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
+
+
+		// 외적 계산 (수직인 벡터)
+		switch (SelectedUInum)
+		{
+		case 0:
+		case 1:
+			//Vector1 = m_pPlayer->GetRight();
+			Vector1 = XMFLOAT3(1.0f,0.0f,0.0f);
+			break;
+		case 2:
+		case 3:
+			//Vector1 = m_pPlayer->GetUp();
+			Vector1 = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			break;
+		default:
+			Vector1 = XMFLOAT3(urd(dre), urd(dre), urd(dre));
+			break;
+		}
+		planeNormal = Vector3::CrossProduct(Vector1, Vector2);
+		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
+		cutterObject->SetMesh(0, cutterMesh);
+
+
+		XMFLOAT3 pos = m_pPlayer->GetPosition();
+		pos = Vector3::Add(pos, Vector3::ScalarProduct(playerLook, 500, false));
+		pos.y = pos.y + 200.f;
+		cutterObject->SetPosition(pos);
+
+		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
+
+		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
+		cutterObject->SetShaderType(ShaderType::CObjectsShader);
+
+		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
+		SelectedUInum = -1;
+	}
+	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
 }
 
 void CTestScene::Enter()
@@ -1566,11 +1628,11 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
 
 		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);
-		cutterMesh->SetCutPlaneNormal(planeNormal);
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
+		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
 		cutterObject->SetMesh(0, cutterMesh);
 		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize)));
-		cutterObject->SetAllowCutting(true);
+		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
 		cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);

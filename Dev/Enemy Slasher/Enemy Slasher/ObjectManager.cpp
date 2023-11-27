@@ -26,6 +26,13 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 
 	// 일단 쉐이더 매니저는 항상 모든 쉐이더를 가지고 있음
 
+
+	if (layer == ObjectLayer::Object)
+	{
+		((CDynamicShapeMesh*)((((CInteractiveObject*)object)->GetMeshes()[0])))->SetCuttable(true);
+		((CDynamicShapeObject*)object)->SetCuttable(true);
+	}
+
 	m_pvObjectManager[(int)(layer)].push_back(object);
 }
 
