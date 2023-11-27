@@ -233,55 +233,9 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		{
-			pSelectedUI = NULL;
-
-			POINT ptCursorPos{ 0,0 };
-			GetCursorPos(&ptCursorPos);
-			ScreenToClient(hWnd, &ptCursorPos);
-			CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
-
-			float nearestDist = FLT_MAX;
-
-			vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-			for (const auto& objects : pvObjectList[(int)ObjectLayer::InteractiveUIObject]) {
-				if (CUIObject* pInterObj = dynamic_cast<CUIObject*>(objects)) {
-					float tmin, tmax;
-					if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
-						if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
-							nearestDist = tmin;
-							pSelectedUI = pInterObj;
-						}
-					}
-				}
-			}
-		}
 		break;
 	case WM_LBUTTONUP:
-	{
-		POINT ptCursorPos{ 0,0 };
-		GetCursorPos(&ptCursorPos);
-		ScreenToClient(hWnd, &ptCursorPos);
-		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
-
-		float nearestDist = FLT_MAX;
-
-		vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-		for (const auto& objects : pvObjectList[(int)ObjectLayer::InteractiveUIObject]) {
-			if (CUIObject* pInterObj = dynamic_cast<CUIObject*>(objects)) {
-				float tmin, tmax;
-				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
-					if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
-						nearestDist = tmin;
-						if (pSelectedUI == pInterObj) {
-							//pInterObj->ButtenUp();
-						}
-					}
-				}
-			}
-		}
-	}
-	break;
+		break;
 	case WM_RBUTTONDOWN:
 		break;
 	case WM_RBUTTONUP:
@@ -1024,7 +978,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
 	if (SelectedUInum != -1) {
 		float fBoxSize = 200.0f;
@@ -1081,7 +1035,52 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
 		SelectedUInum = -1;
 	}
-	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
+	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, pFBXLoader, fTimeElapsed);
+}
+
+void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
+	WCHAR text[100];
+	WCHAR objText[] = L"맵 상의 오브젝트 갯수 : ";
+	int textLen = _countof(objText) - 1;
+	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
+	int objCount = objList[(int)ObjectLayer::Object].size();
+	if (objCount == 0) textLen++;
+	while (objCount > 0) {
+		objCount /= 10; textLen++;
+	}
+
+	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::Object].size()));
+
+	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
+	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
+
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		25,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
 
 void CTestScene::Enter()

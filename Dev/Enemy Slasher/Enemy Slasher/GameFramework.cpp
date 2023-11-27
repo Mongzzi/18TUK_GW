@@ -340,6 +340,22 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+	{
+		if (CTitleScene* title = dynamic_cast<CTitleScene*>(m_pScene)) {
+			POINT ptCursorPos{ 0,0 };
+			GetCursorPos(&ptCursorPos);
+			ScreenToClient(hWnd, &ptCursorPos);
+			if (ptCursorPos.x > 400 && ptCursorPos.x < 560 && ptCursorPos.y > 285 && ptCursorPos.y < 320) {
+				if (m_pvScenelist.size() <= ++m_nSceneCounter) m_nSceneCounter = 0;
+				m_pScene = m_pvScenelist[m_nSceneCounter];
+				m_pPlayer = m_pScene->m_pPlayer;
+				m_pCamera = m_pPlayer->GetCamera();
+			}
+			else if (ptCursorPos.x > 400 && ptCursorPos.x < 560 && ptCursorPos.y > 405 && ptCursorPos.y < 440) {
+				::PostQuitMessage(0);
+			}
+		}
+	}
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
@@ -470,7 +486,7 @@ void CGameFramework::BuildObjects()
 	{
 		// m_pvScenelist 에 여러 씬 등록 및 각 씬의 플레이어 생성
 
-		//m_pvScenelist.push_back(new CTitleScene);
+		m_pvScenelist.push_back(new CTitleScene);
 		m_pvScenelist.push_back(new CTestScene);
 		m_pvScenelist.push_back(new CTestScene_Slice);
 		//m_pvScenelist.push_back(new CTestScene_Card);
