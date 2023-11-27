@@ -533,7 +533,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
+	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -594,6 +594,14 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 #endif
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
+
+	{
+		// 플레이어 위치 테레인 위로 이동
+		XMFLOAT3 xmfPlayerPos = m_pPlayer->GetPosition();
+		xmfPlayerPos.y = pTerrain->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
+		m_pPlayer->SetPosition(xmfPlayerPos);
+	}
+
 
 	{
 		//float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
@@ -869,8 +877,21 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			{
 				SetCursor(NULL);
 				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
+				std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+				if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
+					for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
+						if (CInteractiveObject* IterObj = dynamic_cast<CInteractiveObject*>(obj)) {
+							XMFLOAT4X4 playerMat = m_pPlayer->GetWorldMat();
+							XMFLOAT4X4 objMat = IterObj->GetWorldMat();
+							if (true == CollisionCheck(m_pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
+								m_pPlayer->Rotate(-cyDelta, -cxDelta, 0.0f);
+							}
+						}
+					}
+				}
 			}
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
@@ -910,17 +931,37 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-	if (!pvObjectList[(int)ObjectLayer::Terrain].empty() && !pvObjectList[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면
+	
+	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player가 있다면
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
-		XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
-		float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 
-		if (xmfPlayerPos.y < fHeight) {
-			xmfPlayerPos.y = fHeight;
-			pPlayer->SetPosition(xmfPlayerPos);
-			XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
-			xmfVelocity.y = 0.0f;
-			pPlayer->SetVelocity(xmfVelocity);
+		if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
+			for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
+				if (CInteractiveObject* IterObj = dynamic_cast<CInteractiveObject*>(obj)) {
+					XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+					XMFLOAT4X4 playerMat = pPlayer->GetWorldMat();
+					XMFLOAT4X4 objMat = IterObj->GetWorldMat();
+					if (CollisionCheck(pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
+						XMFLOAT3 playerVal = pPlayer->GetVelocity();
+						xmfPlayerPos.x -= (playerVal.x * fTimeElapsed);
+						xmfPlayerPos.z -= (playerVal.z * fTimeElapsed);
+						pPlayer->SetPosition(xmfPlayerPos);
+					}
+				}
+			}
+		}
+
+		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain과 Player가 있다면
+			XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+			float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
+
+			if (xmfPlayerPos.y < fHeight) {
+				xmfPlayerPos.y = fHeight;
+				pPlayer->SetPosition(xmfPlayerPos);
+				XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
+				xmfVelocity.y = 0.0f;
+				pPlayer->SetVelocity(xmfVelocity);
+			}
 		}
 	}
 }
