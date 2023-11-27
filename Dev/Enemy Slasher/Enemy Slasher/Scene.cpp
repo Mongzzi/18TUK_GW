@@ -535,10 +535,18 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			}
 			else
 			{
-				// 카드 사용
-				// 자신 삭제
-				m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
-				cout << "삭제 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+				if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+				{
+					// 카드 사용
+					// 자신 삭제
+					m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
+					cout << "삭제 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+				}
+				else
+				{
+					cout << "사용하지만 삭제는 안 함 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+
+				}
 			}
 			pSelectedUI = NULL;
 		}
