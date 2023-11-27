@@ -145,6 +145,9 @@ private:
 	int m_nReferences = 0;
 
 public:
+	float m_fLifeTime = 0.0f;
+
+public:
 	void AddRef();
 	void Release();
 
@@ -228,21 +231,20 @@ public:
 
 class CInteractiveObject : public CGameObject
 {
-protected:
-	XMFLOAT4X4 m_xmf4x4Rotate;
-
 public:
 	CInteractiveObject(int nMeshes = 1);
 	virtual ~CInteractiveObject();
 
 public:
-	XMFLOAT3 GetAABBMaxPos(int nIndex);
-	XMFLOAT3 GetAABBMinPos(int nIndex);
+	COBBColliderWithMesh* m_pCollider = NULL;
 
 	CMesh** GetMeshes() { return m_ppMeshes; }
 	int GetNumMeshes() { return m_nMeshes; }
+	COBBCollider* GetCollider() { return m_pCollider->GetCollider(); }
 
-	virtual bool CollisionCheck(CGameObject* pOtherObject);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
+public:
+	void MakeCollider(); // 이 함수는 하위 메쉬의 모든 Collider를 포함하는 외부 Collider를 만들어 m_pCollider에 저장한다.
 };
 
 class CDynamicShapeObject : public CInteractiveObject
@@ -264,7 +266,6 @@ public:
 
 public:
 
-	virtual bool CollisionCheck(CGameObject* pOtherObject);
 	vector<CGameObject*> DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject); // 절단된 오브젝트 2개를 리턴한다.
 };
 

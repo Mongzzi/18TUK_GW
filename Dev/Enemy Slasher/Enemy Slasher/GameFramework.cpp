@@ -556,7 +556,7 @@ void CGameFramework::ProcessInput()
 		}
 	}
 
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObjects()
