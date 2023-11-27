@@ -1016,6 +1016,18 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	m_fCurrntScale = m_fTargetScale = 1.0f;
 	SetCamera(pCamera);
+
+	m_iUInum = -1;
+}
+
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
+{
+	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
+
+	m_fCurrntScale = m_fTargetScale = 1.0f;
+	SetCamera(pCamera);
+
+	m_iUInum = UInum;
 }
 
 CUIObject::~CUIObject()
@@ -1116,6 +1128,10 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 }
 
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName, shaderType, UInum)
+{
+}
+
 CCardUIObject::~CCardUIObject()
 {
 }
@@ -1157,13 +1173,27 @@ void CCardUIObject::ButtenDown()
 
 void CCardUIObject::ButtenUp()
 {
-	// 만약 선택상태라면
-		// 현재 위치를 검사해 작동한다.
+	// 모든 카드는 공격카드
+	switch (m_iUInum)
+	{
+	case 0:
+		// 세로로 절단
+		break;
+	case 1:
+		// 가로 절단
+		break;
+	case 2:
+		// 랜덤 절단
+		break;
+	case 3:
+		// 이동 후 절단.
+		// 이동은 가장 가까운 오브젝트를 향함.
+		break;
+	case 4:
 
-		// Hand Area
-
-		// Play Area
-	
-		
-	// 항상 선택 상태가 해제된다.
+		break;
+	default:
+		break;
+	}
+	cout<< m_iUInum <<endl;
 }

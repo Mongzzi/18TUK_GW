@@ -111,12 +111,16 @@ public:
 
 	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
 	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
 	virtual void Enter();
 	virtual void Exit();
 
 private:
 	CUIObject* pCoveredUI = NULL;
 	CUIObject* pSelectedUI = NULL;
+
+	// юс╫ц
+	int SelectedUInum;
 
 };
 
