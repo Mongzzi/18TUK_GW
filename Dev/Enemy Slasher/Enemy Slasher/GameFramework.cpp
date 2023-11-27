@@ -470,7 +470,7 @@ void CGameFramework::BuildObjects()
 	{
 		// m_pvScenelist 에 여러 씬 등록 및 각 씬의 플레이어 생성
 
-		m_pvScenelist.push_back(new CTitleScene);
+		//m_pvScenelist.push_back(new CTitleScene);
 		m_pvScenelist.push_back(new CTestScene);
 		m_pvScenelist.push_back(new CTestScene_Slice);
 		//m_pvScenelist.push_back(new CTestScene_Card);
@@ -581,7 +581,7 @@ void CGameFramework::DynamicShaping()
 
 		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-		if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList, fTimeElapsed);
+		if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader, fTimeElapsed);
 
 		m_pd3dCommandList->Close();
 		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };

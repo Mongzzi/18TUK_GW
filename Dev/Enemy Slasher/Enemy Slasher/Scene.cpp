@@ -151,7 +151,7 @@ void CBasicScene::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 }
 
-void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
 	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
 }
@@ -1346,6 +1346,25 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 {
 	switch (nMessageID)
 	{
+	case WM_LBUTTONDOWN:
+		if (true == m_bCutterMode) {
+			m_bAddMouseCutter = false;
+			m_pCutStartPos = { 0,0 };
+			m_pCutEndPos = { 0,0 };
+			GetCursorPos(&m_pCutStartPos);
+			ScreenToClient(hWnd, &m_pCutStartPos);
+			m_bStartCutting = true;
+		}
+		break;
+	case WM_LBUTTONUP:
+		if (true == m_bCutterMode && true == m_bStartCutting) {
+			GetCursorPos(&m_pCutEndPos);
+			ScreenToClient(hWnd, &m_pCutEndPos);
+			if (m_pCutStartPos.x != m_pCutEndPos.x && m_pCutStartPos.y != m_pCutEndPos.y)
+				m_bAddMouseCutter = true;
+			m_bStartCutting = false;
+		}
+		break;
 	case WM_RBUTTONDOWN:
 		{
 			m_pSelectedObj = NULL;
@@ -1399,6 +1418,9 @@ bool CTestScene_Slice::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+		case 'c': case'C': m_bCutterMode = !m_bCutterMode; break;
+		case 'p': case'P': m_bCutAlgorithm = !m_bCutAlgorithm; break;
+		case 'm': case 'M': m_bResetFlag = true; break;
 
 		case VK_SPACE:
 			if (false == m_bAddCutter) {
@@ -1437,34 +1459,36 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	{
 		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		//CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
-		pFBXObject->SetPosition(50.0f, 20.0f, 100.0f);
+		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
+		//pFBXObject->SetScale(0.5f, 0.5f, 0.5f);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 	}
 
 	{
-		CBoxMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList);
-		CDynamicShapeObject * newObject = new CDynamicShapeObject;
-		newObject->SetMesh(0, pBoxMesh);
-		newObject->SetPosition(200.0f, 0.0f, 100.0f);
-		newObject->Rotate(45.0f, 45.0f, 45.0f);
-		newObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+		//CBoxMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList);
+		//CDynamicShapeObject * newObject = new CDynamicShapeObject;
+		//newObject->SetMesh(0, pBoxMesh);
+		//newObject->SetPosition(200.0f, 0.0f, 100.0f);
+		//newObject->Rotate(45.0f, 45.0f, 45.0f);
+		//newObject->SetShaderType(ShaderType::CObjectsShader);
+		//m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
 
-		newObject = new CDynamicShapeObject;
-		newObject->SetMesh(0, pBoxMesh);
-		newObject->SetPosition(200.0f, 0.0f, 200.0f);
-		newObject->Rotate(45.0f, 45.0f, 45.0f);
-		newObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+		//newObject = new CDynamicShapeObject;
+		//newObject->SetMesh(0, pBoxMesh);
+		//newObject->SetPosition(200.0f, 0.0f, 200.0f);
+		//newObject->Rotate(45.0f, 45.0f, 45.0f);
+		//newObject->SetShaderType(ShaderType::CObjectsShader);
+		//m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
 
-		newObject = new CDynamicShapeObject;
-		newObject->SetMesh(0, pBoxMesh);
-		newObject->SetPosition(200.0f, 0.0f, 300.0f);
-		newObject->Rotate(0.0f, 0.0f, 0.0f);
-		newObject->SetShaderType(ShaderType::CObjectsShader);
-		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+		//newObject = new CDynamicShapeObject;
+		//newObject->SetMesh(0, pBoxMesh);
+		//newObject->SetPosition(200.0f, 0.0f, 300.0f);
+		//newObject->Rotate(0.0f, 0.0f, 0.0f);
+		//newObject->SetShaderType(ShaderType::CObjectsShader);
+		//m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
 	}
 
 	{
@@ -1499,9 +1523,11 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 		if (cxDelta || cyDelta)
 		{
 			if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-				SetCursor(NULL);
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+				if (false == m_bCutterMode) {
+					SetCursor(NULL);
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+					SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+				}
 			}
 
 			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // 우클릭시 오브젝트를 잡아서 이동
@@ -1548,7 +1574,7 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 #endif // DEBUG
 }
 
-void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
 	if (m_bAddCutter) {
 		m_bAddCutter = false;
@@ -1575,7 +1601,47 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
 	}
-	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
+	if (m_bCutterMode && m_bAddMouseCutter) {
+		m_bAddMouseCutter = false;
+		float fBoxSize = 100.0f;
+		CRay r = r.RayAtWorldSpace(m_pCutStartPos.x, m_pCutStartPos.y, m_pPlayer->GetCamera());
+		CRay r2 = r2.RayAtWorldSpace(m_pCutEndPos.x, m_pCutEndPos.y, m_pPlayer->GetCamera());
+		XMFLOAT3 ray_origin = r.GetOriginal();
+		XMFLOAT3 ray_dir = r.GetDir();
+		XMFLOAT3 ray2_dir = r2.GetDir();
+
+		XMFLOAT3 rayVec = Vector3::Subtract(ray_dir, ray2_dir);
+		// 외적 계산 (수직인 벡터)
+		XMFLOAT3 planeNormal = Vector3::CrossProduct(rayVec, ray_dir);
+		rayVec = Vector3::Add(ray_dir, ray2_dir);
+		rayVec = Vector3::Normalize(rayVec);
+
+		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);
+		cutterMesh->SetCutPlaneNormal(planeNormal);
+		cutterObject->SetMesh(0, cutterMesh);
+		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(rayVec, fBoxSize)));
+		cutterObject->SetAllowCutting(true);
+		cutterObject->SetShaderType(ShaderType::CObjectsShader);
+
+		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
+	}
+
+	if (m_bResetFlag) {
+		m_bResetFlag = false;
+		m_pObjectManager->ClearLayer(ObjectLayer::Object);
+
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
+		pFBXObject->SetCuttable(true);
+		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
+	if(true == m_bCutAlgorithm)
+		m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::Push);
+	else
+		m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::ConvexHull);
 }
 
 void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
@@ -1589,13 +1655,23 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
 
-	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"CTestScene_Slice의 Render2D 입니다.";
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
+	WCHAR text[100];
+	WCHAR objText[] = L"맵 상의 오브젝트 갯수 : ";
+	int textLen = _countof(objText) - 1;
+	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
+	int objCount = objList[(int)ObjectLayer::Object].size();
+	if (objCount == 0) textLen++;
+	while (objCount > 0) {
+		objCount /= 10; textLen++;
+	}
+
+	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::Object].size()));
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
 
-	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), mSolidColorBrush.GetAddressOf()));
 	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
 		L"Verdana",
 		nullptr,
@@ -1610,7 +1686,66 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+
+	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 1, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 2);
+	WCHAR objText3[] = L"소멸 대기 오브젝트 갯수 : ";
+	textLen = _countof(objText3) - 1;
+	objCount = objList[(int)ObjectLayer::TemporaryObject].size();
+	if (objCount == 0) textLen++;
+	while (objCount > 0) {
+		objCount /= 10; textLen++;
+	}
+	wsprintf(text, L"%s%d", objText3, (int)(objList[(int)ObjectLayer::TemporaryObject].size()));
+	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+
+
+
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		20,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 3, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 4);
+	WCHAR objText2[] = L"현재 모드 (C를 눌러 변경) : ";
+	textLen = _countof(objText2) - 1;
+	if (true == m_bCutterMode)
+	{
+		wsprintf(text, L"%s%s", objText2, L"절단모드");
+		textLen += 5;
+	}
+	else {
+		wsprintf(text, L"%s%s", objText2, L"카메라모드");
+		textLen += 6;
+	}
+	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+
+	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 4, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 5);
+	WCHAR objText4[] = L"절단 알고리즘 (P를 눌러 변경) : ";
+	textLen = _countof(objText4) - 1;
+	if (true == m_bCutAlgorithm)
+	{
+		wsprintf(text, L"%s%s", objText4, L"Push");
+		textLen += 5;
+	}
+	else {
+		wsprintf(text, L"%s%s", objText4, L"ConvexHull");
+		textLen += 11;
+	}
+	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+
+	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 5, FRAME_BUFFER_WIDTH / 14 * 3, FRAME_BUFFER_HEIGHT / 14 * 6);
+	WCHAR objText5[] = L"초기화 (M)";
+	textLen = _countof(objText5) - 1;
+	pd2dDeviceContext->DrawText(objText5, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
 
 void CTestScene_Slice::Enter()

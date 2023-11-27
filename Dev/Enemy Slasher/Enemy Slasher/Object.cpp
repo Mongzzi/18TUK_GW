@@ -564,7 +564,7 @@ CDynamicShapeObject::~CDynamicShapeObject()
 {
 }
 
-vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject)
+vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
 {
 	CDynamicShapeObject* pDynamicShapeObject = static_cast<CDynamicShapeObject*>(pCutterObject);
 
@@ -588,7 +588,7 @@ vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevic
 			for (int j = 0; j < nCutterMeshes; ++j) {
 				if (CollisionCheck(ppMeshes[i]->GetCollider(), myWorldMat, ppCutterMeshes[j]->GetCollider(), otherWorldMat)) {
 					// 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
-					vector<CMesh*> vRetVec = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat, CDynamicShapeMesh::CutAlgorithm::Push);
+					vector<CMesh*> vRetVec = ppMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, m_xmf4x4World, ppCutterMeshes[j], pxmfCutterMat, cutAlgorithm);
 					newMeshs.insert(newMeshs.end(), vRetVec.begin(), vRetVec.end());
 				}
 			}

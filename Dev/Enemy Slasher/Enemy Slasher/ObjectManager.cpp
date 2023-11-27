@@ -31,14 +31,25 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 
 void CObjectManager::DelObj(CGameObject* object, ObjectLayer layer)
 {
+	delete object;
 	std::vector<CGameObject*>* target = &(m_pvObjectManager[(int)layer]);
 	target->erase(remove(target->begin(), target->end(), object), target->end());
 }
 
 void CObjectManager::DelObj(CGameObject* object)
 {
+	delete object;
 	for (auto& target : m_pvObjectManager) {
 		target.erase(remove(target.begin(), target.end(), object), target.end());
+	}
+}
+
+void CObjectManager::ClearLayer(ObjectLayer layer)
+{
+	std::vector<CGameObject*>* target = &(m_pvObjectManager[(int)layer]);
+	while (false == target->empty()) {
+		delete target->back();
+		target->pop_back();
 	}
 }
 
@@ -63,7 +74,7 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
@@ -89,7 +100,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 						XMFLOAT4X4 objectWorldMat = pDynamicShapeObject->GetWorldMat();
 						XMFLOAT4X4 cutterWorldMat = pCutter->GetWorldMat();
 						if (CollisionCheck(pDynamicShapeObject->GetCollider(), objectWorldMat, pCutter->GetCollider(), cutterWorldMat)) {
-							 vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pCutter);
+							 vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pCutter, cutAlgorithm);
 
 							if (false == vRetVec.empty()) { // 절단에 성공했다면 데이터를 준비한다.
 								newObjects.insert(newObjects.end(), vRetVec.begin(), vRetVec.end());

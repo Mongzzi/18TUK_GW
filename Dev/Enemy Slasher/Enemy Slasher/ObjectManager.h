@@ -39,8 +39,10 @@ public:
 	void DelObj(CGameObject* object, ObjectLayer layer);
 	void DelObj(CGameObject* object);
 
+	void ClearLayer(ObjectLayer layer);
+
 	void AnimateObjects(float fTimeElapsed);
-	void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed);
+	void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh::CutAlgorithm cutAlgorithm = CDynamicShapeMesh::CutAlgorithm::Push);
 
 	void ReleaseObjects();
 	void ReleaseUploadBuffers();
