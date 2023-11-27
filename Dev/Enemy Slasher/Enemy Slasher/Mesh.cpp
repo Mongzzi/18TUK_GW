@@ -141,7 +141,7 @@ void CColliderMesh::CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 {
 	if (m_pVertices) {
 		if (m_pCollider) delete m_pCollider;
-		m_pCollider = new CAABBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+		m_pCollider = new COBBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
 	}
 }
 
@@ -454,35 +454,13 @@ bool CDynamicShapeMesh::IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT
 	return result > 0.0f;
 }
 
-
-bool CDynamicShapeMesh::CollisionCheck(CColliderMesh* pOtherMesh)
-{
-	// 이 함수는 단순 충돌체크가 아닌
-	// 자신이 잘릴 수 있고 OtherMesh가 절단 가능할 때 세부 충돌체크를 하고 true를 반환하는 함수이다.
-	// 이름을 변경할 수도 있다
-
-	if (CCutterMesh* pCutterMesh = dynamic_cast<CCutterMesh*>(pOtherMesh)) { // OtherMesh가 CutterMesh 라면
-		// 절단할 수 있는 충돌체크를 한다.
-		// 자신이 잘릴 수 있고 OtherMesh가 절단 가능하다면
-		if (m_bCuttable) {
-			// 세부 충돌체크 있으면 좋음
-
-			if (true) { // Mesh 단위로 충돌한다면 절단한다.
-				return true;
-				//return DynamicShaping(pDynamicShapeMesh);
-			}
-		}
-	}
-	return false;
-}
-
-vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat, int DynamicShapeAlgorithm)
+vector<CMesh*> CDynamicShapeMesh::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat, CutAlgorithm DynamicShapeAlgorithm)
 {
 	switch (DynamicShapeAlgorithm)
 	{
-	case DSM_ALGORITHM_PUSH:
+	case CutAlgorithm::Push:
 		return DynamicShaping_Push(pd3dDevice, pd3dCommandList, fTimeElapsed, mxf4x4ThisMat, pCutterMesh, xmf4x4CutterMat);
-	case DSM_ALGORITHM_CONVEXHULL:
+	case CutAlgorithm::ConvexHull:
 		return DynamicShaping_ConvexHull(pd3dDevice, pd3dCommandList, fTimeElapsed, mxf4x4ThisMat, pCutterMesh, xmf4x4CutterMat);
 	default:
 		break;

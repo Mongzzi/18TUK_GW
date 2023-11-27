@@ -233,7 +233,55 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		{
+			pSelectedUI = NULL;
+
+			POINT ptCursorPos{ 0,0 };
+			GetCursorPos(&ptCursorPos);
+			ScreenToClient(hWnd, &ptCursorPos);
+			CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+
+			float nearestDist = FLT_MAX;
+
+			vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+			for (const auto& objects : pvObjectList[(int)ObjectLayer::InteractiveUIObject]) {
+				if (CUIObject* pInterObj = dynamic_cast<CUIObject*>(objects)) {
+					float tmin, tmax;
+					if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
+						if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
+							nearestDist = tmin;
+							pSelectedUI = pInterObj;
+						}
+					}
+				}
+			}
+		}
 		break;
+	case WM_LBUTTONUP:
+	{
+		POINT ptCursorPos{ 0,0 };
+		GetCursorPos(&ptCursorPos);
+		ScreenToClient(hWnd, &ptCursorPos);
+		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+
+		float nearestDist = FLT_MAX;
+
+		vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+		for (const auto& objects : pvObjectList[(int)ObjectLayer::InteractiveUIObject]) {
+			if (CUIObject* pInterObj = dynamic_cast<CUIObject*>(objects)) {
+				float tmin, tmax;
+				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
+					if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
+						nearestDist = tmin;
+						if (pSelectedUI == pInterObj) {
+							//pInterObj->ButtenUp();
+						}
+					}
+				}
+			}
+		}
+	}
+	break;
 	case WM_RBUTTONDOWN:
 		break;
 	case WM_RBUTTONUP:
@@ -269,8 +317,8 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 	}
 
@@ -285,14 +333,14 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	{
 		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, 100, 100, 1000);
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), NULL, ShaderType::CUIObjectsShader);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), PEASANT_1_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetMesh(0, pBox);
 		pCardUIObject->SetPositionUI(480, 300);
 		pCardUIObject->SetScale(1, 1, 1);
 		pCardUIObject->SetShaderType(ShaderType::CUIObjectsShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), NULL, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), PEASANT_1_FBX, ShaderType::CUIObjectsShader);
 		pCardUIObject->SetMesh(0, pBox);
 		pCardUIObject->SetPositionUI(480, 420);
 		pCardUIObject->SetScale(1, 1, 1);
@@ -476,6 +524,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_RBUTTONUP:
 		if (pSelectedUI)
 		{
+			SelectedUInum = pSelectedUI->GetUInum();
 			pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
@@ -533,11 +582,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 2000.0f, 0.0f));
+	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
-
+	// 임시
+	SelectedUInum = -1;
 
 	// ------------------------------------       큐브 메쉬      -------------------------------
 
@@ -594,6 +644,14 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 #endif
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
+
+	{
+		// 플레이어 위치 테레인 위로 이동
+		XMFLOAT3 xmfPlayerPos = m_pPlayer->GetPosition();
+		xmfPlayerPos.y = pTerrain->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
+		m_pPlayer->SetPosition(xmfPlayerPos);
+	}
+
 
 	{
 		//float fTerrainWidth = pTerrain->GetWidth(), fTerrainLength = pTerrain->GetLength();
@@ -757,27 +815,27 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pUIObject->SetScale(1000, 100, 1);
 		m_pObjectManager->AddObj(pUIObject, ObjectLayer::UIObject);
 
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader, 0);
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,1);
 		pCardUIObject->SetPositionUI(200, 200);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,2);
 		pCardUIObject->SetPositionUI(300, 300);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,3);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,4);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetScale(2, 2, 1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
@@ -869,8 +927,21 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			{
 				SetCursor(NULL);
 				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
+				std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+				if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
+					for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
+						if (CInteractiveObject* IterObj = dynamic_cast<CInteractiveObject*>(obj)) {
+							XMFLOAT4X4 playerMat = m_pPlayer->GetWorldMat();
+							XMFLOAT4X4 objMat = IterObj->GetWorldMat();
+							if (true == CollisionCheck(m_pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
+								m_pPlayer->Rotate(-cyDelta, -cxDelta, 0.0f);
+							}
+						}
+					}
+				}
 			}
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
@@ -910,19 +981,99 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-	if (!pvObjectList[(int)ObjectLayer::Terrain].empty() && !pvObjectList[(int)ObjectLayer::Player].empty()) { // Terrain과 Player가 있다면
+	
+	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player가 있다면
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
-		XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
-		float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 
-		if (xmfPlayerPos.y < fHeight) {
-			xmfPlayerPos.y = fHeight;
-			pPlayer->SetPosition(xmfPlayerPos);
-			XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
-			xmfVelocity.y = 0.0f;
-			pPlayer->SetVelocity(xmfVelocity);
+		if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
+			for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
+				if (CInteractiveObject* IterObj = dynamic_cast<CInteractiveObject*>(obj)) {
+					XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+					XMFLOAT4X4 playerMat = pPlayer->GetWorldMat();
+					XMFLOAT4X4 objMat = IterObj->GetWorldMat();
+					if (CollisionCheck(pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
+						XMFLOAT3 playerVal = pPlayer->GetVelocity();
+						xmfPlayerPos.x -= (playerVal.x * fTimeElapsed);
+						xmfPlayerPos.z -= (playerVal.z * fTimeElapsed);
+						pPlayer->SetPosition(xmfPlayerPos);
+					}
+				}
+			}
+		}
+
+		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain과 Player가 있다면
+			XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+			float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
+
+			if (xmfPlayerPos.y < fHeight) {
+				xmfPlayerPos.y = fHeight;
+				pPlayer->SetPosition(xmfPlayerPos);
+				XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
+				xmfVelocity.y = 0.0f;
+				pPlayer->SetVelocity(xmfVelocity);
+			}
 		}
 	}
+}
+
+void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
+{
+	if (SelectedUInum != -1) {
+		float fBoxSize = 200.0f;
+
+
+		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
+		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// 둘 다 해봐
+
+		std::random_device rd;
+		std::default_random_engine dre(rd());
+		std::uniform_real_distribution <float> urd(-1.0, 1.0);
+
+		XMFLOAT3 playerLook = m_pPlayer->GetLook();
+		XMFLOAT3 Vector1;
+		XMFLOAT3 Vector2 = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		XMFLOAT3 planeNormal;
+
+		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
+
+
+		// 외적 계산 (수직인 벡터)
+		switch (SelectedUInum)
+		{
+		case 0:
+		case 1:
+			//Vector1 = m_pPlayer->GetRight();
+			Vector1 = XMFLOAT3(1.0f,0.0f,0.0f);
+			break;
+		case 2:
+		case 3:
+			//Vector1 = m_pPlayer->GetUp();
+			Vector1 = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			break;
+		default:
+			Vector1 = XMFLOAT3(urd(dre), urd(dre), urd(dre));
+			break;
+		}
+		planeNormal = Vector3::CrossProduct(Vector1, Vector2);
+		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
+		cutterObject->SetMesh(0, cutterMesh);
+
+
+		XMFLOAT3 pos = m_pPlayer->GetPosition();
+		pos = Vector3::Add(pos, Vector3::ScalarProduct(playerLook, 500, false));
+		pos.y = pos.y + 200.f;
+		cutterObject->SetPosition(pos);
+
+		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
+
+		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
+		cutterObject->SetShaderType(ShaderType::CObjectsShader);
+
+		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
+		SelectedUInum = -1;
+	}
+	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed);
 }
 
 void CTestScene::Enter()
@@ -1341,7 +1492,7 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, NULL, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
-		m_pPlayer->SetPosition(XMFLOAT3(0.0f, -100.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 	}
@@ -1350,8 +1501,32 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
-		pFBXObject->SetPosition(50.0f, 40.0f, 100.0f);
+		pFBXObject->SetPosition(50.0f, 20.0f, 100.0f);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
+	{
+		CBoxMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList);
+		CDynamicShapeObject * newObject = new CDynamicShapeObject;
+		newObject->SetMesh(0, pBoxMesh);
+		newObject->SetPosition(200.0f, 0.0f, 100.0f);
+		newObject->Rotate(45.0f, 45.0f, 45.0f);
+		newObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+
+		newObject = new CDynamicShapeObject;
+		newObject->SetMesh(0, pBoxMesh);
+		newObject->SetPosition(200.0f, 0.0f, 200.0f);
+		newObject->Rotate(45.0f, 45.0f, 45.0f);
+		newObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+
+		newObject = new CDynamicShapeObject;
+		newObject->SetMesh(0, pBoxMesh);
+		newObject->SetPosition(200.0f, 0.0f, 300.0f);
+		newObject->Rotate(0.0f, 0.0f, 0.0f);
+		newObject->SetShaderType(ShaderType::CObjectsShader);
+		m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
 	}
 
 	{
@@ -1415,8 +1590,24 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 
-	for (const auto& object : pvObjectList[(int)ObjectLayer::CutterObject])
-		object->MoveStrafe(0.2);
+#ifdef _DEBUG
+	std::vector<CGameObject*> pvOL = pvObjectList[(int)ObjectLayer::Object];
+	if (pvOL.size() < 2) return;
+	XMFLOAT4X4 MatA, MatB;
+	for (int i = 0; i < pvOL.size() - 1; ++i) {
+		if (CInteractiveObject* ObjA = dynamic_cast<CInteractiveObject*>(pvOL[i])) {
+			for (int j = i + 1; j < pvOL.size(); ++j) {
+				if (CInteractiveObject* ObjB = dynamic_cast<CInteractiveObject*>(pvOL[j])) {
+					MatA = ObjA->GetWorldMat();
+					MatB = ObjB->GetWorldMat();
+					if (CollisionCheck(ObjA->GetCollider(), MatA, ObjB->GetCollider(), MatB)) {
+						//cout << "Collision! ObjectNum = " << i << '\t' << j << '\n';
+					}
+				}
+			}
+		}
+	}
+#endif // DEBUG
 }
 
 void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed)
@@ -1437,11 +1628,11 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
 
 		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);
-		cutterMesh->SetCutPlaneNormal(planeNormal);
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
+		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
 		cutterObject->SetMesh(0, cutterMesh);
 		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize)));
-		cutterObject->SetAllowCutting(true);
+		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
 		cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);

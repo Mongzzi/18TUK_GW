@@ -1,6 +1,6 @@
 #pragma once
 #include "Vertex.h"
-#include "Collider.h"
+#include "ColliderWithMesh.h"
 #include "FbxLoader.h"
 #include "BoundingBox.h"
 #include "Ray.h"
@@ -61,18 +61,17 @@ class CColliderMesh : public CMesh
 {
 public:
 	CColliderMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	~CColliderMesh();
+	virtual ~CColliderMesh();
 
-protected:
-	CAABBColliderWithMesh* m_pCollider = NULL;
+public:
+	COBBColliderWithMesh* m_pCollider = NULL;
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderAABB = false);
 
-	virtual CAABBColliderWithMesh* GetCollider() { return m_pCollider; }
+	virtual COBBCollider* GetCollider() { return m_pCollider->GetCollider(); };
 
 public:
-	virtual bool CollisionCheck(CColliderMesh* pOtherObject) = 0;
 	virtual void CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
@@ -139,10 +138,12 @@ public:
 	XMFLOAT3 TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xmf4x4Mat);
 	bool IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint);
 public:
-	virtual bool CollisionCheck(CColliderMesh* pOtherMesh);
-#define DSM_ALGORITHM_PUSH 0
-#define DSM_ALGORITHM_CONVEXHULL 1
-	vector<CMesh*> DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat, int DynamicShapeAlgorithm = 0); // 절단된 CMesh 2개 배열을 리턴한다.
+	enum class CutAlgorithm : int {
+		Push,
+		ConvexHull
+	};
+
+	vector<CMesh*> DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat, CutAlgorithm DynamicShapeAlgorithm = CutAlgorithm::Push); // 절단된 CMesh 2개 배열을 리턴한다.
 	vector<CMesh*> DynamicShaping_Push(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
 	vector<CMesh*> DynamicShaping_ConvexHull(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
 };

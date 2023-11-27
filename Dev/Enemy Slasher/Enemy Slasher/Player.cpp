@@ -242,10 +242,17 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) :CPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
 {
-	ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
+
+void TestPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	//Update(fTimeElapsed);
+	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
+	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
+}
 
 CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
@@ -278,13 +285,13 @@ CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case THIRD_PERSON_CAMERA:
-		SetFriction(20.5f);
+		SetFriction(300.5f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(25.5f);
-		SetMaxVelocityY(20.0f);
+		SetMaxVelocityXZ(500.5f);
+		SetMaxVelocityY(300.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 150.0f, -300.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1000.0f, -700.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);

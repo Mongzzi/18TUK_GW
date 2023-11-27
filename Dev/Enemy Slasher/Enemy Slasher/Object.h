@@ -145,6 +145,9 @@ private:
 	int m_nReferences = 0;
 
 public:
+	float m_fLifeTime = 0.0f;
+
+public:
 	void AddRef();
 	void Release();
 
@@ -228,21 +231,20 @@ public:
 
 class CInteractiveObject : public CGameObject
 {
-protected:
-	XMFLOAT4X4 m_xmf4x4Rotate;
-
 public:
 	CInteractiveObject(int nMeshes = 1);
 	virtual ~CInteractiveObject();
 
 public:
-	XMFLOAT3 GetAABBMaxPos(int nIndex);
-	XMFLOAT3 GetAABBMinPos(int nIndex);
+	COBBColliderWithMesh* m_pCollider = NULL;
 
 	CMesh** GetMeshes() { return m_ppMeshes; }
 	int GetNumMeshes() { return m_nMeshes; }
+	COBBCollider* GetCollider() { return m_pCollider->GetCollider(); }
 
-	virtual bool CollisionCheck(CGameObject* pOtherObject);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
+public:
+	void MakeCollider(); // 이 함수는 하위 메쉬의 모든 Collider를 포함하는 외부 Collider를 만들어 m_pCollider에 저장한다.
 };
 
 class CDynamicShapeObject : public CInteractiveObject
@@ -264,7 +266,6 @@ public:
 
 public:
 
-	virtual bool CollisionCheck(CGameObject* pOtherObject);
 	vector<CGameObject*> DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject); // 절단된 오브젝트 2개를 리턴한다.
 };
 
@@ -350,6 +351,7 @@ class CUIObject : public CFBXObject
 {
 public:
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum);
 	virtual ~CUIObject();
 protected:
 	static constexpr float TARGET_SCALE = 1.5f;
@@ -365,6 +367,7 @@ protected:
 
 	XMFLOAT3 m_xmfScale;
 
+	int m_iUInum;
 public:
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };
 
@@ -376,6 +379,7 @@ public:
 	void AddPositionUI(POINT pos);
 
 	POINT GetPositionUI() { return POINT(m_iXPosition, m_iYPosition); }
+	int GetUInum() { return m_iUInum; };
 
 	// 계속 불리는 함수
 	virtual void CursorOverObject(bool flag) = 0;
@@ -391,6 +395,7 @@ class CCardUIObject : public CUIObject
 {
 public:
 	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum);
 	virtual ~CCardUIObject();
 protected:
 
