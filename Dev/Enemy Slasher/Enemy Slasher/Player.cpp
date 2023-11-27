@@ -242,14 +242,14 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) :CPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
 {
-	ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 
 void TestPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-	Update(fTimeElapsed);
+	//Update(fTimeElapsed);
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
 }
