@@ -250,3 +250,28 @@
 
     - 다음 주 할 작업
     > LoadingScnen 추가 및 스레드로 Loading 구현\
+
++ 11월 넷째 주 ( 11월 24일 ~ 11월 30일)
+    - 이번 주 한 작업
+    > TitleScene 추가\
+    > ┗ 클릭반응으로 MainScene으로 변환 추가\
+    > CutTestScene 구성\
+    > 기존 Scene 카메라 위치 변경 (숄더뷰 -> 쿼터뷰)\
+    > RAY 충돌체크 코드를 XMVECTOR를 사용하여 최적화\
+    > ObjectManager 외부에 있던 오브젝트 조작관련 함수를 ObjectManager 내부로 이동\
+    > 오브젝트 절단관련 기능 확장 및 추가\
+    > ┗ DynamicShape 함수들의 반환값 변경 (class** -> vector<class*>)\
+    > ┗ 절단시 평면에 평행하게 절단이 일어날 경우 발생하는 단일 평면 Mesh가 생성되지 않도록 수정\
+    > ┗ 오브젝트 절단평면 생성 알고리즘 추가 (ConvexHull)\
+    > ┗ 마우스 드레그에 따른 오브젝트 절단 추가\
+    > 충돌관련 변경 및 추가사항\
+    > ┗ 충돌박스를 랜더링하는 Collider를 ColliderWithMesh.h로 분리\
+    > ┗ 기본 충돌체크 함수 위치 변경 (각 class 내부 -> Collision.h)\
+    > ┗ OBB 충돌체크 추가\
+    > ┗ 배치된 오브젝트간의 충돌 구현\
+    > ┗ 카메라와 오브젝트간의 충돌 구현
+
+
+    - 다음 주 할 작업
+    > PhysX 를 사용하여 물리엔진 추가\
+    > LoadingScnen 추가 및 스레드로 Loading 구현
