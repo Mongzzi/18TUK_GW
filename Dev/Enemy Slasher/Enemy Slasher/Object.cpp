@@ -652,7 +652,7 @@ void CRotatingNormalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3
 	UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
 
 	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	m_pcbMappedGameObject->m_nMaterial = m_pMaterial->m_nReflection;
+	//m_pcbMappedGameObject->m_nMaterial = m_pMaterial->m_nReflection;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObject->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(1, d3dGpuVirtualAddress);

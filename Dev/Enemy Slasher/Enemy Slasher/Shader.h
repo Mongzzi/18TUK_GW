@@ -11,7 +11,8 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CObjectNormalShader,
 	CTerrainShader,
 	CTextShader,
-	CTextureShader
+	CTextureShader,
+	Count
 };
 
 
