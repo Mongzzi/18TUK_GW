@@ -120,9 +120,9 @@ public:
 	UINT m_nReflection = 0;
 	
 	//재질을 적용하여 렌더링을 하기 위한 쉐이더
-	ShaderType m_ShaderType;
 
 	CTexture* m_pTexture = NULL;
+	ShaderType m_ShaderType;
 
 	void SetAlbedo(XMFLOAT4& xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
