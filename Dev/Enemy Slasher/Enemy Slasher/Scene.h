@@ -205,3 +205,6 @@ protected:
 	CInteractiveObject* m_pSelectedObj = NULL;
 
 };
+
+
+

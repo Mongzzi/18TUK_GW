@@ -454,7 +454,7 @@ CTestScene::~CTestScene()
 
 bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	POINT ptCursorPos{ 0,0 }; 
+	POINT ptCursorPos{ 0,0 };
 	GetCursorPos(&ptCursorPos);
 	ScreenToClient(hWnd, &ptCursorPos);
 	RECT clientRect;
@@ -518,10 +518,10 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		//case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
-		//case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
-		//case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
-		//case 'D': m_pPlayer->Move(DIR_RIGHT, m_pPlayer->GetMoveSpeed(), true); break;
+			//case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
+			//case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
+			//case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
+			//case 'D': m_pPlayer->Move(DIR_RIGHT, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'Q': m_pPlayer->Move(DIR_UP, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
@@ -675,133 +675,168 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		//	}
 		//}
 	}
-	// house
-	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, HOUSE_FBX, ShaderType::CObjectsShader);
-		float xPosition = 257.0f / 4.0f * 24.0f;
-		float zPosition = 257.0f / 4.0f * 24.0f;
-		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//// house
+	//{
+	//	CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, HOUSE_FBX, ShaderType::CObjectsShader);
+	//	float xPosition = 257.0f / 4.0f * 24.0f;
+	//	float zPosition = 257.0f / 4.0f * 24.0f;
+	//	float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 
-		pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	}
+	//	pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//	m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	//}
 
-	// tree
-	{
-		CFBXObject* pFBXObject = NULL;
+	//// tree
+	//{
+	//	CFBXObject* pFBXObject = NULL;
 
 
-		float xpitch = 257.0f * 24.0f / 10.0f;
-		float zpitch = 257.0f * 24.0f / 7.0f;
+	//	float xpitch = 257.0f * 24.0f / 10.0f;
+	//	float zpitch = 257.0f * 24.0f / 7.0f;
 
-		for (int x = 0; x < 10; x++)
-		{
-			for (int z = 0; z < 7; z++)
-			{
-				if (x % 5 == 0) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
-					float xPosition = x * xpitch;
-					float zPosition = z * zpitch;
-					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
-					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-				}
-				else if (x % 5 == 1) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
-					float xPosition = x * xpitch;
-					float zPosition = z * zpitch;
-					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+	//	for (int x = 0; x < 10; x++)
+	//	{
+	//		for (int z = 0; z < 7; z++)
+	//		{
+	//			if (x % 5 == 0) {
+	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
+	//				float xPosition = x * xpitch;
+	//				float zPosition = z * zpitch;
+	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	//			}
+	//			else if (x % 5 == 1) {
+	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
+	//				float xPosition = x * xpitch;
+	//				float zPosition = z * zpitch;
+	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-				}
-				else if (x % 5 == 2) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5, ShaderType::CObjectsShader);
-					float xPosition = x * xpitch;
-					float zPosition = z * zpitch;
-					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	//			}
+	//			else if (x % 5 == 2) {
+	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5, ShaderType::CObjectsShader);
+	//				float xPosition = x * xpitch;
+	//				float zPosition = z * zpitch;
+	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-				}
-				else if (x % 5 == 3) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2, ShaderType::CObjectsShader);
-					float xPosition = x * xpitch;
-					float zPosition = z * zpitch;
-					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	//			}
+	//			else if (x % 5 == 3) {
+	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2, ShaderType::CObjectsShader);
+	//				float xPosition = x * xpitch;
+	//				float zPosition = z * zpitch;
+	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-				}
-				else if (x % 5 == 4) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3, ShaderType::CObjectsShader);
-					float xPosition = x * xpitch;
-					float zPosition = z * zpitch;
-					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	//			}
+	//			else if (x % 5 == 4) {
+	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3, ShaderType::CObjectsShader);
+	//				float xPosition = x * xpitch;
+	//				float zPosition = z * zpitch;
+	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-				}
-				else if (x % 5 == 0) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4, ShaderType::CObjectsShader);
-					float xPosition = x * xpitch;
-					float zPosition = z * zpitch;
-					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	//			}
+	//			else if (x % 5 == 0) {
+	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4, ShaderType::CObjectsShader);
+	//				float xPosition = x * xpitch;
+	//				float zPosition = z * zpitch;
+	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
 
-					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-				}
-			}
-		}
-	}
+	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	//			}
+	//		}
+	//	}
+	//}
 
-	// UI
-	{
-		//카드 UI 테스트용 오브젝트.
-		CCardUIObject* pUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), TREE4, ShaderType::CUIObjectsShader);
-		CMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 0.2f, 0.5f, 0.2f, 10.0f, 10.0f, 10.0f);
-		pUIObject->SetMesh(0, pBoxMesh);
-		pUIObject->SetPositionUI(320, 440);
-		pUIObject->SetScale(1000, 100, 1);
-		m_pObjectManager->AddObj(pUIObject, ObjectLayer::UIObject);
+	//// UI
+	//{
+	//	//카드 UI 테스트용 오브젝트.
+	//	CCardUIObject* pUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), TREE4, ShaderType::CUIObjectsShader);
+	//	CMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 0.2f, 0.5f, 0.2f, 10.0f, 10.0f, 10.0f);
+	//	pUIObject->SetMesh(0, pBoxMesh);
+	//	pUIObject->SetPositionUI(320, 440);
+	//	pUIObject->SetScale(1000, 100, 1);
+	//	m_pObjectManager->AddObj(pUIObject, ObjectLayer::UIObject);
 
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader, 0);
-		pCardUIObject->SetPositionUI(100, 100);
-		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	//	CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader, 0);
+	//	pCardUIObject->SetPositionUI(100, 100);
+	//	pCardUIObject->SetScale(2, 2, 1);
+	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,1);
-		pCardUIObject->SetPositionUI(200, 200);
-		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,1);
+	//	pCardUIObject->SetPositionUI(200, 200);
+	//	pCardUIObject->SetScale(2, 2, 1);
+	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,2);
-		pCardUIObject->SetPositionUI(300, 300);
-		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,2);
+	//	pCardUIObject->SetPositionUI(300, 300);
+	//	pCardUIObject->SetScale(2, 2, 1);
+	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,3);
-		pCardUIObject->SetPositionUI(400, 400);
-		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,3);
+	//	pCardUIObject->SetPositionUI(400, 400);
+	//	pCardUIObject->SetScale(2, 2, 1);
+	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,4);
-		pCardUIObject->SetPositionUI(400, 400);
-		pCardUIObject->SetScale(2, 2, 1);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-	}
+	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,4);
+	//	pCardUIObject->SetPositionUI(400, 400);
+	//	pCardUIObject->SetScale(2, 2, 1);
+	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	//}
+
+
+	// 텍스쳐 시험
+	int TEXTURES = 6;
+	CTexture* ppTextures[6];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone01.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone02.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone03.bmp", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Ceiling.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Floor.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[5]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Wood.jpg", RESOURCE_TEXTURE2D, 0);
+
+	int m_nObjects = 10;
+	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, TEXTURES,ShaderType::CTextureShader);
+
+
+
+
+
+
+
+
+
 
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());
 
@@ -850,11 +885,11 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	pCoveredUI = NULL;
 
-	for (int lc = 0; lc < (int)ObjectLayer::Count;lc++)
+	for (int lc = 0; lc < (int)ObjectLayer::Count; lc++)
 	{
 		if (lc == (int)ObjectLayer::InteractiveUIObject)
 		{
-			for (int i = 0;i < pObjectList[lc].size();i++) {
+			for (int i = 0; i < pObjectList[lc].size(); i++) {
 				CUIObject* obj = (CUIObject*)pObjectList[lc][i];
 				if (!obj)
 					continue;
@@ -870,7 +905,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 					;//obj->CursorOverObject(false);
 				obj->CursorOverObject(false);
 			}
-			if(pCoveredUI)
+			if (pCoveredUI)
 				pCoveredUI->CursorOverObject(true);
 		}
 		else if (lc == (int)ObjectLayer::Ray)
@@ -923,14 +958,14 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	int clientWidth = clientRect.right - clientRect.left;
 	int clientHeight = clientRect.bottom - clientRect.top;
-	
+
 	int count = pObjectList[(int)ObjectLayer::InteractiveUIObject].size();
 
-	for (int i = 0;i < count;i++)
+	for (int i = 0; i < count; i++)
 	{
 		CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
-		if(obj != pSelectedUI)
-			obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)count / 2) * (clientWidth / 12)+ (clientWidth / 24), (float)clientHeight / 10 * 9);
+		if (obj != pSelectedUI)
+			obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)count / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
 	}
 
 
@@ -943,7 +978,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-	
+
 	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player가 있다면
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
 
@@ -1006,7 +1041,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		case 0:
 		case 1:
 			//Vector1 = m_pPlayer->GetRight();
-			Vector1 = XMFLOAT3(1.0f,0.0f,0.0f);
+			Vector1 = XMFLOAT3(1.0f, 0.0f, 0.0f);
 			break;
 		case 2:
 		case 3:
@@ -1105,7 +1140,7 @@ bool CTestScene_Card::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARA
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		
+
 		break;
 	case WM_RBUTTONDOWN:
 		break;
@@ -1168,7 +1203,7 @@ void CTestScene_Card::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	{
 		//가로x세로x높이가 12x12x12인 정육면체 메쉬를 생성한다. 
-		CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice,pd3dCommandList, 12.0f, 12.0f, 12.0f);
+		CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
 		int xObjects = 2, yObjects = 2, zObjects = 2, i = 0;
 
@@ -1245,7 +1280,7 @@ void CTestScene_Card::BuildLightsAndMaterials()
 	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights->m_pLights[3].m_fFalloff = 8.0f;
-	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f)); 
+	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
 	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 
 
@@ -1265,14 +1300,14 @@ void CTestScene_Card::BuildLightsAndMaterials()
 void CTestScene_Card::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
-	
-	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+
+	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
 
 	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
-	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD,
+	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 
@@ -1377,16 +1412,16 @@ void CTestScene_Card::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	
+
 	//재질 리소스에 대한 상수 버퍼 뷰를 쉐이더 변수에 연결(바인딩)한다. 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2,d3dcbMaterialsGpuVirtualAddress);
+	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbMaterialsGpuVirtualAddress);
 
 	//조명 리소스에 대한 상수 버퍼 뷰를 쉐이더 변수에 연결(바인딩)한다. 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(3, d3dcbLightsGpuVirtualAddress);
-	
-	
+
+
 	m_pObjectManager->Render(pd3dCommandList, pCamera, m_pShaderManager);
 
 
@@ -1435,32 +1470,32 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 		}
 		break;
 	case WM_RBUTTONDOWN:
-		{
-			m_pSelectedObj = NULL;
+	{
+		m_pSelectedObj = NULL;
 
-			POINT ptCursorPos{ 0,0 };
-			GetCursorPos(&ptCursorPos);
-			ScreenToClient(hWnd, &ptCursorPos);
-			CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+		POINT ptCursorPos{ 0,0 };
+		GetCursorPos(&ptCursorPos);
+		ScreenToClient(hWnd, &ptCursorPos);
+		CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 
-			float nearestDist = FLT_MAX;
+		float nearestDist = FLT_MAX;
 
-			vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-			for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
-				if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
-					float tmin, tmax;
-					if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
-						if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
-							nearestDist = tmin;
-							m_pSelectedObj = pInterObj;
-						}
+		vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+		for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
+			if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
+				float tmin, tmax;
+				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
+					if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
+						nearestDist = tmin;
+						m_pSelectedObj = pInterObj;
 					}
 				}
 			}
-			if (NULL != m_pSelectedObj) m_bMoveObj = true;
 		}
-		::GetCursorPos(&m_ptOldCursorPos);
-		break;
+		if (NULL != m_pSelectedObj) m_bMoveObj = true;
+	}
+	::GetCursorPos(&m_ptOldCursorPos);
+	break;
 	case WM_RBUTTONUP:
 		m_bMoveObj = false;
 		break;
@@ -1707,7 +1742,7 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 	}
 
-	if(true == m_bCutAlgorithm)
+	if (true == m_bCutAlgorithm)
 		m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::Push);
 	else
 		m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::ConvexHull);
