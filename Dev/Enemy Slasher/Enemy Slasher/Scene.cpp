@@ -999,6 +999,8 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 				{
 					fbxmesh = (CFBXMesh*)meshes[m];
 
+					//------------------------------------------------------------------------
+					//                     GetOffsetMatList 라는 함수로 뺀다.
 					// 정점의 개수만큼 변환행렬 생성.
 					int verticesCount = fbxmesh->GetNumVertices();
 					XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
@@ -1007,7 +1009,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 						offsetMatList[j] = Matrix4x4::Identity();
 
 					//매쉬의 본들에서
-					CSkeleton* skelList = fbxmesh->GetSkeletonList();
+					CSkeleton* skelList = fbxmesh->GetSkeletonList();	// m_skelList의 transMatrix를 바꿔주면 됨.
 					for (int c = 0;c < fbxmesh->GetClusterCount();c++)
 					{
 						// 영향받는 정점들과 그 정도를 가져와서
@@ -1029,9 +1031,10 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 								}
 						}
 					}
+					//------------------------------------------------------------------------
 
 					// 만들어진 행렬을 정점들에 적용.
-					//fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList);
+					fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // 아직 버그 있음.
 
 					// 변환행렬 삭제.
 					delete[] offsetMatList;
