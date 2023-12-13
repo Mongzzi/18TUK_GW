@@ -1376,6 +1376,22 @@ CAABB* CFBXMesh::GetAABB(XMFLOAT4X4 m_xmf4x4World)
 	return aabb;
 }
 
+void CFBXMesh::UpdateVerticesBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* offsetMat)
+{
+	for (int i = 0;i < m_nVertices;i++)
+	{
+		m_pVertices[i].m_xmf3Vertex = Vector3::TransformNormal(m_pVertices[i].m_xmf3Vertex, offsetMat[i]);
+	}
+
+	// 버퍼생성
+	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+}
+
 // -------------------------------- 터레인 맵 ------------------------------------
 
 

@@ -211,6 +211,9 @@ public:
 	int GetClusterCount() { return m_nICluster; };
 
 	CAABB* GetAABB(XMFLOAT4X4 m_xmf4x4World);
+
+	void UpdateVerticesBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* offsetMat);
+
 };
 
 // ------------------------------- ≈Õ∑π¿Œ ∏  -----------------------------------

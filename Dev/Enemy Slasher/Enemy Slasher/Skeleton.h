@@ -23,6 +23,7 @@ public:
 
 	int* GetIndices() { return m_ipIndices; };
 	double* GetWeights() { return m_dpWeights; };
+	XMFLOAT4X4 GetOffsetMatrix();
 
 	XMFLOAT4X4 GetTransformMatrix() { return m_xmf4x4TransformMatrix; };
 	XMFLOAT4X4 GetTransformLinkMatrix() { return m_xmf4x4TransformLinkMatrix; };

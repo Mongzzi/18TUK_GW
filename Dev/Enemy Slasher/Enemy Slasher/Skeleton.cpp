@@ -97,3 +97,10 @@ void CSkeleton::SetData(string name, int indexCount, int* indices, double* weigh
 	}
 	m_xmf4x4TransformLinkMatrix = result;
 }
+
+XMFLOAT4X4 CSkeleton::GetOffsetMatrix()
+{
+	XMFLOAT4X4 inverseMat = Matrix4x4::Inverse(m_xmf4x4TransformLinkMatrix);
+	XMFLOAT4X4 offMat = Matrix4x4::Multiply(inverseMat, m_xmf4x4TransformMatrix);
+	return offMat;
+}
