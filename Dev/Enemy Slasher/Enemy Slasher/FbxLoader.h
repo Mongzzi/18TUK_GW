@@ -46,7 +46,7 @@ public:
 
 	bool CheckFileNameList(const char* pFilename, CFBXLoader* pFBXLoader);
 
-	FbxNode* GetNode(const char* filename);
+	FbxNode* GetRootNode(const char* filename);
 
 	FbxScene* GetScene();
 private:
@@ -54,6 +54,7 @@ private:
 	FbxScene* m_plScene = NULL;
 
 	std::map<std::string, FbxNode*> m_mfileNameList;
+	std::map<std::string, FbxNode*> m_mAnimationList;
 };
 
 

@@ -262,7 +262,7 @@ bool CFBXLoader::CheckFileNameList(const char* pFilename, CFBXLoader* pFBXLoader
     return false;
 }
 
-FbxNode* CFBXLoader::GetNode(const char* filename)
+FbxNode* CFBXLoader::GetRootNode(const char* filename)
 {
     return m_mfileNameList.find(filename)->second;
 }

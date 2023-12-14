@@ -338,7 +338,11 @@ public:
 	bool LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName);
 	bool LoadHierarchy(FbxNode* pNode);
 	void LoadHierarchyFromMesh();
-	
+
+	void LoadAnimation(CFBXLoader* pFBXLoader, const char* fileName);
+	void LoadAnimation(FbxAnimStack* pAnimStack, FbxNode* pNode, bool isSwitcher = false);
+	void LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, bool isSwitcher = false);
+
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	//bool IsCursorOverObject();

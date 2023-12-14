@@ -715,6 +715,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 		LoadHierarchy(pFBXLoader, lFilePath.Buffer()); // 이 함수가 true 를 반환해야 본이 있는것. false를 반환하면 없어야함.
 		LoadHierarchyFromMesh();
+		LoadAnimation(pFBXLoader, lFilePath.Buffer());
 	}
 	else if (lResult == LoadResult::Overlapping)
 	{
@@ -735,7 +736,7 @@ CFBXObject::~CFBXObject()
 void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* filePath)
 {
 	int i;
-	FbxNode* lNode = pFBXLoader->GetNode(filePath);
+	FbxNode* lNode = pFBXLoader->GetRootNode(filePath);
 	if (lNode)
 	{
 		for (i = 0; i < lNode->GetChildCount(); i++)
@@ -818,7 +819,7 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 bool CFBXObject::LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName)
 {
 	int i;
-	FbxNode* lNode = pFBXLoader->GetNode(fileName);
+	FbxNode* lNode = pFBXLoader->GetRootNode(fileName);
 
 	for (i = 0; i < lNode->GetChildCount(); i++)
 	{
@@ -869,6 +870,107 @@ void CFBXObject::LoadHierarchyFromMesh()
 			m_skelRoot->LoadHierarchyFromMesh(pMesh);
 	}
 
+}
+
+void CFBXObject::LoadAnimation(CFBXLoader* pFBXLoader, const char* fileName)
+{
+	int i;
+	FbxScene* pScene = pFBXLoader->GetScene();
+
+	// 스택이 하나임을 가정한다.
+	for (i = 0; i < pScene->GetSrcObjectCount<FbxAnimStack>(); i++)
+	{
+		FbxAnimStack* lAnimStack = pScene->GetSrcObject<FbxAnimStack>(i);
+
+		//FbxString lOutputString = "Animation Stack Name: ";
+		//lOutputString += lAnimStack->GetName();
+		//lOutputString += "\n";
+		//FBXSDK_printf(lOutputString);
+
+
+		// pFBXLoader의 m_mAnimationList에 새로운 애니메이션을 저장
+		// 저장할때 파일 이름을 기준으로 저장하므로 주의할것.
+		// 함수 인자 줄줄이 바꿔야함.
+		LoadAnimation(lAnimStack, pScene->GetRootNode());
+	}
+}
+
+void CFBXObject::LoadAnimation(FbxAnimStack* pAnimStack, FbxNode* pNode, bool isSwitcher)
+{
+	int l;
+	int nbAnimLayers = pAnimStack->GetMemberCount<FbxAnimLayer>();
+	//int nbAudioLayers = pAnimStack->GetMemberCount<FbxAudioLayer>();
+	//FbxString lOutputString;
+
+	//lOutputString = "   contains ";
+	//if (nbAnimLayers == 0 /*&& nbAudioLayers == 0*/)
+	//	lOutputString += "no layers";
+
+	//if (nbAnimLayers)
+	//{
+	//	lOutputString += nbAnimLayers;
+	//	lOutputString += " Animation Layer";
+	//	if (nbAnimLayers > 1)
+	//		lOutputString += "s";
+	//}
+
+	//if (nbAudioLayers)
+	//{
+	//	if (nbAnimLayers)
+	//		lOutputString += " and ";
+	//
+	//	lOutputString += nbAudioLayers;
+	//	lOutputString += " Audio Layer";
+	//	if (nbAudioLayers > 1)
+	//		lOutputString += "s";
+	//}
+	//lOutputString += "\n\n";
+	//FBXSDK_printf(lOutputString);
+
+	// 레이어는 하나임을 가정한다.
+	for (l = 0; l < nbAnimLayers; l++)
+	{
+		FbxAnimLayer* lAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(l);
+
+		//lOutputString = "AnimLayer ";
+		//lOutputString += l;
+		//lOutputString += "\n";
+		//FBXSDK_printf(lOutputString);
+
+		LoadAnimation(lAnimLayer, pNode, isSwitcher);
+	}
+
+	//for (l = 0; l < nbAudioLayers; l++)
+	//{
+	//	FbxAudioLayer* lAudioLayer = pAnimStack->GetMember<FbxAudioLayer>(l);
+	//
+	//	lOutputString = "AudioLayer ";
+	//	lOutputString += l;
+	//	lOutputString += "\n";
+	//	FBXSDK_printf(lOutputString);
+	//
+	//	DisplayAnimation(lAudioLayer, isSwitcher);
+	//	FBXSDK_printf("\n");
+	//}
+}
+
+void CFBXObject::LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, bool isSwitcher)
+{
+	int lModelCount;
+	//FbxString lOutputString;
+
+	//lOutputString = "     Node Name: ";
+	//lOutputString += pNode->GetName();
+	//lOutputString += "\n\n";
+	//FBXSDK_printf(lOutputString);
+
+	//DisplayChannels(pNode, pAnimLayer, DisplayCurveKeys, DisplayListCurveKeys, isSwitcher);
+	//FBXSDK_printf("\n");
+
+	for (lModelCount = 0; lModelCount < pNode->GetChildCount(); lModelCount++)
+	{
+		LoadAnimation(pAnimLayer, pNode->GetChild(lModelCount), isSwitcher);
+	}
 }
 
 // 
