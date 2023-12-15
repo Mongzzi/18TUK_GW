@@ -1006,11 +1006,11 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 				meshes = ((CFBXObject*)obj)->GetMeshes();
 				for (int m = 0;m < fbxobj->GetNumMeshes();m++)
 				{
-					fbxmesh = (CFBXMesh*)meshes[m];
 
 					//------------------------------------------------------------------------
 					//                     GetOffsetMatList 라는 함수로 뺀다.
 					// 정점의 개수만큼 변환행렬 생성.
+					fbxmesh = (CFBXMesh*)meshes[m];
 					int verticesCount = fbxmesh->GetNumVertices();
 					XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
 					// 초기화

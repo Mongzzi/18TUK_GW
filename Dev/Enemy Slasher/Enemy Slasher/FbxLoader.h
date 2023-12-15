@@ -34,6 +34,7 @@
 
 
 #define DEFAULT_TIME_MODE FbxTime::eFrames30
+#define DEFAULT_FRAME_RATIO 30.f
 
 enum class LoadResult : int {
 	False,

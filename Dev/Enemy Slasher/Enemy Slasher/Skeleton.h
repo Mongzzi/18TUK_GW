@@ -26,6 +26,7 @@ public:
 	XMFLOAT4X4 GetOffsetMatrix();
 
 	XMFLOAT4X4 GetTransformMatrix() { return m_xmf4x4TransformMatrix; };
+	void SetTransformMatrix(XMFLOAT4X4 in) { m_xmf4x4TransformMatrix = in; };
 	XMFLOAT4X4 GetTransformLinkMatrix() { return m_xmf4x4TransformLinkMatrix; };
 
 

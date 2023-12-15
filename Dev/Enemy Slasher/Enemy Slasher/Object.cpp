@@ -698,6 +698,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	}
 	else if (lResult == LoadResult::First)
 	{
+		m_sFileName = fileName;
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 		LoadHierarchy(pFBXLoader, lFilePath.Buffer()); // 이 함수가 true 를 반환해야 본이 있는것. false를 반환하면 없어야함.
 		LoadHierarchyFromMesh(); //이건 꼭 해야하는가 의문이 들긴 함.
@@ -705,6 +706,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	}
 	else if (lResult == LoadResult::Overlapping)
 	{
+		m_sFileName = fileName;
 		// 일단 아직 위와 동일한 코드를 넣어놓는다.
 		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
 		LoadHierarchy(pFBXLoader, lFilePath.Buffer()); // 이 함수가 true 를 반환해야 본이 있는것. false를 반환하면 없어야함.
@@ -994,7 +996,7 @@ void CFBXObject::SetAnimation(CAnimationData* ani, bool loofFlag)
 	m_adCurrentAnimationData = ani;
 	m_bCurrentLoofFlag = loofFlag;
 	
-	m_fProgressedTime = 0.f;
+	m_fProgressedFrame = 0.f;
 }
 
 void CFBXObject::RestoreAnimation()
@@ -1004,7 +1006,7 @@ void CFBXObject::RestoreAnimation()
 		m_adCurrentAnimationData = m_adOldAnimationData;
 		m_bCurrentLoofFlag = m_bOldLoofFlag;
 	}
-	m_fProgressedTime = 0.f;
+	m_fProgressedFrame = 0.f;
 }
 
 
@@ -1012,18 +1014,38 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (m_adCurrentAnimationData)
 	{
-		m_fProgressedTime += fTimeElapsed;
-		if (m_fProgressedTime > m_adCurrentAnimationData->GetTotalFrames())
+		// 애니메이션 데이터에 있는 정보로 본 정보 바꾸기.
+		// 0번 매쉬가 본의 리스트를 갖고 있다고 가정.
+
+		CSkeleton* skelList = ((CFBXMesh*)m_ppMeshes[0])->GetSkeletonList();
+		int clusterCOunt = ((CFBXMesh*)m_ppMeshes[0])->GetClusterCount();
+
+		for (const auto& pair : m_adCurrentAnimationData->m_mAnimationData)
+		{
+			for (int i = 0;i < clusterCOunt;i++)
+			{
+				if (pair.first == skelList[i].GetName())
+				{
+					XMFLOAT4X4 mat = pair.second.at((int)m_fProgressedFrame);
+					skelList[i].SetTransformMatrix(mat);
+				}
+				break;
+			}
+		}
+
+		// --
+		m_fProgressedFrame += fTimeElapsed * DEFAULT_FRAME_RATIO;
+		if (m_fProgressedFrame > m_adCurrentAnimationData->GetTotalFrames())
 		{
 			if (m_bCurrentLoofFlag)
-				m_fProgressedTime = 0.f;
+				m_fProgressedFrame = 0.f;
 			else
 			{
 				RestoreAnimation();
 			}
 		}
+		cout << m_fProgressedFrame << endl;
 	}
-
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 

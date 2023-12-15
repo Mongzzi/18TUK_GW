@@ -331,6 +331,8 @@ private:
 	float m_fRotationSpeed = 0.0f;
 
 	CSkeleton* m_skelRoot = NULL;
+
+	string m_sFileName;
 public:	
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId);
@@ -352,7 +354,7 @@ public:
 
 	// 애니메이션 관련
 private:
-	float  m_fProgressedTime;
+	float  m_fProgressedFrame;
 	bool m_bCurrentLoofFlag;
 	bool m_bOldLoofFlag;
 	CAnimationData* m_adOldAnimationData = NULL;
