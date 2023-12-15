@@ -1044,7 +1044,6 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 				RestoreAnimation();
 			}
 		}
-		cout << m_fProgressedFrame << endl;
 	}
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }

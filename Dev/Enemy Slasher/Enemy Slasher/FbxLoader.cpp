@@ -496,7 +496,7 @@ std::map<int, XMFLOAT4X4> CFBXLoader::DisplayChannels(FbxNode* pNode, FbxAnimLay
         // 월드 변환 행렬 생성
         XMFLOAT4X4 worldMatrix;
         XMMATRIX translationMatrix = XMMatrixTranslation(tx, ty, tz);
-        XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(rx, ry, rz);
+        XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(XMConvertToRadians(rx), XMConvertToRadians(ry), XMConvertToRadians(rz));
         XMMATRIX scaleMatrix = XMMatrixScaling(sx, sy, sz);
 
         // 월드 변환 행렬 조합

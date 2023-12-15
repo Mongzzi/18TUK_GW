@@ -197,7 +197,7 @@ class CFBXMesh : public CDynamicShapeMesh
 private:
 	CSkeleton* m_skelList = NULL;	// lSkinCount가 늘어나면 2중배열로 바꿔야함.
 
-	int m_nICluster;
+	int m_nICluster = 0;
 public:
 	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CFBXMesh();

@@ -1322,16 +1322,21 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 				{
 					name = (char*)lCluster->GetLink()->GetName();
 				}
-				int lIndexCount = lCluster->GetControlPointIndicesCount();
-				int* lIndices = lCluster->GetControlPointIndices();
-				double* lWeights = lCluster->GetControlPointWeights();
+				int lIndicesCount = lCluster->GetControlPointIndicesCount();
+				int* lIndices = new int[lIndicesCount];
+				double* lWeights = new double[lIndicesCount];
+				for (int i = 0;i < lIndicesCount;i++)
+				{
+					lIndices[i] = (lCluster->GetControlPointIndices())[i];
+					lWeights[i] = (lCluster->GetControlPointWeights())[i];
+				}
 
 				FbxAMatrix transMatrix;
 				transMatrix = lCluster->GetTransformMatrix(transMatrix);
 				FbxAMatrix transLinkMatrix;
 				transLinkMatrix = lCluster->GetTransformLinkMatrix(transLinkMatrix);
 
-				m_skelList[j].SetData(name, lIndexCount, lIndices, lWeights, transMatrix, transLinkMatrix);
+				m_skelList[j].SetData(name, lIndicesCount, lIndices, lWeights, transMatrix, transLinkMatrix);
 				
 			}
 
@@ -1378,18 +1383,25 @@ CAABB* CFBXMesh::GetAABB(XMFLOAT4X4 m_xmf4x4World)
 
 void CFBXMesh::UpdateVerticesBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* offsetMat)
 {
+	CVertex* tmp = new CVertex[m_nVertices];
 	for (int i = 0;i < m_nVertices;i++)
 	{
-		m_pVertices[i].m_xmf3Vertex = Vector3::TransformNormal(m_pVertices[i].m_xmf3Vertex, offsetMat[i]);
+		tmp[i].m_xmf3Normal = m_pVertices[i].m_xmf3Normal;
+		tmp[i].m_xmf3Vertex = m_pVertices[i].m_xmf3Vertex;
+		tmp[i].m_xmf4Color = m_pVertices[i].m_xmf4Color;
+		//cout << m_pVertices[i].m_xmf3Vertex.x << ", " << m_pVertices[i].m_xmf3Vertex.y << ", " << m_pVertices[i].m_xmf3Vertex.z << endl;
+		tmp[i].m_xmf3Vertex = Vector3::TransformNormal(m_pVertices[i].m_xmf3Vertex, offsetMat[i]);
+		//cout << m_pVertices[i].m_xmf3Vertex.x << ", " << m_pVertices[i].m_xmf3Vertex.y << ", " << m_pVertices[i].m_xmf3Vertex.z << endl;
 	}
-
 	// 버퍼생성
 	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
-	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, tmp, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	// 바인딩위해 버퍼뷰 초기화
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+
+	delete[] tmp;
 }
 
 // -------------------------------- 터레인 맵 ------------------------------------

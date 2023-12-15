@@ -53,7 +53,7 @@ void CSkeleton::LoadHierarchyFromMesh(CFBXMesh* pMesh)
 	{
 		if (m_strName == skelList[j].GetName())
 		{
-			m_iIndexCount = skelList[j].GetIndexCount();
+			m_iIndicesCount = skelList[j].GetIndicesCount();
 			m_ipIndices = skelList[j].GetIndices();
 			m_dpWeights = skelList[j].GetWeights();
 			m_xmf4x4TransformMatrix = skelList[j].GetTransformMatrix();
@@ -73,7 +73,7 @@ void CSkeleton::LoadHierarchyFromMesh(CFBXMesh* pMesh)
 void CSkeleton::SetData(string name, int indexCount, int* indices, double* weights, FbxAMatrix transformMatrix, FbxAMatrix transformLinkMatrix)
 {
 	m_strName = name;
-	m_iIndexCount = indexCount;
+	m_iIndicesCount = indexCount;
 	m_ipIndices = indices;
 	m_dpWeights = weights;
 

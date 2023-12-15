@@ -19,7 +19,7 @@ public:
 
 	string GetName() { return m_strName; };
 
-	int GetIndexCount() { return m_iIndexCount; };
+	int GetIndicesCount() { return m_iIndicesCount; };
 
 	int* GetIndices() { return m_ipIndices; };
 	double* GetWeights() { return m_dpWeights; };
@@ -32,7 +32,12 @@ public:
 
 	friend std::ostream& operator << (std::ostream& out, const CSkeleton& skel)
 	{
-		out << "name " << skel.m_strName << ", childNum " << skel.m_inChildNum << ", indexCount " << skel.m_iIndexCount << endl << "indices " << skel.m_ipIndices[0] << endl << "weights " << skel.m_dpWeights[0] << " )";
+		out << "name " << skel.m_strName << endl;
+		out << "lIndicesCount : " << skel.m_iIndicesCount << endl;
+		for (int i = 0;i < skel.m_iIndicesCount;i++)
+		{
+			out << "lIndices : " << skel.m_ipIndices[i] << ", lWeights : " << skel.m_dpWeights[i] << endl;
+		}
 
 		return out;
 	}
@@ -44,7 +49,7 @@ private:
 	CSkeleton* m_pParent = NULL;
 
 	int m_inChildNum;
-	int m_iIndexCount;
+	int m_iIndicesCount;
 
 	int* m_ipIndices;
 	double* m_dpWeights;

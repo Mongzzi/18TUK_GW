@@ -351,6 +351,7 @@ public:
 	//void ButtenDown();
 	//void ButtenUp();
 	CAABB* GetAABB();
+	string GetFileName() { return m_sFileName; };
 
 	// 애니메이션 관련
 private:
@@ -363,6 +364,7 @@ private:
 public:
 	void SetAnimation(CAnimationData* ani, bool loofFlag);
 	void RestoreAnimation();
+	CAnimationData* GetCurrentAnimationData() { return m_adCurrentAnimationData; };
 };
 //  UI
 class CUIObject : public CFBXObject
