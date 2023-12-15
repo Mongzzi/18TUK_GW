@@ -738,13 +738,13 @@ void CTextureShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
-D3D12_SHADER_BYTECODE CTextureShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CTextureShader::CreateVertexShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", &m_pd3dVertexShaderBlob));
 
 }
 
-D3D12_SHADER_BYTECODE CTextureShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CTextureShader::CreatePixelShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", &m_pd3dPixelShaderBlob));
 
