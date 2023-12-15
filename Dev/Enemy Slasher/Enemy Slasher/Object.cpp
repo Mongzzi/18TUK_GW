@@ -984,10 +984,49 @@ CAABB* CFBXObject::GetAABB()
 	return tmp->GetAABB(m_xmf4x4World);
 }
 
+void CFBXObject::SetAnimation(CAnimationData* ani, bool loofFlag)
+{
+	if (m_adCurrentAnimationData)
+	{
+		m_adOldAnimationData = m_adCurrentAnimationData;
+		m_bOldLoofFlag = m_bCurrentLoofFlag;
+	}
+	m_adCurrentAnimationData = ani;
+	m_bCurrentLoofFlag = loofFlag;
+	
+	m_fProgressedTime = 0.f;
+}
+
+void CFBXObject::RestoreAnimation()
+{
+	if (m_adOldAnimationData)
+	{
+		m_adCurrentAnimationData = m_adOldAnimationData;
+		m_bCurrentLoofFlag = m_bOldLoofFlag;
+	}
+	m_fProgressedTime = 0.f;
+}
+
+
 void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	if (m_adCurrentAnimationData)
+	{
+		m_fProgressedTime += fTimeElapsed;
+		if (m_fProgressedTime > m_adCurrentAnimationData->GetTotalFrames())
+		{
+			if (m_bCurrentLoofFlag)
+				m_fProgressedTime = 0.f;
+			else
+			{
+				RestoreAnimation();
+			}
+		}
+	}
+
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
+
 
 
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName,

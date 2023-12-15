@@ -815,6 +815,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	{
 		pFBXLoader->LoadAnimationOnly(IDLE_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(RUN_ANI_FBX);
+
+		m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
 	}
 
 	//m_nShaders = 1;

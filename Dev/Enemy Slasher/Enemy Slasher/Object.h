@@ -349,6 +349,18 @@ public:
 	//void ButtenDown();
 	//void ButtenUp();
 	CAABB* GetAABB();
+
+	// 애니메이션 관련
+private:
+	float  m_fProgressedTime;
+	bool m_bCurrentLoofFlag;
+	bool m_bOldLoofFlag;
+	CAnimationData* m_adOldAnimationData = NULL;
+	CAnimationData* m_adCurrentAnimationData = NULL;
+
+public:
+	void SetAnimation(CAnimationData* ani, bool loofFlag);
+	void RestoreAnimation();
 };
 //  UI
 class CUIObject : public CFBXObject
