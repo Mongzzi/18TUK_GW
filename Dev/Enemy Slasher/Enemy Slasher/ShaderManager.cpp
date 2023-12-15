@@ -60,3 +60,8 @@ void CShaderManager::CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nCo
 	m_vShaderManager[(int)pShaderType]->CreateConstantBufferViews(pd3dDevice, nConstantBufferViews, pd3dConstantBuffers, nStride);
 }
 
+void CShaderManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, ShaderType pShaderType)
+{
+	m_vShaderManager[(int)pShaderType]->UpdateShaderVariables(pd3dCommandList);
+}
+
