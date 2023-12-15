@@ -810,6 +810,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
 	m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
 
+
+	// animations
+	{
+
+	}
+
 	//m_nShaders = 1;
 	//m_pShaders = new CObjectsShader[m_nShaders];
 
