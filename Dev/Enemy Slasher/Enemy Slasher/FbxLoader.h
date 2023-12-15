@@ -27,7 +27,13 @@
 #define TREE4 "fbxsdk/Tree_temp_climate_004.fbx"
 #define TREE5 "fbxsdk/Tree_temp_climate_005.fbx"
 
-#define DEFAULT_TIME_MODE FbxTime::eFrames24
+// 애니메이션전용
+
+#define IDLE_ANI_FBX "fbxsdk/Idle.fbx"
+#define RUN_ANI_FBX "fbxsdk/Run.fbx"
+
+
+#define DEFAULT_TIME_MODE FbxTime::eFrames30
 
 enum class LoadResult : int {
 	False,
@@ -55,12 +61,12 @@ public:
 
 	FbxScene* GetScene();
 
-	void LoadAnimaitionOnly(const char* fileName);
+	void LoadAnimationOnly(const char* fileName);
 	void LoadAnimation(const char* fileName);
 	void LoadAnimation(FbxAnimStack* pAnimStack, FbxNode* pNode, CAnimationData* pNewAniData, bool isSwitcher = false);
 	void LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, CAnimationData* pNewAniData, bool isSwitcher = false);
 
-	std::map<int, XMFLOAT4X4> DisplayChannels(FbxNode* pNode, FbxAnimLayer* pAnimLayer, bool isSwitcher);
+	std::map<int, XMFLOAT4X4> DisplayChannels(FbxNode* pNode, FbxAnimLayer* pAnimLayer, bool isSwitcher, int totalFrames);
 
 	std::map<int, float> DisplayCurve(FbxAnimCurve* pCurve);
 

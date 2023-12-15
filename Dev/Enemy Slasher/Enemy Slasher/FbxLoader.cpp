@@ -294,8 +294,11 @@ FbxScene* CFBXLoader::GetScene()
     return m_plScene;
 }
 
-void CFBXLoader::LoadAnimaitionOnly(const char* fileName)
+void CFBXLoader::LoadAnimationOnly(const char* fileName)
 {
+#ifdef _DEBUG
+    std::cout << "LoadAnimaitionOnly " << fileName << std::endl;
+#endif // _DEBUG
     LoadResult lResult;
     FbxString lFilePath(fileName);
 
@@ -426,8 +429,8 @@ void CFBXLoader::LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, CAnimat
 
     //FBXSDK_printf("\n");
     // 아래 함수의 반환값과 노드의 이름을 갖는 pair를 pNewAniData->m_mAnimationData에 insert
-    auto dataMap= DisplayChannels(pNode, pAnimLayer, isSwitcher);
-
+    auto dataMap= DisplayChannels(pNode, pAnimLayer, isSwitcher,pNewAniData->GetTotalFrames());
+    
     pNewAniData->insertData(std::make_pair(pNode->GetName(), dataMap));
 
     for (lModelCount = 0; lModelCount < pNode->GetChildCount(); lModelCount++)
@@ -436,7 +439,7 @@ void CFBXLoader::LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, CAnimat
     }
 }
 
-std::map<int, XMFLOAT4X4> CFBXLoader::DisplayChannels(FbxNode* pNode, FbxAnimLayer* pAnimLayer, bool isSwitcher)
+std::map<int, XMFLOAT4X4> CFBXLoader::DisplayChannels(FbxNode* pNode, FbxAnimLayer* pAnimLayer, bool isSwitcher, int totalFrames)
 {
     FbxAnimCurve* lAnimCurve = NULL;
 
@@ -467,30 +470,28 @@ std::map<int, XMFLOAT4X4> CFBXLoader::DisplayChannels(FbxNode* pNode, FbxAnimLay
         if (lAnimCurve)
             Rz = DisplayCurve(lAnimCurve);
 
-        lAnimCurve = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-        if (lAnimCurve)
-            Sx = DisplayCurve(lAnimCurve);
-        lAnimCurve = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
-        if (lAnimCurve)
-            Sy = DisplayCurve(lAnimCurve);
-        lAnimCurve = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
-        if (lAnimCurve)
-            Sz = DisplayCurve(lAnimCurve);
+        //lAnimCurve = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+        //if (lAnimCurve)
+        //    Sx = DisplayCurve(lAnimCurve);
+        //lAnimCurve = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+        //if (lAnimCurve)
+        //    Sy = DisplayCurve(lAnimCurve);
+        //lAnimCurve = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+        //if (lAnimCurve)
+        //    Sz = DisplayCurve(lAnimCurve);
     }
-
-    for (const auto& entry : Tx) {
-        int key = entry.first;
-
+    for (int i = 0;i < totalFrames;i++) {
         // 해당 키에 대한 변환 정보 가져오기
-        float tx = Tx[key];
-        float ty = Ty[key];
-        float tz = Tz[key];
-        float rx = Rx[key];
-        float ry = Ry[key];
-        float rz = Rz[key];
-        float sx = Sx[key];
-        float sy = Sy[key];
-        float sz = Sz[key];
+        // 스케일은 변하지 않는것을 가정. 혹 나중에 변경.
+        float tx = Tx[i];
+        float ty = Ty[i];
+        float tz = Tz[i];
+        float rx = Rx[i];
+        float ry = Ry[i];
+        float rz = Rz[i];
+        float sx = 1.f;//Sx[i];
+        float sy = 1.f;//Sy[i];
+        float sz = 1.f;//Sz[i];
 
         // 월드 변환 행렬 생성
         XMFLOAT4X4 worldMatrix;
@@ -504,8 +505,7 @@ std::map<int, XMFLOAT4X4> CFBXLoader::DisplayChannels(FbxNode* pNode, FbxAnimLay
         XMStoreFloat4x4(&worldMatrix, combinedMatrix);
 
         // 결과를 dataMap에 저장
-        dataMap.insert(std::make_pair(key, worldMatrix));
-
+        dataMap.insert(std::make_pair(i, worldMatrix));
     }
     return dataMap;
 }
