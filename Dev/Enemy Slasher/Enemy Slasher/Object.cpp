@@ -1020,7 +1020,6 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 		CSkeleton* skelList = ((CFBXMesh*)m_ppMeshes[0])->GetSkeletonList();
 		int clusterCOunt = ((CFBXMesh*)m_ppMeshes[0])->GetClusterCount();
-
 		for (const auto& pair : m_adCurrentAnimationData->m_mAnimationData)
 		{
 			for (int i = 0;i < clusterCOunt;i++)
@@ -1029,8 +1028,8 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 				{
 					XMFLOAT4X4 mat = pair.second.at((int)m_fProgressedFrame);
 					skelList[i].SetTransformMatrix(mat);
+					break;
 				}
-				break;
 			}
 		}
 
