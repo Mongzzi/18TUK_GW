@@ -882,26 +882,26 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 
 	// 텍스쳐 시험
-#define TEXTURES  1
-	CTexture* ppTextures[1];
+#define TEXTURES  6
+	CTexture* ppTextures[TEXTURES];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone01.jpg", RESOURCE_TEXTURE2D, 0);
 
-	//ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone02.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone02.jpg", RESOURCE_TEXTURE2D, 0);
 
-	//ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone03.bmp", RESOURCE_TEXTURE2D, 0);
+	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone03.bmp", RESOURCE_TEXTURE2D, 0);
 
-	//ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Ceiling.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Ceiling.jpg", RESOURCE_TEXTURE2D, 0);
 
-	//ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Floor.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Floor.jpg", RESOURCE_TEXTURE2D, 0);
 
-	//ppTextures[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//ppTextures[5]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Wood.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[5]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Wood.jpg", RESOURCE_TEXTURE2D, 0);
 
 
 	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
@@ -933,8 +933,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			{
 				pRotatingObject = new CRotatingObject(1);
 				pRotatingObject->SetMesh(0, pCubeMesh);
-				pRotatingObject->SetMaterial(ppMaterials[0]);
-				pRotatingObject->SetPosition(fxPitch * x + 2160.0f, fyPitch * y + 687.0f, fzPitch * z + 2340.0f);
+				pRotatingObject->SetMaterial(ppMaterials[i++ % TEXTURES]);
+				pRotatingObject->SetPosition(fxPitch * x + 2160.0f, fyPitch * y + 687.0f + 400.0f, fzPitch * z + 2340.0f);
 				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
 				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
