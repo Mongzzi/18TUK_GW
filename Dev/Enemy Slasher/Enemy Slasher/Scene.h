@@ -104,10 +104,19 @@ public:
 	CTestScene();
 	~CTestScene();
 
+
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+
+
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
 
 	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
 	virtual void AnimateObjects(float fTimeElapsed);
@@ -122,6 +131,13 @@ private:
 
 	// юс╫ц
 	int SelectedUInum;
+
+	//int		m_nObjects = 0;
+
+	//ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	//CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
+
+
 
 };
 
