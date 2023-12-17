@@ -11,8 +11,8 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CObjectNormalShader,
 	CTerrainShader,
 	CTextShader,
-	Count,
-	CTextureShader
+	CTextureShader,
+	Count
 };
 
 
@@ -224,4 +224,17 @@ public:
 
 public:
 	D3D12_RESOURCE_DESC textureDesc = {};
+};
+
+
+class CTextureShader : public CStandardShader
+{
+public:
+	CTextureShader(){};
+	virtual ~CTextureShader(){};
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };
