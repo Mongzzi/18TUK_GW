@@ -1325,10 +1325,10 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 				int lIndicesCount = lCluster->GetControlPointIndicesCount();
 				int* lIndices = new int[lIndicesCount];
 				double* lWeights = new double[lIndicesCount];
-				for (int i = 0;i < lIndicesCount;i++)
+				for (int k = 0;k < lIndicesCount;k++)
 				{
-					lIndices[i] = (lCluster->GetControlPointIndices())[i];
-					lWeights[i] = (lCluster->GetControlPointWeights())[i];
+					lIndices[k] = (lCluster->GetControlPointIndices())[k];
+					lWeights[k] = (lCluster->GetControlPointWeights())[k];
 				}
 
 				FbxAMatrix transMatrix;
