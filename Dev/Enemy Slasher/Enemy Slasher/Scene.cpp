@@ -845,6 +845,16 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
 	m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
 
+
+	// animations
+	{
+		pFBXLoader->LoadAnimationOnly(IDLE_ANI_FBX);
+		pFBXLoader->LoadAnimationOnly(RUN_ANI_FBX);
+		pFBXLoader->LoadAnimationOnly(ANI_TEST_ANI_FBX);
+
+		m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
+	}
+
 	//m_nShaders = 1;
 	//m_pShaders = new CObjectsShader[m_nShaders];
 
@@ -1015,6 +1025,80 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
+	// 임시 애니메이션
+	{
+		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
+		
+		CFBXObject* fbxobj = NULL;
+		CMesh** meshes = NULL;
+		CFBXMesh* fbxmesh = NULL;
+
+		for (CGameObject* obj : vGO)
+		{
+			fbxobj = (CFBXObject*)obj;
+			//if (fbxobj->GetCurrentAnimationData())
+			{
+				if (fbxobj->GetMeshes())
+				{
+					meshes = ((CFBXObject*)obj)->GetMeshes();
+					for (int m = 0;m < fbxobj->GetNumMeshes();m++)
+					{
+
+						//------------------------------------------------------------------------
+						//                     GetOffsetMatList 라는 함수로 뺀다.
+						// 정점의 개수만큼 변환행렬 생성.
+						fbxmesh = (CFBXMesh*)meshes[m];
+						int verticesCount = fbxmesh->GetNumVertices();
+						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
+						// 초기화
+						for (int j = 0;j < verticesCount;j++)
+							offsetMatList[j] = Matrix4x4::Identity();
+
+						//매쉬의 본들에서
+						CSkeleton* skelList = fbxmesh->GetSkeletonList();
+						if (skelList)
+						{
+							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
+							//{
+							//	cout << skelList[i] << endl;
+							//}
+							for (int c = 0;c < fbxmesh->GetClusterCount();c++)
+							{
+								// 영향받는 정점들과 그 정도를 가져와서
+								int* pIndices = skelList[c].GetIndices();
+								double* Weights = skelList[c].GetWeights();
+							
+								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
+
+								for (int i = 0;i < skelList[c].GetIndicesCount();i++)
+								{
+									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
+									int index = pIndices[i];
+							
+							
+									for (int row = 0; row < 4; ++row)
+										for (int col = 0; col < 4; ++col)
+										{
+											tmp.m[row][col] *= (float)Weights[i];
+											offsetMatList[index].m[row][col] += tmp.m[row][col];
+										}
+								}
+							}
+						}
+						//------------------------------------------------------------------------
+
+						// 만들어진 행렬을 정점들에 적용.
+						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // 아직 버그 있음.
+
+						// 변환행렬 삭제.
+						delete[] offsetMatList;
+					}
+
+				}
+			}
+		}
+
+	}
 	if (SelectedUInum != -1) {
 		float fBoxSize = 200.0f;
 

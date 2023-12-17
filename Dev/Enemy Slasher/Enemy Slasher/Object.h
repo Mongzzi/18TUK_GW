@@ -330,6 +330,8 @@ private:
 	float m_fRotationSpeed = 0.0f;
 
 	CSkeleton* m_skelRoot = NULL;
+
+	string m_sFileName;
 public:	
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId);
@@ -337,13 +339,31 @@ public:
 	bool LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName);
 	bool LoadHierarchy(FbxNode* pNode);
 	void LoadHierarchyFromMesh();
-	
+
+	//void LoadAnimation(CFBXLoader* pFBXLoader, const char* fileName);
+	//void LoadAnimation(FbxAnimStack* pAnimStack, FbxNode* pNode, bool isSwitcher = false);
+	//void LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, bool isSwitcher = false);
+
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	//bool IsCursorOverObject();
 	//void ButtenDown();
 	//void ButtenUp();
 	CAABB* GetAABB();
+	string GetFileName() { return m_sFileName; };
+
+	// 애니메이션 관련
+private:
+	float  m_fProgressedFrame;
+	bool m_bCurrentLoofFlag;
+	bool m_bOldLoofFlag;
+	CAnimationData* m_adOldAnimationData = NULL;
+	CAnimationData* m_adCurrentAnimationData = NULL;
+
+public:
+	void SetAnimation(CAnimationData* ani, bool loofFlag);
+	void RestoreAnimation();
+	CAnimationData* GetCurrentAnimationData() { return m_adCurrentAnimationData; };
 };
 //  UI
 class CUIObject : public CFBXObject
