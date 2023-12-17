@@ -960,6 +960,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pFBXLoader->LoadAnimationOnly(IDLE_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(RUN_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(ANI_TEST_ANI_FBX);
+		pFBXLoader->LoadAnimationOnly(ANI_TEST2_ANI_FBX);
 
 		m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
 	}
@@ -1206,7 +1207,8 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 								double* Weights = skelList[c].GetWeights();
 
 								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
-
+								//XMFLOAT4X4 tmp = skelList[c].GetTransformLinkMatrix();
+								
 								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
 								{
 									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
