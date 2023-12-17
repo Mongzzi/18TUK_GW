@@ -925,25 +925,25 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CRotatingObject* pRotatingObject = NULL;
 
 	int xObjects = 1, yObjects = 1, zObjects = 1;
-	//for (int i = 0, x = -xObjects; x <= xObjects; x++)
-	//{
-	//	for (int y = -yObjects; y <= yObjects; y++)
-	//	{
-	//		for (int z = -zObjects; z <= zObjects; z++)
-	//		{
-	pRotatingObject = new CRotatingObject(1);
-	pRotatingObject->SetMesh(0, pCubeMesh);
-	pRotatingObject->SetMaterial(ppMaterials[0]);
-	pRotatingObject->SetPosition(fxPitch * 10 + 2160.0f, fyPitch * 10 + 687.0f, fzPitch * 10 + 2340.0f);
-	pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
-	pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
-	pRotatingObject->SetShaderType(ShaderType::CTextureShader);
-	m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::TextureObject);
-	//		
-	//		}
-	//	}
-	//}
+	for (int i = 0, x = -xObjects; x <= xObjects; x++)
+	{
+		for (int y = -yObjects; y <= yObjects; y++)
+		{
+			for (int z = -zObjects; z <= zObjects; z++)
+			{
+				pRotatingObject = new CRotatingObject(1);
+				pRotatingObject->SetMesh(0, pCubeMesh);
+				pRotatingObject->SetMaterial(ppMaterials[0]);
+				pRotatingObject->SetPosition(fxPitch * x + 2160.0f, fyPitch * y + 687.0f, fzPitch * z + 2340.0f);
+				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
+				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
+				pRotatingObject->SetShaderType(ShaderType::CTextureShader);
+				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::TextureObject);
+
+			}
+		}
+	}
 
 
 
@@ -1165,7 +1165,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	// 임시 애니메이션
 	{
 		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
-		
+
 		CFBXObject* fbxobj = NULL;
 		CMesh** meshes = NULL;
 		CFBXMesh* fbxmesh = NULL;
@@ -1178,7 +1178,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 				if (fbxobj->GetMeshes())
 				{
 					meshes = ((CFBXObject*)obj)->GetMeshes();
-					for (int m = 0;m < fbxobj->GetNumMeshes();m++)
+					for (int m = 0; m < fbxobj->GetNumMeshes(); m++)
 					{
 
 						//------------------------------------------------------------------------
@@ -1188,7 +1188,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 						int verticesCount = fbxmesh->GetNumVertices();
 						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
 						// 초기화
-						for (int j = 0;j < verticesCount;j++)
+						for (int j = 0; j < verticesCount; j++)
 							offsetMatList[j] = Matrix4x4::Identity();
 
 						//매쉬의 본들에서
@@ -1199,20 +1199,20 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 							//{
 							//	cout << skelList[i] << endl;
 							//}
-							for (int c = 0;c < fbxmesh->GetClusterCount();c++)
+							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
 							{
 								// 영향받는 정점들과 그 정도를 가져와서
 								int* pIndices = skelList[c].GetIndices();
 								double* Weights = skelList[c].GetWeights();
-							
+
 								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
 
-								for (int i = 0;i < skelList[c].GetIndicesCount();i++)
+								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
 								{
 									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
 									int index = pIndices[i];
-							
-							
+
+
 									for (int row = 0; row < 4; ++row)
 										for (int col = 0; col < 4; ++col)
 										{
