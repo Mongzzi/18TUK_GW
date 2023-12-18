@@ -1165,7 +1165,23 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 					fvNormal = leNormals->GetDirectArray().GetAt(i);
 			}
 		}
-		m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
+		XMFLOAT2 xmfUV;
+		for (int k = 0; k < lMesh->GetElementUVCount(); ++k)
+		{
+			FbxVector2 fvUV;
+			FbxGeometryElementUV* leUV = lMesh->GetElementUV(k);
+			fvUV = leUV->GetDirectArray().GetAt(i);	// 이거 쓰면 될듯?
+			xmfUV.x = fvUV[0];
+			xmfUV.y = fvUV[1];
+			break;// m_nInElementUVCount 가 하나만 있다고 가정.
+		}
+		if (lMesh->GetElementUVCount() == 0)
+		{
+			xmfUV.x = 0;
+			xmfUV.y = 0;
+		}
+		m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT2(xmfUV));
+		//m_pVertices[i] = CTexturedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(xmfUV));
 	}
 	////////////////////////////////////////////////////////////// - 여기 문제가 있음. - //////////////////////////////////////////////////////////////
 	// 버퍼생성 
@@ -1389,14 +1405,16 @@ void CFBXMesh::UpdateVerticesBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		tmp[i].m_xmf3Normal = m_pVertices[i].m_xmf3Normal;
 		tmp[i].m_xmf3Vertex = m_pVertices[i].m_xmf3Vertex;
 		tmp[i].m_xmf4Color = m_pVertices[i].m_xmf4Color;
-		//cout << m_pVertices[i].m_xmf3Vertex.x << ", " << m_pVertices[i].m_xmf3Vertex.y << ", " << m_pVertices[i].m_xmf3Vertex.z << endl;
 		tmp[i].m_xmf3Vertex = Vector3::TransformNormal(m_pVertices[i].m_xmf3Vertex, offsetMat[i]);
-		//cout << m_pVertices[i].m_xmf3Vertex.x << ", " << m_pVertices[i].m_xmf3Vertex.y << ", " << m_pVertices[i].m_xmf3Vertex.z << endl;
+		//m_pVertices[i].m_xmf3Vertex = Vector3::TransformNormal(m_pVertices[i].m_xmf3Vertex, offsetMat[i]);
+		//cout << "before : " << m_pVertices[i].m_xmf3Vertex.x << ", " << m_pVertices[i].m_xmf3Vertex.y << ", " << m_pVertices[i].m_xmf3Vertex.z << endl;
+		//cout << "after  : " << tmp[i].m_xmf3Vertex.x << ", " << tmp[i].m_xmf3Vertex.y << ", " << tmp[i].m_xmf3Vertex.z << endl;
 	}
 	// 버퍼생성
 	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, tmp, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	//m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	// 바인딩위해 버퍼뷰 초기화
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();

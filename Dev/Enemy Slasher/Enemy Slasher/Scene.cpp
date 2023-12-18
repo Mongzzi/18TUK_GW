@@ -1010,6 +1010,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pFBXLoader->LoadAnimationOnly(IDLE_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(RUN_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(ANI_TEST_ANI_FBX);
+		pFBXLoader->LoadAnimationOnly(ANI_TEST2_ANI_FBX);
 
 		m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
 	}
@@ -1241,10 +1242,14 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 						for (int j = 0; j < verticesCount; j++)
 							offsetMatList[j] = Matrix4x4::Identity();
 
+
 						//매쉬의 본들에서
 						CSkeleton* skelList = fbxmesh->GetSkeletonList();
 						if (skelList)
 						{
+							float* weightSum = new float[verticesCount];
+							for (int asdf = 0;asdf < verticesCount;asdf++)
+								weightSum[asdf] = 0.f;
 							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
 							//{
 							//	cout << skelList[i] << endl;
@@ -1261,16 +1266,24 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 								{
 									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
 									int index = pIndices[i];
-
-
 									for (int row = 0; row < 4; ++row)
 										for (int col = 0; col < 4; ++col)
 										{
+											// 가중치의 합이 1이 아니더라
+											Weights[i] = Weights[i] / 16;
 											tmp.m[row][col] *= (float)Weights[i];
 											offsetMatList[index].m[row][col] += tmp.m[row][col];
+											weightSum[index] += (float)Weights[i];
 										}
 								}
 							}
+							for (int asdf = 0;asdf < verticesCount;asdf++)
+							{
+#ifdef _DEBUG
+								//cout << "weightSum[" << asdf << "] : " << weightSum[asdf] << endl;
+#endif // _DEBUG
+							}
+							delete[] weightSum;
 						}
 						//------------------------------------------------------------------------
 

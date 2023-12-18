@@ -32,6 +32,7 @@
 #define IDLE_ANI_FBX "fbxsdk/Idle.fbx"
 #define RUN_ANI_FBX "fbxsdk/Run.fbx"
 #define ANI_TEST_ANI_FBX "fbxsdk/aniTest.fbx"
+#define ANI_TEST2_ANI_FBX "fbxsdk/aniTest2.fbx"
 
 
 #define DEFAULT_TIME_MODE FbxTime::eFrames30
