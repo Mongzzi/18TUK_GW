@@ -849,6 +849,13 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	{
 		CFBXObject* pFBXObject = NULL;
 
+		CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 120.0f);
+		float fxPitch = 120.0f * 2.5f, fyPitch = 120.0f * 2.5f, fzPitch = 120.0f * 2.5f;
+
+
+		CRotatingObject* pRotatingObject = NULL;
+
+
 		float xpitch = 257.0f * 24.0f / 10.0f;
 		float zpitch = 257.0f * 24.0f / 7.0f;
 
@@ -856,6 +863,16 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		{
 			for (int z = 0; z < 7; z++)
 			{
+				float xPosition = x * xpitch;
+				float zPosition = z * zpitch;
+				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+				pRotatingObject = new CRotatingObject(1);
+				pRotatingObject->SetMesh(0, pCubeMesh);
+				pRotatingObject->SetPosition(xPosition, fHeight, zPosition);
+				pRotatingObject->SetMaterial(ppMaterials[x % 6]);
+				pRotatingObject->SetShaderType(ShaderType::CTextureShader);
+				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::TextureObject);
+
 				if (x % 5 == 0) {
 					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CTextureShader);
 					float xPosition = x * xpitch;
@@ -928,6 +945,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetShaderType(ShaderType::CTextureShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 				}
+
 			}
 		}
 	}
@@ -1022,32 +1040,32 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//m_pShaderManager->CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255), ShaderType::CTextureShader);
 
 
-	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 120.0f);
-	float fxPitch = 120.0f * 2.5f, fyPitch = 120.0f * 2.5f, fzPitch = 120.0f * 2.5f;
+	//CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 120.0f);
+	//float fxPitch = 120.0f * 2.5f, fyPitch = 120.0f * 2.5f, fzPitch = 120.0f * 2.5f;
 
 
-	CRotatingObject* pRotatingObject = NULL;
+	//CRotatingObject* pRotatingObject = NULL;
 
-	int xObjects = 1, yObjects = 1, zObjects = 1;
-	for (int i = 0, x = -xObjects; x <= xObjects; x++)
-	{
-		for (int y = -yObjects; y <= yObjects; y++)
-		{
-			for (int z = -zObjects; z <= zObjects; z++)
-			{
-				pRotatingObject = new CRotatingObject(1);
-				pRotatingObject->SetMesh(0, pCubeMesh);
-				pRotatingObject->SetPosition(fxPitch * x + 2160.0f, fyPitch * y + 687.0f + 400.0f, fzPitch * z + 2340.0f);
-				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
-				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
-				pRotatingObject->SetMaterial(ppMaterials[i++ % 6]);
-				pRotatingObject->SetShaderType(ShaderType::CTextureShader);
-				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::TextureObject);
+	//int xObjects = 1, yObjects = 1, zObjects = 1;
+	//for (int i = 0, x = -xObjects; x <= xObjects; x++)
+	//{
+	//	for (int y = -yObjects; y <= yObjects; y++)
+	//	{
+	//		for (int z = -zObjects; z <= zObjects; z++)
+	//		{
+	//			pRotatingObject = new CRotatingObject(1);
+	//			pRotatingObject->SetMesh(0, pCubeMesh);
+	//			pRotatingObject->SetPosition(fxPitch * x + 2160.0f, fyPitch * y + 687.0f + 400.0f, fzPitch * z + 2340.0f);
+	//			pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	//			pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
+	//			pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
+	//			pRotatingObject->SetMaterial(ppMaterials[i++ % 6]);
+	//			pRotatingObject->SetShaderType(ShaderType::CTextureShader);
+	//			m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::TextureObject);
 
-			}
-		}
-	}
+	//		}
+	//	}
+	//}
 
 
 
