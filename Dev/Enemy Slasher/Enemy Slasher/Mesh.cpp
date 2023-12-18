@@ -1180,7 +1180,8 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 			m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
 		}
 		else
-			m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT2(xmfUV));
+			m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f), XMFLOAT2(xmfUV));
+		//m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT2(xmfUV));
 	}
 	////////////////////////////////////////////////////////////// - 여기 문제가 있음. - //////////////////////////////////////////////////////////////
 	// 버퍼생성 
