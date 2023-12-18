@@ -620,7 +620,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 
-#define TEXTURES  14
+#define TEXTURES  15
 	CTexture* ppTextures[TEXTURES];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -666,17 +666,25 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	ppTextures[13] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTextures[13]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
 
+	ppTextures[14] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[14]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/black.jpg", RESOURCE_TEXTURE2D, 0);
 
 	//CMaterial* m = new CMaterial();
 	//m->SetTexture(ppTextures[8]);
 
+	CMaterial* ppMaterials[TEXTURES];
+	for (int i = 0; i < TEXTURES; i++)
+	{
+		ppMaterials[i] = new CMaterial();
+		ppMaterials[i]->SetTexture(ppTextures[i]);
+	}
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
-	//m_pPlayer->SetMaterial(m);
-	//m_pPlayer->SetShaderType(ShaderType::CTextureShader);
+	m_pPlayer->SetMaterial(ppMaterials[14]);
+	m_pPlayer->SetShaderType(ShaderType::CTextureShader);
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -701,12 +709,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 
 
-	CMaterial* ppMaterials[TEXTURES];
-	for (int i = 0; i < TEXTURES; i++)
-	{
-		ppMaterials[i] = new CMaterial();
-		ppMaterials[i]->SetTexture(ppTextures[i]);
-	}
+
 
 
 
