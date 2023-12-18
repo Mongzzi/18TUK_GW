@@ -21,6 +21,8 @@ SamplerState gSamplerState : register(s0);
 struct VS_TEXTURED_INPUT
 {
     float3 position : POSITION;
+    float3 normal : NORMAL;
+    float4 color : COLOR;
     float2 uv : TEXCOORD;
 };
 

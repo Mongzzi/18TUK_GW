@@ -28,7 +28,6 @@ public:
 	}
 
 	CVertex(XMFLOAT3 v, XMFLOAT3 n, XMFLOAT2 uv) : m_xmf3Vertex(v), m_xmf3Normal(n), m_xmf2UV(uv) {
-		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
 		m_xmf4Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 	CVertex(XMFLOAT3 v, XMFLOAT3 n, XMFLOAT4 c, XMFLOAT2 uv) : m_xmf3Vertex(v), m_xmf3Normal(n), m_xmf4Color(c), m_xmf2UV(uv) {}
