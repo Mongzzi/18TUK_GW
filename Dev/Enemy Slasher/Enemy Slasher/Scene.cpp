@@ -48,7 +48,7 @@ ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3d
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// °ÔÀÓ ¿ÀºêÁ§Æ®
 	pd3dRootParameters[1].Constants.Num32BitValues = 16;
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
@@ -92,7 +92,7 @@ ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3d
 
 void CBasicScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
+	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	//m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	//m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
@@ -142,7 +142,7 @@ bool CBasicScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 {
 	return(false);
 
-	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Óºï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¹Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ó¸ï¿½ï¿½ï¿½ Å° ï¿½Ô·ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
+	// ¾À¿¡¼­ ÇÁ·¹ÀÓº° ÀÔ·ÂÀ» Ã³¸®ÇÒ °ÍÀÌ¹Ç·Î ÇÁ·¹ÀÓ¸¶´Ù Å° ÀÔ·Â Ã³¸®ÇÏÁö ¸» °Í
 	//return(true);
 }
 
@@ -187,7 +187,7 @@ void CBasicScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"BasicSceneï¿½ï¿½ Render2D ï¿½Ô´Ï´ï¿½.";
+	static const WCHAR text[] = L"BasicSceneÀÇ Render2D ÀÔ´Ï´Ù.";
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
@@ -322,7 +322,7 @@ bool CTitleScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	int xDelta = 0, yDelta = 0;
-	POINT ptCursorPos{ 0,0 }; //ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ifï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½È´ï¿½.
+	POINT ptCursorPos{ 0,0 }; //ÃÊ±âÈ­¸¦ ÇÏÁö ¾ÊÀ» ½Ã ³·Àº È®·ü·Î ¾Æ·¡ÀÇ if¹®¿¡ ÁøÀÔÇÏÁö ¸øÇÏ¿© ÃÊ±âÈ­µÇÁö ¾ÊÀº °ªÀ» »ç¿ëÇÏ°Ô µÈ´Ù.
 	if (GetCapture() == hWnd)
 	{
 		//SetCursor(NULL);
@@ -422,11 +422,11 @@ void CTitleScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 4 * 3);
-	static const WCHAR text2[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½";
+	static const WCHAR text2[] = L"°ÔÀÓ ½ÃÀÛ";
 	pd2dDeviceContext->DrawText(text2, _countof(text2) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 4 * 3, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text3[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½";
+	static const WCHAR text3[] = L"°ÔÀÓ Á¾·á";
 	pd2dDeviceContext->DrawText(text3, _countof(text3) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
 
@@ -472,7 +472,7 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// °ÔÀÓ ¿ÀºêÁ§Æ®
 	pd3dRootParameters[1].Constants.Num32BitValues = 16;
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
@@ -485,7 +485,7 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 
 
 
-	//pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+	//pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;	// °ÔÀÓ ¿ÀºêÁ§Æ®
 	//pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 	//pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[0];
 	//pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
@@ -559,8 +559,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
-				// ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½.
-				cout << "ï¿½ï¿½ï¿½ï¿½Ä¡ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+				// ¿øÀ§Ä¡·Î µ¹¾Æ°¨.
+				cout << "¿øÀ§Ä¡ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 				pSelectedUI->SetPositionUI(pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
 
 			}
@@ -568,14 +568,14 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			{
 				if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
 				{
-					// Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½
-					// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½
+					// Ä«µå »ç¿ë
+					// ÀÚ½Å »èÁ¦
 					m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
-					cout << "ï¿½ï¿½ï¿½ï¿½ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+					cout << "»èÁ¦ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 				}
 				else
 				{
-					cout << "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+					cout << "»ç¿ëÇÏÁö¸¸ »èÁ¦´Â ¾È ÇÔ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 
 				}
 			}
@@ -603,7 +603,6 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
-		case 'P': if (m_bAniFlag) m_bAniFlag = false; else m_bAniFlag = true; break;
 		default:
 			break;
 		}
@@ -621,7 +620,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 
-#define TEXTURES  15
+#define TEXTURES  14
 	CTexture* ppTextures[TEXTURES];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -667,36 +666,28 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	ppTextures[13] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTextures[13]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
 
-	ppTextures[14] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[14]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/black.jpg", RESOURCE_TEXTURE2D, 0);
 
 	//CMaterial* m = new CMaterial();
 	//m->SetTexture(ppTextures[8]);
 
-	CMaterial* ppMaterials[TEXTURES];
-	for (int i = 0; i < TEXTURES; i++)
-	{
-		ppMaterials[i] = new CMaterial();
-		ppMaterials[i]->SetTexture(ppTextures[i]);
-	}
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
-	m_pPlayer->SetMaterial(ppMaterials[8]);
-	m_pPlayer->SetShaderType(ShaderType::CTextureShader);
+	//m_pPlayer->SetMaterial(m);
+	//m_pPlayer->SetShaderType(ShaderType::CTextureShader);
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
 
 
 
-	// ï¿½Ó½ï¿½
+	// ÀÓ½Ã
 	SelectedUInum = -1;
 
 
-	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµé°ªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text ½¦ÀÌ´õ¿¡ ¼­¼úÀÚ ÈüÀÇ ÇÚµé°ª¸¦ ¸â¹öº¯¼ö¿¡ ÀúÀåÇÑ »óÅÂ
 	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
 
 
@@ -705,26 +696,31 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 //	mate[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 //	mate[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack.jpg", RESOURCE_TEXTURE2D, 0);
 //
-//	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CUITextureShader); // text ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµé°ªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+//	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CUITextureShader); // text ½¦ÀÌ´õ¿¡ ¼­¼úÀÚ ÈüÀÇ ÇÚµé°ª¸¦ ¸â¹öº¯¼ö¿¡ ÀúÀåÇÑ »óÅÂ
 //	for (int i = 0; i < UITEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, mate[i], 0, 2, ShaderType::CUITextureShader);
 
 
 
+	CMaterial* ppMaterials[TEXTURES];
+	for (int i = 0; i < TEXTURES; i++)
+	{
+		ppMaterials[i] = new CMaterial();
+		ppMaterials[i]->SetTexture(ppTextures[i]);
+	}
 
 
 
-
-	// ------------------------------------       Å¥ï¿½ï¿½ ï¿½Þ½ï¿½      -------------------------------
+	// ------------------------------------       Å¥ºê ¸Þ½¬      -------------------------------
 
 //{
-//	//ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½Ì°ï¿½ 12x12x12ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½. 
+//	//°¡·Îx¼¼·Îx³ôÀÌ°¡ 12x12x12ÀÎ Á¤À°¸éÃ¼ ¸Þ½¬¸¦ »ý¼ºÇÑ´Ù. 
 //	CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
-//	/*x-ï¿½ï¿½, y-ï¿½ï¿½, z-ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½. ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ ï¿½Ã¸ï¿½ï¿½Å³ï¿½ ï¿½ï¿½ï¿½Ì¸é¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½î¶»ï¿½ï¿½
-//	ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ìº¸ï¿½ï¿½ ï¿½Ù¶ï¿½ï¿½ï¿½.*/
+//	/*x-Ãà, y-Ãà, z-Ãà ¾çÀÇ ¹æÇâÀÇ °´Ã¼ °³¼öÀÌ´Ù. °¢ °ªÀ» 1¾¿ ´Ã¸®°Å³ª ÁÙÀÌ¸é¼­ ½ÇÇàÇÒ ¶§ ÇÁ·¹ÀÓ ·¹ÀÌÆ®°¡ ¾î¶»°Ô
+//	º¯ÇÏ´Â °¡¸¦ »ìÆìº¸±â ¹Ù¶õ´Ù.*/
 //	int xObjects = 10, yObjects = 10, zObjects = 10, i = 0;
 
-//	//x-ï¿½ï¿½, y-ï¿½ï¿½, z-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 21ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ 21 x 21 x 21 = 9261ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½Ä¡ï¿½Ñ´ï¿½.
+//	//x-Ãà, y-Ãà, z-ÃàÀ¸·Î 21°³¾¿ ÃÑ 21 x 21 x 21 = 9261°³ÀÇ Á¤À°¸éÃ¼¸¦ »ý¼ºÇÏ°í ¹èÄ¡ÇÑ´Ù.
 //	int m_nObjects;
 //	m_nObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
 
@@ -742,7 +738,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 //				pRotatingObject = new CRotatingObject();
 //				pRotatingObject->SetMesh(0, pCubeMesh);
 
-//				//ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½. 
+//				//°¢ Á¤À°¸éÃ¼ °´Ã¼ÀÇ À§Ä¡¸¦ ¼³Á¤ÇÑ´Ù. 
 //				pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
 //				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 //				pRotatingObject->SetRotationSpeed(10.0f * (i++ % 10) + 3.0f);
@@ -752,26 +748,26 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 //	}
 //}
 
-// ------------------------------------       ï¿½Í·ï¿½ï¿½ï¿½      -------------------------------
-//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½. x-ï¿½ï¿½ï¿½ z-ï¿½ï¿½ï¿½ï¿½ 8ï¿½ï¿½, y-ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ñ´ï¿½. 
+// ------------------------------------       ÅÍ·¹ÀÎ      -------------------------------
+//ÁöÇüÀ» È®´ëÇÒ ½ºÄÉÀÏ º¤ÅÍÀÌ´Ù. x-Ãà°ú z-ÃàÀº 8¹è, y-ÃàÀº 2¹è È®´ëÇÑ´Ù. 
 	XMFLOAT3 xmf3Scale(24.0f, 6.0f, 24.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(HeightMap.raw)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½(257x257)ï¿½Ì´ï¿½. 
+	//ÁöÇüÀ» ³ôÀÌ ¸Ê ÀÌ¹ÌÁö ÆÄÀÏ(HeightMap.raw)À» »ç¿ëÇÏ¿© »ý¼ºÇÑ´Ù. ³ôÀÌ ¸ÊÀÇ Å©±â´Â °¡·Îx¼¼·Î(257x257)ÀÌ´Ù. 
 	CHeightMapTerrain* pTerrain;
 #ifdef _WITH_TERRAIN_PARTITION
-	/*ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½(17x17)ï¿½Ì´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 16ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 16ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ 256(16x16)ï¿½ï¿½ï¿½ï¿½ ï¿½È´ï¿½.*/
+	/*ÇÏ³ªÀÇ °ÝÀÚ ¸Þ½¬ÀÇ Å©±â´Â °¡·Îx¼¼·Î(17x17)ÀÌ´Ù. ÁöÇü ÀüÃ¼´Â °¡·Î ¹æÇâÀ¸·Î 16°³, ¼¼·Î ¹æÇâÀ¸·Î 16ÀÇ °ÝÀÚ ¸Þ½¬¸¦ °¡Áø´Ù. ÁöÇüÀ» ±¸¼ºÇÏ´Â °ÝÀÚ ¸Þ½¬ÀÇ °³¼ö´Â ÃÑ 256(16x16)°³°¡ µÈ´Ù.*/
 	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 
 #else
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½(257x257)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½. 
+	//ÁöÇüÀ» ÇÏ³ªÀÇ °ÝÀÚ ¸Þ½¬(257x257)·Î »ý¼ºÇÑ´Ù. 
 	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
 
 #endif
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
 
 	{
-		// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ä¡ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+		// ÇÃ·¹ÀÌ¾î À§Ä¡ Å×·¹ÀÎ À§·Î ÀÌµ¿
 		XMFLOAT3 xmfPlayerPos = m_pPlayer->GetPosition();
 		xmfPlayerPos.y = pTerrain->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 		m_pPlayer->SetPosition(xmfPlayerPos);
@@ -784,7 +780,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		//float fyPitch = 12.0f * 3.5f;
 		//float fzPitch = 12.0f * 3.5f;
 
-		////ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½é¿¡ ï¿½×¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½Ñ´ï¿½. 
+		////Á÷À°¸éÃ¼¸¦ ÁöÇü Ç¥¸é¿¡ ±×¸®°í ÁöÇüº¸´Ù ³ôÀº À§Ä¡¿¡ ÀÏÁ¤ÇÑ °£°ÝÀ¸·Î ¹èÄ¡ÇÑ´Ù. 
 		//int xObjects = int(fTerrainWidth / fxPitch), yObjects = 1, zObjects = int(fTerrainLength / fzPitch);
 
 		//CBoxMesh* pCubeMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
@@ -797,7 +793,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		//CFBXObject* pRotatingObject = NULL;
 		////CRotatingObject* pRotatingObject = NULL;
 
-		////CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbxï¿½ï¿½ meshï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½Î´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+		////CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX);	// box.fbx´Â mesh°¡ 3°³¶ó Áö±Ý ÄÚµå·Î´Â ¹ö±× »ý±è.
 		////m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 
 		//for (int i = 0, x = 0; x < 1; x++)
@@ -818,7 +814,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		//			if (y == 0)
 		//			{
-		//				/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½é¿¡ ï¿½ï¿½Ä¡ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½Ñ´ï¿½. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ y-ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½Ïµï¿½ï¿½ï¿½ ï¿½Ñ´ï¿½.*/
+		//				/*ÁöÇüÀÇ Ç¥¸é¿¡ À§Ä¡ÇÏ´Â Á÷À°¸éÃ¼´Â ÁöÇüÀÇ ±â¿ï±â¿¡ µû¶ó ¹æÇâÀÌ ´Ù¸£°Ô ¹èÄ¡ÇÑ´Ù. Á÷À°¸éÃ¼°¡ À§Ä¡ÇÒ ÁöÇüÀÇ ¹ý¼± º¤ÅÍ ¹æÇâ°ú Á÷À°¸éÃ¼ÀÇ y-ÃàÀÌ ÀÏÄ¡ÇÏµµ·Ï ÇÑ´Ù.*/
 		//				xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
 
 		//				XMFLOAT3 temp = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -962,7 +958,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// UI
 	{
-		//Ä«ï¿½ï¿½ UI ï¿½×½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®.
+		//Ä«µå UI Å×½ºÆ®¿ë ¿ÀºêÁ§Æ®.
 		CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
 
 
@@ -1008,7 +1004,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 
 
-	// ï¿½Ø½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	// ÅØ½ºÃÄ ½ÃÇè
 //#define TEXTURES  6
 //	CTexture* ppTextures[TEXTURES];
 //
@@ -1031,7 +1027,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 //	ppTextures[5]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Wood.jpg", RESOURCE_TEXTURE2D, 0);
 //
 //
-//	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµé°ªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+//	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text ½¦ÀÌ´õ¿¡ ¼­¼úÀÚ ÈüÀÇ ÇÚµé°ª¸¦ ¸â¹öº¯¼ö¿¡ ÀúÀåÇÑ »óÅÂ
 //	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
 
 
@@ -1094,7 +1090,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pFBXLoader->LoadAnimationOnly(ANI_TEST_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(ANI_TEST2_ANI_FBX);
 
-		m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(RUN_ANI_FBX), true);
+		//m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
 	}
 
 	//m_nShaders = 1;
@@ -1107,7 +1103,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 void CTestScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
+	//UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
 	//m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	//m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
@@ -1144,7 +1140,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	int xDelta = 0, yDelta = 0;
-	POINT ptCursorPos{ 0,0 }; //ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ifï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½È´ï¿½.
+	POINT ptCursorPos{ 0,0 }; //ÃÊ±âÈ­¸¦ ÇÏÁö ¾ÊÀ» ½Ã ³·Àº È®·ü·Î ¾Æ·¡ÀÇ if¹®¿¡ ÁøÀÔÇÏÁö ¸øÇÏ¿© ÃÊ±âÈ­µÇÁö ¾ÊÀº °ªÀ» »ç¿ëÇÏ°Ô µÈ´Ù.
 	if (GetCapture() == hWnd)
 	{
 		//SetCursor(NULL);
@@ -1158,7 +1154,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	GetCursorPos(&ptCursorPos);
 	ScreenToClient(hWnd, &ptCursorPos);
-	//-------------- ï¿½ï¿½Å·
+	//-------------- ÇÇÅ·
 	CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
@@ -1259,7 +1255,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 
-	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Playerï¿½ï¿½ ï¿½Ö´Ù¸ï¿½
+	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player°¡ ÀÖ´Ù¸é
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
 
 		if (false == pvObjectList[(int)ObjectLayer::TextureObject].empty()) {
@@ -1278,7 +1274,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 			}
 		}
 
-		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrainï¿½ï¿½ Playerï¿½ï¿½ ï¿½Ö´Ù¸ï¿½
+		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain°ú Player°¡ ÀÖ´Ù¸é
 			XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
 			float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 
@@ -1295,101 +1291,99 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
-	// ï¿½Ó½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½
-	if(m_bAniFlag)
-	{
-		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
-
-		CFBXObject* fbxobj = NULL;
-		CMesh** meshes = NULL;
-		CFBXMesh* fbxmesh = NULL;
-
-		for (CGameObject* obj : vGO)
-		{
-			fbxobj = (CFBXObject*)obj;
-			if (fbxobj->GetCurrentAnimationData())
-			{
-				if (fbxobj->GetMeshes())
-				{
-					meshes = ((CFBXObject*)obj)->GetMeshes();
-					for (int m = 0; m < fbxobj->GetNumMeshes(); m++)
-					{
-
-						//------------------------------------------------------------------------
-						//                     GetOffsetMatList ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
-						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­ ï¿½ï¿½È¯ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
-						fbxmesh = (CFBXMesh*)meshes[m];
-						int verticesCount = fbxmesh->GetNumVertices();
-						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
-						// ï¿½Ê±ï¿½È­
-						for (int j = 0; j < verticesCount; j++)
-							offsetMatList[j] = Matrix4x4::Identity();
-
-
-						//ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½é¿¡ï¿½ï¿½
-						CSkeleton* skelList = fbxmesh->GetSkeletonList();
-						if (skelList)
-						{
-							float* weightSum = new float[verticesCount];
-							for (int asdf = 0;asdf < verticesCount;asdf++)
-								weightSum[asdf] = 0.f;
-							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
-							//{
-								//cout << skelList[i] << endl;
-							//}
-							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
-							{
-								// ï¿½ï¿½ï¿½ï¿½Þ´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½
-								int* pIndices = skelList[c].GetIndices();
-								double* Weights = skelList[c].GetWeights();
-
-								//XMFLOAT4X4 tmp = skelList[c].GetTransformMatrix();
-								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
-
-								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
-								{
-									// ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­ OffsetMatrixï¿½ï¿½ ï¿½ï¿½ï¿½Ñ´ï¿½.
-									int index = pIndices[i];
-									for (int row = 0; row < 4; ++row)
-										for (int col = 0; col < 4; ++col)
-										{
-											{
-												tmp.m[row][col] *= (float)Weights[i];
-												offsetMatList[index].m[row][col] += tmp.m[row][col];
-											}
-										}
-									weightSum[index] += (float)Weights[i];
-								}
-							}
-							for (int asdf = 0;asdf < verticesCount;asdf++)
-							{
-#ifdef _DEBUG
-								//cout << "weightSum[" << asdf << "] : " << weightSum[asdf] << endl;
-#endif // _DEBUG
-							}
-							delete[] weightSum;
-						}
-						//------------------------------------------------------------------------
-
-						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½é¿¡ ï¿½ï¿½ï¿½ï¿½.
-						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
-
-						// ï¿½ï¿½È¯ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
-						delete[] offsetMatList;
-					}
-
-				}
-			}
-		}
-
-	}
-	
+	// ÀÓ½Ã ¾Ö´Ï¸ÞÀÌ¼Ç
+//	{
+//		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
+//
+//		CFBXObject* fbxobj = NULL;
+//		CMesh** meshes = NULL;
+//		CFBXMesh* fbxmesh = NULL;
+//
+//		for (CGameObject* obj : vGO)
+//		{
+//			fbxobj = (CFBXObject*)obj;
+//			//if (fbxobj->GetCurrentAnimationData())
+//			{
+//				if (fbxobj->GetMeshes())
+//				{
+//					meshes = ((CFBXObject*)obj)->GetMeshes();
+//					for (int m = 0; m < fbxobj->GetNumMeshes(); m++)
+//					{
+//
+//						//------------------------------------------------------------------------
+//						//                     GetOffsetMatList ¶ó´Â ÇÔ¼ö·Î »«´Ù.
+//						// Á¤Á¡ÀÇ °³¼ö¸¸Å­ º¯È¯Çà·Ä »ý¼º.
+//						fbxmesh = (CFBXMesh*)meshes[m];
+//						int verticesCount = fbxmesh->GetNumVertices();
+//						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
+//						// ÃÊ±âÈ­
+//						for (int j = 0; j < verticesCount; j++)
+//							offsetMatList[j] = Matrix4x4::Identity();
+//
+//
+//						//¸Å½¬ÀÇ º»µé¿¡¼­
+//						CSkeleton* skelList = fbxmesh->GetSkeletonList();
+//						if (skelList)
+//						{
+//							float* weightSum = new float[verticesCount];
+//							for (int asdf = 0;asdf < verticesCount;asdf++)
+//								weightSum[asdf] = 0.f;
+//							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
+//							//{
+//								//cout << skelList[i] << endl;
+//							//}
+//							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
+//							{
+//								// ¿µÇâ¹Þ´Â Á¤Á¡µé°ú ±× Á¤µµ¸¦ °¡Á®¿Í¼­
+//								int* pIndices = skelList[c].GetIndices();
+//								double* Weights = skelList[c].GetWeights();
+//
+//								//XMFLOAT4X4 tmp = skelList[c].GetTransformMatrix();
+//								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
+//
+//								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
+//								{
+//									// ÇØ´çÇÏ´Â Á¤Á¡¿¡ ±× Á¤µµ¸¸Å­ OffsetMatrix¸¦ °öÇÑ´Ù.
+//									int index = pIndices[i];
+//									for (int row = 0; row < 4; ++row)
+//										for (int col = 0; col < 4; ++col)
+//										{
+//											{
+//												tmp.m[row][col] *= (float)Weights[i];
+//												offsetMatList[index].m[row][col] += tmp.m[row][col];
+//											}
+//										}
+//									weightSum[index] += (float)Weights[i];
+//								}
+//							}
+//							for (int asdf = 0;asdf < verticesCount;asdf++)
+//							{
+//#ifdef _DEBUG
+//								//cout << "weightSum[" << asdf << "] : " << weightSum[asdf] << endl;
+//#endif // _DEBUG
+//							}
+//							delete[] weightSum;
+//						}
+//						//------------------------------------------------------------------------
+//
+//						// ¸¸µé¾îÁø Çà·ÄÀ» Á¤Á¡µé¿¡ Àû¿ë.
+//						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // ¾ÆÁ÷ ¹ö±× ÀÖÀ½.
+//
+//						// º¯È¯Çà·Ä »èÁ¦.
+//						delete[] offsetMatList;
+//					}
+//
+//				}
+//			}
+//		}
+//
+//	}
 	if (SelectedUInum != -1) {
 		float fBoxSize = 200.0f;
 
 
 		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
-		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// ï¿½ï¿½ ï¿½ï¿½ ï¿½Øºï¿½
+		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// µÑ ´Ù ÇØºÁ
 
 		std::random_device rd;
 		std::default_random_engine dre(rd());
@@ -1401,10 +1395,10 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		XMFLOAT3 planeNormal;
 
 		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ¹Ú½º ¾ÈÀÇ ¿ÀºêÁ§Æ®¸¦ Àý´ÜÇÑ´Ù.
 
 
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+		// ¿ÜÀû °è»ê (¼öÁ÷ÀÎ º¤ÅÍ)
 		switch (SelectedUInum)
 		{
 		case 0:
@@ -1422,7 +1416,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 			break;
 		}
 		planeNormal = Vector3::CrossProduct(Vector1, Vector2);
-		cutterMesh->SetCutPlaneNormal(planeNormal); // ï¿½ï¿½ï¿½Ü¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+		cutterMesh->SetCutPlaneNormal(planeNormal); // Àý´Ü¸éÀÇ ³ë¸Ö
 		cutterObject->SetMesh(0, cutterMesh);
 
 
@@ -1433,7 +1427,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
 
-		cutterObject->SetAllowCutting(true);	// ï¿½Ì°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½?
+		cutterObject->SetAllowCutting(true);	// ÀÌ°Ô ÄÑÁ®ÀÖ¾î¾ß ÀÚ¸¥´Ù?
 		cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
@@ -1455,7 +1449,7 @@ void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devic
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 3 * 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
-	WCHAR objText[] = L"ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ : ";
+	WCHAR objText[] = L"¸Ê »óÀÇ ¿ÀºêÁ§Æ® °¹¼ö : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*> objList = m_pObjectManager->GetObjectList(ObjectLayer::TextureObject);
 	int objCount = objList.size();
@@ -1533,7 +1527,7 @@ bool CTestScene_Card::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WP
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-			// ï¿½×½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ ï¿½Ìµï¿½ ï¿½Úµï¿½
+			// Å×½ºÆ®¿ë ºü¸¥¼Óµµ ÀÌµ¿ ÄÚµå
 		case 'W': m_pPlayer->Move(DIR_FORWARD, 1.25f * 10, false); break;
 		case 'S': m_pPlayer->Move(DIR_BACKWARD, 1.25f * 10, false); break;
 		case 'A': m_pPlayer->Move(DIR_LEFT, 1.25f * 10, false); break;
@@ -1565,10 +1559,10 @@ void CTestScene_Card::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
 
-	// ------------------------------------       Å¥ï¿½ï¿½ ï¿½Þ½ï¿½      -------------------------------
+	// ------------------------------------       Å¥ºê ¸Þ½¬      -------------------------------
 
 	{
-		//ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½Ì°ï¿½ 12x12x12ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½. 
+		//°¡·Îx¼¼·Îx³ôÀÌ°¡ 12x12x12ÀÎ Á¤À°¸éÃ¼ ¸Þ½¬¸¦ »ý¼ºÇÑ´Ù. 
 		CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 12.0f, 12.0f, 12.0f);
 
 		int xObjects = 2, yObjects = 2, zObjects = 2, i = 0;
@@ -1668,14 +1662,14 @@ void CTestScene_Card::BuildLightsAndMaterials()
 
 void CTestScene_Card::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
 
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
 
-	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
@@ -1705,7 +1699,7 @@ ID3D12RootSignature* CTestScene_Card::CreateGraphicsRootSignature(ID3D12Device* 
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	//pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+	//pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// °ÔÀÓ ¿ÀºêÁ§Æ®
 	//pd3dRootParameters[1].Constants.Num32BitValues = 16;
 	//pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	//pd3dRootParameters[1].Constants.RegisterSpace = 0;
@@ -1821,7 +1815,7 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 			if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
 				float tmin, tmax;
 				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
-					if (nearestDist > tmin) { // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
+					if (nearestDist > tmin) { // °¡Àå °¡±î¿î ¿ÀºêÁ§Æ® ¼±º°
 						nearestDist = tmin;
 						m_pSelectedObj = pInterObj;
 					}
@@ -1970,7 +1964,7 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 				}
 			}
 
-			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // ï¿½ï¿½Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½Æ¼ï¿½ ï¿½Ìµï¿½
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // ¿ìÅ¬¸¯½Ã ¿ÀºêÁ§Æ®¸¦ Àâ¾Æ¼­ ÀÌµ¿
 				if (m_bMoveObj) {
 					if (NULL != m_pSelectedObj) {
 						XMFLOAT3 t0((float)(ptCursorPos.x - m_ptOldCursorPos.x), (float)(ptCursorPos.y - m_ptOldCursorPos.y), 0.0f);
@@ -2028,15 +2022,15 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		std::uniform_real_distribution <float> urd(-1.0, 1.0);
 
 		XMFLOAT3 randomVector(urd(dre), urd(dre), urd(dre));
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+		// ¿ÜÀû °è»ê (¼öÁ÷ÀÎ º¤ÅÍ)
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
 
 		CDynamicShapeObject* cutterObject = new CDynamicShapeObject;
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
-		cutterMesh->SetCutPlaneNormal(planeNormal); // ï¿½ï¿½ï¿½Ü¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ¹Ú½º ¾ÈÀÇ ¿ÀºêÁ§Æ®¸¦ Àý´ÜÇÑ´Ù.
+		cutterMesh->SetCutPlaneNormal(planeNormal); // Àý´Ü¸éÀÇ ³ë¸Ö
 		cutterObject->SetMesh(0, cutterMesh);
 		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize)));
-		cutterObject->SetAllowCutting(true);	// ï¿½Ì°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½?
+		cutterObject->SetAllowCutting(true);	// ÀÌ°Ô ÄÑÁ®ÀÖ¾î¾ß ÀÚ¸¥´Ù?
 		cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
@@ -2051,7 +2045,7 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		XMFLOAT3 ray2_dir = r2.GetDir();
 
 		XMFLOAT3 rayVec = Vector3::Subtract(ray_dir, ray2_dir);
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+		// ¿ÜÀû °è»ê (¼öÁ÷ÀÎ º¤ÅÍ)
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(rayVec, ray_dir);
 		rayVec = Vector3::Add(ray_dir, ray2_dir);
 		rayVec = Vector3::Normalize(rayVec);
@@ -2097,7 +2091,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
-	WCHAR objText[] = L"ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ : ";
+	WCHAR objText[] = L"¸Ê »óÀÇ ¿ÀºêÁ§Æ® °¹¼ö : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
 	int objCount = objList[(int)ObjectLayer::Object].size();
@@ -2129,7 +2123,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 1, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 2);
-	WCHAR objText3[] = L"ï¿½Ò¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ : ";
+	WCHAR objText3[] = L"¼Ò¸ê ´ë±â ¿ÀºêÁ§Æ® °¹¼ö : ";
 	textLen = _countof(objText3) - 1;
 	objCount = objList[(int)ObjectLayer::TemporaryObject].size();
 	if (objCount == 0) textLen++;
@@ -2155,21 +2149,21 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 3, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 4);
-	WCHAR objText2[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (Cï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) : ";
+	WCHAR objText2[] = L"ÇöÀç ¸ðµå (C¸¦ ´­·¯ º¯°æ) : ";
 	textLen = _countof(objText2) - 1;
 	if (true == m_bCutterMode)
 	{
-		wsprintf(text, L"%s%s", objText2, L"ï¿½ï¿½ï¿½Ü¸ï¿½ï¿½");
+		wsprintf(text, L"%s%s", objText2, L"Àý´Ü¸ðµå");
 		textLen += 5;
 	}
 	else {
-		wsprintf(text, L"%s%s", objText2, L"Ä«ï¿½Þ¶ï¿½ï¿½ï¿½");
+		wsprintf(text, L"%s%s", objText2, L"Ä«¸Þ¶ó¸ðµå");
 		textLen += 6;
 	}
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 4, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 5);
-	WCHAR objText4[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½Ë°ï¿½ï¿½ï¿½ï¿½ï¿½ (Pï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) : ";
+	WCHAR objText4[] = L"Àý´Ü ¾Ë°í¸®Áò (P¸¦ ´­·¯ º¯°æ) : ";
 	textLen = _countof(objText4) - 1;
 	if (true == m_bCutAlgorithm)
 	{
@@ -2183,7 +2177,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 5, FRAME_BUFFER_WIDTH / 14 * 3, FRAME_BUFFER_HEIGHT / 14 * 6);
-	WCHAR objText5[] = L"ï¿½Ê±ï¿½È­ (M)";
+	WCHAR objText5[] = L"ÃÊ±âÈ­ (M)";
 	textLen = _countof(objText5) - 1;
 	pd2dDeviceContext->DrawText(objText5, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }

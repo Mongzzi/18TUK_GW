@@ -132,8 +132,6 @@ private:
 	// юс╫ц
 	int SelectedUInum;
 
-	bool m_bAniFlag = false;
-
 	//int		m_nObjects = 0;
 
 	//ID3D12Resource* m_pd3dcbGameObjects = NULL;
