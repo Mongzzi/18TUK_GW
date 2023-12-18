@@ -619,19 +619,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
-	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
-	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
-	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
-	// 임시
-	SelectedUInum = -1;
-
-
-
-
-#define TEXTURES  8
+#define TEXTURES  9
 	CTexture* ppTextures[TEXTURES];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -658,6 +647,30 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	ppTextures[7] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTextures[7]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/stone_texture.png", RESOURCE_TEXTURE2D, 0);
 
+	ppTextures[8] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[8]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/people_texture_map.png", RESOURCE_TEXTURE2D, 0);
+
+	CMaterial* m = new CMaterial();
+	m->SetTexture(ppTextures[8]);
+
+
+	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CTextureShader);
+	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
+	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
+	m_pPlayer->SetMaterial(m);
+	m_pPlayer->SetShaderType(ShaderType::CTextureShader);
+
+	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+
+
+
+
+	// 임시
+	SelectedUInum = -1;
+
+
+	
 
 	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
 	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
@@ -819,7 +832,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			for (int z = 0; z < 7; z++)
 			{
 				if (x % 5 == 0) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CTextureShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -831,7 +844,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 				}
 				else if (x % 5 == 1) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CTextureShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -843,7 +856,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 				}
 				else if (x % 5 == 2) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5, ShaderType::CObjectsShader);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5, ShaderType::CTextureShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -855,7 +868,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 				}
 				else if (x % 5 == 3) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2, ShaderType::CObjectsShader);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2, ShaderType::CTextureShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -867,7 +880,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 				}
 				else if (x % 5 == 4) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3, ShaderType::CObjectsShader);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3, ShaderType::CTextureShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -879,7 +892,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 				}
 				else if (x % 5 == 0) {
-					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4, ShaderType::CObjectsShader);
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4, ShaderType::CTextureShader);
 					float xPosition = x * xpitch;
 					float zPosition = z * zpitch;
 					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
