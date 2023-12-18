@@ -1170,9 +1170,23 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		{
 			FbxVector2 fvUV;
 			FbxGeometryElementUV* leUV = lMesh->GetElementUV(k);
-			fvUV = leUV->GetDirectArray().GetAt(i);	// 이거 쓰면 될듯?
+			int id = leUV->GetIndexArray().GetAt(i);
+			fvUV = leUV->GetDirectArray().GetAt(id);
+			//fvUV = leUV->GetDirectArray().GetAt(i);	// 이거 쓰면 될듯?
 			xmfUV.x = fvUV[0];
+			xmfUV.x = 1 - xmfUV.x;
 			xmfUV.y = fvUV[1];
+			xmfUV.y = 1 - xmfUV.y;
+			//if (xmfUV.x > 1 || xmfUV.x < 0 || xmfUV.y>1 || xmfUV.y < 0)
+			//	cout << xmfUV.x << ", " << xmfUV.y << endl;
+			//if (xmfUV.x > 1)
+			//	xmfUV.x = 1;
+			//else if (xmfUV.x < 0)
+			//	xmfUV.x = 0;
+			//if (xmfUV.y > 1)
+			//	xmfUV.y = 1;
+			//else if (xmfUV.y < 0)
+			//	xmfUV.y = 0;
 			break;// m_nInElementUVCount 가 하나만 있다고 가정.
 		}
 		if (lMesh->GetElementUVCount() == 0)
