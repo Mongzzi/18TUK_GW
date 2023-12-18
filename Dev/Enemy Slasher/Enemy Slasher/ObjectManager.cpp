@@ -120,36 +120,6 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			for (const auto& a : deleteObjects) DelObj(a, ObjectLayer::Object);	// 원본 오브젝트 삭제
 			for (const auto& a : newObjects) AddObj(a, ObjectLayer::Object); // 절단된 오브젝트 추가
 		}
-
-		if (false == m_pvObjectManager[(int)ObjectLayer::TextureObject].empty()) { // 비어있지 않다면
-			vector<CGameObject*> pObjects = m_pvObjectManager[(int)ObjectLayer::TextureObject];
-
-			vector<CGameObject*> newObjects;
-			vector<CGameObject*> deleteObjects;
-
-			vector<CDynamicShapeObject*>* pvDSMCutters = (vector<CDynamicShapeObject*>*)(pvCutters);
-			for (const auto& pCutter : *pvDSMCutters) {
-				for (const auto& pObject : pObjects) {
-
-					// 이 오브젝트가 DynamicShapeObject라면 처리
-					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObject)) {
-						XMFLOAT4X4 objectWorldMat = pDynamicShapeObject->GetWorldMat();
-						XMFLOAT4X4 cutterWorldMat = pCutter->GetWorldMat();
-						if (CollisionCheck(pDynamicShapeObject->GetCollider(), objectWorldMat, pCutter->GetCollider(), cutterWorldMat)) {
-							vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pCutter, cutAlgorithm);
-
-							if (false == vRetVec.empty()) { // 절단에 성공했다면 데이터를 준비한다.
-								newObjects.insert(newObjects.end(), vRetVec.begin(), vRetVec.end());
-								deleteObjects.push_back(pDynamicShapeObject);
-							}
-						}
-					}
-				}
-			}
-			for (const auto& a : deleteObjects) DelObj(a, ObjectLayer::TextureObject);	// 원본 오브젝트 삭제
-			for (const auto& a : newObjects) AddObj(a, ObjectLayer::TextureObject); // 절단된 오브젝트 추가
-		}
-
 		//while (false == pvCutters->empty()) { pvCutters->pop_back(); } // 항상 CutterObjectLayer는 비어있어야 한다.
 
 		while (false == pvCutters->empty()) { 
