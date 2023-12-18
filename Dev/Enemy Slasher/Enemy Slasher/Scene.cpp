@@ -962,7 +962,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pFBXLoader->LoadAnimationOnly(ANI_TEST_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(ANI_TEST2_ANI_FBX);
 
-		m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
+		//m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
 	}
 
 	//m_nShaders = 1;
@@ -1202,7 +1202,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 								weightSum[asdf] = 0.f;
 							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
 							//{
-							//	cout << skelList[i] << endl;
+								//cout << skelList[i] << endl;
 							//}
 							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
 							{
@@ -1210,6 +1210,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 								int* pIndices = skelList[c].GetIndices();
 								double* Weights = skelList[c].GetWeights();
 
+								//XMFLOAT4X4 tmp = skelList[c].GetTransformMatrix();
 								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
 
 								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
@@ -1219,12 +1220,12 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 									for (int row = 0; row < 4; ++row)
 										for (int col = 0; col < 4; ++col)
 										{
-											// 가중치의 합이 1이 아니더라
-											Weights[i] = Weights[i] / 16;
-											tmp.m[row][col] *= (float)Weights[i];
-											offsetMatList[index].m[row][col] += tmp.m[row][col];
-											weightSum[index] += (float)Weights[i];
+											{
+												tmp.m[row][col] *= (float)Weights[i];
+												offsetMatList[index].m[row][col] += tmp.m[row][col];
+											}
 										}
+									weightSum[index] += (float)Weights[i];
 								}
 							}
 							for (int asdf = 0;asdf < verticesCount;asdf++)
