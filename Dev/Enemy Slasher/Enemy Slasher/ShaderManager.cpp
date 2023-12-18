@@ -29,6 +29,7 @@ void CShaderManager::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_vShaderManager.push_back(new CTerrainShader());
 	m_vShaderManager.push_back(new CTextShader());
 	m_vShaderManager.push_back(new CTextureShader());
+	m_vShaderManager.push_back(new CUITextureShader());
 
 	for (auto d : m_vShaderManager)
 		d->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);

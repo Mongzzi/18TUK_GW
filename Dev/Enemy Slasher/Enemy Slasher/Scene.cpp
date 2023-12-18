@@ -620,7 +620,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 
-#define TEXTURES  9
+#define TEXTURES  14
 	CTexture* ppTextures[TEXTURES];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -650,16 +650,33 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	ppTextures[8] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTextures[8]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/people_texture_map.png", RESOURCE_TEXTURE2D, 0);
 
-	CMaterial* m = new CMaterial();
-	m->SetTexture(ppTextures[8]);
+	ppTextures[9] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[9]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[10] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[10]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack2.jpg", RESOURCE_TEXTURE2D, 0);
 
 
-	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CTextureShader);
+	ppTextures[11] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[11]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack3.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[12] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[12]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack4.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[13] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[13]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
+
+
+	//CMaterial* m = new CMaterial();
+	//m->SetTexture(ppTextures[8]);
+
+
+	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
-	m_pPlayer->SetMaterial(m);
-	m_pPlayer->SetShaderType(ShaderType::CTextureShader);
+	//m_pPlayer->SetMaterial(m);
+	//m_pPlayer->SetShaderType(ShaderType::CTextureShader);
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -670,10 +687,18 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	SelectedUInum = -1;
 
 
-	
-
 	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
 	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
+
+
+//#define UITEXTURES  1
+//	CTexture* mate[UITEXTURES];
+//	mate[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	mate[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack.jpg", RESOURCE_TEXTURE2D, 0);
+//
+//	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CUITextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
+//	for (int i = 0; i < UITEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, mate[i], 0, 2, ShaderType::CUITextureShader);
+
 
 
 	CMaterial* ppMaterials[TEXTURES];
@@ -910,31 +935,47 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// UI
 	{
 		//카드 UI 테스트용 오브젝트.
+		CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
 
 
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader, 0);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUITextureShader, 0);
 		pCardUIObject->SetPositionUI(100, 100);
+		pCardUIObject->SetMesh(0,pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetMaterial(ppMaterials[9]);
+		pCardUIObject->SetShaderType(ShaderType::CUITextureShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,1);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUITextureShader,1);
 		pCardUIObject->SetPositionUI(200, 200);
+		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetMaterial(ppMaterials[10]);
+		pCardUIObject->SetShaderType(ShaderType::CUITextureShader); 
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,2);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUITextureShader,2);
 		pCardUIObject->SetPositionUI(300, 300);
+		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetMaterial(ppMaterials[11]);
+		pCardUIObject->SetShaderType(ShaderType::CUITextureShader); 
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,3);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUITextureShader,3);
 		pCardUIObject->SetPositionUI(400, 400);
+		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetMaterial(ppMaterials[12]);
+		pCardUIObject->SetShaderType(ShaderType::CUITextureShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,4);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUITextureShader,4);
 		pCardUIObject->SetPositionUI(400, 400);
+		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetMaterial(ppMaterials[13]);
+		pCardUIObject->SetShaderType(ShaderType::CUITextureShader); 
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 	}
 
