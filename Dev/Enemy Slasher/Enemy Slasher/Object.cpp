@@ -527,6 +527,12 @@ void CGameObject::SetShaderType(ShaderType shaderType)
 	if (m_pMaterial) m_pMaterial->SetShaderType(shaderType); 
 }
 
+ShaderType CGameObject::GetShaderType()
+{
+	if (!m_pMaterial) return ShaderType::CObjectsShader;
+	if (m_pMaterial) return m_pMaterial->GetShaderType();
+}
+
 
 
 CInteractiveObject::CInteractiveObject(int nMeshes) : CGameObject(nMeshes)
@@ -610,7 +616,8 @@ vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevic
 
 		newGameObjects[i]->SetWorldMat(newWorldMat);
 		newGameObjects[i]->SetTransMat(newTransformMat);
-		newGameObjects[i]->SetShaderType(ShaderType::CObjectsShader);
+		//newGameObjects[i]->SetShaderType(ShaderType::CObjectsShader);
+		newGameObjects[i]->SetShaderType(GetShaderType());
 		((CDynamicShapeObject*)newGameObjects[i])->SetCuttable(true);
 	}
 
