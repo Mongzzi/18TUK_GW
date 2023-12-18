@@ -603,6 +603,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+		case 'P': if (m_bAniFlag) m_bAniFlag = false; else m_bAniFlag = true; break;
 		default:
 			break;
 		}
@@ -683,7 +684,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
-	m_pPlayer->SetMaterial(ppMaterials[14]);
+	m_pPlayer->SetMaterial(ppMaterials[8]);
 	m_pPlayer->SetShaderType(ShaderType::CTextureShader);
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
@@ -1087,7 +1088,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pFBXLoader->LoadAnimationOnly(ANI_TEST_ANI_FBX);
 		pFBXLoader->LoadAnimationOnly(ANI_TEST2_ANI_FBX);
 
-		//m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
+		m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(RUN_ANI_FBX), true);
 	}
 
 	//m_nShaders = 1;
@@ -1289,6 +1290,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
 	// 임시 애니메이션
+	if(m_bAniFlag)
 	{
 		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
 
@@ -1299,7 +1301,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		for (CGameObject* obj : vGO)
 		{
 			fbxobj = (CFBXObject*)obj;
-			//if (fbxobj->GetCurrentAnimationData())
+			if (fbxobj->GetCurrentAnimationData())
 			{
 				if (fbxobj->GetMeshes())
 				{
