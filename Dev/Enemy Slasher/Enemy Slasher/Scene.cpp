@@ -628,6 +628,50 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 임시
 	SelectedUInum = -1;
 
+
+
+
+#define TEXTURES  8
+	CTexture* ppTextures[TEXTURES];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone01.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone02.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone03.bmp", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Ceiling.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Floor.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[5]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Wood.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[6] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[6]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[7] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[7]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/stone_texture.png", RESOURCE_TEXTURE2D, 0);
+
+
+	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
+	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
+
+
+	CMaterial* ppMaterials[TEXTURES];
+	for (int i = 0; i < TEXTURES; i++)
+	{
+		ppMaterials[i] = new CMaterial();
+		ppMaterials[i]->SetTexture(ppTextures[i]);
+	}
+
+
+
 	// ------------------------------------       큐브 메쉬      -------------------------------
 
 //{
@@ -763,160 +807,166 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//	m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 	//}
 
-	//// tree
-	//{
-	//	CFBXObject* pFBXObject = NULL;
+	// tree
+	{
+		CFBXObject* pFBXObject = NULL;
+
+		float xpitch = 257.0f * 24.0f / 10.0f;
+		float zpitch = 257.0f * 24.0f / 7.0f;
+
+		for (int x = 0; x < 10; x++)
+		{
+			for (int z = 0; z < 7; z++)
+			{
+				if (x % 5 == 0) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetMaterial(ppMaterials[6]);
+					pFBXObject->SetShaderType(ShaderType::CTextureShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
+				}
+				else if (x % 5 == 1) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetMaterial(ppMaterials[6]);
+					pFBXObject->SetShaderType(ShaderType::CTextureShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
+				}
+				else if (x % 5 == 2) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5, ShaderType::CObjectsShader);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetMaterial(ppMaterials[6]);
+					pFBXObject->SetShaderType(ShaderType::CTextureShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
+				}
+				else if (x % 5 == 3) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2, ShaderType::CObjectsShader);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetMaterial(ppMaterials[6]);
+					pFBXObject->SetShaderType(ShaderType::CTextureShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
+				}
+				else if (x % 5 == 4) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3, ShaderType::CObjectsShader);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetMaterial(ppMaterials[6]);
+					pFBXObject->SetShaderType(ShaderType::CTextureShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
+				}
+				else if (x % 5 == 0) {
+					CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4, ShaderType::CObjectsShader);
+					float xPosition = x * xpitch;
+					float zPosition = z * zpitch;
+					float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
+					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetMaterial(ppMaterials[6]);
+					pFBXObject->SetShaderType(ShaderType::CTextureShader);
+					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
+				}
+			}
+		}
+	}
+
+	// UI
+	{
+		//카드 UI 테스트용 오브젝트.
 
 
-	//	float xpitch = 257.0f * 24.0f / 10.0f;
-	//	float zpitch = 257.0f * 24.0f / 7.0f;
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader, 0);
+		pCardUIObject->SetPositionUI(100, 100);
+		pCardUIObject->SetScale(2, 2, 1);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//	for (int x = 0; x < 10; x++)
-	//	{
-	//		for (int z = 0; z < 7; z++)
-	//		{
-	//			if (x % 5 == 0) {
-	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
-	//				float xPosition = x * xpitch;
-	//				float zPosition = z * zpitch;
-	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
-	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	//			}
-	//			else if (x % 5 == 1) {
-	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE1, ShaderType::CObjectsShader);
-	//				float xPosition = x * xpitch;
-	//				float zPosition = z * zpitch;
-	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,1);
+		pCardUIObject->SetPositionUI(200, 200);
+		pCardUIObject->SetScale(2, 2, 1);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	//			}
-	//			else if (x % 5 == 2) {
-	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE5, ShaderType::CObjectsShader);
-	//				float xPosition = x * xpitch;
-	//				float zPosition = z * zpitch;
-	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,2);
+		pCardUIObject->SetPositionUI(300, 300);
+		pCardUIObject->SetScale(2, 2, 1);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	//			}
-	//			else if (x % 5 == 3) {
-	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE2, ShaderType::CObjectsShader);
-	//				float xPosition = x * xpitch;
-	//				float zPosition = z * zpitch;
-	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,3);
+		pCardUIObject->SetPositionUI(400, 400);
+		pCardUIObject->SetScale(2, 2, 1);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	//			}
-	//			else if (x % 5 == 4) {
-	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE3, ShaderType::CObjectsShader);
-	//				float xPosition = x * xpitch;
-	//				float zPosition = z * zpitch;
-	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
-
-	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	//			}
-	//			else if (x % 5 == 0) {
-	//				CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, TREE4, ShaderType::CObjectsShader);
-	//				float xPosition = x * xpitch;
-	//				float zPosition = z * zpitch;
-	//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->SetPosition(xPosition, fHeight, zPosition);
-	//				pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
-
-	//				m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	//			}
-	//		}
-	//	}
-	//}
-
-	//// UI
-	//{
-	//	//카드 UI 테스트용 오브젝트.
-	//	CCardUIObject* pUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), TREE4, ShaderType::CUIObjectsShader);
-	//	CMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList, 0.2f, 0.5f, 0.2f, 10.0f, 10.0f, 10.0f);
-	//	pUIObject->SetMesh(0, pBoxMesh);
-	//	pUIObject->SetPositionUI(320, 440);
-	//	pUIObject->SetScale(1000, 100, 1);
-	//	m_pObjectManager->AddObj(pUIObject, ObjectLayer::UIObject);
-
-	//	CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader, 0);
-	//	pCardUIObject->SetPositionUI(100, 100);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,1);
-	//	pCardUIObject->SetPositionUI(200, 200);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,2);
-	//	pCardUIObject->SetPositionUI(300, 300);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,3);
-	//	pCardUIObject->SetPositionUI(400, 400);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,4);
-	//	pCardUIObject->SetPositionUI(400, 400);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-	//}
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, ShaderType::CUIObjectsShader,4);
+		pCardUIObject->SetPositionUI(400, 400);
+		pCardUIObject->SetScale(2, 2, 1);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	}
 
 
 	// 텍스쳐 시험
-#define TEXTURES  6
-	CTexture* ppTextures[TEXTURES];
+//#define TEXTURES  6
+//	CTexture* ppTextures[TEXTURES];
+//
+//	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone01.jpg", RESOURCE_TEXTURE2D, 0);
+//
+//	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone02.jpg", RESOURCE_TEXTURE2D, 0);
+//
+//	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone03.bmp", RESOURCE_TEXTURE2D, 0);
+//
+//	ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Ceiling.jpg", RESOURCE_TEXTURE2D, 0);
+//
+//	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Floor.jpg", RESOURCE_TEXTURE2D, 0);
+//
+//	ppTextures[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	ppTextures[5]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Wood.jpg", RESOURCE_TEXTURE2D, 0);
+//
+//
+//	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
+//	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
 
-	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone01.jpg", RESOURCE_TEXTURE2D, 0);
-
-	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone02.jpg", RESOURCE_TEXTURE2D, 0);
-
-	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Stone03.bmp", RESOURCE_TEXTURE2D, 0);
-
-	ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Ceiling.jpg", RESOURCE_TEXTURE2D, 0);
-
-	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Floor.jpg", RESOURCE_TEXTURE2D, 0);
-
-	ppTextures[5] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[5]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Wood.jpg", RESOURCE_TEXTURE2D, 0);
 
 
-	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
 
+
+	//CMaterial* ppMaterials[TEXTURES];
+	//for (int i = 0; i < 6; i++)
+	//{
+	//	ppMaterials[i] = new CMaterial();
+	//	ppMaterials[i]->SetTexture(ppTextures[i]);
+	//}
+
+	//------------------------------------------
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//m_pShaderManager->CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255), ShaderType::CTextureShader);
 
-	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
-
-	CMaterial* ppMaterials[TEXTURES];
-	for (int i = 0; i < TEXTURES; i++)
-	{
-		ppMaterials[i] = new CMaterial();
-		ppMaterials[i]->SetTexture(ppTextures[i]);
-	}
 
 	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 120.0f, 120.0f, 120.0f);
 	float fxPitch = 120.0f * 2.5f, fyPitch = 120.0f * 2.5f, fzPitch = 120.0f * 2.5f;
@@ -933,11 +983,11 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			{
 				pRotatingObject = new CRotatingObject(1);
 				pRotatingObject->SetMesh(0, pCubeMesh);
-				pRotatingObject->SetMaterial(ppMaterials[i++ % TEXTURES]);
 				pRotatingObject->SetPosition(fxPitch * x + 2160.0f, fyPitch * y + 687.0f + 400.0f, fzPitch * z + 2340.0f);
 				pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
 				pRotatingObject->SetRotationSpeed(10.0f * (10 % 10));
+				pRotatingObject->SetMaterial(ppMaterials[i++ % 6]);
 				pRotatingObject->SetShaderType(ShaderType::CTextureShader);
 				m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::TextureObject);
 
