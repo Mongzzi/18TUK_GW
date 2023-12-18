@@ -128,6 +128,7 @@ public:
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 	void SetTexture(CTexture* pTexture);
 	void SetShaderType(ShaderType type) { m_ShaderType = type; }
+	ShaderType GetShaderType() { return m_ShaderType; }
 
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
@@ -212,6 +213,7 @@ public:
 
 	//m_pShader
 	void SetShaderType(ShaderType shaderType);
+	ShaderType GetShaderType();
 
 	void SetMaterial(CMaterial* pMaterial);
 	void SetMaterial(UINT nReflection);

@@ -881,6 +881,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetCuttable(true);
 					pFBXObject->SetMaterial(ppMaterials[6]);
 					pFBXObject->SetShaderType(ShaderType::CTextureShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
@@ -893,6 +894,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetCuttable(true);
 					pFBXObject->SetMaterial(ppMaterials[6]);
 					pFBXObject->SetShaderType(ShaderType::CTextureShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
@@ -905,6 +907,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetCuttable(true);
 					pFBXObject->SetMaterial(ppMaterials[6]);
 					pFBXObject->SetShaderType(ShaderType::CTextureShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
@@ -917,6 +920,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetCuttable(true);
 					pFBXObject->SetMaterial(ppMaterials[6]);
 					pFBXObject->SetShaderType(ShaderType::CTextureShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
@@ -929,6 +933,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetCuttable(true);
 					pFBXObject->SetMaterial(ppMaterials[6]);
 					pFBXObject->SetShaderType(ShaderType::CTextureShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
@@ -941,6 +946,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->SetPosition(xPosition, fHeight, zPosition);
 					pFBXObject->Rotate(90.0f, 0.0f, 0.0f);
+					pFBXObject->SetCuttable(true);
 					pFBXObject->SetMaterial(ppMaterials[6]);
 					pFBXObject->SetShaderType(ShaderType::CTextureShader);
 					m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
@@ -1252,8 +1258,8 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player가 있다면
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
 
-		if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
-			for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
+		if (false == pvObjectList[(int)ObjectLayer::TextureObject].empty()) {
+			for (const auto& obj : pvObjectList[(int)ObjectLayer::TextureObject]) {
 				if (CInteractiveObject* IterObj = dynamic_cast<CInteractiveObject*>(obj)) {
 					XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
 					XMFLOAT4X4 playerMat = pPlayer->GetWorldMat();
@@ -1286,92 +1292,92 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
 	// 임시 애니메이션
-	{
-		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
-
-		CFBXObject* fbxobj = NULL;
-		CMesh** meshes = NULL;
-		CFBXMesh* fbxmesh = NULL;
-
-		for (CGameObject* obj : vGO)
-		{
-			fbxobj = (CFBXObject*)obj;
-			//if (fbxobj->GetCurrentAnimationData())
-			{
-				if (fbxobj->GetMeshes())
-				{
-					meshes = ((CFBXObject*)obj)->GetMeshes();
-					for (int m = 0; m < fbxobj->GetNumMeshes(); m++)
-					{
-
-						//------------------------------------------------------------------------
-						//                     GetOffsetMatList 라는 함수로 뺀다.
-						// 정점의 개수만큼 변환행렬 생성.
-						fbxmesh = (CFBXMesh*)meshes[m];
-						int verticesCount = fbxmesh->GetNumVertices();
-						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
-						// 초기화
-						for (int j = 0; j < verticesCount; j++)
-							offsetMatList[j] = Matrix4x4::Identity();
-
-
-						//매쉬의 본들에서
-						CSkeleton* skelList = fbxmesh->GetSkeletonList();
-						if (skelList)
-						{
-							float* weightSum = new float[verticesCount];
-							for (int asdf = 0;asdf < verticesCount;asdf++)
-								weightSum[asdf] = 0.f;
-							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
-							//{
-								//cout << skelList[i] << endl;
-							//}
-							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
-							{
-								// 영향받는 정점들과 그 정도를 가져와서
-								int* pIndices = skelList[c].GetIndices();
-								double* Weights = skelList[c].GetWeights();
-
-								//XMFLOAT4X4 tmp = skelList[c].GetTransformMatrix();
-								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
-
-								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
-								{
-									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
-									int index = pIndices[i];
-									for (int row = 0; row < 4; ++row)
-										for (int col = 0; col < 4; ++col)
-										{
-											{
-												tmp.m[row][col] *= (float)Weights[i];
-												offsetMatList[index].m[row][col] += tmp.m[row][col];
-											}
-										}
-									weightSum[index] += (float)Weights[i];
-								}
-							}
-							for (int asdf = 0;asdf < verticesCount;asdf++)
-							{
-#ifdef _DEBUG
-								//cout << "weightSum[" << asdf << "] : " << weightSum[asdf] << endl;
-#endif // _DEBUG
-							}
-							delete[] weightSum;
-						}
-						//------------------------------------------------------------------------
-
-						// 만들어진 행렬을 정점들에 적용.
-						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // 아직 버그 있음.
-
-						// 변환행렬 삭제.
-						delete[] offsetMatList;
-					}
-
-				}
-			}
-		}
-
-	}
+//	{
+//		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
+//
+//		CFBXObject* fbxobj = NULL;
+//		CMesh** meshes = NULL;
+//		CFBXMesh* fbxmesh = NULL;
+//
+//		for (CGameObject* obj : vGO)
+//		{
+//			fbxobj = (CFBXObject*)obj;
+//			//if (fbxobj->GetCurrentAnimationData())
+//			{
+//				if (fbxobj->GetMeshes())
+//				{
+//					meshes = ((CFBXObject*)obj)->GetMeshes();
+//					for (int m = 0; m < fbxobj->GetNumMeshes(); m++)
+//					{
+//
+//						//------------------------------------------------------------------------
+//						//                     GetOffsetMatList 라는 함수로 뺀다.
+//						// 정점의 개수만큼 변환행렬 생성.
+//						fbxmesh = (CFBXMesh*)meshes[m];
+//						int verticesCount = fbxmesh->GetNumVertices();
+//						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
+//						// 초기화
+//						for (int j = 0; j < verticesCount; j++)
+//							offsetMatList[j] = Matrix4x4::Identity();
+//
+//
+//						//매쉬의 본들에서
+//						CSkeleton* skelList = fbxmesh->GetSkeletonList();
+//						if (skelList)
+//						{
+//							float* weightSum = new float[verticesCount];
+//							for (int asdf = 0;asdf < verticesCount;asdf++)
+//								weightSum[asdf] = 0.f;
+//							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
+//							//{
+//								//cout << skelList[i] << endl;
+//							//}
+//							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
+//							{
+//								// 영향받는 정점들과 그 정도를 가져와서
+//								int* pIndices = skelList[c].GetIndices();
+//								double* Weights = skelList[c].GetWeights();
+//
+//								//XMFLOAT4X4 tmp = skelList[c].GetTransformMatrix();
+//								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
+//
+//								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
+//								{
+//									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
+//									int index = pIndices[i];
+//									for (int row = 0; row < 4; ++row)
+//										for (int col = 0; col < 4; ++col)
+//										{
+//											{
+//												tmp.m[row][col] *= (float)Weights[i];
+//												offsetMatList[index].m[row][col] += tmp.m[row][col];
+//											}
+//										}
+//									weightSum[index] += (float)Weights[i];
+//								}
+//							}
+//							for (int asdf = 0;asdf < verticesCount;asdf++)
+//							{
+//#ifdef _DEBUG
+//								//cout << "weightSum[" << asdf << "] : " << weightSum[asdf] << endl;
+//#endif // _DEBUG
+//							}
+//							delete[] weightSum;
+//						}
+//						//------------------------------------------------------------------------
+//
+//						// 만들어진 행렬을 정점들에 적용.
+//						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // 아직 버그 있음.
+//
+//						// 변환행렬 삭제.
+//						delete[] offsetMatList;
+//					}
+//
+//				}
+//			}
+//		}
+//
+//	}
 	if (SelectedUInum != -1) {
 		float fBoxSize = 200.0f;
 
@@ -1441,18 +1447,18 @@ void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devic
 
 	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
 
-	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 3 * 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
 	WCHAR objText[] = L"맵 상의 오브젝트 갯수 : ";
 	int textLen = _countof(objText) - 1;
-	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
-	int objCount = objList[(int)ObjectLayer::Object].size();
+	vector<CGameObject*> objList = m_pObjectManager->GetObjectList(ObjectLayer::TextureObject);
+	int objCount = objList.size();
 	if (objCount == 0) textLen++;
 	while (objCount > 0) {
 		objCount /= 10; textLen++;
 	}
 
-	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::Object].size()));
+	wsprintf(text, L"%s%d", objText, (int)(objList.size()));
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;

@@ -668,7 +668,8 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Push(ID3D12Device* pd3dDevice, 
 				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
 				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
 				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vvNewVertices[1].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+				XMFLOAT2 xmf2UV = m_pVertices[i].m_xmf2UV;
+				vvNewVertices[1].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color, xmf2UV);
 
 				vvNewVertices[0].first->emplace_back(m_pVertices[i]);
 				vvNewVertices[0].second = true;
@@ -677,7 +678,8 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Push(ID3D12Device* pd3dDevice, 
 				XMFLOAT3 xmf3Vertex = ProjectVertexToPlane(m_pVertices[i].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
 				XMFLOAT3 xmf33Normal = m_pVertices[i].m_xmf3Normal;
 				XMFLOAT4 xmf4Color = m_pVertices[i].m_xmf4Color;
-				vvNewVertices[0].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color);
+				XMFLOAT2 xmf2UV = m_pVertices[i].m_xmf2UV;
+				vvNewVertices[0].first->emplace_back(xmf3Vertex, xmf33Normal, xmf4Color, xmf2UV);
 
 				vvNewVertices[1].first->emplace_back(m_pVertices[i]);
 				vvNewVertices[1].second = true;
