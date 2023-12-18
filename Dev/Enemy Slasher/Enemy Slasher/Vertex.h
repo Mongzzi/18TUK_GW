@@ -8,23 +8,28 @@ public:
 	XMFLOAT3 m_xmf3Vertex;
 	XMFLOAT3 m_xmf3Normal;
 	XMFLOAT4 m_xmf4Color;
-	//XMFLOAT2 m_xmf2UV;
+	XMFLOAT2 m_xmf2UV;
 
 public:
 	CVertex() {
 		m_xmf3Vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_xmf4Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-		//m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
+		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
 	}
 
 	CVertex(XMFLOAT3 v, XMFLOAT4 c) : m_xmf3Vertex(v), m_xmf4Color(c) {
 		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		//m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
+		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
 	}
 
 	CVertex(XMFLOAT3 v, XMFLOAT3 n, XMFLOAT4 c) : m_xmf3Vertex(v), m_xmf3Normal(n), m_xmf4Color(c) {
-		//m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
+		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
+	}
+
+	CVertex(XMFLOAT3 v, XMFLOAT3 n, XMFLOAT2 uv) : m_xmf3Vertex(v), m_xmf3Normal(n), m_xmf2UV(uv) {
+		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
+		m_xmf4Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 	//CVertex(XMFLOAT3 v, XMFLOAT3 n, XMFLOAT4 c, XMFLOAT2 u) : m_xmf3Vertex(v), m_xmf3Normal(n), m_xmf4Color(c), m_xmf2UV(u) { }
@@ -33,7 +38,7 @@ public:
 		m_xmf3Vertex = XMFLOAT3(x, y, z);
 		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_xmf4Color = c;
-		//m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
+		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
 	}
 	~CVertex() { }
 
