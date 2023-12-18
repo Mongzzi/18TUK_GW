@@ -1177,11 +1177,10 @@ bool CFBXMesh::LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		}
 		if (lMesh->GetElementUVCount() == 0)
 		{
-			xmfUV.x = 0;
-			xmfUV.y = 0;
+			m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT4(urd(dre), urd(dre), urd(dre), 1.0f));
 		}
-		m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT2(xmfUV));
-		//m_pVertices[i] = CTexturedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(xmfUV));
+		else
+			m_pVertices[i] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT3(fvNormal[0], fvNormal[1], fvNormal[2]), XMFLOAT2(xmfUV));
 	}
 	////////////////////////////////////////////////////////////// - 여기 문제가 있음. - //////////////////////////////////////////////////////////////
 	// 버퍼생성 
