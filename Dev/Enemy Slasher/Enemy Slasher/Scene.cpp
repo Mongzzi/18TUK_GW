@@ -3,6 +3,7 @@
 #include "FbxLoader.h"
 #include "ObjectManager.h"
 #include "ShaderManager.h"
+#include "PhysXManager.h"
 #include "Ray.h"
 
 CBasicScene::CBasicScene()
@@ -2182,4 +2183,81 @@ void CTestScene_Slice::Enter()
 
 void CTestScene_Slice::Exit()
 {
+}
+
+CTestScene_PhysX::CTestScene_PhysX()
+{
+	m_pPhysXManager = new CPhysXManager;
+}
+
+CTestScene_PhysX::~CTestScene_PhysX()
+{
+	delete m_pPhysXManager;
+}
+
+void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+{
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	{
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+	}
+
+	{
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
+		pFBXObject->SetCuttable(true);
+		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+	}
+
+	{
+		CRayObject* pRayObject = NULL;
+		pRayObject = new CRayObject();
+		pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
+		m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
+	}
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CTestScene_PhysX::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	static const WCHAR text[] = L"PhysXScene의 Render2D 입니다.";
+
+	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
+	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
+
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		25,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }

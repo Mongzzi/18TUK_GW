@@ -489,6 +489,7 @@ void CGameFramework::BuildObjects()
 		m_pvScenelist.push_back(new CTitleScene);
 		m_pvScenelist.push_back(new CTestScene);
 		m_pvScenelist.push_back(new CTestScene_Slice);
+		m_pvScenelist.push_back(new CTestScene_PhysX);
 		//m_pvScenelist.push_back(new CTestScene_Card);
 
 		for (auto scene : m_pvScenelist)
