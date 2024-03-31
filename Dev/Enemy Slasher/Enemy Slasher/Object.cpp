@@ -196,6 +196,13 @@ void CMaterial::SetTexture(CTexture* pTexture)
 	if (m_pTexture) m_pTexture->AddRef();
 }
 
+void CMaterial::SetShader(CShader* pShader)
+{
+	if (m_pShader) m_pShader->Release();
+	m_pShader = pShader;
+	if (m_pShader) m_pShader->AddRef();
+}
+
 void CMaterial::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
@@ -516,7 +523,7 @@ void CGameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 	UpdateTransform(NULL);
 }
 
-void CGameObject::SetShaderType(ShaderType shaderType)
+void CGameObject::SetShader(CShader* pShader)
 {
 	if (!m_pMaterial)
 	{
@@ -524,14 +531,16 @@ void CGameObject::SetShaderType(ShaderType shaderType)
 		m_pMaterial->AddRef();
 	}
 
-	if (m_pMaterial) m_pMaterial->SetShaderType(shaderType); 
+	if (m_pMaterial) m_pMaterial->SetShader(pShader);
 }
 
 
 
 CInteractiveObject::CInteractiveObject(int nMeshes) : CGameObject(nMeshes)
 {
-	CGameObject::SetShaderType(ShaderType::CObjectsShader);
+	//CGameObject::SetShaderType(ShaderType::CObjectsShader);
+	CObjectsShader* pObjectsShader = new CObjectsShader();
+	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 }
 
 CInteractiveObject::~CInteractiveObject()

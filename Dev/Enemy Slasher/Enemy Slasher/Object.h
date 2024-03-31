@@ -122,12 +122,13 @@ public:
 	//재질을 적용하여 렌더링을 하기 위한 쉐이더
 
 	CTexture* m_pTexture = NULL;
-	ShaderType m_ShaderType;
+	CShader* m_pShader = NULL;
+
 
 	void SetAlbedo(XMFLOAT4& xmf4Albedo) { m_xmf4Albedo = xmf4Albedo; }
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 	void SetTexture(CTexture* pTexture);
-	void SetShaderType(ShaderType type) { m_ShaderType = type; }
+	void SetShader(CShader* pShader);
 
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
@@ -216,7 +217,8 @@ public:
 	virtual void Rotate(XMFLOAT4* pxmf4Quaternion);
 
 	//m_pShader
-	void SetShaderType(ShaderType shaderType);
+	void SetShader(CShader* pShader);
+
 
 	void SetMaterial(CMaterial* pMaterial);
 	void SetMaterial(UINT nReflection);
