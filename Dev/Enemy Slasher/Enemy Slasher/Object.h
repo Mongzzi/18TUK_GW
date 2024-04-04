@@ -238,7 +238,7 @@ public:
 class CInteractiveObject : public CGameObject
 {
 public:
-	CInteractiveObject(int nMeshes = 1);
+	CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes = 1);
 	virtual ~CInteractiveObject();
 
 public:
@@ -257,7 +257,7 @@ class CDynamicShapeObject : public CInteractiveObject
 {
 	// dynamic_cast 로 처리를 하고 있지만 이것은 런타임시 코스트가 높은 작업이다. 주의할 것
 public:
-	CDynamicShapeObject(int nMeshes = 1);
+	CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes = 1);
 	virtual ~CDynamicShapeObject();
 
 protected:

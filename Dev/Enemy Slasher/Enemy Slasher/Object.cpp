@@ -536,11 +536,11 @@ void CGameObject::SetShader(CShader* pShader)
 
 
 
-CInteractiveObject::CInteractiveObject(int nMeshes) : CGameObject(nMeshes)
+CInteractiveObject::CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes) : CGameObject(nMeshes)
 {
 	//CGameObject::SetShaderType(ShaderType::CObjectsShader);
 	CObjectsShader* pObjectsShader = new CObjectsShader();
-	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 }
 
 CInteractiveObject::~CInteractiveObject()
@@ -566,7 +566,8 @@ void CInteractiveObject::MakeCollider()
 }
 
 
-CDynamicShapeObject::CDynamicShapeObject(int nMeshes) : CInteractiveObject(nMeshes)
+CDynamicShapeObject::CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes) 
+	: CInteractiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature , nMeshes)
 {
 }
 
