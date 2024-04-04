@@ -38,7 +38,7 @@ protected:
 	CShader* m_pShader = NULL;
 
 public:
-	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
+	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
 
 	virtual ~CPlayer();
 
@@ -92,7 +92,7 @@ public:
 class TestPlayer : public CPlayer 
 {
 public:
-	TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
+	TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
 
 	//TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 	//{
