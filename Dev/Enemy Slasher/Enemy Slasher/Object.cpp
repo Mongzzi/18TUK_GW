@@ -413,6 +413,48 @@ void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 }
 
+void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
+{
+	switch (stype)
+	{
+	case ShaderType::CObjectsShader:
+		CObjectsShader* pObjectsShader = new CObjectsShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	case ShaderType::CUIObjectsShader:
+		CUIObjectsShader* pObjectsShader = new CUIObjectsShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	case ShaderType::CObjectsNormalShader:
+		CObjectsNormalShader* pObjectsShader = new CObjectsNormalShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	case ShaderType::CTerrainShader:
+		CTerrainShader* pObjectsShader = new CTerrainShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	case ShaderType::CTextShader:
+		CTextShader* pObjectsShader = new CTextShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	case ShaderType::CTextureShader:
+		CTextureShader* pObjectsShader = new CTextureShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	case ShaderType::CUITextureShader:
+		CUITextureShader* pObjectsShader = new CUITextureShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	}
+}
+
 
 void CGameObject::SetPosition(float x, float y, float z)
 {
@@ -536,11 +578,10 @@ void CGameObject::SetShader(CShader* pShader)
 
 
 
-CInteractiveObject::CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes) : CGameObject(nMeshes)
+CInteractiveObject::CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes) : CGameObject(nMeshes)
 {
 	//CGameObject::SetShaderType(ShaderType::CObjectsShader);
-	CObjectsShader* pObjectsShader = new CObjectsShader();
-	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	CGameObject::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype);
 }
 
 CInteractiveObject::~CInteractiveObject()
@@ -560,14 +601,14 @@ void CInteractiveObject::MakeCollider()
 	m_pCollider = new COBBColliderWithMesh;
 	XMFLOAT4X4 myWorldMat = GetWorldMat();
 	for (int i = 0; i < m_nMeshes; ++i) {
-		if(CColliderMesh* colliderMesh = dynamic_cast<CColliderMesh*>(m_ppMeshes[i]))
-		m_pCollider->UpdateColliderWithOBB((colliderMesh)->GetCollider(), myWorldMat);
+		if (CColliderMesh* colliderMesh = dynamic_cast<CColliderMesh*>(m_ppMeshes[i]))
+			m_pCollider->UpdateColliderWithOBB((colliderMesh)->GetCollider(), myWorldMat);
 	}
 }
 
 
-CDynamicShapeObject::CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes) 
-	: CInteractiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature , nMeshes)
+CDynamicShapeObject::CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CInteractiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
 }
 
@@ -575,7 +616,8 @@ CDynamicShapeObject::~CDynamicShapeObject()
 {
 }
 
-vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
+vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
+	ShaderType stype, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
 {
 	CDynamicShapeObject* pDynamicShapeObject = static_cast<CDynamicShapeObject*>(pCutterObject);
 
@@ -614,13 +656,13 @@ vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevic
 	// 하나의 Mesh 는 하나의 Object가 되도록 하자. - 나중에 변경할 수도 있다
 	vector<CGameObject*> newGameObjects;
 	for (int i = 0; i < newMeshs.size(); ++i) {
-		newGameObjects.push_back(new CDynamicShapeObject());
+		newGameObjects.push_back(new CDynamicShapeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype));
 
 		newGameObjects[i]->SetMesh(0, newMeshs[i]);
 
 		newGameObjects[i]->SetWorldMat(newWorldMat);
 		newGameObjects[i]->SetTransMat(newTransformMat);
-		newGameObjects[i]->SetShaderType(ShaderType::CObjectsShader);
+		//newGameObjects[i]->SetShaderType(ShaderType::CObjectsShader);
 		((CDynamicShapeObject*)newGameObjects[i])->SetCuttable(true);
 	}
 
@@ -628,11 +670,12 @@ vector<CGameObject*> CDynamicShapeObject::DynamicShaping(ID3D12Device* pd3dDevic
 }
 
 
-CRotatingObject::CRotatingObject(int nMeshes) : CGameObject(nMeshes)
+CRotatingObject::CRotatingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1) : CGameObject(nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
-	CGameObject::SetShaderType(ShaderType::CObjectsShader);
+	//CGameObject::SetShaderType(ShaderType::CObjectsShader);
+	CGameObject::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype);
 
 }
 
@@ -640,11 +683,14 @@ CRotatingObject::~CRotatingObject()
 {
 }
 
-CRotatingNormalObject::CRotatingNormalObject(int nmeshes)
+CRotatingNormalObject::CRotatingNormalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1)
+	: CRotatingObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
-	CGameObject::SetShaderType(ShaderType::CObjectNormalShader);
+	//CGameObject::SetShaderType(ShaderType::CObjectNormalShader);
+	CGameObject::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype);
+
 }
 
 CRotatingNormalObject::~CRotatingNormalObject()
@@ -687,7 +733,8 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 }
 
 
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) : CDynamicShapeObject(0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, const char* fileName)
+	: CDynamicShapeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
 {
 	//------------------------------------------------------------------------------------------
 	//FbxManager* plSdkManager = NULL;
@@ -727,7 +774,9 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	//------------------------------------------------------------------------------------------
 
-	SetShaderType(shaderType);
+	//SetShaderType(shaderType);
+
+
 	MakeCollider();
 }
 
@@ -752,7 +801,7 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	FbxNodeAttribute::EType lAttributeType;
 	CFBXMesh* pFBXMesh = NULL;
-	int p=0;
+	int p = 0;
 
 	if (pNode->GetNodeAttribute() == NULL)
 	{
@@ -868,7 +917,7 @@ void CFBXObject::LoadHierarchyFromMesh()
 	if (m_ppMeshes[0])
 	{
 		pMesh = (CFBXMesh*)m_ppMeshes[0];
-		if(m_skelRoot)
+		if (m_skelRoot)
 			m_skelRoot->LoadHierarchyFromMesh(pMesh);
 	}
 
@@ -1006,7 +1055,7 @@ void CFBXObject::SetAnimation(CAnimationData* ani, bool loofFlag)
 	}
 	m_adCurrentAnimationData = ani;
 	m_bCurrentLoofFlag = loofFlag;
-	
+
 	m_fProgressedFrame = 0.f;
 }
 
@@ -1032,7 +1081,7 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		int clusterCOunt = ((CFBXMesh*)m_ppMeshes[0])->GetClusterCount();
 		for (const auto& pair : m_adCurrentAnimationData->m_mAnimationData)
 		{
-			for (int i = 0;i < clusterCOunt;i++)
+			for (int i = 0; i < clusterCOunt; i++)
 			{
 				if (pair.first == skelList[i].GetName())
 				{
@@ -1106,7 +1155,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		}
 	}
 
-	CGameObject::SetShaderType(ShaderType::CTerrainShader);
+	CGameObject::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTerrainShader);
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)
@@ -1126,7 +1175,8 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext)
 	//);
 }
 
-CRayObject::CRayObject() : CInteractiveObject()
+CRayObject::CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
+	: CInteractiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_vOriginal = { 0,0,0 };
 	m_xmf3DirOld = { 0,0,1 };
@@ -1144,7 +1194,7 @@ void CRayObject::Reset(CRay ray)
 	XMVECTOR vFrom = XMLoadFloat3(&m_xmf3DirOld);
 	XMFLOAT3 dir = ray.GetDir();
 	XMVECTOR vTo = XMLoadFloat3(&dir);
-	
+
 	// 정규화된 벡터로 변환
 	vFrom = XMVector3Normalize(vFrom);
 	vTo = XMVector3Normalize(vTo);
@@ -1172,7 +1222,8 @@ void CRayObject::Reset(CRay ray)
 #endif // _DEBUG
 }
 
-CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName)
+	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,stype, pFBXLoader, fileName)
 {
 	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
 
@@ -1182,7 +1233,8 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_iUInum = -1;
 }
 
-CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum) : CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, fileName, shaderType)
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum)
+	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, pFBXLoader, fileName)
 {
 	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
 
@@ -1220,7 +1272,7 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	// 이걸 사용하면 카메라벡터의 반대를 보게됨.
 	// 카메라의Look의 반대, 카메라UP으로 만들어도 될듯? 아마?
 	XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
-	
+
 	// 스케일 적용.
 	SetScale(m_xmfScale);
 
@@ -1282,15 +1334,17 @@ void CUIObject::SetScale(float x, float y, float z)
 void CUIObject::SetScale(XMFLOAT3 scale)
 {
 	m_xmfScale = scale;
-	
+
 	CGameObject::SetScale(Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false));
 }
 
-CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName, shaderType)
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType) 
+	: CUIObject(pd3dDevice, pd3dCommandList,pd3dGraphicsRootSignature,stype, pFBXLoader, pCamera, fileName)
 {
 }
 
-CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum) : CUIObject(pd3dDevice, pd3dCommandList, pFBXLoader, pCamera, fileName, shaderType, UInum)
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum) 
+	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, pFBXLoader, pCamera, fileName, UInum)
 {
 }
 
@@ -1306,8 +1360,8 @@ void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		if (m_fTargetScale > m_fCurrntScale)
 		{
-			m_fCurrntScale += fTimeElapsed* TIME_ELAPSE_RATIO;
-			if(m_fTargetScale < m_fCurrntScale)
+			m_fCurrntScale += fTimeElapsed * TIME_ELAPSE_RATIO;
+			if (m_fTargetScale < m_fCurrntScale)
 				m_fCurrntScale = m_fTargetScale;
 		}
 		else
@@ -1357,7 +1411,7 @@ void CCardUIObject::ButtenUp()
 	default:
 		break;
 	}
-	cout<< m_iUInum <<endl;
+	cout << m_iUInum << endl;
 }
 
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)

@@ -112,13 +112,13 @@ private:
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
-	
+
 	//재질의 기본 색상
 	XMFLOAT4 m_xmf4Albedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	
+
 	//재질의 번호
 	UINT m_nReflection = 0;
-	
+
 	//재질을 적용하여 렌더링을 하기 위한 쉐이더
 
 	CTexture* m_pTexture = NULL;
@@ -161,14 +161,14 @@ protected:
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 
 	int								m_nMeshes = 0;
-	CMesh**							m_ppMeshes = NULL;
+	CMesh** m_ppMeshes = NULL;
 
 	int								m_nMaterial = 0;
-	CMaterial*						m_pMaterial = NULL;
+	CMaterial* m_pMaterial = NULL;
 
-	CGameObject*					m_pParent = NULL;
-	CGameObject*					m_pChild = NULL;
-	CGameObject*					m_pSibling = NULL;
+	CGameObject* m_pParent = NULL;
+	CGameObject* m_pChild = NULL;
+	CGameObject* m_pSibling = NULL;
 
 public:
 	void SetChild(CGameObject* pChild);
@@ -189,6 +189,11 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+	// 쉐이더 생성 함수 ( create shader )
+	// 기존 쉐이더 타입 재사용 - 생성자 부분 or Scene에서 CreatShader 호출할 예정
+	//						   - SetShaderType함수 없애고 이부분에서만 사용할 예정
+	void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype);
 
 
 public:
@@ -238,7 +243,7 @@ public:
 class CInteractiveObject : public CGameObject
 {
 public:
-	CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes = 1);
+	CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
 	virtual ~CInteractiveObject();
 
 public:
@@ -257,7 +262,7 @@ class CDynamicShapeObject : public CInteractiveObject
 {
 	// dynamic_cast 로 처리를 하고 있지만 이것은 런타임시 코스트가 높은 작업이다. 주의할 것
 public:
-	CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nMeshes = 1);
+	CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
 	virtual ~CDynamicShapeObject();
 
 protected:
@@ -272,14 +277,15 @@ public:
 
 public:
 
-	vector<CGameObject*> DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm = CDynamicShapeMesh::CutAlgorithm::Push); // 절단된 오브젝트 2개를 리턴한다.
+	vector<CGameObject*> DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
+		ShaderType stype, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm = CDynamicShapeMesh::CutAlgorithm::Push); // 절단된 오브젝트 2개를 리턴한다.
 };
 
 
 class CRotatingObject : public CGameObject
 {
 public:
-	CRotatingObject(int nMeshes = 1);
+	CRotatingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
 	virtual ~CRotatingObject();
 protected:
 	XMFLOAT3 m_xmf3RotationAxis;
@@ -293,7 +299,7 @@ public:
 class CRotatingNormalObject : public CRotatingObject
 {
 public:
-	CRotatingNormalObject(int nmeshes = 1);
+	CRotatingNormalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
 	virtual ~CRotatingNormalObject();
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -311,7 +317,7 @@ private:
 class CRayObject : public CInteractiveObject
 {
 public:
-	CRayObject();
+	CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype);
 	virtual ~CRayObject();
 
 	void Reset(CRay ray);
@@ -330,7 +336,7 @@ public:
 class CFBXObject : public CDynamicShapeObject
 {
 public:
-	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
+	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, const char* fileName);
 	virtual ~CFBXObject();
 private:
 	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -339,10 +345,10 @@ private:
 	CSkeleton* m_skelRoot = NULL;
 
 	string m_sFileName;
-public:	
+public:
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
 	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId);
-	
+
 	bool LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName);
 	bool LoadHierarchy(FbxNode* pNode);
 	void LoadHierarchyFromMesh();
@@ -376,8 +382,8 @@ public:
 class CUIObject : public CFBXObject
 {
 public:
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum);
 	virtual ~CUIObject();
 protected:
 	static constexpr float TARGET_SCALE = 1.5f;
@@ -420,8 +426,8 @@ public:
 class CCardUIObject : public CUIObject
 {
 public:
-	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
-	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum);
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType);
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType, int UInum);
 	virtual ~CCardUIObject();
 protected:
 
