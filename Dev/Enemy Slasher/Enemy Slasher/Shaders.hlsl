@@ -194,7 +194,7 @@ output.normalW = normalW;
 
 
 
-//�ȼ� ���̴� �Լ�
+
 float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 {
 #ifdef _WITH_VERTEX_LIGHTING
@@ -207,6 +207,37 @@ return(color);
 }
 
 
+// 스카이 박스 전용 추후 할 예정
+
+//struct VS_POSITION_TEXCOORD_INPUT
+//{
+//    float3 position : POSITION;
+//    float2 uv : TEXCOORD;
+//};
+
+//struct VS_POSITION_TEXCOORD_OUTPUT
+//{
+//    float4 position : SV_POSITION;
+//    float2 uv : TEXCOORD;
+//};
+
+
+//VS_POSITION_TEXCOORD_OUTPUT VS_POSITION_TEXCOORD(VS_POSITION_TEXCOORD_INPUT input)
+//{
+//    VS_POSITION_TEXCOORD_OUTPUT output;
+
+//    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+//    output.uv = input.uv;
+
+//    return (output);
+//}
+
+//float4 PS_POSITION_TEXCOORD(VS_POSITION_TEXCOORD_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
+//{
+//    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+
+//    return (cColor);
+//}
 
 
 
