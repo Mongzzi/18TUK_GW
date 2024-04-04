@@ -427,10 +427,10 @@ class CCardUIObject : public CUIObject
 {
 public:
 	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType= ShaderType::CObjectsShader);
+		 CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType stype= ShaderType::CObjectsShader);
 
 	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName,  int UInum, ShaderType shaderType= ShaderType::CObjectsShader);
+		 CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName,  int UInum, ShaderType stype= ShaderType::CObjectsShader);
 
 	virtual ~CCardUIObject();
 protected:

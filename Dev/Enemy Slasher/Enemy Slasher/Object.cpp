@@ -1344,12 +1344,12 @@ void CUIObject::SetScale(XMFLOAT3 scale)
 	CGameObject::SetScale(Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false));
 }
 
-CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType shaderType)
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType stype)
 	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName,stype)
 {
 }
 
-CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType shaderType)
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType stype)
 	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName, UInum,stype)
 {
 }
