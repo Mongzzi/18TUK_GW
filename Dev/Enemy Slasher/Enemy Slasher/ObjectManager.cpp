@@ -81,7 +81,7 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
+void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float fTimeElapsed, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
@@ -107,12 +107,12 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 						XMFLOAT4X4 objectWorldMat = pDynamicShapeObject->GetWorldMat();
 						XMFLOAT4X4 cutterWorldMat = pCutter->GetWorldMat();
 						if (CollisionCheck(pDynamicShapeObject->GetCollider(), objectWorldMat, pCutter->GetCollider(), cutterWorldMat)) {
-							 vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pCutter, cutAlgorithm);
+							// vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, /*오브젝트의 쉐이더 타입*/, fTimeElapsed, pCutter, cutAlgorithm);
 
-							if (false == vRetVec.empty()) { // 절단에 성공했다면 데이터를 준비한다.
-								newObjects.insert(newObjects.end(), vRetVec.begin(), vRetVec.end());
-								deleteObjects.push_back(pDynamicShapeObject);
-							}
+							//if (false == vRetVec.empty()) { // 절단에 성공했다면 데이터를 준비한다.
+							//	newObjects.insert(newObjects.end(), vRetVec.begin(), vRetVec.end());
+							//	deleteObjects.push_back(pDynamicShapeObject);
+							//}
 						}
 					}
 				}
@@ -159,8 +159,11 @@ void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
-			if (b->GetMaterial() && b->GetMaterial()->m_ShaderType != ShaderType::NON) {
-				pShaderManager->Render(pd3dCommandList, pCamera, b->GetMaterial()->m_ShaderType);
+			//if (b->GetMaterial() && b->GetMaterial()->m_ShaderType != ShaderType::NON) {
+			//	pShaderManager->Render(pd3dCommandList, pCamera, b->GetMaterial()->m_ShaderType);
+			//	b->Render(pd3dCommandList, pCamera, true);
+			//}
+			if (b->GetMaterial()) {
 				b->Render(pd3dCommandList, pCamera, true);
 			}
 		}
