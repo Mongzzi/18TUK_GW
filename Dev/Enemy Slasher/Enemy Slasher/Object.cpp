@@ -343,14 +343,18 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	//객체의 정보를 셰이더 변수(상수 버퍼)로 복사한다. 
 	UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World);
 
-
-
 	if (m_pMaterial)
 	{
+		if (m_pMaterial->m_pShader)
+		{
+			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+		}
+
 		if (m_pMaterial->m_pTexture)
 		{
 			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 		}
+
 	}
 	// 서술자힙 연결할지말지 작성 고민...
 
