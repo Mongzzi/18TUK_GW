@@ -421,40 +421,54 @@ void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	case ShaderType::NON:
 		break;
 	case ShaderType::CObjectsShader:
+	{
 		CObjectsShader* pObjectsShader = new CObjectsShader();
 		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		SetShader(pObjectsShader);
 		break;
+	}
 	case ShaderType::CUIObjectsShader:
+	{
 		CUIObjectsShader* pObjectsShader = new CUIObjectsShader();
 		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		SetShader(pObjectsShader);
 		break;
+	}
 	case ShaderType::CObjectsNormalShader:
+	{
 		CObjectsNormalShader* pObjectsShader = new CObjectsNormalShader();
 		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		SetShader(pObjectsShader);
 		break;
+	}
 	case ShaderType::CTerrainShader:
+	{
 		CTerrainShader* pObjectsShader = new CTerrainShader();
 		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		SetShader(pObjectsShader);
 		break;
+	}
 	case ShaderType::CTextShader:
+	{
 		CTextShader* pObjectsShader = new CTextShader();
 		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		SetShader(pObjectsShader);
 		break;
+	}
 	case ShaderType::CTextureShader:
+	{
 		CTextureShader* pObjectsShader = new CTextureShader();
 		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		SetShader(pObjectsShader);
 		break;
+	}
 	case ShaderType::CUITextureShader:
+	{
 		CUITextureShader* pObjectsShader = new CUITextureShader();
 		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		SetShader(pObjectsShader);
 		break;
+	}
 	}
 }
 
@@ -1240,7 +1254,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 }
 
 CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType stype)
-	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName,stype)
+	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)
 {
 	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
 
@@ -1345,12 +1359,12 @@ void CUIObject::SetScale(XMFLOAT3 scale)
 }
 
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType stype)
-	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName,stype)
+	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName, stype)
 {
 }
 
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType stype)
-	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName, UInum,stype)
+	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName, UInum, stype)
 {
 }
 
