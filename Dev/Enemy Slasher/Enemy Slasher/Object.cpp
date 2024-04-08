@@ -187,6 +187,7 @@ CMaterial::CMaterial()
 
 CMaterial::~CMaterial()
 {
+	if (m_pShader) m_pShader->Release();
 }
 
 void CMaterial::SetTexture(CTexture* pTexture)
@@ -205,11 +206,16 @@ void CMaterial::SetShader(CShader* pShader)
 
 void CMaterial::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	if (m_pShader)
+	{
+		m_pShader->UpdateShaderVariables(pd3dCommandList);
+	}
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 }
 
 void CMaterial::ReleaseShaderVariables()
 {
+	if (m_pShader) m_pShader->ReleaseShaderVariables();
 	if (m_pTexture) m_pTexture->ReleaseShaderVariables();
 }
 
