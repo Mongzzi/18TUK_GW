@@ -165,8 +165,8 @@ protected:
 	XMFLOAT4X4						m_xmf4x4World;
 	XMFLOAT4X4						m_xmf4x4Transform;
 
-	ID3D12Resource* m_pd3dcbGameObject = NULL;
-	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
+	ID3D12Resource					*m_pd3dcbGameObject = NULL;
+	CB_GAMEOBJECT_INFO				*m_pcbMappedGameObject = NULL;
 
 	int								m_nMeshes = 0;
 	CMesh** m_ppMeshes = NULL;
