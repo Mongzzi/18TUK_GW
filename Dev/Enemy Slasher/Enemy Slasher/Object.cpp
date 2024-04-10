@@ -703,8 +703,7 @@ CRotatingObject::CRotatingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 {
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
-	//CGameObject::SetShaderType(ShaderType::CObjectsShader);
-	CGameObject::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype);
+
 
 }
 
@@ -1556,5 +1555,27 @@ CSkyBox::~CSkyBox()
 }
 
 void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+}
+
+CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype)
+	:CFBXObject(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature,pFBXLoader,fileName,stype)
+{
+	CTexture* ppTextures[1];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 2);
+			m_pMaterial->SetTexture(ppTextures[0]);
+		}
+	}
+}
+
+CTreeObject::~CTreeObject()
 {
 }
