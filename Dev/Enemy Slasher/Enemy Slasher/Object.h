@@ -202,7 +202,9 @@ public:
 	// 기존 쉐이더 타입 재사용 - 생성자 부분 or Scene에서 CreatShader 호출할 예정
 	//						   - SetShaderType함수 없애고 이부분에서만 사용할 예정
 	void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype);
-
+	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
+	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetCbvGPUDescriptorHandle() { return(m_d3dCbvGPUDescriptorHandle); }
 
 public:
 	//게임 객체의 월드 변환 행렬에서 위치 벡터와 방향(x-축, y-축, z-축) 벡터를 반환한다. 
@@ -441,11 +443,16 @@ public:
 		 CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName,  int UInum, ShaderType stype= ShaderType::CObjectsShader);
 
 	virtual ~CCardUIObject();
-protected:
+private:
+	int m_Card_Ui_Num;
 
 
 public:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 
 	void CursorOverObject(bool flag) override;
 	void ButtenDown() override;

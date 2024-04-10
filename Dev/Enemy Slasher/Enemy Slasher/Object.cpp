@@ -728,20 +728,20 @@ CRotatingNormalObject::~CRotatingNormalObject()
 
 void CRotatingNormalObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbGameObjectBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+	//UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	//m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbGameObjectBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	//m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
 }
 
 void CRotatingNormalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	//UINT ncbGameObjectBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
 
-	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	//m_pcbMappedGameObject->m_nMaterial = m_pMaterial->m_nReflection;
+	//XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	////m_pcbMappedGameObject->m_nMaterial = m_pMaterial->m_nReflection;
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObject->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(1, d3dGpuVirtualAddress);
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbGameObject->GetGPUVirtualAddress();
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(1, d3dGpuVirtualAddress);
 }
 
 void CRotatingNormalObject::ReleaseShaderVariables()
@@ -1376,6 +1376,43 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType stype)
 	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName, UInum, stype)
 {
+	m_Card_Ui_Num = UInum;
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+
+	CTexture* ppTextures[5];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack2.jpg", RESOURCE_TEXTURE2D, 0);
+
+
+	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack3.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack4.jpg", RESOURCE_TEXTURE2D, 0);
+
+	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
+
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	
+	
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			//m_pMaterial->m_pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ncbElementBytes);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 2);
+
+			m_pMaterial->SetTexture(ppTextures[0]);
+			SetCbvGPUDescriptorHandle(m_pMaterial->m_pShader->GetGPUCbvDescriptorStartHandle());
+		}
+	}
+
 }
 
 CCardUIObject::~CCardUIObject()
@@ -1403,6 +1440,58 @@ void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	}
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
+
+void CCardUIObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+}
+
+void CCardUIObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pcbMappedGameObject)
+	{
+		XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+		//if (m_pMaterial) m_pcbMappedGameObject->m_nMaterial = m_pMaterial->m_nReflection;
+	}
+}
+
+//void CCardUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
+//{
+//	OnPrepareRender();
+//
+//	UpdateShaderVariables(pd3dCommandList);
+//
+//	if (m_pMaterial)
+//	{
+//		if (m_pMaterial->m_pShader)
+//		{
+//			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+//		}
+//
+//		if (m_pMaterial->m_pTexture)
+//		{
+//			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+//		}
+//
+//	}
+//	pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_d3dCbvGPUDescriptorHandle);
+//
+//	if (m_ppMeshes)
+//	{
+//		for (int i = 0; i < m_nMeshes; i++)
+//		{
+//			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, pRenderOption);
+//		}
+//	}
+//
+//	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+//	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+//}
 
 void CCardUIObject::CursorOverObject(bool flag)
 {
