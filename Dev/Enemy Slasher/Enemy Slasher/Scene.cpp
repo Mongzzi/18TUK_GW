@@ -2,27 +2,29 @@
 #include "Scene.h"
 #include "FbxLoader.h"
 #include "ObjectManager.h"
-#include "ShaderManager.h"
+//#include "ShaderManager.h"
 #include "PhysXManager.h"
 #include "Ray.h"
 
 CBasicScene::CBasicScene()
 {
 	m_pObjectManager = new CObjectManager;
-	m_pShaderManager = new CShaderManager;
+	//m_pShaderManager = new CShaderManager;
 }
 
 CBasicScene::~CBasicScene()
 {
 	delete m_pObjectManager;
-	delete m_pShaderManager;
+	//delete m_pShaderManager;
 }
 
 void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice,pd3dCommandList,m_pd3dGraphicsRootSignature);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -168,7 +170,7 @@ void CBasicScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 	//if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
-	m_pObjectManager->Render(pd3dCommandList, pCamera, m_pShaderManager);
+	m_pObjectManager->Render(pd3dCommandList, pCamera);
 
 
 
@@ -185,7 +187,9 @@ void CBasicScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	//m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	m_pTextShader->Render(pd3dCommandList, pCamera);
+
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	static const WCHAR text[] = L"BasicScene의 Render2D 입니다.";
@@ -268,8 +272,9 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
+	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList,m_pd3dGraphicsRootSignature, pFBXLoader, NULL, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);
@@ -383,7 +388,8 @@ void CTitleScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	//m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	m_pTextShader->Render(pd3dCommandList, pCamera);
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 2);
 	static const WCHAR text[] = L"Enemy Slasher";
@@ -618,8 +624,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
+	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 #define TEXTURES  14
 	CTexture* ppTextures[TEXTURES];
@@ -688,8 +695,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	SelectedUInum = -1;
 
 
-	m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
-	for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
+	//m_pShaderManager->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, TEXTURES, ShaderType::CTextureShader); // text 쉐이더에 서술자 힙의 핸들값를 멤버변수에 저장한 상태
+	//for (int i = 0; i < TEXTURES; i++) m_pShaderManager->CreateShaderResourceViews(pd3dDevice, ppTextures[i], 0, 2, ShaderType::CTextureShader);
 
 
 //#define UITEXTURES  1
@@ -1440,7 +1447,8 @@ void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devic
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	//m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	m_pTextShader->Render(pd3dCommandList, pCamera);
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
@@ -1545,7 +1553,9 @@ void CTestScene_Card::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature ,pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 	//m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList);
@@ -1747,7 +1757,7 @@ void CTestScene_Card::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 
 
-	m_pObjectManager->Render(pd3dCommandList, pCamera, m_pShaderManager);
+	m_pObjectManager->Render(pd3dCommandList, pCamera);
 
 
 }
@@ -1876,8 +1886,9 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
+	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList,m_pd3dGraphicsRootSignature, pFBXLoader, NULL, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
@@ -2082,7 +2093,8 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	//m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	m_pTextShader->Render(pd3dCommandList, pCamera);
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
@@ -2199,7 +2211,9 @@ void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,pFBXLoader, NULL, ShaderType::CObjectsShader);
@@ -2236,7 +2250,9 @@ void CTestScene_PhysX::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	//m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	m_pTextShader->Render(pd3dCommandList, pCamera);
+
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	static const WCHAR text[] = L"PhysXScene의 Render2D 입니다.";

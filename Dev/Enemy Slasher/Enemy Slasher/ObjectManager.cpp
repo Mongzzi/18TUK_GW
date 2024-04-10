@@ -155,12 +155,14 @@ void CObjectManager::ReleaseShaderVariables()
 {
 }
 
-void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShaderManager* pShaderManager)
+void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
 			//if (b->GetMaterial() && b->GetMaterial()->m_ShaderType != ShaderType::NON) {
-			//	pShaderManager->Render(pd3dCommandList, pCamera, b->GetMaterial()->m_ShaderType);
+			//	p
+			// 
+			// ->Render(pd3dCommandList, pCamera, b->GetMaterial()->m_ShaderType);
 			//	b->Render(pd3dCommandList, pCamera, true);
 			//}
 			if (b->GetMaterial()) {
