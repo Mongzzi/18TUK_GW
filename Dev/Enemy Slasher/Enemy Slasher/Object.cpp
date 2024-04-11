@@ -1398,8 +1398,8 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	
-	
+
+
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {
 			m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -1558,8 +1558,7 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 {
 }
 
-CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype)
-	:CFBXObject(pd3dDevice,pd3dCommandList,pd3dGraphicsRootSignature,pFBXLoader,fileName,stype)
+CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype) :CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)
 {
 	CTexture* ppTextures[1];
 
@@ -1568,7 +1567,6 @@ CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {
-			m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 2);
 			m_pMaterial->SetTexture(ppTextures[0]);

@@ -35,8 +35,6 @@ protected:
 
 	CCamera* m_pCamera = NULL;
 
-	CShader* m_pShader = NULL;
-
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType);
 

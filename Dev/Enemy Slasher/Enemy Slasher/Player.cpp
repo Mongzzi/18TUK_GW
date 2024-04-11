@@ -9,8 +9,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType) 
-	: CFBXObject(pd3dDevice, pd3dCommandList,pd3dGraphicsRootSignature, pFBXLoader, fileName, shaderType)
+CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType)
+	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, shaderType)
 {
 	m_pCamera = NULL;
 
@@ -39,7 +39,6 @@ CPlayer::~CPlayer()
 
 	if (m_pCamera) delete m_pCamera;
 
-	if (m_pShader) m_pShader->Release();
 }
 
 void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -236,21 +235,28 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA)
 	{
-		if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera, 0);
 		CGameObject::Render(pd3dCommandList, pCamera);
 	}
 }
 
 TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType shaderType)
-	:CPlayer(pd3dDevice, pd3dCommandList,pd3dGraphicsRootSignature, pFBXLoader, fileName, shaderType)
+	:CPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, shaderType)
 {
-	if (m_pMaterial) {
-		if (m_pMaterial->m_pShader) {
-			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 1);	// cbv 1 + srv 1
+	if (fileName != NULL)	//
+	{
+		CTexture* ppTextures[1];
 
+		ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/people_texture_map.png", RESOURCE_TEXTURE2D, 0);
+
+		if (m_pMaterial) {
+			if (m_pMaterial->m_pShader) {
+				m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 2);
+				m_pMaterial->SetTexture(ppTextures[0]);
+			}
 		}
 	}
-
 	ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -261,7 +267,7 @@ void TestPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	//Update(fTimeElapsed);
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
-	
+
 	CFBXObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
