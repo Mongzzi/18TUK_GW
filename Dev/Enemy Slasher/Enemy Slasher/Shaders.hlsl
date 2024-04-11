@@ -16,7 +16,9 @@ cbuffer cbGameObjectInfo : register(b1)
 
 //------------------------텍스처-----------------------------
 Texture2D gtxtTexture : register(t0);
-SamplerState gSamplerState : register(s0);
+SamplerState gWrapSamplerState : register(s0);
+SamplerState gClampSamplerState : register(s1);
+
 
 struct VS_TEXTURED_INPUT
 {
@@ -44,11 +46,45 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-    float4 cColor = gtxtTexture.Sample(gSamplerState, input.uv);
+    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
 
     return (cColor);
 }
 //----------------------텍스처끝-------------------------------
+
+// ------------------------------ 스카이 박스 전용 텍스처 ----------------------------------------------
+
+struct VS_TEXTURED_INPUT_TWO_ELEMENT
+{
+    float3 position : POSITION;
+    float2 uv : TEXCOORD;
+};
+
+struct VS_TEXTURED_OUTPUT_TWO_ELEMENT
+{
+    float4 position : SV_POSITION;
+    float2 uv : TEXCOORD;
+};
+
+VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_POSITION_TEXCOORD(VS_TEXTURED_INPUT_TWO_ELEMENT input)
+{
+    VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
+
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.uv = input.uv;
+
+    return (output);
+}
+
+float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
+{
+    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+
+    return (cColor);
+}
+// 스카이 박스 전용 텍스처----------------------------------------------
+
+
 
 
 

@@ -16,6 +16,8 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CTextShader,
 	CTextureShader,
 	CUITextureShader,
+	CTexture_Position_Texcoord_Shader,
+	CSkyBoxShader
 };
 
 //객체를 렌더링할 때 적용하는 상수 버퍼 데이터

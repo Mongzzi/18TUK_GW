@@ -237,28 +237,28 @@ public:
 
 };
 
-// 아래부분들 프레임워크 수정 후 다시 작업예정
-// 
-//class CTexturedShader : public CStandardShader	// position texcoord
-//{
-//public:
-//	CTexturedShader(){};
-//	virtual ~CTexturedShader(){};
-//	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-//	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
-//	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
-//
-//	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-//};
-//
-//class CSkyBoxShader : public CTexturedShader
-//{
-//public:
-//	CSkyBoxShader(){};
-//	virtual ~CSkyBoxShader(){};
-//
-//	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
-//	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
-//
-//	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-//};
+ //아래부분들 프레임워크 수정 후 다시 작업예정
+ 
+class CTexture_Position_Texcoord_Shader : public CStandardShader	// position texcoord
+{
+public:
+	CTexture_Position_Texcoord_Shader(){};
+	virtual ~CTexture_Position_Texcoord_Shader(){};
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+};
+
+class CSkyBoxShader : public CTexture_Position_Texcoord_Shader
+{
+public:
+	CSkyBoxShader(){};
+	virtual ~CSkyBoxShader(){};
+
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+};
