@@ -159,7 +159,7 @@ void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	for (auto& a : m_pvObjectManager) // 벡터 요소에 대한 참조를 사용
 	{
-		for (auto b : a)
+		for (auto& b : a)
 		{
 			b->Render(pd3dCommandList, pCamera, true);
 		}

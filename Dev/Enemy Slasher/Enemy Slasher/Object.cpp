@@ -1585,7 +1585,7 @@ CSkyBox::~CSkyBox()
 {
 }
 
-void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,bool pRenderOption)
 {
 	std::cout << "스카이박스 렌더 호출" << std::endl;
 

@@ -661,6 +661,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 임시
 	SelectedUInum = -1;
 
+	// -------------------------------      스카이 박스     _____________________________________
+
+	CSkyBox* pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CSkyBoxShader, 6);
+	m_pObjectManager->AddObj(pSkyBox, ObjectLayer::SkyBox);
+
+	// -------------------------------      스카이 박스 끝    _____________________________________
 
 	// ------------------------------------       터레인      -------------------------------
 	//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다. 
@@ -681,14 +687,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
 
 	// --------------------------------      터레인 끝     _____________________________________
-
-	// -------------------------------      스카이 박스     _____________________________________
-
-	CSkyBox* pSkyBox = new CSkyBox(pd3dDevice,pd3dCommandList,m_pd3dGraphicsRootSignature,ShaderType::CSkyBoxShader,6);
-	m_pObjectManager->AddObj(pSkyBox, ObjectLayer::TextureObject);
-
-
-	// -------------------------------      스카이 박스 끝    _____________________________________
 
 
 	{
