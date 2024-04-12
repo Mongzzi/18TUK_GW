@@ -82,10 +82,14 @@ float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitive
 
     return (cColor);
 }
-// 스카이 박스 전용 텍스처----------------------------------------------
+// ------------------------------ 스카이 박스 전용 텍스처 ----------------------------------------------
 
+float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+    float4 cColor = gtxtTexture.Sample(gClampSamplerState, input.uv);
 
-
+    return (cColor);
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,17 +278,6 @@ float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
 
 //    return (cColor);
 //}
-
-
-
-
-
-
-
-
-
-
-
 
 
 

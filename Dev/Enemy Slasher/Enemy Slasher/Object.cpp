@@ -1550,19 +1550,35 @@ void CCardUIObject::ButtenUp()
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
-	CTexturedRectMesh* pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, +10.0f);
+	CTexturedRectMesh* pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2000.0f, 2000.0f, 0.0f, 0.0f, 0.0f, +1000.0f);
 	SetMesh(0, pSkyBoxMesh);
-	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, -10.0f);
+	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2000.0f, 2000.0f, 0.0f, 0.0f, 0.0f, -1000.0f);
 	SetMesh(1, pSkyBoxMesh);
-	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 20.0f, 20.0f, -10.0f, 0.0f, 0.0f);
+	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 2000.0f, 2000.0f, -1000.0f, 0.0f, 0.0f);
 	SetMesh(2, pSkyBoxMesh);
-	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 20.0f, 20.0f, +10.0f, 0.0f, 0.0f);
+	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 2000.0f, 2000.0f, +1000.0f, 0.0f, 0.0f);
 	SetMesh(3, pSkyBoxMesh);
-	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 0.0f, 20.0f, 0.0f, +10.0f, 0.0f);
+	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2000.0f, 0.0f, 2000.0f, 0.0f, +1000.0f, 0.0f);
 	SetMesh(4, pSkyBoxMesh);
-	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 0.0f, 20.0f, 0.0f, -10.0f, 0.0f);
+	pSkyBoxMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2000.0f, 0.0f, 2000.0f, 0.0f, -1000.0f, 0.0f);
 	SetMesh(5, pSkyBoxMesh);
 
+	CTexture* pSkyBoxTexture = new CTexture(6, RESOURCE_TEXTURE2D, 0, 1);
+
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Front_0.dds", RESOURCE_TEXTURE2D, 0);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Back_0.dds", RESOURCE_TEXTURE2D, 1);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Left_0.dds", RESOURCE_TEXTURE2D, 2);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Right_0.dds", RESOURCE_TEXTURE2D, 3);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Top_0.dds", RESOURCE_TEXTURE2D, 4);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Bottom_0.dds", RESOURCE_TEXTURE2D, 5);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 6);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 2);
+			m_pMaterial->SetTexture(pSkyBoxTexture);
+		}
+	}
 }
 
 CSkyBox::~CSkyBox()
@@ -1571,6 +1587,25 @@ CSkyBox::~CSkyBox()
 
 void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	std::cout << "스카이박스 렌더 호출" << std::endl;
+
+	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+
+	OnPrepareRender();
+	UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World);
+
+	if (m_pMaterial && m_pMaterial->m_pShader) m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_pMaterial && m_pMaterial->m_pTexture) m_pMaterial->m_pTexture->UpdateShaderVariable(pd3dCommandList, 0, i);
+			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+		}
+	}
+
 }
 
 CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype) :CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)

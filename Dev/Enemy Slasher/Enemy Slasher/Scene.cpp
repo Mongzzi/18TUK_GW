@@ -647,21 +647,14 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pTextShader = new CTextShader();
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
-
-	//CMaterial* m = new CMaterial();
-	//m->SetTexture(ppTextures[8]);
 
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, PEASANT_1_FBX, ShaderType::CTextureShader);
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340.0f));
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
-	//m_pPlayer->SetMaterial(m);
-	//m_pPlayer->SetShaderType(ShaderType::CTextureShader);
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -691,8 +684,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// -------------------------------      스카이 박스     _____________________________________
 
-	//CSkyBox* pSkyBox = new CSkyBox(pd3dDevice,pd3dCommandList,m_pd3dGraphicsRootSignature,);
-
+	CSkyBox* pSkyBox = new CSkyBox(pd3dDevice,pd3dCommandList,m_pd3dGraphicsRootSignature,ShaderType::CSkyBoxShader,6);
+	m_pObjectManager->AddObj(pSkyBox, ObjectLayer::TextureObject);
 
 
 	// -------------------------------      스카이 박스 끝    _____________________________________
@@ -742,7 +735,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				float zPosition = z * zpitch;
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 				pTreeObject->SetPosition(xPosition, fHeight, zPosition);
-				pTreeObject->SetPosition(xPosition, fHeight, zPosition);
 				pTreeObject->Rotate(90.0f, 0.0f, 0.0f);
 				m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
 
@@ -761,40 +753,30 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
-		//pCardUIObject->SetMaterial(ppMaterials[9]);
-		//pCardUIObject->SetShaderType(ShaderType::CUITextureShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 1, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(200, 200);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
-		//pCardUIObject->SetMaterial(ppMaterials[10]);
-		//pCardUIObject->SetShaderType(ShaderType::CUITextureShader); 
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 2, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(300, 300);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
-		//pCardUIObject->SetMaterial(ppMaterials[11]);
-		//pCardUIObject->SetShaderType(ShaderType::CUITextureShader); 
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 3, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
-		//pCardUIObject->SetMaterial(ppMaterials[12]);
-		//pCardUIObject->SetShaderType(ShaderType::CUITextureShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 4, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
-		//pCardUIObject->SetMaterial(ppMaterials[13]);
-		//pCardUIObject->SetShaderType(ShaderType::CUITextureShader); 
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 	}
 

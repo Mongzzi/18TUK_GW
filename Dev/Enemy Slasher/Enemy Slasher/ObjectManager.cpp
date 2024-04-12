@@ -157,18 +157,13 @@ void CObjectManager::ReleaseShaderVariables()
 
 void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	for (std::vector<CGameObject*> a : m_pvObjectManager)
-		for (CGameObject* b : a) {
-			//if (b->GetMaterial() && b->GetMaterial()->m_ShaderType != ShaderType::NON) {
-			//	p
-			// 
-			// ->Render(pd3dCommandList, pCamera, b->GetMaterial()->m_ShaderType);
-			//	b->Render(pd3dCommandList, pCamera, true);
-			//}
-			if (b->GetMaterial()) {
-				b->Render(pd3dCommandList, pCamera, true);
-			}
+	for (auto& a : m_pvObjectManager) // 벡터 요소에 대한 참조를 사용
+	{
+		for (auto b : a)
+		{
+			b->Render(pd3dCommandList, pCamera, true);
 		}
+	}
 }
 
 
