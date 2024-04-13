@@ -681,7 +681,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 #else
 	//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
-	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
+	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color,ShaderType::CTerrainShader);
 
 #endif
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);

@@ -1153,8 +1153,8 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName,
-	int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color)
-	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature)
+	int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, ShaderType stype)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,stype)
 {
 	//지형에 사용할 높이 맵의 가로, 세로의 크기이다.
 	m_nWidth = nWidth;
@@ -1199,7 +1199,6 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		}
 	}
 
-	CGameObject::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTerrainShader);
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)

@@ -468,7 +468,7 @@ class CHeightMapTerrain : public CGameObject
 public:
 	CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength,
-		XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color);
+		XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, ShaderType stype = ShaderType::CTerrainShader);
 	virtual ~CHeightMapTerrain();
 
 private:
