@@ -1567,14 +1567,20 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	//격자의 교점(정점)의 개수는 (nWidth * nLength)이다. 
 	m_nVertices = nWidth * nLength;
-	m_nStride = sizeof(Vertex_Color);
+	m_nStride = sizeof(VertexWithColorAnd2TexCoord);
 
 	//격자는 삼각형 스트립으로 구성한다. 
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	m_nWidth = nWidth;
 	m_nLength = nLength;
 	m_xmf3Scale = xmf3Scale;
-	Vertex_Color* pVertices = new Vertex_Color[m_nVertices];
+	VertexWithColorAnd2TexCoord* pVertices = new VertexWithColorAnd2TexCoord[m_nVertices];
+
+
+	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
+	int cxHeightMap = pHeightMapImage->GetHeightMapWidth();
+	int czHeightMap = pHeightMapImage->GetHeightMapLength();
+
 
 	/*xStart와 zStart는 격자의 시작 위치(x-좌표와 z-좌표)를 나타낸다.
 	커다란 지형은 격자들의 이차원 배열로 만들 필요가 있기 때문에
@@ -1590,12 +1596,16 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 			XMFLOAT3 xmf3Position = XMFLOAT3((x * m_xmf3Scale.x), OnGetHeight(x, z, pContext), (z * m_xmf3Scale.z));
 			XMFLOAT4 get_color = OnGetColor(x, z, pContext);
 			XMFLOAT4 xmf3Color = Vector4::Add(get_color, xmf4Color);
+			XMFLOAT2 xmTexCoord0 = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
+			XMFLOAT2 xmTexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
 
-			pVertices[i] = Vertex_Color(xmf3Position, xmf3Color);
+			pVertices[i] = VertexWithColorAnd2TexCoord(xmf3Position, xmf3Color, xmTexCoord0, xmTexCoord1);
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
 	}
+
+
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();

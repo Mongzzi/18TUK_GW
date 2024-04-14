@@ -1198,7 +1198,19 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			SetMesh(x + (z * cxBlocks), pHeightMapGridMesh);
 		}
 	}
+	CTexture* pTerrainTexture = new CTexture(3, RESOURCE_TEXTURE2D, 0, 3);
 
+	pTerrainTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Base_Texture.dds", RESOURCE_TEXTURE2D, 0);
+	pTerrainTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/Detail_Texture_7.dds", RESOURCE_TEXTURE2D, 1);
+	pTerrainTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/HeightMap(Alpha).dds", RESOURCE_TEXTURE2D, 2);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 3);
+			m_pMaterial->SetTexture(pTerrainTexture);
+		}
+	}
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)

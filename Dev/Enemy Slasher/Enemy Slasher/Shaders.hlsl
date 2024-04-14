@@ -82,7 +82,6 @@ float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitive
 
     return (cColor);
 }
-// ------------------------------ 스카이 박스 전용 텍스처 ----------------------------------------------
 
 float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
@@ -90,7 +89,51 @@ float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
 
     return (cColor);
 }
+// ------------------------------ 스카이 박스 전용 텍스처 끝 ----------------------------------------------
 
+// ------------------------------ 터레인 전용 -----------------------------------------------
+Texture2D<float4> gtxtTerrainBaseTexture : register(t1);
+Texture2D<float4> gtxtTerrainDetailTexture : register(t2);
+Texture2D<float> gtxtTerrainAlphaTexture : register(t2);
+
+struct VS_TERRAIN_INPUT
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+    float2 uv0 : TEXCOORD0;
+    float2 uv1 : TEXCOORD1;
+};
+
+struct VS_TERRAIN_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+    float2 uv0 : TEXCOORD0;
+    float2 uv1 : TEXCOORD1;
+};
+
+VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
+{
+    VS_TERRAIN_OUTPUT output;
+
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.color = input.color;
+    output.uv0 = input.uv0;
+    output.uv1 = input.uv1;
+
+    return (output);
+}
+
+float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
+{
+    float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gWrapSamplerState, input.uv0);
+    float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gWrapSamplerState, input.uv1);
+    float fAlpha = gtxtTerrainAlphaTexture.Sample(gWrapSamplerState, input.uv0);
+
+    float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
+
+    return (cColor);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -109,7 +152,6 @@ struct VS_STANDARD_OUTPUT
     float4 color : COLOR;
 	
 };
-
 
 
 
@@ -246,38 +288,6 @@ float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
 //#endif
 //}
 
-
-// 스카이 박스 전용 추후 할 예정
-
-//struct VS_POSITION_TEXCOORD_INPUT
-//{
-//    float3 position : POSITION;
-//    float2 uv : TEXCOORD;
-//};
-
-//struct VS_POSITION_TEXCOORD_OUTPUT
-//{
-//    float4 position : SV_POSITION;
-//    float2 uv : TEXCOORD;
-//};
-
-
-//VS_POSITION_TEXCOORD_OUTPUT VS_POSITION_TEXCOORD(VS_POSITION_TEXCOORD_INPUT input)
-//{
-//    VS_POSITION_TEXCOORD_OUTPUT output;
-
-//    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-//    output.uv = input.uv;
-
-//    return (output);
-//}
-
-//float4 PS_POSITION_TEXCOORD(VS_POSITION_TEXCOORD_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
-//{
-//    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
-
-//    return (cColor);
-//}
 
 
 
