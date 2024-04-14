@@ -70,6 +70,47 @@ public:
 	XMFLOAT3 GetVertex() { return vertex; };
 };
 
+class VertexWithColorAndTexCoord
+{
+private:
+	XMFLOAT3 vertex;
+	XMFLOAT4 color;
+	XMFLOAT2 texcoord;
+
+public:
+	VertexWithColorAndTexCoord() : vertex(XMFLOAT3(0.0f, 0.0f, 0.0f)), color(XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f)), texcoord(XMFLOAT2(0.0f, 0.0f)) {}
+	VertexWithColorAndTexCoord(XMFLOAT3 v, XMFLOAT4 c, XMFLOAT2 uv) : vertex(v), color(c), texcoord(uv) {}
+	VertexWithColorAndTexCoord(float x, float y, float z, XMFLOAT4 c, float u, float v) : vertex(XMFLOAT3(x, y, z)), color(c), texcoord(XMFLOAT2(u, v)) {}
+
+	~VertexWithColorAndTexCoord() {}
+
+	XMFLOAT3 GetVertex() const { return vertex; }
+	XMFLOAT4 GetColor() const { return color; }
+	XMFLOAT2 GetTexCoord() const { return texcoord; }
+};
+
+class VertexWithColorAnd2TexCoord
+{
+private:
+	XMFLOAT3 vertex;
+	XMFLOAT4 color;
+	XMFLOAT2 texcoord1;
+	XMFLOAT2 texcoord2;
+
+public:
+	VertexWithColorAnd2TexCoord() : vertex(XMFLOAT3(0.0f, 0.0f, 0.0f)), color(XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f)), texcoord1(XMFLOAT2(0.0f, 0.0f)), texcoord2(XMFLOAT2(0.0f, 0.0f)) {}
+	VertexWithColorAnd2TexCoord(XMFLOAT3 v, XMFLOAT4 c, XMFLOAT2 uv1, XMFLOAT2 uv2) : vertex(v), color(c), texcoord1(uv1), texcoord2(uv2) {}
+	VertexWithColorAnd2TexCoord(float x, float y, float z, XMFLOAT4 c, float u1, float v1, float u2, float v2) : vertex(XMFLOAT3(x, y, z)), color(c), texcoord1(XMFLOAT2(u1, v1)), texcoord2(XMFLOAT2(u2, v2)) {}
+
+	~VertexWithColorAnd2TexCoord() {}
+
+	XMFLOAT3 GetVertex() const { return vertex; }
+	XMFLOAT4 GetColor() const { return color; }
+	XMFLOAT2 GetTexCoord1() const { return texcoord1; }
+	XMFLOAT2 GetTexCoord2() const { return texcoord2; }
+};
+
+
 /////////////////////////////////////////////////////////////////////////////
 
 class CIlluminatedVertex
