@@ -94,7 +94,7 @@ float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
 // ------------------------------ 터레인 전용 -----------------------------------------------
 Texture2D<float4> gtxtTerrainBaseTexture : register(t1);
 Texture2D<float4> gtxtTerrainDetailTexture : register(t2);
-Texture2D<float> gtxtTerrainAlphaTexture : register(t2);
+Texture2D<float> gtxtTerrainAlphaTexture : register(t3);
 
 struct VS_TERRAIN_INPUT
 {
@@ -131,6 +131,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
     float fAlpha = gtxtTerrainAlphaTexture.Sample(gWrapSamplerState, input.uv0);
 
     float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
+    //float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
     return (cColor);
 }
