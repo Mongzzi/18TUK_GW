@@ -5,6 +5,9 @@
 #include "stdafx.h"
 #include "d3dx12.h"
 #include "WICTextureLoader12.h"
+#include "DDSTextureLoader12.h"
+
+
 
 UINT gnRtvDescriptorIncrementSize = 0;
 UINT gnDsvDescriptorIncrementSize = 0;
@@ -187,6 +190,52 @@ ID3D12Resource* CreateTextureResourceFromWICFile(ID3D12Device* pd3dDevice, ID3D1
 	d3dResourceBarrier.Transition.StateAfter = d3dResourceStates;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+
+	return(pd3dTexture);
+}
+
+
+ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates)
+{
+	ID3D12Resource* pd3dTexture = NULL;
+	std::unique_ptr<uint8_t[]> ddsData;
+	std::vector<D3D12_SUBRESOURCE_DATA> vSubresources;
+	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
+	bool bIsCubeMap = false;
+
+	HRESULT hResult = DirectX::LoadDDSTextureFromFileEx(pd3dDevice, pszFileName, 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT, &pd3dTexture, ddsData, vSubresources, &ddsAlphaMode, &bIsCubeMap);
+
+	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc;
+	::ZeroMemory(&d3dHeapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
+	d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_UPLOAD;
+	d3dHeapPropertiesDesc.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	d3dHeapPropertiesDesc.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	d3dHeapPropertiesDesc.CreationNodeMask = 1;
+	d3dHeapPropertiesDesc.VisibleNodeMask = 1;
+
+	D3D12_RESOURCE_DESC d3dTextureResourceDesc = pd3dTexture->GetDesc();
+	UINT nSubResources = (UINT)vSubresources.size();
+	UINT64 nBytes = GetRequiredIntermediateSize(pd3dTexture, 0, nSubResources);
+
+	D3D12_RESOURCE_DESC d3dBufferResourceDesc;
+	::ZeroMemory(&d3dBufferResourceDesc, sizeof(D3D12_RESOURCE_DESC));
+	d3dBufferResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; //Upload Heap에는 텍스쳐를 생성할 수 없음
+	d3dBufferResourceDesc.Alignment = 0;
+	d3dBufferResourceDesc.Width = nBytes;
+	d3dBufferResourceDesc.Height = 1;
+	d3dBufferResourceDesc.DepthOrArraySize = 1;
+	d3dBufferResourceDesc.MipLevels = 1;
+	d3dBufferResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+	d3dBufferResourceDesc.SampleDesc.Count = 1;
+	d3dBufferResourceDesc.SampleDesc.Quality = 0;
+	d3dBufferResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	d3dBufferResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+	pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dBufferResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, __uuidof(ID3D12Resource), (void**)ppd3dUploadBuffer);
+
+	UINT64 nBytesUpdated = ::UpdateSubresources(pd3dCommandList, pd3dTexture, *ppd3dUploadBuffer, 0, 0, nSubResources, &vSubresources[0]);
+
+	::SynchronizeResourceTransition(pd3dCommandList, pd3dTexture, D3D12_RESOURCE_STATE_COPY_DEST, d3dResourceStates);
 
 	return(pd3dTexture);
 }

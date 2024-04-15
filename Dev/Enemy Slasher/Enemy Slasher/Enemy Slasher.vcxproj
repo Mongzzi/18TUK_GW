@@ -140,6 +140,7 @@
     </ClInclude>
     <ClInclude Include="Collider.h" />
     <ClInclude Include="ColliderWithMesh.h" />
+    <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="Skeleton.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="d3dx12.h" />
@@ -176,6 +177,7 @@
     </ClCompile>
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ColliderWithMesh.cpp" />
+    <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="Skeleton.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="Enemy Slasher.cpp" />
