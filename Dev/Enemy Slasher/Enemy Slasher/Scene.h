@@ -8,24 +8,34 @@ class CPhysXManager;
 
 struct LIGHT
 {
-	XMFLOAT4 m_xmf4Ambient; XMFLOAT4 m_xmf4Diffuse;
-	XMFLOAT4 m_xmf4Specular;
-	XMFLOAT3 m_xmf3Position;
-	float m_fFalloff;
-	XMFLOAT3 m_xmf3Direction;
-	float m_fTheta; //cos(m_fTheta)
-	XMFLOAT3 m_xmf3Attenuation;
-	float m_fPhi; //cos(m_fPhi)
-	bool m_bEnable;
-	int m_nType;
-	float m_fRange;
-	float padding;
+	XMFLOAT4				m_xmf4Ambient;
+	XMFLOAT4				m_xmf4Diffuse;
+	XMFLOAT4				m_xmf4Specular;
+	XMFLOAT3				m_xmf3Position;
+	float 					m_fFalloff;
+	XMFLOAT3				m_xmf3Direction;
+	float 					m_fTheta; //cos(m_fTheta)
+	XMFLOAT3				m_xmf3Attenuation;
+	float					m_fPhi; //cos(m_fPhi)
+	bool					m_bEnable;
+	int						m_nType;
+	float					m_fRange;
+	float					padding;
 };
 
 struct LIGHTS
 {
-	LIGHT m_pLights[MAX_LIGHTS];
-	XMFLOAT4 m_xmf4GlobalAmbient;
+	LIGHT					m_pLights[MAX_LIGHTS];
+	XMFLOAT4				m_xmf4GlobalAmbient;
+	int						m_nLights;
+};
+
+struct MATERIAL
+{
+	XMFLOAT4				m_xmf4Ambient;
+	XMFLOAT4				m_xmf4Diffuse;
+	XMFLOAT4				m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4				m_xmf4Emissive;
 };
 
 struct MATERIALS
@@ -68,7 +78,6 @@ public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 	ID3D12RootSignature* m_pd3dComputeRootSignature = NULL;
 	CObjectManager* m_pObjectManager = NULL;
-	//CShaderManager* m_pShaderManager = NULL;
 	CTextShader* m_pTextShader = NULL;
 };
 
@@ -139,12 +148,15 @@ private:
 	// юс╫ц
 	int SelectedUInum;
 
-	//int		m_nObjects = 0;
+protected:
 
-	//ID3D12Resource* m_pd3dcbGameObjects = NULL;
-	//CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
+	LIGHTS* m_pLights = NULL;
+	ID3D12Resource* m_pd3dcbLights = NULL;
+	LIGHTS* m_pcbMappedLights = NULL;
 
-
+	MATERIALS* m_pMaterials = NULL;
+	ID3D12Resource* m_pd3dcbMaterials = NULL;
+	MATERIAL* m_pcbMappedMaterials = NULL;
 
 };
 
