@@ -24,6 +24,7 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 struct CB_GAMEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4World;
+	UINT	   m_nMaterialID;
 };
 
 
@@ -159,7 +160,6 @@ protected:
 	int								m_nMeshes = 0;
 	CMesh** m_ppMeshes = NULL;
 
-	int								m_nMaterial = 0;
 	CMaterial* m_pMaterial = NULL;
 
 	CGameObject* m_pParent = NULL;
