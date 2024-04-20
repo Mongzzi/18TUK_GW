@@ -4,7 +4,7 @@
 
 class CObjectManager;
 class CPhysXManager;
-//class CShaderManager;
+
 
 struct LIGHT
 {
@@ -30,6 +30,7 @@ struct LIGHTS
 	int						m_nLights;
 };
 
+
 struct MATERIAL
 {
 	XMFLOAT4				m_xmf4Ambient;
@@ -42,6 +43,7 @@ struct MATERIALS
 {
 	MATERIAL m_pReflections[MAX_MATERIALS];
 };
+
 
 class CBasicScene
 {
@@ -125,6 +127,8 @@ public:
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
+	void BuildLightsAndMaterials();
+
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -135,6 +139,8 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed);
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+
 	virtual void Enter();
 	virtual void Exit();
 
@@ -188,20 +194,6 @@ public:
 	virtual void Exit();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-
-protected:
-	//씬의 조명
-	LIGHTS* m_pLights = NULL;
-
-	//조명을 나타내는 리소스와 리소스에 대한 포인터이다. 
-	ID3D12Resource *m_pd3dcbLights = NULL;
-	LIGHTS* m_pcbMappedLights = NULL;
-
-	//씬의 객체들에 적용되는 재질
-	MATERIALS* m_pMaterials = NULL;//재질을 나타내는 리소스와 리소스에 대한 포인터이다. 
-
-	ID3D12Resource *m_pd3dcbMaterials = NULL;
-	MATERIAL* m_pcbMappedMaterials = NULL;
 
 };
 

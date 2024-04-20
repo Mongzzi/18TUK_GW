@@ -60,7 +60,6 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World) { }
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, MATERIAL* pMaterial) { }
 
 	virtual void ReleaseShaderVariables() { }
 

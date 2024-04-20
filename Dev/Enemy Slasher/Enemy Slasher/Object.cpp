@@ -1213,7 +1213,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {
 			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 3);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 5);
 			m_pMaterial->SetTexture(pTerrainTexture);
 		}
 	}
@@ -1437,7 +1437,7 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 			//m_pMaterial->m_pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ncbElementBytes);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 2);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
 
 			m_pMaterial->SetTexture(ppTextures[0]);
 			//SetCbvGPUDescriptorHandle(m_pMaterial->m_pShader->GetGPUCbvDescriptorStartHandle());
@@ -1592,7 +1592,7 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {
 			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 6);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 2);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 4);
 			m_pMaterial->SetTexture(pSkyBoxTexture);
 		}
 	}
@@ -1634,7 +1634,7 @@ CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {
 			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 2);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
 			m_pMaterial->SetTexture(ppTextures[0]);
 		}
 	}

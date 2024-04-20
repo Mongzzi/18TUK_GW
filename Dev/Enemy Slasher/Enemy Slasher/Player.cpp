@@ -252,7 +252,7 @@ TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		if (m_pMaterial) {
 			if (m_pMaterial->m_pShader) {
 				m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 2);
+				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
 				m_pMaterial->SetTexture(ppTextures[0]);
 			}
 		}

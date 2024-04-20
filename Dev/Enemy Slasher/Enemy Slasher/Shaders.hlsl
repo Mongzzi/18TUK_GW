@@ -14,6 +14,8 @@ cbuffer cbGameObjectInfo : register(b1)
 };
 
 
+//#include "Light.hlsl"
+
 //------------------------텍스처-----------------------------
 Texture2D gtxtTexture : register(t0);
 SamplerState gWrapSamplerState : register(s0);
@@ -156,7 +158,7 @@ struct VS_STANDARD_OUTPUT
 
 
 
-//#include "Light.hlsl"
+
 
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
