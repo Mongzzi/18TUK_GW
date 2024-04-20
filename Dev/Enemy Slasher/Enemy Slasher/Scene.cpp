@@ -51,11 +51,10 @@ ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3d
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;	// 게임 오브젝트
-	pd3dRootParameters[1].Constants.Num32BitValues = 16;
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// 게임 오브젝트
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 
 
@@ -287,7 +286,6 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 0.0f, 0.0f, 0.0f, 10000, 10000);
 		pBackGround->SetMesh(0, pBox);
 		pBackGround->SetPosition(0.0f, 0.0f, 1000);
-		//pBackGround->SetShaderType(ShaderType::CObjectsShader);
 		m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
 	}
 
@@ -846,7 +844,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		//m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
 	}
 
-	\
+	
 }
 
 void CTestScene::BuildLightsAndMaterials()
