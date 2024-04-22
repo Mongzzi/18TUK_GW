@@ -110,6 +110,29 @@ public:
 	XMFLOAT2 GetTexCoord2() const { return texcoord2; }
 };
 
+class VertexWithColorAnd2TexCoordAndNormal
+{
+private:
+	XMFLOAT3 vertex;
+	XMFLOAT4 color;
+	XMFLOAT3 normal;
+	XMFLOAT2 texcoord1;
+	XMFLOAT2 texcoord2;
+
+public:
+	VertexWithColorAnd2TexCoordAndNormal() : vertex(XMFLOAT3(0.0f, 0.0f, 0.0f)), color(XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f)), normal(XMFLOAT3(0.0f, 0.0f, 0.0f)), texcoord1(XMFLOAT2(0.0f, 0.0f)), texcoord2(XMFLOAT2(0.0f, 0.0f)) {}
+	VertexWithColorAnd2TexCoordAndNormal(XMFLOAT3 v, XMFLOAT4 c, XMFLOAT3 n, XMFLOAT2 uv1, XMFLOAT2 uv2) : vertex(v), color(c), normal(n), texcoord1(uv1), texcoord2(uv2) {}
+	VertexWithColorAnd2TexCoordAndNormal(float x, float y, float z, XMFLOAT4 c, float nx, float ny, float nz, float u1, float v1, float u2, float v2) : vertex(XMFLOAT3(x, y, z)), color(c), normal(XMFLOAT3(nx, ny, nz)), texcoord1(XMFLOAT2(u1, v1)), texcoord2(XMFLOAT2(u2, v2)) {}
+
+	~VertexWithColorAnd2TexCoordAndNormal() {}
+
+	XMFLOAT3 GetVertex() const { return vertex; }
+	XMFLOAT4 GetColor() const { return color; }
+	XMFLOAT3 GetNormal() const { return normal; }
+	XMFLOAT2 GetTexCoord1() const { return texcoord1; }
+	XMFLOAT2 GetTexCoord2() const { return texcoord2; }
+};
+
 
 /////////////////////////////////////////////////////////////////////////////
 

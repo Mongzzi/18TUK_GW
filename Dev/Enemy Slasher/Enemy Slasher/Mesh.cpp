@@ -1567,14 +1567,14 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	//격자의 교점(정점)의 개수는 (nWidth * nLength)이다. 
 	m_nVertices = nWidth * nLength;
-	m_nStride = sizeof(VertexWithColorAnd2TexCoord);
+	m_nStride = sizeof(VertexWithColorAnd2TexCoordAndNormal);
 
 	//격자는 삼각형 스트립으로 구성한다. 
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	m_nWidth = nWidth;
 	m_nLength = nLength;
 	m_xmf3Scale = xmf3Scale;
-	VertexWithColorAnd2TexCoord* pVertices = new VertexWithColorAnd2TexCoord[m_nVertices];
+	VertexWithColorAnd2TexCoordAndNormal* pVertices = new VertexWithColorAnd2TexCoordAndNormal[m_nVertices];
 
 
 	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
@@ -1598,8 +1598,11 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 			XMFLOAT4 xmf3Color = Vector4::Add(get_color, xmf4Color);
 			XMFLOAT2 xmTexCoord0 = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			XMFLOAT2 xmTexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
+			
+			XMFLOAT3 xmNormal = pHeightMapImage->GetHeightMapNormal(x, z);
 
-			pVertices[i] = VertexWithColorAnd2TexCoord(xmf3Position, xmf3Color, xmTexCoord0, xmTexCoord1);
+
+			pVertices[i] = VertexWithColorAnd2TexCoordAndNormal(xmf3Position, xmf3Color, xmNormal, xmTexCoord0, xmTexCoord1);
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}

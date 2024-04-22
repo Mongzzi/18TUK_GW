@@ -14,7 +14,7 @@ cbuffer cbGameObjectInfo : register(b1)
 };
 
 
-//#include "Light.hlsl"
+#include "Light.hlsl"
 
 //------------------------텍스처-----------------------------
 Texture2D gtxtTexture : register(t0);
@@ -102,6 +102,7 @@ struct VS_TERRAIN_INPUT
 {
     float3 position : POSITION;
     float4 color : COLOR;
+    float3 normal : NORMAL;
     float2 uv0 : TEXCOORD0;
     float2 uv1 : TEXCOORD1;
 };
@@ -110,6 +111,7 @@ struct VS_TERRAIN_OUTPUT
 {
     float4 position : SV_POSITION;
     float4 color : COLOR;
+    float3 normal : NORMAL;
     float2 uv0 : TEXCOORD0;
     float2 uv1 : TEXCOORD1;
 };
@@ -120,6 +122,7 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     output.color = input.color;
+    output.normal = input.normal;
     output.uv0 = input.uv0;
     output.uv1 = input.uv1;
 
@@ -131,11 +134,17 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
     float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gWrapSamplerState, input.uv0);
     float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gWrapSamplerState, input.uv1);
     float fAlpha = gtxtTerrainAlphaTexture.Sample(gWrapSamplerState, input.uv0);
-
     float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
-    //float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    return (cColor);
+    float4x4 gmtxProjectionInverse = transpose(float4x4(gmtxProjection[0], gmtxProjection[1], gmtxProjection[2], gmtxProjection[3]));
+    float4x4 gmtxViewInverse = transpose(float4x4(gmtxView[0], gmtxView[1], gmtxView[2], gmtxView[3]));
+    float3 positionW = (float3) mul(mul(input.position, gmtxProjectionInverse), gmtxViewInverse);
+    float3 normalW = normalize(mul(input.normal, (float3x3) gmtxGameObject));
+    float4 cIllumination = Lighting(positionW, normalW);
+    
+    
+    
+    return (cColor*cIllumination);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
