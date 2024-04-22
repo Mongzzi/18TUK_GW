@@ -10,7 +10,7 @@ cbuffer cbCameraInfo : register(b0)
 cbuffer cbGameObjectInfo : register(b1)
 {
     matrix gmtxGameObject : packoffset(c0);
-    uint gnMaterial : packoffset(c4);
+    uint gnMaterialID : packoffset(c4);
 };
 
 
@@ -110,8 +110,9 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
     float4 position : SV_POSITION;
+    float3 positionW: POSITION;
     float4 color : COLOR;
-    float3 normal : NORMAL;
+    float3 normalW : NORMAL;
     float2 uv0 : TEXCOORD0;
     float2 uv1 : TEXCOORD1;
 };
@@ -120,9 +121,10 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
     VS_TERRAIN_OUTPUT output;
 
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
+    output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.color = input.color;
-    output.normal = input.normal;
     output.uv0 = input.uv0;
     output.uv1 = input.uv1;
 
@@ -136,15 +138,18 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
     float fAlpha = gtxtTerrainAlphaTexture.Sample(gWrapSamplerState, input.uv0);
     float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
 
-    float4x4 gmtxProjectionInverse = transpose(float4x4(gmtxProjection[0], gmtxProjection[1], gmtxProjection[2], gmtxProjection[3]));
-    float4x4 gmtxViewInverse = transpose(float4x4(gmtxView[0], gmtxView[1], gmtxView[2], gmtxView[3]));
-    float3 positionW = (float3) mul(mul(input.position, gmtxProjectionInverse), gmtxViewInverse);
-    float3 normalW = normalize(mul(input.normal, (float3x3) gmtxGameObject));
-    float4 cIllumination = Lighting(positionW, normalW);
+    //float4x4 gmtxProjectionInverse = transpose(float4x4(gmtxProjection[0], gmtxProjection[1], gmtxProjection[2], gmtxProjection[3]));
+    //float4x4 gmtxViewInverse = transpose(float4x4(gmtxView[0], gmtxView[1], gmtxView[2], gmtxView[3]));
+    //float3 positionW = (float3) mul(mul(input.position, gmtxProjectionInverse), gmtxViewInverse);
+    //float3 normalW = normalize(mul(input.normal, (float3x3) gmtxGameObject));
+    //float4 cIllumination = Lighting(positionW, normalW);
     
+    input.normalW = normalize(input.normalW);
+    float4 cIllumination = Lighting(input.positionW, input.normalW);
+    return(cColor * cIllumination);
+
     
-    
-    return (cColor*cIllumination);
+    //return (cColor*cIllumination);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -29,7 +29,6 @@ struct LIGHTS
 	XMFLOAT4				m_xmf4GlobalAmbient;
 };
 
-
 struct MATERIAL
 {
 	XMFLOAT4				m_xmf4Ambient;
@@ -40,9 +39,8 @@ struct MATERIAL
 
 struct MATERIALS
 {
-	MATERIAL m_pReflections[MAX_MATERIALS];
+	MATERIAL				m_pReflections[MAX_MATERIALS];
 };
-
 
 class CBasicScene
 {
