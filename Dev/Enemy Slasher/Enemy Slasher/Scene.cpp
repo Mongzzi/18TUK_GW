@@ -924,6 +924,9 @@ void CTestScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 void CTestScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
+
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbMaterialsGpuVirtualAddress); //Materials
 
