@@ -32,7 +32,9 @@ struct VS_TEXTURED_INPUT
 
 struct VS_TEXTURED_OUTPUT
 {
-    float4 position : SV_POSITION;
+    float4 position : SV_POSITION;    
+    float3 positionW: POSITION;
+    float3 normalW : NORMAL;
     float2 uv : TEXCOORD;
 };
 
@@ -40,7 +42,9 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
     VS_TEXTURED_OUTPUT output;
 
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
+    output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.uv = input.uv;
 
     return (output);
@@ -49,8 +53,10 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
-
-    return (cColor);
+    input.normalW = normalize(input.normalW);
+    float4 cIllumination = Lighting(input.positionW, input.normalW);
+    return(cColor * cIllumination);
+    //return (cColor);
 }
 //----------------------텍스처끝-------------------------------
 
@@ -85,7 +91,9 @@ float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitive
     return (cColor);
 }
 
-float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
+
+
+float4 PSSkyBox(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gClampSamplerState, input.uv);
 
