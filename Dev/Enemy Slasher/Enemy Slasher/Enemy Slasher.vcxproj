@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.2\include;C:\PhysX\physx\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,6 +141,7 @@
     <ClInclude Include="Collider.h" />
     <ClInclude Include="ColliderWithMesh.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
+    <ClInclude Include="PhysXManager.h" />
     <ClInclude Include="Skeleton.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="d3dx12.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ColliderWithMesh.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
+    <ClCompile Include="PhysXManager.cpp" />
     <ClCompile Include="Skeleton.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="Enemy Slasher.cpp" />

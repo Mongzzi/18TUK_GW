@@ -1,52 +1,36 @@
 #pragma once
-//#define _SILENCE_CXX20_CISO646_REMOVED_WARNING
-//#define _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS
-//#include <physx/PxPhysicsAPI.h>
-//#include <physx/PxPhysicsAPI.h>
+#include "PxPhysicsAPI.h"
 
-//class CGameObject;
-//class CVertex;
+class CGameObject;
+class CVertex;
 
 class CPhysXManager
 {
 public:
-    CPhysXManager()
-    {
-    /*    using namespace physx;
+    CPhysXManager();
+    ~CPhysXManager();
 
-        gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+    void stepPhysics(bool /*interactive*/, float elapsedTime = (1.0f / 60.0f));
 
-        gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale());
+    void cleanupPhysics(bool /*interactive*/);
 
-        PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-        sceneDesc.gravity = gGravity;
-        gDispatcher = PxDefaultCpuDispatcherCreate(2);
-        sceneDesc.cpuDispatcher = gDispatcher;
-        sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+    physx::PxRigidDynamic* createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
 
-        gScene = gPhysics->createScene(sceneDesc);
+    void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
 
-        gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);*/
-    }
-    ~CPhysXManager()
-    {
-        //PX_RELEASE(gMaterial);
-        //PX_RELEASE(gScene);
-        //PX_RELEASE(gDispatcher);
-        //PX_RELEASE(gPhysics);
-        //PX_RELEASE(gFoundation);
-    }
+    void renderCallback();
+
+    void updateActors(physx::PxRigidActor** actors, const physx::PxU32 numActors);
 
 private:
-    //physx::PxDefaultAllocator		gAllocator;
-    //physx::PxDefaultErrorCallback	gErrorCallback;
-    //physx::PxFoundation*            gFoundation = nullptr;
-    //physx::PxPhysics*               gPhysics    = nullptr;
-    //physx::PxDefaultCpuDispatcher*  gDispatcher = nullptr;
-    //physx::PxScene*                 gScene      = nullptr;
-    //physx::PxMaterial*              gMaterial   = nullptr;
+    physx::PxDefaultAllocator		gAllocator;
+    physx::PxDefaultErrorCallback	gErrorCallback;
+    physx::PxFoundation*            gFoundation = nullptr;
+    physx::PxPhysics*               gPhysics = nullptr;
+    physx::PxDefaultCpuDispatcher*  gDispatcher = nullptr;
+    physx::PxScene*                 gScene = nullptr;
+    physx::PxMaterial*              gMaterial = nullptr;
 
-    ////Gravitational acceleration
-    //const physx::PxVec3 gGravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+    //Gravitational acceleration
+    const physx::PxVec3 gGravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
 };
-

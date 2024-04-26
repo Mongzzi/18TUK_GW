@@ -2006,6 +2006,25 @@ void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+
+		for (int i = 0; i < (55); ++i) {
+			pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+			pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
+			m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
+		}
+
+		vector<CGameObject*> obLayer = m_pObjectManager->GetObjectList(ObjectLayer::Object);
+		physx::PxScene* scene;
+		PxGetPhysics().getScenes(&scene, 1);
+		physx::PxU32 nbActors = scene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC);
+		if (nbActors)
+		{
+			std::vector<physx::PxRigidActor*> actors(nbActors);
+			scene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<physx::PxActor**>(&actors[0]), nbActors);
+			for (int i = 0; i < (55 + 1); ++i) {
+				physxPairs.emplace_back(obLayer[i], actors[i]);
+			}
+		}
 	}
 
 	{
@@ -2053,4 +2072,27 @@ void CTestScene_PhysX::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+}
+
+void CTestScene_PhysX::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+
+	m_pPhysXManager->stepPhysics(true);
+
+	vector<CGameObject*> obLayer = m_pObjectManager->GetObjectList(ObjectLayer::Object);
+	
+	for (auto& p : physxPairs) {
+		physx::PxTransform transform = static_cast<physx::PxRigidActor*>(p.second)->getGlobalPose();
+		physx::PxVec3 position = transform.p;
+		p.first->SetPosition(XMFLOAT3(position.x, position.y - 200.0f, position.z));
+	}
+
+	m_pObjectManager->Render(pd3dCommandList, pCamera);
 }
