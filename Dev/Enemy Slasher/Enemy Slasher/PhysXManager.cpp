@@ -1,5 +1,6 @@
 #include "PhysXManager.h"
 #include "stdafx.h"
+#include "Object.h"
 #include <vector>
 
 //using namespace physx;
@@ -126,4 +127,63 @@ void CPhysXManager::updateActors(physx::PxRigidActor** actors, const physx::PxU3
             //renderGeometry(geom);
         }
     }
+}
+
+void CPhysXManager::AddCustomGeometry(CGameObject* object)
+{
+    using namespace physx;
+
+    CMesh** ppMeshs = object->GetMeshes();
+    int nMeshs = object->GetNumMeshes();
+    XMFLOAT3 xmfPos = object->GetPosition();
+
+    // 동적 Actor 작성
+    PxTransform transform(xmfPos.x, xmfPos.y, xmfPos.z); // 위치 지정
+    PxRigidDynamic* dynamicActor = gPhysics->createRigidDynamic(transform);
+    
+    for (int i = 0; i < nMeshs; ++i) {
+        CMesh* pMesh = ppMeshs[i];
+        CVertex* gOriginVertices = pMesh->GetVertices();
+
+        UINT* gIndices = pMesh->GetIndices();
+        UINT gVertexCount = pMesh->GetNumVertices();
+        UINT gIndexCount = pMesh->GetNumIndices();
+
+        // Vertex 좌표만 추출한 배열 생성
+        PxArray<PxVec3> gVertices;
+        gVertices.resize(gVertexCount);
+        for (int j = 0; j < gVertexCount; ++j) {
+            XMFLOAT3 oriVertex = gOriginVertices->GetVertex();
+            gVertices[j] = PxVec3(oriVertex.x, oriVertex.y, oriVertex.z);
+        }
+
+        // PhysX Mesh를 생성.
+        PxTolerancesScale scale;
+        PxCookingParams params(scale);
+        params.midphaseDesc.setToDefault(PxMeshMidPhase::eBVH34);
+        params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_ACTIVE_EDGES_PRECOMPUTE;
+        params.meshPreprocessParams |= PxMeshPreprocessingFlag::eDISABLE_CLEAN_MESH;
+
+        PxTriangleMeshDesc triangleMeshDesc;
+        triangleMeshDesc.points.count = gVertexCount;
+        triangleMeshDesc.points.data = gVertices.begin();
+        triangleMeshDesc.points.stride = sizeof(PxVec3);
+
+        triangleMeshDesc.triangles.count = gIndexCount / 3;
+        triangleMeshDesc.triangles.data = gIndices;
+        triangleMeshDesc.triangles.stride = 3 * sizeof(UINT);
+
+        PxTriangleMesh* gTriangleMesh = PxCreateTriangleMesh(params, triangleMeshDesc);
+
+
+        // Shape를 생성.
+        PxTriangleMeshGeometry meshGeometry(gTriangleMesh);
+        PxShape* shape = gPhysics->createShape(meshGeometry, *gMaterial, true);
+
+        // 물리 시뮬레이션에 오브젝트로 추가.
+        dynamicActor->attachShape(*shape);
+        shape->release();
+    }
+
+    gScene->addActor(*dynamicActor);
 }

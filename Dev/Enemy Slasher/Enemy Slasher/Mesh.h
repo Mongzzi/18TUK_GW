@@ -55,6 +55,12 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOption = false);
 
 	void SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride, CVertex* pVertices, UINT nVertices, UINT* pnIndices, UINT nIndices);
+
+public:
+	CVertex* GetVertices() { return m_pVertices; }
+	UINT* GetIndices() { return m_pnIndices; }
+	UINT GetNumVertices() { return m_nVertices; }
+	UINT GetNumIndices() { return m_nIndices; }
 };
 
 class CColliderMesh : public CMesh
@@ -130,13 +136,9 @@ public:
 	bool GetCuttable() { return m_bCuttable; }
 
 public:
-	CVertex* GetVertices() { return m_pVertices; }
-	UINT* GetIndices() { return m_pnIndices; }
-	UINT GetNumVertices() { return m_nVertices; }
-	UINT GetNumIndices() { return m_nIndices; }
-
 	XMFLOAT3 TransformVertex(XMFLOAT3& xmf3Vertex, XMFLOAT4X4& xmf4x4Mat);
 	bool IsVertexAbovePlane(const XMFLOAT3& vertex, const XMFLOAT3& planeNormal, const XMFLOAT3& planePoint);
+
 public:
 	enum class CutAlgorithm : int {
 		Push,

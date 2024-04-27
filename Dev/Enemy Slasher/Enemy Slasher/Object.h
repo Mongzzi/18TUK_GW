@@ -175,6 +175,9 @@ public:
 	XMFLOAT4X4 GetWorldMat() { return m_xmf4x4World; }
 	XMFLOAT4X4 GetTransMat() { return m_xmf4x4Transform; }
 
+	CMesh** GetMeshes() { return m_ppMeshes; }
+	int GetNumMeshes() { return m_nMeshes; }
+
 public:
 	//상수 버퍼를 생성한다. 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -247,8 +250,6 @@ public:
 public:
 	COBBColliderWithMesh* m_pCollider = NULL;
 
-	CMesh** GetMeshes() { return m_ppMeshes; }
-	int GetNumMeshes() { return m_nMeshes; }
 	COBBCollider* GetCollider() { return m_pCollider->GetCollider(); }
 
 	virtual void SetMesh(int nIndex, CMesh* pMesh);

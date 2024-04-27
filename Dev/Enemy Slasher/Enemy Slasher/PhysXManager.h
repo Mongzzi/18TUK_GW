@@ -4,6 +4,11 @@
 class CGameObject;
 class CVertex;
 
+class CustomObject : physx::PxCustomGeometry::Callbacks, physx::PxUserAllocated
+{
+
+};
+
 class CPhysXManager
 {
 public:
@@ -21,6 +26,9 @@ public:
     void renderCallback();
 
     void updateActors(physx::PxRigidActor** actors, const physx::PxU32 numActors);
+
+public:
+    void AddCustomGeometry(CGameObject* object);
 
 private:
     physx::PxDefaultAllocator		gAllocator;
