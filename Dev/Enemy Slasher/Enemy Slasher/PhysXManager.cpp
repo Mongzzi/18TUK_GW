@@ -129,7 +129,7 @@ void CPhysXManager::updateActors(physx::PxRigidActor** actors, const physx::PxU3
     }
 }
 
-void CPhysXManager::AddCustomGeometry(CGameObject* object)
+physx::PxActor* CPhysXManager::AddCustomGeometry(CGameObject* object)
 {
     using namespace physx;
 
@@ -186,4 +186,5 @@ void CPhysXManager::AddCustomGeometry(CGameObject* object)
     }
 
     gScene->addActor(*dynamicActor);
+    return dynamicActor;
 }

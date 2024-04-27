@@ -28,7 +28,7 @@ public:
     void updateActors(physx::PxRigidActor** actors, const physx::PxU32 numActors);
 
 public:
-    void AddCustomGeometry(CGameObject* object);
+    physx::PxActor* AddCustomGeometry(CGameObject* object);
 
 private:
     physx::PxDefaultAllocator		gAllocator;

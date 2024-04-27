@@ -1,6 +1,7 @@
 #pragma once
 
 class CShaderManager;
+class CPhysXManager;
 
 enum class ObjectLayer : int;
 
@@ -12,6 +13,7 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	InteractiveObject,		// 상호작용가능 오브젝트 (ex 문, 버튼)
 	Object,					// 중립 오브젝트
 	ObjectNormal,
+	ObjectPhysX,			// 테스트용 PhysX Layer
 	DestroyedObject,		// 파괴된 오브젝트
 	Enemy,					// 적 오브젝트
 	Player,					// 플레이어 오브젝트
@@ -26,10 +28,16 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	Count					// Layer 개수
 };
 
+namespace physx {
+	class PxActor;
+}
 class CObjectManager
 {
 private:
 	std::vector<CGameObject*> m_pvObjectManager[int(ObjectLayer::Count)];
+
+	CPhysXManager* m_pPhysXManager = nullptr;
+	vector<pair<CGameObject*, physx::PxActor*>> m_vPhysxPairs;
 
 public:
 	CObjectManager();
@@ -38,6 +46,8 @@ public:
 	std::vector<CGameObject*>* GetObjectList() { return m_pvObjectManager; }
 
 	std::vector<CGameObject*> GetObjectList(ObjectLayer layer) { return m_pvObjectManager[(int)layer]; }
+
+	void SetPhysXManager(CPhysXManager* physxManager) { m_pPhysXManager = physxManager; }
 
 	void AddObj(CGameObject* object, ObjectLayer layer);
 	void DelObj(CGameObject* object, ObjectLayer layer);

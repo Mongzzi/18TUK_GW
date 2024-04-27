@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "ObjectManager.h"
 #include "ShaderManager.h"
+#include "PhysXManager.h"
 
 CObjectManager::CObjectManager()
 {
@@ -31,6 +32,12 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	{
 		((CDynamicShapeMesh*)((((CInteractiveObject*)object)->GetMeshes()[0])))->SetCuttable(true);
 		((CDynamicShapeObject*)object)->SetCuttable(true);
+	}
+
+	if (layer == ObjectLayer::ObjectPhysX && m_pPhysXManager != nullptr)
+	{
+		physx::PxActor* actor = m_pPhysXManager->AddCustomGeometry(object);
+		m_vPhysxPairs.emplace_back(object, actor);
 	}
 
 	m_pvObjectManager[(int)(layer)].push_back(object);
