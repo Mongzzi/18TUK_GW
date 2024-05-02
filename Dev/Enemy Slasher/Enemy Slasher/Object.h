@@ -17,7 +17,8 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CTextureShader,
 	CUITextureShader,
 	CTexture_Position_Texcoord_Shader,
-	CSkyBoxShader
+	CSkyBoxShader,
+	CBillBoardInstanceShader
 };
 
 //객체를 렌더링할 때 적용하는 상수 버퍼 데이터
@@ -189,6 +190,7 @@ public:
 	// 쉐이더 생성 함수 ( create shader )
 	// 기존 쉐이더 타입 재사용 - 생성자 부분 or Scene에서 CreatShader 호출할 예정
 	//						   - SetShaderType함수 없애고 이부분에서만 사용할 예정
+
 	void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype);
 	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
 	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }

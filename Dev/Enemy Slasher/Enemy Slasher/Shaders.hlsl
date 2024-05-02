@@ -249,6 +249,19 @@ float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
 }
 
 
+void VSBillboardInstancing()
+{
+
+}
+
+void PSBillboardInstancing()
+{
+
+}
+
+
+
+
 
 //VS_STANDARD_OUTPUT VSLighting(VS_STANDARD_INPUT input)
 //{

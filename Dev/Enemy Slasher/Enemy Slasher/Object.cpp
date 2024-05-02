@@ -500,6 +500,14 @@ void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		SetShader(pObjectsShader);
 		break;
 	}
+	case ShaderType::CBillBoardInstanceShader:
+	{
+		CBillBoardInstanceShader* pObjectsShader = new CBillBoardInstanceShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	}
+	
 
 	}
 }
