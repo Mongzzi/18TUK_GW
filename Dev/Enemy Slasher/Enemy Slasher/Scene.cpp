@@ -1977,6 +1977,7 @@ void CTestScene_Slice::Exit()
 CTestScene_PhysX::CTestScene_PhysX()
 {
 	m_pPhysXManager = new CPhysXManager;
+	m_pObjectManager->SetPhysXManager(m_pPhysXManager);
 }
 
 CTestScene_PhysX::~CTestScene_PhysX()
@@ -2007,23 +2008,10 @@ void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 
-		for (int i = 0; i < (55); ++i) {
+		for (int i = 0; i < (10); ++i) {
 			pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
-			pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
-			m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-		}
-
-		vector<CGameObject*> obLayer = m_pObjectManager->GetObjectList(ObjectLayer::Object);
-		physx::PxScene* scene;
-		PxGetPhysics().getScenes(&scene, 1);
-		physx::PxU32 nbActors = scene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC);
-		if (nbActors)
-		{
-			std::vector<physx::PxRigidActor*> actors(nbActors);
-			scene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<physx::PxActor**>(&actors[0]), nbActors);
-			for (int i = 0; i < (55 + 1); ++i) {
-				physxPairs.emplace_back(obLayer[i], actors[i]);
-			}
+			pFBXObject->SetPosition(50.0f, 50.0f * i, 100.0f);
+			m_pObjectManager->AddObj(pFBXObject, ObjectLayer::ObjectPhysX);
 		}
 	}
 
@@ -2082,17 +2070,6 @@ void CTestScene_PhysX::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	UpdateShaderVariables(pd3dCommandList);
-
-
-	m_pPhysXManager->stepPhysics(true);
-
-	vector<CGameObject*> obLayer = m_pObjectManager->GetObjectList(ObjectLayer::Object);
-	
-	for (auto& p : physxPairs) {
-		physx::PxTransform transform = static_cast<physx::PxRigidActor*>(p.second)->getGlobalPose();
-		physx::PxVec3 position = transform.p;
-		p.first->SetPosition(XMFLOAT3(position.x, position.y - 200.0f, position.z));
-	}
 
 	m_pObjectManager->Render(pd3dCommandList, pCamera);
 }

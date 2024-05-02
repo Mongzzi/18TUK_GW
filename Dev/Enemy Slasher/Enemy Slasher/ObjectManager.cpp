@@ -86,6 +86,18 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 		}
 		for (const auto& a : deleteObjects) DelObj(a, ObjectLayer::TemporaryObject);	// 원본 오브젝트 삭제
 	}
+
+	{
+		if (m_pPhysXManager != nullptr) {
+			// PhysX 에 의한 물리연산 적용
+			m_pPhysXManager->stepPhysics(true);
+			for (auto& p : m_vPhysxPairs) {
+				physx::PxTransform transform = static_cast<physx::PxRigidActor*>(p.second)->getGlobalPose();
+				physx::PxVec3 position = transform.p;
+				p.first->SetPosition(XMFLOAT3(position.x, position.y, position.z));
+			}
+		}
+	}
 }
 
 void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float fTimeElapsed, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
