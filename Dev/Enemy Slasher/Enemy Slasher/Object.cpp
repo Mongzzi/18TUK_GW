@@ -1161,7 +1161,7 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName,
 	int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, ShaderType stype)
-	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,stype)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	//지형에 사용할 높이 맵의 가로, 세로의 크기이다.
 	m_nWidth = nWidth;
@@ -1605,7 +1605,7 @@ CSkyBox::~CSkyBox()
 {
 }
 
-void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,bool pRenderOption)
+void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
 {
 
 	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
@@ -1646,3 +1646,16 @@ CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 CTreeObject::~CTreeObject()
 {
 }
+
+CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+
+}
+
+CBillBoardInstanceObject::~CBillBoardInstanceObject()
+{
+
+}
+
+
