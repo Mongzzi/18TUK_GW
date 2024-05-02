@@ -14,6 +14,13 @@ cbuffer cbGameObjectInfo : register(b1)
 };
 
 
+cbuffer cbTimeInfo : register(b4)
+{
+    float gfCurrentTime : packoffset(c0.x);
+    float gfElapsedTime : packoffset(c0.y);
+};
+
+
 #include "Light.hlsl"
 
 //------------------------텍스처-----------------------------
@@ -32,8 +39,8 @@ struct VS_TEXTURED_INPUT
 
 struct VS_TEXTURED_OUTPUT
 {
-    float4 position : SV_POSITION;    
-    float3 positionW: POSITION;
+    float4 position : SV_POSITION;
+    float3 positionW : POSITION;
     float3 normalW : NORMAL;
     float2 uv : TEXCOORD;
 };
@@ -42,8 +49,8 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
     VS_TEXTURED_OUTPUT output;
 
-    output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
-    output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+    output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
     output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.uv = input.uv;
 
@@ -55,7 +62,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
     float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
     input.normalW = normalize(input.normalW);
     float4 cIllumination = Lighting(input.positionW, input.normalW);
-    return(cColor * cIllumination);
+    return (cColor * cIllumination);
     //return (cColor);
 }
 //----------------------텍스처끝-------------------------------
@@ -118,7 +125,7 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
     float4 position : SV_POSITION;
-    float3 positionW: POSITION;
+    float3 positionW : POSITION;
     float4 color : COLOR;
     float3 normalW : NORMAL;
     float2 uv0 : TEXCOORD0;
@@ -129,12 +136,17 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
     VS_TERRAIN_OUTPUT output;
 
-    output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
-    output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+    output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
     output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.color = input.color;
     output.uv0 = input.uv0;
     output.uv1 = input.uv1;
+    
+    
+    //float fShift = gfElapsedTime*10;
+    //output.uv0.x += fShift;
+    
 
     return (output);
 }
@@ -154,9 +166,8 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
     
     input.normalW = normalize(input.normalW);
     float4 cIllumination = Lighting(input.positionW, input.normalW);
-    return(cColor * cIllumination);
-
-    
+    return (cColor * cIllumination);
+  
     //return (cColor*cIllumination);
 }
 

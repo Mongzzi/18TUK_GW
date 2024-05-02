@@ -6,6 +6,12 @@ class CObjectManager;
 class CPhysXManager;
 
 
+struct CB_TIME_INFO
+{
+	float					m_fCurrentTime;
+	float					m_fElapsedTime;
+};
+
 struct LIGHT
 {
 	XMFLOAT4				m_xmf4Ambient;
@@ -70,6 +76,7 @@ public:
 	virtual void Exit();
 
 	void ReleaseUploadBuffers();
+	void UpdateTimer(float fTimeCurrent,float fTimeElapsed);
 
 	CPlayer* m_pPlayer = NULL;
 	
@@ -78,6 +85,10 @@ public:
 	ID3D12RootSignature* m_pd3dComputeRootSignature = NULL;
 	CObjectManager* m_pObjectManager = NULL;
 	CTextShader* m_pTextShader = NULL;
+
+protected:
+	float m_CurrentTime;
+	float m_ElapsedTime;
 };
 
 class CTitleScene : public CBasicScene
@@ -161,6 +172,8 @@ protected:
 	ID3D12Resource* m_pd3dcbMaterials = NULL;
 	MATERIAL* m_pcbMappedMaterials = NULL;
 
+	ID3D12Resource* m_pd3dcbTimeInfo = NULL;
+	CB_TIME_INFO* m_pcbMappedTimeInfo = NULL;
 };
 
 class CTestScene_Card : public CBasicScene

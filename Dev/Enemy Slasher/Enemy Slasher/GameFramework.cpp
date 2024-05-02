@@ -498,6 +498,8 @@ void CGameFramework::BuildObjects()
 		m_pScene = m_pvScenelist[m_nSceneCounter];
 		m_pPlayer = m_pScene->m_pPlayer;
 		m_pCamera = m_pPlayer->GetCamera();
+
+
 	}
 
 	//m_pScene = new CTestScene();
@@ -610,6 +612,13 @@ void CGameFramework::DynamicShaping()
 	}
 }
 
+void CGameFramework::UpdateTimer()
+{
+	for (auto scene : m_pvScenelist) {
+		scene->UpdateTimer(m_GameTimer.GetTotalTime(), m_GameTimer.GetTimeElapsed());
+	}
+}
+
 void CGameFramework::WaitForGpuComplete()
 {
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
@@ -673,6 +682,7 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+	UpdateTimer();
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
