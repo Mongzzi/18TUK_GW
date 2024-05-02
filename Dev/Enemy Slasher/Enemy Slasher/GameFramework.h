@@ -35,6 +35,8 @@ public:
 	void AnimateObjects();
 	void FrameAdvance();
 	void DynamicShaping();
+	void UpdateTimer();
+
 
 	void Render2D();
 
