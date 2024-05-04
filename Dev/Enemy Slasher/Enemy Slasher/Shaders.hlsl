@@ -2,22 +2,22 @@
 
 cbuffer cbCameraInfo : register(b0)
 {
-    matrix gmtxView : packoffset(c0);
-    matrix gmtxProjection : packoffset(c4);
-    float3 gvCameraPosition : packoffset(c8);
+	matrix gmtxView : packoffset(c0);
+	matrix gmtxProjection : packoffset(c4);
+	float3 gvCameraPosition : packoffset(c8);
 };
 
 cbuffer cbGameObjectInfo : register(b1)
 {
-    matrix gmtxGameObject : packoffset(c0);
-    uint gnMaterialID : packoffset(c4);
+	matrix gmtxGameObject : packoffset(c0);
+	uint gnMaterialID : packoffset(c4);
 };
 
 
 cbuffer cbTimeInfo : register(b4)
 {
-    float gfCurrentTime : packoffset(c0.x);
-    float gfElapsedTime : packoffset(c0.y);
+	float gfCurrentTime : packoffset(c0.x);
+	float gfElapsedTime : packoffset(c0.y);
 };
 
 
@@ -31,39 +31,39 @@ SamplerState gClampSamplerState : register(s1);
 
 struct VS_TEXTURED_INPUT
 {
-    float3 position : POSITION;
-    float3 normal : NORMAL;
-    float4 color : COLOR;
-    float2 uv : TEXCOORD;
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+	float4 color : COLOR;
+	float2 uv : TEXCOORD;
 };
 
 struct VS_TEXTURED_OUTPUT
 {
-    float4 position : SV_POSITION;
-    float3 positionW : POSITION;
-    float3 normalW : NORMAL;
-    float2 uv : TEXCOORD;
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+	float2 uv : TEXCOORD;
 };
 
 VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
-    VS_TEXTURED_OUTPUT output;
+	VS_TEXTURED_OUTPUT output;
 
-    output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
-    output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
-    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-    output.uv = input.uv;
+	output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+	output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.uv = input.uv;
 
-    return (output);
+	return (output);
 }
 
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
-    input.normalW = normalize(input.normalW);
-    float4 cIllumination = Lighting(input.positionW, input.normalW);
-    return (cColor * cIllumination);
-    //return (cColor);
+	float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
+	return (cColor * cIllumination);
+	//return (cColor);
 }
 //----------------------텍스처끝-------------------------------
 
@@ -71,40 +71,40 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 
 struct VS_TEXTURED_INPUT_TWO_ELEMENT
 {
-    float3 position : POSITION;
-    float2 uv : TEXCOORD;
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
 };
 
 struct VS_TEXTURED_OUTPUT_TWO_ELEMENT
 {
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD;
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
 };
 
 VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_POSITION_TEXCOORD(VS_TEXTURED_INPUT_TWO_ELEMENT input)
 {
-    VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
+	VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
 
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-    output.uv = input.uv;
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.uv = input.uv;
 
-    return (output);
+	return (output);
 }
 
 float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
 {
-    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+	float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
 
-    return (cColor);
+	return (cColor);
 }
 
 
 
 float4 PSSkyBox(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
 {
-    float4 cColor = gtxtTexture.Sample(gClampSamplerState, input.uv);
+	float4 cColor = gtxtTexture.Sample(gClampSamplerState, input.uv);
 
-    return (cColor);
+	return (cColor);
 }
 // ------------------------------ 스카이 박스 전용 텍스처 끝 ----------------------------------------------
 
@@ -115,60 +115,60 @@ Texture2D<float> gtxtTerrainAlphaTexture : register(t3);
 
 struct VS_TERRAIN_INPUT
 {
-    float3 position : POSITION;
-    float4 color : COLOR;
-    float3 normal : NORMAL;
-    float2 uv0 : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
+	float3 position : POSITION;
+	float4 color : COLOR;
+	float3 normal : NORMAL;
+	float2 uv0 : TEXCOORD0;
+	float2 uv1 : TEXCOORD1;
 };
 
 struct VS_TERRAIN_OUTPUT
 {
-    float4 position : SV_POSITION;
-    float3 positionW : POSITION;
-    float4 color : COLOR;
-    float3 normalW : NORMAL;
-    float2 uv0 : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float4 color : COLOR;
+	float3 normalW : NORMAL;
+	float2 uv0 : TEXCOORD0;
+	float2 uv1 : TEXCOORD1;
 };
 
 VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
-    VS_TERRAIN_OUTPUT output;
+	VS_TERRAIN_OUTPUT output;
 
-    output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
-    output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
-    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-    output.color = input.color;
-    output.uv0 = input.uv0;
-    output.uv1 = input.uv1;
-    
-    
-    //float fShift = gfElapsedTime*10;
-    //output.uv0.x += fShift;
-    
+	output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+	output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.color = input.color;
+	output.uv0 = input.uv0;
+	output.uv1 = input.uv1;
 
-    return (output);
+
+	//float fShift = gfElapsedTime*10;
+	//output.uv0.x += fShift;
+
+
+	return (output);
 }
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
-    float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gWrapSamplerState, input.uv0);
-    float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gWrapSamplerState, input.uv1);
-    float fAlpha = gtxtTerrainAlphaTexture.Sample(gWrapSamplerState, input.uv0);
-    float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
+	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gWrapSamplerState, input.uv0);
+	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gWrapSamplerState, input.uv1);
+	float fAlpha = gtxtTerrainAlphaTexture.Sample(gWrapSamplerState, input.uv0);
+	float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
 
-    //float4x4 gmtxProjectionInverse = transpose(float4x4(gmtxProjection[0], gmtxProjection[1], gmtxProjection[2], gmtxProjection[3]));
-    //float4x4 gmtxViewInverse = transpose(float4x4(gmtxView[0], gmtxView[1], gmtxView[2], gmtxView[3]));
-    //float3 positionW = (float3) mul(mul(input.position, gmtxProjectionInverse), gmtxViewInverse);
-    //float3 normalW = normalize(mul(input.normal, (float3x3) gmtxGameObject));
-    //float4 cIllumination = Lighting(positionW, normalW);
-    
-    input.normalW = normalize(input.normalW);
-    float4 cIllumination = Lighting(input.positionW, input.normalW);
-    return (cColor * cIllumination);
-  
-    //return (cColor*cIllumination);
+	//float4x4 gmtxProjectionInverse = transpose(float4x4(gmtxProjection[0], gmtxProjection[1], gmtxProjection[2], gmtxProjection[3]));
+	//float4x4 gmtxViewInverse = transpose(float4x4(gmtxView[0], gmtxView[1], gmtxView[2], gmtxView[3]));
+	//float3 positionW = (float3) mul(mul(input.position, gmtxProjectionInverse), gmtxViewInverse);
+	//float3 normalW = normalize(mul(input.normal, (float3x3) gmtxGameObject));
+	//float4 cIllumination = Lighting(positionW, normalW);
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
+	return (cColor * cIllumination);
+
+	//return (cColor*cIllumination);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,17 +176,17 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 struct VS_STANDARD_INPUT
 {
-    float3 position : POSITION;
-    float3 normal : NORMAL;
-    float4 color : COLOR;
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+	float4 color : COLOR;
 };
 
 struct VS_STANDARD_OUTPUT
 {
-    float4 position : SV_POSITION;
-    float3 normal : NORMAL;
-    float4 color : COLOR;
-	
+	float4 position : SV_POSITION;
+	float3 normal : NORMAL;
+	float4 color : COLOR;
+
 };
 
 
@@ -196,13 +196,13 @@ struct VS_STANDARD_OUTPUT
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 {
-    VS_STANDARD_OUTPUT output;
+	VS_STANDARD_OUTPUT output;
 
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-    output.color = input.color;
-	
-    return (output);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.color = input.color;
+
+	return (output);
 }
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
@@ -215,89 +215,101 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 	//cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
 
-    return (input.color);
+	return (input.color);
 }
 
 ////////////////////////////////////////////////////////
 
 struct VS_COLOR_INPUT
 {
-    float3 position : POSITION;
-    float4 color : COLOR;
+	float3 position : POSITION;
+	float4 color : COLOR;
 };
 
 struct VS_COLOR_OUTPUT
 {
-    float4 position : SV_POSITION;
-    float4 color : COLOR;
+	float4 position : SV_POSITION;
+	float4 color : COLOR;
 
 };
 
 VS_COLOR_OUTPUT VSColor(VS_COLOR_INPUT input)
 {
-    VS_COLOR_OUTPUT output;
+	VS_COLOR_OUTPUT output;
 
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-    output.color = input.color;
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.color = input.color;
 
-    return (output);
+	return (output);
 }
 
 float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
 {
-    return (input.color);
+	return (input.color);
 }
 
 
 struct VS_BILLBOARD_INSTANCING_INPUT
 {
-    float3 position : POSITION;
-    float2 uv : TEXCOORD;
-    float3 instancePosition : INSTANCEPOSITION;
-    float4 billboardInfo : BILLBOARDINFO; //(cx, cy, type, texture)
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
+	float3 instancePosition : INSTANCEPOSITION;
+	float4 billboardInfo : BILLBOARDINFO; //(cx, cy, type, texture)
 };
 
 struct VS_BILLBOARD_INSTANCING_OUTPUT
 {
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD;
-    int textureID : TEXTUREID;
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
+	int textureID : TEXTUREID;
 };
 
 VS_BILLBOARD_INSTANCING_OUTPUT VSBillboardInstancing(VS_BILLBOARD_INSTANCING_INPUT input)
 {
-    VS_BILLBOARD_INSTANCING_OUTPUT output;
+	VS_BILLBOARD_INSTANCING_OUTPUT output;
 
-    if (input.position.x < 0.0f) input.position.x = -(input.billboardInfo.x * 0.5f);
-    else if (input.position.x > 0.0f) input.position.x = (input.billboardInfo.x * 0.5f);
-    
-    if (input.position.y < 0.0f) input.position.y = -(input.billboardInfo.y * 0.5f);
-    else if (input.position.y > 0.0f) input.position.y = (input.billboardInfo.y * 0.5f);
+	if (input.position.x < 0.0f) input.position.x = -(input.billboardInfo.x * 0.5f);
+	else if (input.position.x > 0.0f) input.position.x = (input.billboardInfo.x * 0.5f);
 
-    float3 f3Look = normalize(gvCameraPosition - input.instancePosition);
-    float3 f3Up = float3(0.0f, 1.0f, 0.0f);
-    float3 f3Right = normalize(cross(f3Up, f3Look));
+	if (input.position.y < 0.0f) input.position.y = -(input.billboardInfo.y * 0.5f);
+	else if (input.position.y > 0.0f) input.position.y = (input.billboardInfo.y * 0.5f);
 
-    matrix mtxWorld;
-    mtxWorld[0] = float4(f3Right, 0.0f);
-    mtxWorld[1] = float4(f3Up, 0.0f);
-    mtxWorld[2] = float4(f3Look, 0.0f);
-    mtxWorld[3] = float4(input.instancePosition, 1.0f);
+	float3 f3Look = normalize(gvCameraPosition - input.instancePosition);
+	float3 f3Up = float3(0.0f, 1.0f, 0.0f);
+	float3 f3Right = normalize(cross(f3Up, f3Look));
 
-    output.position = mul(mul(mul(float4(input.position, 1.0f), mtxWorld), gmtxView), gmtxProjection);
-    output.uv = input.uv;
-    output.textureID = (int) input.billboardInfo.w - 1;
+	matrix mtxWorld;
+	mtxWorld[0] = float4(f3Right, 0.0f);
+	mtxWorld[1] = float4(f3Up, 0.0f);
+	mtxWorld[2] = float4(f3Look, 0.0f);
+	mtxWorld[3] = float4(input.instancePosition, 1.0f);
 
-    return (output);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), mtxWorld), gmtxView), gmtxProjection);
+
+	if (input.uv.y < 0.7f)
+	{
+		if (input.billboardInfo.w - 1 == 1 || input.billboardInfo.w - 1 == 2 || input.billboardInfo.w - 1 == 3 || input.billboardInfo.w - 1 == 4)
+		{
+			float fShift = 0.0f;
+			uint nResidual = ((uint)gfCurrentTime % 4);
+			if (nResidual == 1) fShift = -gfElapsedTime * 20.0f;
+			if (nResidual == 3) fShift = +gfElapsedTime * 20.0f;
+			input.uv.x += fShift;
+		}
+	}
+	output.uv = input.uv;
+	output.textureID = (int)input.billboardInfo.w - 1;
+
+	return (output);
 }
 
 Texture2D<float4> gtxtBillboardTextures[7] : register(t4);
 
 float4 PSBillboardInstancing(VS_BILLBOARD_INSTANCING_OUTPUT input) : SV_TARGET
 {
-    float4 cColor = gtxtBillboardTextures[NonUniformResourceIndex(input.textureID)].Sample(gWrapSamplerState, input.uv);
+	float4 cColor = gtxtBillboardTextures[NonUniformResourceIndex(input.textureID)].Sample(gWrapSamplerState, input.uv);
 
-    return (cColor);
+	return (cColor);
 }
 
 
@@ -355,7 +367,7 @@ float4 PSBillboardInstancing(VS_BILLBOARD_INSTANCING_OUTPUT input) : SV_TARGET
 //    output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
 //    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 //    float3 normalW = mul(input.normal, (float3x3) gmtxGameObject);
-    
+
 //#ifdef _WITH_VERTEX_LIGHTING
 //    output.color = Lighting(output.positionW, normalize(normalW));
 //#else
