@@ -1694,7 +1694,7 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 	m_d3dVertexBufferView.SizeInBytes = sizeof(CTexturedVertex) * 6;
 
 	// 인스턴스 오브젝트 개수 초기화
-	m_nInstances = 1;
+	m_nInstances = 25;
 
 	// 빌보드 인스턴스 구조체 생성 // 인스턴스 버퍼,버퍼뷰 만들기 위함
 	VS_VB_BILLBOARD_INSTANCE* pInstanceInfos = new VS_VB_BILLBOARD_INSTANCE[m_nInstances];
@@ -1716,8 +1716,8 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 	float zpitch = 257.0f * 24.0f / 7.0f;
 
 	int nObjects = 0;
-	for (int x = 0; x < 11; x++) {
-		for (int z = 0; z < 11; z++) {
+	for (int x = 0; x < 5; x++) {
+		for (int z = 0; z < 5; z++) {
 			fxWidth = 400.0f;
 			fyHeight = 400.0f;
 
@@ -1740,7 +1740,7 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 	m_d3dInstancingBufferView.StrideInBytes = sizeof(VS_VB_BILLBOARD_INSTANCE);
 	m_d3dInstancingBufferView.SizeInBytes = sizeof(VS_VB_BILLBOARD_INSTANCE) * m_nInstances;
 
-	//if (pInstanceInfos) delete[] pInstanceInfos;
+	if (pInstanceInfos) delete[] pInstanceInfos;
 
 }
 

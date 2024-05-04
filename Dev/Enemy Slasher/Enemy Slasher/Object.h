@@ -509,6 +509,13 @@ public:
 
 };
 
+class CTextObject
+{
+	POINT m_position;
+
+public:
+	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
+};
 
 struct VS_VB_BILLBOARD_INSTANCE
 {
@@ -543,11 +550,3 @@ public:
 
 };
 
-
-class CTextObject
-{
-	POINT m_position;
-
-public:
-	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
-};
