@@ -809,7 +809,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 				pTreeObject->SetPosition(xPosition, fHeight, zPosition);
 				pTreeObject->Rotate(90.0f, 0.0f, 0.0f);
-				//m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
+				m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
 
 
 			}
@@ -1078,7 +1078,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			}
 			//
 		}
-		if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
+		if (dwDirection) m_pPlayer->Move(dwDirection, 100.0f, true);
 	}
 
 

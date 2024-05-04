@@ -1673,7 +1673,7 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {
 			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 7);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 4);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 9);
 			m_pMaterial->SetTexture(pBillboardTexture);
 		}
 	}
@@ -1703,17 +1703,16 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	//XMFLOAT3 xmf3TerrainScale = pTerrain->GetScale();
 
-	int nBillboardType = -1; //1:Grass, 2:Flower, 3:Tree
-	int nTextureType = -1; //1:Grass0, 2:Grass1, 3:Flower0, 4:Flower1, 5:Tree1, 6: Tree2, 7: Tree3
+	int nBillboardType = 0; 
+	int nTextureType = 0; //1:Grass0, 2:Grass1, 3:Flower0, 4:Flower1, 5:Tree1, 6: Tree2, 7: Tree3
 	float fxWidth = 0.0f, fyHeight = 0.0f;
 
 	std::random_device rd;
 	std::default_random_engine dre(rd());
-	std::uniform_int_distribution<> uid_1(1, 3);
-	std::uniform_int_distribution<> uid_2(1, 7);
+	std::uniform_int_distribution<> uid(1, 7);
 
-	float xpitch = 257.0f * 24.0f / 10.0f;
-	float zpitch = 257.0f * 24.0f / 7.0f;
+	float xpitch = 257.0f * 24.0f / 5.0f;
+	float zpitch = 257.0f * 24.0f / 3.0f;
 
 	int nObjects = 0;
 	for (int x = 0; x < 5; x++) {
@@ -1721,8 +1720,19 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 			fxWidth = 400.0f;
 			fyHeight = 400.0f;
 
-			nBillboardType = uid_1(dre);
-			nTextureType = uid_2(dre);
+			nBillboardType = 0;
+			nTextureType = uid(dre);
+			switch (nTextureType)
+			{
+			case 1:fxWidth = 100; fyHeight = 100; break;
+			case 2:fxWidth = 400; fyHeight = 300; break;
+			case 3:fxWidth = 100; fyHeight = 200; break;
+			case 4:fxWidth = 100; fyHeight = 200; break;
+			case 5:fxWidth = 200; fyHeight = 300; break;
+			case 6:fxWidth = 2000; fyHeight = 3000; break;
+			case 7:fxWidth = 1600; fyHeight = 3000; break;
+				
+			}
 
 			float xPosition = x * xpitch;
 			float zPosition = z * zpitch;
