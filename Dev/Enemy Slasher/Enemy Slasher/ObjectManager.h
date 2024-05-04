@@ -20,6 +20,7 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	Ray,					// 광선 테스트용 레이어
 	CutterObject,			// 다른 오브젝트를 자를 수 있는 오브젝트 DynamicShaping을 진행 후 무조건 삭제된다.
 	TemporaryObject,		// 생존시간에 제한이 있는 오브젝트들
+	BillBoardObject,		// 빌보드 오브젝트들 ( 인스턴스 되어있어 여러개가 한번에 그려짐 )
 	TextureObject,
 	// ------------------------이 아래는 depth/stancil 무시
 	// ------------------------따라서 앞에 그려질지를 결정하려면 vector상에서의 순서를 바꿔야함.

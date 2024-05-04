@@ -313,6 +313,7 @@ void CGameObject::ReleaseUploadBuffers()
 	//	if (m_ppMaterials[i]) m_ppMaterials[i]->ReleaseUploadBuffers();
 	//}
 
+	if (m_pMaterial) m_pMaterial->ReleaseUploadBuffers();
 	if (m_pSibling) m_pSibling->ReleaseUploadBuffers();
 	if (m_pChild) m_pChild->ReleaseUploadBuffers();
 
@@ -507,7 +508,7 @@ void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		SetShader(pObjectsShader);
 		break;
 	}
-	
+
 
 	}
 }
@@ -1655,15 +1656,138 @@ CTreeObject::~CTreeObject()
 {
 }
 
-CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, ShaderType stype, int nMeshes)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
+
+	// 빌보드 텍스처들 생성------------------------------------------------------------------
+	CTexture* pBillboardTexture = new CTexture(7, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds", RESOURCE_TEXTURE2D, 0);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass02.dds", RESOURCE_TEXTURE2D, 1);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower01.dds", RESOURCE_TEXTURE2D, 2);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower02.dds", RESOURCE_TEXTURE2D, 3);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree01.dds", RESOURCE_TEXTURE2D, 4);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree02.dds", RESOURCE_TEXTURE2D, 5);
+	pBillboardTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree03.dds", RESOURCE_TEXTURE2D, 6);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 7);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pBillboardTexture, 0, 4);
+			m_pMaterial->SetTexture(pBillboardTexture);
+		}
+	}
+
+	// 빌보드 메쉬 생성 --------------------------------------------------------------------
+	CTexturedVertex pVertices[6];
+	pVertices[0] = CTexturedVertex(XMFLOAT3(-400.0f, +400.0f, 1.0f), XMFLOAT2(0.0f, 0.0f));
+	pVertices[1] = CTexturedVertex(XMFLOAT3(+400.0f, +400.0f, 1.0f), XMFLOAT2(1.0f, 0.0f));
+	pVertices[2] = CTexturedVertex(XMFLOAT3(+400.0f, -400.0f, 1.0f), XMFLOAT2(1.0f, 1.0f));
+	pVertices[3] = CTexturedVertex(XMFLOAT3(-400.0f, +400.0f, 1.0f), XMFLOAT2(0.0f, 0.0f));
+	pVertices[4] = CTexturedVertex(XMFLOAT3(+400.0f, -400.0f, 1.0f), XMFLOAT2(1.0f, 1.0f));
+	pVertices[5] = CTexturedVertex(XMFLOAT3(-400.0f, -400.0f, 1.0f), XMFLOAT2(0.0f, 1.0f));
+
+	// 버텍스 버퍼 생성 이유 -> 기존 메쉬 렌더부분에서는 버텍스버퍼 하나만 사용 하지만 해당 빌보드는 인스턴스 오브젝트 이므로 인스턴스버퍼 뷰도 같이 넘겨준 후 렌더해야함
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, sizeof(CTexturedVertex) * 6, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = sizeof(CTexturedVertex);
+	m_d3dVertexBufferView.SizeInBytes = sizeof(CTexturedVertex) * 6;
+
+	// 인스턴스 오브젝트 개수 초기화
+	m_nInstances = 1;
+
+	// 빌보드 인스턴스 구조체 생성 // 인스턴스 버퍼,버퍼뷰 만들기 위함
+	VS_VB_BILLBOARD_INSTANCE* pInstanceInfos = new VS_VB_BILLBOARD_INSTANCE[m_nInstances];
+
+	// 터레인 불러옴 높이값 초기화하기위함
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	//XMFLOAT3 xmf3TerrainScale = pTerrain->GetScale();
+
+	int nBillboardType = -1; //1:Grass, 2:Flower, 3:Tree
+	int nTextureType = -1; //1:Grass0, 2:Grass1, 3:Flower0, 4:Flower1, 5:Tree1, 6: Tree2, 7: Tree3
+	float fxWidth = 0.0f, fyHeight = 0.0f;
+
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_int_distribution<> uid_1(1, 3);
+	std::uniform_int_distribution<> uid_2(1, 7);
+
+	float xpitch = 257.0f * 24.0f / 10.0f;
+	float zpitch = 257.0f * 24.0f / 7.0f;
+
+	int nObjects = 0;
+	for (int x = 0; x < 11; x++) {
+		for (int z = 0; z < 11; z++) {
+			fxWidth = 400.0f;
+			fyHeight = 400.0f;
+
+			nBillboardType = uid_1(dre);
+			nTextureType = uid_2(dre);
+
+			float xPosition = x * xpitch;
+			float zPosition = z * zpitch;
+
+			float fyOffset = fyHeight * 0.5f;
+			float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+
+			pInstanceInfos[nObjects].m_xmf3Position = XMFLOAT3(xPosition, fHeight + fyOffset, zPosition);
+			pInstanceInfos[nObjects++].m_xmf4BillboardInfo = XMFLOAT4(fxWidth, fyHeight, float(nBillboardType), float(nTextureType));
+		}
+	}
+	m_pd3dInstancesBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pInstanceInfos, sizeof(VS_VB_BILLBOARD_INSTANCE) * m_nInstances, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dInstanceUploadBuffer);
+
+	m_d3dInstancingBufferView.BufferLocation = m_pd3dInstancesBuffer->GetGPUVirtualAddress();
+	m_d3dInstancingBufferView.StrideInBytes = sizeof(VS_VB_BILLBOARD_INSTANCE);
+	m_d3dInstancingBufferView.SizeInBytes = sizeof(VS_VB_BILLBOARD_INSTANCE) * m_nInstances;
+
+	//if (pInstanceInfos) delete[] pInstanceInfos;
 
 }
 
 CBillBoardInstanceObject::~CBillBoardInstanceObject()
 {
-
+	if (m_pMaterial) m_pMaterial->Release();
+	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+	if (m_pd3dInstancesBuffer) m_pd3dInstancesBuffer->Release();
 }
 
+void CBillBoardInstanceObject::ReleaseUploadBuffers()
+{
+	CGameObject::ReleaseUploadBuffers();
+	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	if (m_pd3dInstanceUploadBuffer) m_pd3dInstanceUploadBuffer->Release();
+}
+
+void CBillBoardInstanceObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
+{
+
+	if (m_pMaterial)
+	{
+		if (m_pMaterial->m_pShader)
+		{
+			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+		}
+
+		if (m_pMaterial->m_pTexture)
+		{
+			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+		}
+	}
+	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[] = { m_d3dVertexBufferView, m_d3dInstancingBufferView };
+	pd3dCommandList->IASetVertexBuffers(0, _countof(pVertexBufferViews), pVertexBufferViews);
+	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pd3dCommandList->DrawInstanced(6, m_nInstances, 0, 0);
+}
+
+void CBillBoardInstanceObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CBillBoardInstanceObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CBillBoardInstanceObject::ReleaseShaderVariables()
+{
+}
 

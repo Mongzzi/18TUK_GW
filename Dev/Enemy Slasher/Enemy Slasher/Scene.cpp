@@ -469,7 +469,7 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[4];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[5];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -495,7 +495,11 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dDescriptorRanges[3].RegisterSpace = 0;
 	pd3dDescriptorRanges[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-
+	pd3dDescriptorRanges[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[4].NumDescriptors = 7;
+	pd3dDescriptorRanges[4].BaseShaderRegister = 4; //t7: gtxtBillboardTextures[7]
+	pd3dDescriptorRanges[4].RegisterSpace = 0;
+	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	//pd3dDescriptorRanges[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	//pd3dDescriptorRanges[1].NumDescriptors = 1;
@@ -504,7 +508,7 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	//pd3dDescriptorRanges[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[9];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[10];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Camera
@@ -550,6 +554,11 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[8].Descriptor.ShaderRegister = 4; //Time Info
 	pd3dRootParameters[8].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[9].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[9].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[4]; //t7: gtxtBillboardTextures[7]
+	pd3dRootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	//pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	//pd3dRootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
@@ -719,6 +728,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	BuildLightsAndMaterials();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//
 
 	// -------------------------------      스카이 박스     _____________________________________
 
@@ -755,6 +765,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_pPlayer->SetPosition(xmfPlayerPos);
 	}
 
+
+	// --------------------------------- 빌보드 인스턴스 오브젝트 ------------------------------
+
+
+	CBillBoardInstanceObject* pBillBoardObjects = new CBillBoardInstanceObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pTerrain, ShaderType::CBillBoardInstanceShader);
+	m_pObjectManager->AddObj(pBillBoardObjects, ObjectLayer::BillBoardObject);
 
 
 
@@ -793,7 +809,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 				pTreeObject->SetPosition(xPosition, fHeight, zPosition);
 				pTreeObject->Rotate(90.0f, 0.0f, 0.0f);
-				m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
+				//m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
 
 
 			}

@@ -509,12 +509,37 @@ public:
 
 };
 
+
+struct VS_VB_BILLBOARD_INSTANCE
+{
+	XMFLOAT3						m_xmf3Position;
+	XMFLOAT4						m_xmf4BillboardInfo;
+};
+
 class CBillBoardInstanceObject : public CGameObject
 {
 public:
-	CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::NON, int nMeshes = 0);
-
+	CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL , ShaderType stype = ShaderType::NON, int nMeshes = 0);
 	virtual ~CBillBoardInstanceObject();
+	virtual void ReleaseUploadBuffers();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
+
+	// 버텍스 버퍼
+	ID3D12Resource* m_pd3dVertexBuffer = NULL;
+	ID3D12Resource* m_pd3dVertexUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dVertexBufferView;
+
+	// 인스턴스 오브젝트 수
+	int								m_nInstances = 0;
+
+	// 인스턴스 버퍼
+	ID3D12Resource* m_pd3dInstancesBuffer = NULL;
+	ID3D12Resource* m_pd3dInstanceUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dInstancingBufferView;
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
 
 };
 
