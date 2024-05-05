@@ -243,8 +243,6 @@ public:
 
 };
 
-
-
 class CHeightMapGridMesh : public CMesh
 {
 protected:
@@ -279,7 +277,6 @@ public:
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 색상을 반환하는 함수이다. 
 	virtual XMFLOAT4 OnGetColor(int x, int z, void *pContext);
 };
-
 
 class CTexturedVertex
 {

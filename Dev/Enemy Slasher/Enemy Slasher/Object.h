@@ -1,7 +1,6 @@
 #pragma once
 #include "Camera.h"
 #include "Mesh.h"
-#include "Skeleton.h"
 
 class CShader;
 
