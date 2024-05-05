@@ -31,7 +31,7 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	if (layer == ObjectLayer::Object)
 	{
 		((CDynamicShapeMesh*)((((CGameObject*)object)->GetMeshes()[0])))->SetCuttable(true);
-		((CDynamicShapeObject*)object)->SetCuttable(true);
+		(object)->SetCuttable(true);
 	}
 
 	if (layer == ObjectLayer::ObjectPhysX && m_pPhysXManager != nullptr)
@@ -102,13 +102,6 @@ void CObjectManager::AnimateObjects(float fTimeElapsed)
 
 void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float fTimeElapsed, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
 {
-	for (std::vector<CGameObject*> a : m_pvObjectManager)
-		for (CGameObject* b : a) {
-			if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(b)) {
-
-			}
-		}
-	
 	if (false == m_pvObjectManager[(int)ObjectLayer::CutterObject].empty()) { // 비어있지 않다면
 		vector<CGameObject*>* pvCutters = (&m_pvObjectManager[(int)ObjectLayer::CutterObject]);
 		if (false == m_pvObjectManager[(int)ObjectLayer::Object].empty()) { // 비어있지 않다면
@@ -117,15 +110,15 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			vector<CGameObject*> newObjects;
 			vector<CGameObject*> deleteObjects;
 
-			vector<CDynamicShapeObject*>* pvDSMCutters = (vector<CDynamicShapeObject*>*)(pvCutters);
-			for (const auto& pCutter : *pvDSMCutters) {
-				for (const auto& pObject : pObjects) {
+			for (const auto& pCutter : *pvCutters) {
+				for (const auto& pTargetObject : pObjects) {
 
 					// 이 오브젝트가 DynamicShapeObject라면 처리
-					if (CDynamicShapeObject* pDynamicShapeObject = dynamic_cast<CDynamicShapeObject*>(pObject)) {
-						XMFLOAT4X4 objectWorldMat = pDynamicShapeObject->GetWorldMat();
+					if (pTargetObject->GetCuttable()) {
+						XMFLOAT4X4 objectWorldMat = pTargetObject->GetWorldMat();
 						XMFLOAT4X4 cutterWorldMat = pCutter->GetWorldMat();
-						if (CollisionCheck(pDynamicShapeObject->GetCollider(), objectWorldMat, pCutter->GetCollider(), cutterWorldMat)) {
+						if (CollisionCheck(pTargetObject->GetCollider(), objectWorldMat, pCutter->GetCollider(), cutterWorldMat)) {
+							 //vector<CGameObject*> vRetVec = _AtomicDynamicShaping(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, /*오브젝트의 쉐이더 타입*/, fTimeElapsed, pTargetObject, pCutter, cutAlgorithm);
 							// vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, /*오브젝트의 쉐이더 타입*/, fTimeElapsed, pCutter, cutAlgorithm);
 
 							//if (false == vRetVec.empty()) { // 절단에 성공했다면 데이터를 준비한다.
@@ -147,6 +140,61 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			pvCutters->pop_back(); 
 		} // 항상 CutterObjectLayer는 비어있어야 한다.
 	}
+}
+
+vector<CGameObject*> CObjectManager::_AtomicDynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
+	ShaderType stype, float fTimeElapsed, CGameObject* pTargetObject, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm)
+{
+	int nTargerMeshes = pTargetObject->GetNumMeshes();
+	CCutterMesh** ppTargetMeshes = (CCutterMesh**)pTargetObject->GetMeshes();
+	XMFLOAT4X4 pxmfTargetMat = pTargetObject->GetWorldMat();
+
+	int nCutterMeshes = pCutterObject->GetNumMeshes();
+	CCutterMesh** ppCutterMeshes = (CCutterMesh**)pCutterObject->GetMeshes();
+	XMFLOAT4X4 pxmfCutterMat = pCutterObject->GetWorldMat();
+
+
+	// 절단 후 생성될 Mesh들을 받기위한 데이터 정의
+	vector<CMesh*> newMeshs;
+	XMFLOAT4X4 newWorldMat = Matrix4x4::Identity();
+	XMFLOAT4X4 newTransformMat = Matrix4x4::Identity();
+
+	if (pTargetObject->GetCuttable() && pCutterObject->GetAllowCutting()) {
+		// 다른 오브젝트에 의해 내가 잘릴 수 있을 때
+
+		XMFLOAT4X4 myWorldMat = pxmfTargetMat;
+		XMFLOAT4X4 otherWorldMat = pCutterObject->GetWorldMat();
+
+		for (int i = 0; i < nTargerMeshes; ++i) {
+			for (int j = 0; j < nCutterMeshes; ++j) {
+				if (CollisionCheck(ppTargetMeshes[i]->GetCollider(), myWorldMat, ppCutterMeshes[j]->GetCollider(), otherWorldMat)) {
+					// 두 오브젝트가 충돌하면 DynamicShaping을 시도한다.
+					vector<CMesh*> vRetVec = ppTargetMeshes[i]->DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pxmfTargetMat, ppCutterMeshes[j], pxmfCutterMat, cutAlgorithm);
+					newMeshs.insert(newMeshs.end(), vRetVec.begin(), vRetVec.end());
+				}
+			}
+		}
+		if (false == newMeshs.empty()) {
+			newWorldMat = pTargetObject->GetWorldMat();
+			newTransformMat = pTargetObject->GetTransMat();
+		}
+	}
+
+	// 만약 절단이 일어나 새로운 Mesh가 생겼다면 2개 이상의 오브젝트를 생성한다.
+	// 하나의 Mesh 는 하나의 Object가 되도록 하자. - 나중에 변경할 수도 있다
+	vector<CGameObject*> newGameObjects;
+	for (int i = 0; i < newMeshs.size(); ++i) {
+		newGameObjects.push_back(new CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype));
+
+		newGameObjects[i]->SetMesh(0, newMeshs[i]);
+
+		newGameObjects[i]->SetWorldMat(newWorldMat);
+		newGameObjects[i]->SetTransMat(newTransformMat);
+		//newGameObjects[i]->SetShaderType(ShaderType::CObjectsShader);
+		newGameObjects[i]->SetCuttable(true);
+	}
+
+	return newGameObjects;
 }
 
 void CObjectManager::ReleaseObjects()

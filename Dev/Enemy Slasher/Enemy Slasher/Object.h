@@ -167,8 +167,12 @@ protected:
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
 
-public:
-	COBBColliderWithMesh* m_pCollider = NULL;
+
+protected:
+	COBBColliderWithMesh* m_pCollider = NULL;	// 충돌체
+
+	bool m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
+	bool m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
 
 public:
 	void SetChild(CGameObject* pChild);
@@ -183,6 +187,17 @@ public:
 	int GetNumMeshes() { return m_nMeshes; }
 
 	COBBCollider* GetCollider() { return m_pCollider->GetCollider(); }
+
+	// true 라면 다른 오브젝트를 자를 수 있다.
+	void SetAllowCutting(bool bState) { m_bAllowCutting = bState; }
+	// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
+	void SetCuttable(bool bState) { m_bCuttable = bState; }
+
+	// true 라면 다른 오브젝트를 자를 수 있다.
+	bool GetAllowCutting() { return m_bAllowCutting; }
+	// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
+	bool GetCuttable() { return m_bCuttable; }
+
 public:
 	//상수 버퍼를 생성한다. 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -238,7 +253,7 @@ public:
 
 public:
 	void ReleaseUploadBuffers();
-	virtual void SetMesh(int nIndex, CMesh* pMesh, bool bColliderFlag = false);
+	virtual void SetMesh(int nIndex, CMesh* pMesh, bool bMakeColliderFlag = false);
 	virtual void SetMesh(int nIndexSize);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void OnPrepareRender();
@@ -248,29 +263,6 @@ public:
 public:
 	void MakeCollider(); // 이 함수는 하위 메쉬의 모든 Collider를 포함하는 외부 Collider를 만들어 m_pCollider에 저장한다.
 
-};
-
-class CDynamicShapeObject : public CGameObject
-{
-	// dynamic_cast 로 처리를 하고 있지만 이것은 런타임시 코스트가 높은 작업이다. 주의할 것
-public:
-	CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype= ShaderType::CObjectsShader, int nMeshes = 1);
-	virtual ~CDynamicShapeObject();
-
-protected:
-	bool m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
-	bool m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
-
-public:
-	void SetAllowCutting(bool bState) { m_bAllowCutting = bState; }
-	void SetCuttable(bool bState) { m_bCuttable = bState; }
-	bool GetAllowCutting() { return m_bAllowCutting; }
-	bool GetCuttable() { return m_bCuttable; }
-
-public:
-
-	vector<CGameObject*> DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
-		ShaderType stype, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm = CDynamicShapeMesh::CutAlgorithm::Push); // 절단된 오브젝트 2개를 리턴한다.
 };
 
 class CRayObject : public CGameObject
@@ -292,7 +284,7 @@ public:
 };
 
 
-class CFBXObject : public CDynamicShapeObject
+class CFBXObject : public CGameObject
 {
 public:
 	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype= ShaderType::CObjectsShader);

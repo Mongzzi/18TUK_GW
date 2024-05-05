@@ -1255,7 +1255,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		XMFLOAT3 Vector2 = XMFLOAT3(0.0f, 0.0f, 1.0f);
 		XMFLOAT3 planeNormal;
 
-		CDynamicShapeObject* cutterObject = new CDynamicShapeObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
 
 
@@ -1278,7 +1278,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		}
 		planeNormal = Vector3::CrossProduct(Vector1, Vector2);
 		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
-		cutterObject->SetMesh(0, cutterMesh);
+		cutterObject->SetMesh(0, cutterMesh, true);
 
 
 		XMFLOAT3 pos = m_pPlayer->GetPosition();
@@ -1631,10 +1631,10 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		// 외적 계산 (수직인 벡터)
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
 
-		CDynamicShapeObject* cutterObject = new CDynamicShapeObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
 		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
-		cutterObject->SetMesh(0, cutterMesh);
+		cutterObject->SetMesh(0, cutterMesh, true);
 		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize)));
 		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
@@ -1656,10 +1656,10 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		rayVec = Vector3::Add(ray_dir, ray2_dir);
 		rayVec = Vector3::Normalize(rayVec);
 
-		CDynamicShapeObject* cutterObject = new CDynamicShapeObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);
 		cutterMesh->SetCutPlaneNormal(planeNormal);
-		cutterObject->SetMesh(0, cutterMesh);
+		cutterObject->SetMesh(0, cutterMesh, true);
 		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(rayVec, fBoxSize)));
 		cutterObject->SetAllowCutting(true);
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
