@@ -211,7 +211,7 @@ protected:
 	bool m_bResetFlag = false;
 
 	POINT m_ptOldCursorPos;
-	CInteractiveObject* m_pSelectedObj = NULL;
+	CGameObject* m_pSelectedObj = NULL;
 
 };
 

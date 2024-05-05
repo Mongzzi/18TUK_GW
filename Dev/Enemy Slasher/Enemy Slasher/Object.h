@@ -168,6 +168,9 @@ protected:
 	CGameObject* m_pSibling = NULL;
 
 public:
+	COBBColliderWithMesh* m_pCollider = NULL;
+
+public:
 	void SetChild(CGameObject* pChild);
 
 	CGameObject* GetParent() { return(m_pParent); }
@@ -179,6 +182,7 @@ public:
 	CMesh** GetMeshes() { return m_ppMeshes; }
 	int GetNumMeshes() { return m_nMeshes; }
 
+	COBBCollider* GetCollider() { return m_pCollider->GetCollider(); }
 public:
 	//상수 버퍼를 생성한다. 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -234,32 +238,19 @@ public:
 
 public:
 	void ReleaseUploadBuffers();
-	virtual void SetMesh(int nIndex, CMesh* pMesh);
+	virtual void SetMesh(int nIndex, CMesh* pMesh, bool bColliderFlag = false);
 	virtual void SetMesh(int nIndexSize);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 	virtual void Render2D() {};
-};
 
-
-class CInteractiveObject : public CGameObject
-{
-public:
-	CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsShader, int nMeshes = 1);
-	virtual ~CInteractiveObject();
-
-public:
-	COBBColliderWithMesh* m_pCollider = NULL;
-
-	COBBCollider* GetCollider() { return m_pCollider->GetCollider(); }
-
-	virtual void SetMesh(int nIndex, CMesh* pMesh);
 public:
 	void MakeCollider(); // 이 함수는 하위 메쉬의 모든 Collider를 포함하는 외부 Collider를 만들어 m_pCollider에 저장한다.
+
 };
 
-class CDynamicShapeObject : public CInteractiveObject
+class CDynamicShapeObject : public CGameObject
 {
 	// dynamic_cast 로 처리를 하고 있지만 이것은 런타임시 코스트가 높은 작업이다. 주의할 것
 public:
@@ -282,7 +273,7 @@ public:
 		ShaderType stype, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm = CDynamicShapeMesh::CutAlgorithm::Push); // 절단된 오브젝트 2개를 리턴한다.
 };
 
-class CRayObject : public CInteractiveObject
+class CRayObject : public CGameObject
 {
 public:
 	CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype= ShaderType::CObjectsShader);

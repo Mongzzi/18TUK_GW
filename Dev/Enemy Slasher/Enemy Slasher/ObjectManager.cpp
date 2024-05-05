@@ -30,7 +30,7 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 
 	if (layer == ObjectLayer::Object)
 	{
-		((CDynamicShapeMesh*)((((CInteractiveObject*)object)->GetMeshes()[0])))->SetCuttable(true);
+		((CDynamicShapeMesh*)((((CGameObject*)object)->GetMeshes()[0])))->SetCuttable(true);
 		((CDynamicShapeObject*)object)->SetCuttable(true);
 	}
 
@@ -190,7 +190,7 @@ void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 // 
 // Utility
 
-bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CInteractiveObject* obj, float& tmin, float& tmax)
+bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CGameObject* obj, float& tmin, float& tmax)
 {
 	CAABBCollider* objCollider = obj->GetCollider();
 	XMFLOAT4X4 objWorldMat = obj->GetWorldMat();
@@ -227,7 +227,7 @@ bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CInteractiveObject* o
 	return result;
 }
 
-void CObjectManager::ScreenBasedObjectMove(CInteractiveObject* obj, CCamera* pCamera, float cxDelta, float cyDelta, float fSensitivity)
+void CObjectManager::ScreenBasedObjectMove(CGameObject* obj, CCamera* pCamera, float cxDelta, float cyDelta, float fSensitivity)
 {
 	XMFLOAT3 CameraRight = pCamera->GetRightVector();
 	XMFLOAT3 CameraUp = pCamera->GetUpVector();

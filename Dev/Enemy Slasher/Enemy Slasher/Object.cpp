@@ -240,6 +240,8 @@ CGameObject::~CGameObject()
 	}
 
 	if (m_pMaterial) m_pMaterial->Release();
+
+	if (m_pCollider) delete m_pCollider;
 }
 
 void CGameObject::AddRef()
@@ -273,7 +275,7 @@ void CGameObject::SetMaterial(UINT nReflection)
 }
 
 
-void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
+void CGameObject::SetMesh(int nIndex, CMesh* pMesh, bool bColliderFlag)
 {
 	if (m_ppMeshes == NULL || nIndex >= m_nMeshes)
 		SetMesh(nIndex + 1);
@@ -284,6 +286,8 @@ void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
 		m_ppMeshes[nIndex] = pMesh;
 		if (pMesh) pMesh->AddRef();
 	}
+	if (bColliderFlag == true)
+		MakeCollider();
 }
 
 void CGameObject::SetMesh(int nIndexSize)
@@ -634,27 +638,7 @@ void CGameObject::SetShader(CShader* pShader)
 	if (m_pMaterial) m_pMaterial->SetShader(pShader);
 }
 
-
-
-CInteractiveObject::CInteractiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
-	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
-{
-	//CGameObject::SetShaderType(ShaderType::CObjectsShader);
-	//CGameObject::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype);
-}
-
-CInteractiveObject::~CInteractiveObject()
-{
-	if (m_pCollider) delete m_pCollider;
-}
-
-void CInteractiveObject::SetMesh(int nIndex, CMesh* pMesh)
-{
-	CGameObject::SetMesh(nIndex, pMesh);
-	MakeCollider();
-}
-
-void CInteractiveObject::MakeCollider()
+void CGameObject::MakeCollider()
 {
 	if (m_pCollider) delete m_pCollider;
 	m_pCollider = new COBBColliderWithMesh;
@@ -664,10 +648,10 @@ void CInteractiveObject::MakeCollider()
 			m_pCollider->UpdateColliderWithOBB((colliderMesh)->GetCollider(), myWorldMat);
 	}
 }
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 CDynamicShapeObject::CDynamicShapeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
-	: CInteractiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
 }
 
@@ -1183,7 +1167,7 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext)
 }
 
 CRayObject::CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
-	: CInteractiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_vOriginal = { 0,0,0 };
 	m_xmf3DirOld = { 0,0,1 };

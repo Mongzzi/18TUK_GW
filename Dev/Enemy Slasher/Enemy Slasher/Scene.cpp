@@ -1059,7 +1059,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 				if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
 					for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
-						if (CInteractiveObject* IterObj = dynamic_cast<CInteractiveObject*>(obj)) {
+						if (CGameObject* IterObj = dynamic_cast<CGameObject*>(obj)) {
 							XMFLOAT4X4 playerMat = m_pPlayer->GetWorldMat();
 							XMFLOAT4X4 objMat = IterObj->GetWorldMat();
 							if (true == CollisionCheck(m_pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
@@ -1113,7 +1113,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 		if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
 			for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
-				if (CInteractiveObject* IterObj = dynamic_cast<CInteractiveObject*>(obj)) {
+				if (CGameObject* IterObj = dynamic_cast<CGameObject*>(obj)) {
 					XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
 					XMFLOAT4X4 playerMat = pPlayer->GetWorldMat();
 					XMFLOAT4X4 objMat = IterObj->GetWorldMat();
@@ -1417,7 +1417,7 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 
 		vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 		for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
-			if (CInteractiveObject* pInterObj = dynamic_cast<CInteractiveObject*>(objects)) {
+			if (CGameObject* pInterObj = dynamic_cast<CGameObject*>(objects)) {
 				float tmin, tmax;
 				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
 					if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
@@ -1599,9 +1599,9 @@ void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
 	if (pvOL.size() < 2) return;
 	XMFLOAT4X4 MatA, MatB;
 	for (int i = 0; i < pvOL.size() - 1; ++i) {
-		if (CInteractiveObject* ObjA = dynamic_cast<CInteractiveObject*>(pvOL[i])) {
+		if (CGameObject* ObjA = dynamic_cast<CGameObject*>(pvOL[i])) {
 			for (int j = i + 1; j < pvOL.size(); ++j) {
-				if (CInteractiveObject* ObjB = dynamic_cast<CInteractiveObject*>(pvOL[j])) {
+				if (CGameObject* ObjB = dynamic_cast<CGameObject*>(pvOL[j])) {
 					MatA = ObjA->GetWorldMat();
 					MatB = ObjB->GetWorldMat();
 					if (CollisionCheck(ObjA->GetCollider(), MatA, ObjB->GetCollider(), MatB)) {
