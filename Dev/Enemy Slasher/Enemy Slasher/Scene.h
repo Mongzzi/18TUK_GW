@@ -176,37 +176,6 @@ protected:
 	CB_TIME_INFO* m_pcbMappedTimeInfo = NULL;
 };
 
-class CTestScene_Card : public CBasicScene
-{
-public:
-	CTestScene_Card();
-	~CTestScene_Card();
-
-	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
-
-	void BuildLightsAndMaterials();
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-	
-	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
-
-
-public:
-	//CPlayer* m_pPlayer = NULL; -> 조명을 붙이기 위해 새로 초기화 필요
-	
-	virtual void ReleaseObjects();
-	virtual void AnimateObjects(float fTimeElapsed);
-	virtual void Enter();
-	virtual void Exit();
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-
-};
-
 class CTestScene_Slice : public CBasicScene
 {
 public:

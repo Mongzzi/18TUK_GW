@@ -282,39 +282,6 @@ public:
 		ShaderType stype, float fTimeElapsed, CGameObject* pCutterObject, CDynamicShapeMesh::CutAlgorithm cutAlgorithm = CDynamicShapeMesh::CutAlgorithm::Push); // 절단된 오브젝트 2개를 리턴한다.
 };
 
-
-class CRotatingObject : public CGameObject
-{
-public:
-	CRotatingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsShader, int nMeshes = 1);
-	virtual ~CRotatingObject();
-protected:
-	XMFLOAT3 m_xmf3RotationAxis;
-	float m_fRotationSpeed;
-public:
-	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
-	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-};
-
-class CRotatingNormalObject : public CRotatingObject
-{
-public:
-	CRotatingNormalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsNormalShader, int nMeshes = 1);
-	virtual ~CRotatingNormalObject();
-
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
-	//상수 버퍼의 내용을 갱신한다. 
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-
-private:
-	ID3D12Resource* m_pd3dcbGameObject = NULL;
-	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
-};
-
-
 class CRayObject : public CInteractiveObject
 {
 public:
