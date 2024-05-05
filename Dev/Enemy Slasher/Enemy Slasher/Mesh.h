@@ -51,6 +51,9 @@ protected:
 	UINT m_nInElementUVCount = 0;
 	UINT m_nInElementNormalCount = 0;
 
+protected:
+	COBBColliderWithMesh* m_pCollider = nullptr;
+
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOption = false);
 
@@ -61,19 +64,6 @@ public:
 	UINT* GetIndices() { return m_pnIndices; }
 	UINT GetNumVertices() { return m_nVertices; }
 	UINT GetNumIndices() { return m_nIndices; }
-};
-
-class CColliderMesh : public CMesh
-{
-public:
-	CColliderMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual ~CColliderMesh();
-
-public:
-	COBBColliderWithMesh* m_pCollider = NULL;
-
-public:
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderAABB = false);
 
 	virtual COBBCollider* GetCollider() { return m_pCollider->GetCollider(); };
 
@@ -100,7 +90,7 @@ public:
 	virtual ~CCubeMeshIlluminated();
 };
 
-class CDynamicShapeMesh : public CColliderMesh
+class CDynamicShapeMesh : public CMesh
 {
 public:
 	CDynamicShapeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

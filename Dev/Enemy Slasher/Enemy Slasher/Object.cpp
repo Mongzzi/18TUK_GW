@@ -644,8 +644,7 @@ void CGameObject::MakeCollider()
 	m_pCollider = new COBBColliderWithMesh;
 	XMFLOAT4X4 myWorldMat = GetWorldMat();
 	for (int i = 0; i < m_nMeshes; ++i) {
-		if (CColliderMesh* colliderMesh = dynamic_cast<CColliderMesh*>(m_ppMeshes[i]))
-			m_pCollider->UpdateColliderWithOBB((colliderMesh)->GetCollider(), myWorldMat);
+		m_pCollider->UpdateColliderWithOBB((m_ppMeshes[i])->GetCollider(), myWorldMat);
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////

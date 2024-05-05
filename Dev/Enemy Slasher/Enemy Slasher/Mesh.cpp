@@ -31,6 +31,8 @@ CMesh::~CMesh()
 	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
 	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
 	if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
+
+	if (m_pCollider) delete m_pCollider;
 }
 
 
@@ -66,6 +68,9 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOptio
 		//메쉬의 정점 버퍼 뷰를 렌더링한다(파이프라인(입력 조립기)을 작동하게 한다).
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
+
+	if (true == pRenderOption && nullptr != m_pCollider)
+		m_pCollider->RenderCollider(pd3dCommandList);
 }
 
 void CMesh::SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride, CVertex* pVertices, UINT nVertices, UINT* pnIndices, UINT nIndices)
@@ -101,43 +106,7 @@ void CMesh::SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 }
 
-
-CColliderMesh::CColliderMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
-{
-}
-
-CColliderMesh::~CColliderMesh()
-{
-	if (m_pCollider) delete m_pCollider;
-}
-
-void CColliderMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderAABB)
-{
-	//메쉬의 프리미티브 유형을 설정한다. 
-	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-
-	//메쉬의 정점 버퍼 뷰를 설정한다. 
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dVertexBufferView);
-
-
-	if (m_pd3dIndexBuffer)
-	{
-		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
-		pd3dCommandList->DrawIndexedInstanced(m_nIndices, 1, 0, 0, 0);
-		//인덱스 버퍼가 있으면 인덱스 버퍼를 파이프라인(IA: 입력 조립기)에 연결하고 인덱스를 사용하여 렌더링한다. 
-	}
-
-	else
-	{
-		//메쉬의 정점 버퍼 뷰를 렌더링한다(파이프라인(입력 조립기)을 작동하게 한다).
-		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
-	}
-
-	if (true == pRenderAABB && nullptr != m_pCollider)
-		m_pCollider->RenderCollider(pd3dCommandList);
-}
-
-void CColliderMesh::CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CMesh::CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_pVertices) {
 		if (m_pCollider) delete m_pCollider;
@@ -296,7 +265,7 @@ CCubeMeshIlluminated::~CCubeMeshIlluminated()
 }
 
 
-CDynamicShapeMesh::CDynamicShapeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CColliderMesh(pd3dDevice, pd3dCommandList)
+CDynamicShapeMesh::CDynamicShapeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {
 
 }
