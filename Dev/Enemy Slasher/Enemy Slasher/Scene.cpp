@@ -772,6 +772,33 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CBillBoardInstanceObject* pBillBoardObjects = new CBillBoardInstanceObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pTerrain, ShaderType::CBillBoardInstanceShader);
 	m_pObjectManager->AddObj(pBillBoardObjects, ObjectLayer::BillBoardObject);
 
+	// ------------------------------ 적 몬스터 오브젝트 --------------------------------------
+
+
+	//Stone_lit_003
+
+
+	float xPosition = 0.0f;
+	float zPosition = 0.0f;
+
+	float terrain_width = pTerrain->GetWidth();
+	float terrain_length = pTerrain->GetLength();
+
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution <float> urd_width(0, terrain_width);
+	std::uniform_real_distribution <float> urd_length(0, terrain_length);
+
+	for (int i = 0; i < 100; i++) {
+		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
+		xPosition = urd_width(dre);
+		zPosition = urd_length(dre);
+
+		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+		pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
+		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+	}
+
 
 
 	// tree
@@ -928,7 +955,7 @@ void CTestScene::BuildLightsAndMaterials()
 
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
-	
+
 	//        Ambient ( 주변광 )          //         Diffuse ( 산란광 )           //       Specullar ( 반사광 )         //       Emissive ( 발광 )     //
 	//			Ambient : 일반적으로 장면 전반적인 색상과 밝기를 나타내는 데 사용
 	//			Diffuse : 물체의 색상과 표면 특성을 나타내는 데 사용

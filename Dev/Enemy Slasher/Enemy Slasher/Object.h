@@ -20,6 +20,13 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CBillBoardInstanceShader
 };
 
+enum class MonsterState : int {
+	Default_State,
+	Chase_State,
+	Battle_State
+};
+
+
 //객체를 렌더링할 때 적용하는 상수 버퍼 데이터
 struct CB_GAMEOBJECT_INFO
 {
@@ -328,6 +335,25 @@ public:
 	void RestoreAnimation();
 	CAnimationData* GetCurrentAnimationData() { return m_adCurrentAnimationData; };
 };
+
+
+class CMonsterObject : public CFBXObject
+{
+public:
+	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype = ShaderType::CObjectsShader);
+	virtual ~CMonsterObject();
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+
+private:
+	MonsterState m_Monster_State;
+
+};
+
+
+
+
+
 //  UI
 class CUIObject : public CFBXObject
 {
@@ -465,6 +491,7 @@ class CTextObject
 public:
 	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
 };
+
 
 struct VS_VB_BILLBOARD_INSTANCE
 {
