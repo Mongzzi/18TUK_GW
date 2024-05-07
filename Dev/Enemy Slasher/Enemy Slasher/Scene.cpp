@@ -54,7 +54,7 @@ ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3d
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// ���� ������Ʈ
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// 게임 오브젝트
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -97,7 +97,7 @@ ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3d
 
 void CBasicScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256�� ���
+	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
 	//m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	//m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
@@ -153,7 +153,7 @@ bool CBasicScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 {
 	return(false);
 
-	// ������ �����Ӻ� �Է��� ó���� ���̹Ƿ� �����Ӹ��� Ű �Է� ó������ �� ��
+	// 씬에서 프레임별 입력을 처리할 것이므로 프레임마다 키 입력 처리하지 말 것
 	//return(true);
 }
 
@@ -200,7 +200,7 @@ void CBasicScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"BasicScene�� Render2D �Դϴ�.";
+	static const WCHAR text[] = L"BasicScene의 Render2D 입니다.";
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
@@ -335,7 +335,7 @@ bool CTitleScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	int xDelta = 0, yDelta = 0;
-	POINT ptCursorPos{ 0,0 }; //�ʱ�ȭ�� ���� ���� �� ���� Ȯ���� �Ʒ��� if���� �������� ���Ͽ� �ʱ�ȭ���� ���� ���� ����ϰ� �ȴ�.
+	POINT ptCursorPos{ 0,0 }; //초기화를 하지 않을 시 낮은 확률로 아래의 if문에 진입하지 못하여 초기화되지 않은 값을 사용하게 된다.
 	if (GetCapture() == hWnd)
 	{
 		//SetCursor(NULL);
@@ -436,11 +436,11 @@ void CTitleScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 4 * 3);
-	static const WCHAR text2[] = L"���� ����";
+	static const WCHAR text2[] = L"게임 시작";
 	pd2dDeviceContext->DrawText(text2, _countof(text2) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 4 * 3, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text3[] = L"���� ����";
+	static const WCHAR text3[] = L"게임 종료";
 	pd2dDeviceContext->DrawText(text3, _countof(text3) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
 
@@ -516,7 +516,7 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// ���� ������Ʈ
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// 게임 오브젝트
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -563,11 +563,11 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 
 	//pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	//pd3dRootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
-	//pd3dRootParameters[3].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[1]; // ���� ������Ʈ
+	//pd3dRootParameters[3].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[1]; // 게임 오브젝트
 	//pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 
-	//pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;	// ���� ������Ʈ
+	//pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;	// 게임 오브젝트
 	//pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 	//pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[0];
 	//pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
@@ -653,8 +653,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
-				// ����ġ�� ���ư�.
-				cout << "����ġ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+				// 원위치로 돌아감.
+				cout << "원위치 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 				pSelectedUI->SetPositionUI(pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
 
 			}
@@ -662,14 +662,14 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			{
 				if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
 				{
-					// ī�� ���
-					// �ڽ� ����
+					// 카드 사용
+					// 자신 삭제
 					m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
-					cout << "���� " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+					cout << "삭제 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 				}
 				else
 				{
-					cout << "��������� ������ �� �� " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+					cout << "사용하지만 삭제는 안 함 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 
 				}
 			}
@@ -723,57 +723,57 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
-	// �ӽ�
+	// 임시
 	SelectedUInum = -1;
-	//--------------------------------- ����, ���� ���� ----------------------------------------
+	//--------------------------------- 조명, 재질 생성 ----------------------------------------
 
 	BuildLightsAndMaterials();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//
 
-	// -------------------------------      ��ī�� �ڽ�     _____________________________________
+	// -------------------------------      스카이 박스     _____________________________________
 
 	CSkyBox* pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CSkyBoxShader, 6);
 	m_pObjectManager->AddObj(pSkyBox, ObjectLayer::SkyBox);
 
-	// -------------------------------      ��ī�� �ڽ� ��    _____________________________________
+	// -------------------------------      스카이 박스 끝    _____________________________________
 
-	// ------------------------------------       �ͷ���      -------------------------------
-	//������ Ȯ���� ������ �����̴�. x-��� z-���� 8��, y-���� 2�� Ȯ���Ѵ�. 
+	// ------------------------------------       터레인      -------------------------------
+	//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다. 
 	XMFLOAT3 xmf3Scale(240.0f, 60.0f, 240.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.0f, 0.0f, 0.0f);
 
-	//������ ���� �� �̹��� ����(HeightMap.raw)�� ����Ͽ� �����Ѵ�. ���� ���� ũ��� ����x����(257x257)�̴�. 
+	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다. 
 	CHeightMapTerrain* pTerrain;
 #ifdef _WITH_TERRAIN_PARTITION
-	/*�ϳ��� ���� �޽��� ũ��� ����x����(17x17)�̴�. ���� ��ü�� ���� �������� 16��, ���� �������� 16�� ���� �޽��� ������. ������ �����ϴ� ���� �޽��� ������ �� 256(16x16)���� �ȴ�.*/
+	/*하나의 격자 메쉬의 크기는 가로x세로(17x17)이다. 지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메쉬를 가진다. 지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.*/
 	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 
 #else
-	//������ �ϳ��� ���� �޽�(257x257)�� �����Ѵ�. 
+	//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
 	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 13, 13, xmf3Scale, xmf4Color, ShaderType::CTerrainShader);
 	pTerrain->GetMaterial()->SetReflection(0);
 #endif
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
 
-	// --------------------------------      �ͷ��� ��     _____________________________________
+	// --------------------------------      터레인 끝     _____________________________________
 
 
 	{
-		// �÷��̾� ��ġ �׷��� ���� �̵�
+		// 플레이어 위치 테레인 위로 이동
 		XMFLOAT3 xmfPlayerPos = m_pPlayer->GetPosition();
 		xmfPlayerPos.y = pTerrain->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 		m_pPlayer->SetPosition(xmfPlayerPos);
 	}
 
 
-	// --------------------------------- ������ �ν��Ͻ� ������Ʈ ------------------------------
+	// --------------------------------- 빌보드 인스턴스 오브젝트 ------------------------------
 
 
 	CBillBoardInstanceObject* pBillBoardObjects = new CBillBoardInstanceObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pTerrain, ShaderType::CBillBoardInstanceShader);
 	m_pObjectManager->AddObj(pBillBoardObjects, ObjectLayer::BillBoardObject);
 
-	// ------------------------------ �� ���� ������Ʈ --------------------------------------
+	// ------------------------------ 적 몬스터 오브젝트 --------------------------------------
 
 
 	//Stone_lit_003
@@ -790,16 +790,15 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_real_distribution <float> urd_width(0, terrain_width);
 	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
-
 	for (int i = 0; i < 100; i++) {
 		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
 		xPosition = urd_width(dre);
 		zPosition = urd_length(dre);
+
 		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 		pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
 		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 	}
-
 
 
 	// tree
@@ -858,7 +857,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// UI
 	{
-		//ī�� UI �׽�Ʈ�� ������Ʈ.
+		//카드 UI 테스트용 오브젝트.
 		CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
 
 
@@ -969,11 +968,11 @@ void CTestScene::BuildLightsAndMaterials()
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
 
-	//        Ambient ( �ֺ��� )          //         Diffuse ( ����� )           //       Specullar ( �ݻ籤 )         //       Emissive ( �߱� )     //
-	//			Ambient : �Ϲ������� ��� �������� ����� ��⸦ ��Ÿ���� �� ���
-	//			Diffuse : ��ü�� ����� ǥ�� Ư���� ��Ÿ���� �� ���
-	//			Specular : ���� ǥ�鿡 �ݻ�Ǵ� ���� ����� ������ ��Ÿ���� �� ���
-	//			Emissive : ��ü�� �߱��ϴ� ��� �ش� ��ü�� ����� ������ ��Ÿ���� �� ���
+	//        Ambient ( 주변광 )          //         Diffuse ( 산란광 )           //       Specullar ( 반사광 )         //       Emissive ( 발광 )     //
+	//			Ambient : 일반적으로 장면 전반적인 색상과 밝기를 나타내는 데 사용
+	//			Diffuse : 물체의 색상과 표면 특성을 나타내는 데 사용
+	//			Specular : 빛이 표면에 반사되는 빛의 색상과 강도를 나타내는 데 사용
+	//			Emissive : 물체가 발광하는 경우 해당 물체의 색상과 강도를 나타내는 데 사용
 	//			r g b a
 	m_pMaterials->m_pReflections[0] = { XMFLOAT4(10.0f, 10.0f, 10.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 5.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
@@ -988,15 +987,15 @@ void CTestScene::BuildLightsAndMaterials()
 
 void CTestScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256�� ���
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
-	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256�� ���
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
 	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 
-	UINT ncbTimeBytes = ((sizeof(CB_TIME_INFO) + 255) & ~255); //256�� ���
+	UINT ncbTimeBytes = ((sizeof(CB_TIME_INFO) + 255) & ~255); //256의 배수
 	m_pd3dcbTimeInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbTimeBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbTimeInfo->Map(0, NULL, (void**)&m_pcbMappedTimeInfo);
 }
@@ -1033,7 +1032,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	int xDelta = 0, yDelta = 0;
-	POINT ptCursorPos{ 0,0 }; //�ʱ�ȭ�� ���� ���� �� ���� Ȯ���� �Ʒ��� if���� �������� ���Ͽ� �ʱ�ȭ���� ���� ���� ����ϰ� �ȴ�.
+	POINT ptCursorPos{ 0,0 }; //초기화를 하지 않을 시 낮은 확률로 아래의 if문에 진입하지 못하여 초기화되지 않은 값을 사용하게 된다.
 	if (GetCapture() == hWnd)
 	{
 		//SetCursor(NULL);
@@ -1047,7 +1046,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	GetCursorPos(&ptCursorPos);
 	ScreenToClient(hWnd, &ptCursorPos);
-	//-------------- ��ŷ
+	//-------------- 피킹
 	CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
@@ -1148,7 +1147,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 
-	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player�� �ִٸ�
+	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player가 있다면
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
 
 		if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
@@ -1167,7 +1166,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 			}
 		}
 
-		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain�� Player�� �ִٸ�
+		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain과 Player가 있다면
 			XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
 			float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 
@@ -1192,7 +1191,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
-	// �ӽ� �ִϸ��̼�
+	// 임시 애니메이션
 	{
 		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
 
@@ -1212,17 +1211,17 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 					{
 
 						//------------------------------------------------------------------------
-						//                     GetOffsetMatList ��� �Լ��� ����.
-						// ������ ������ŭ ��ȯ��� ����.
+						//                     GetOffsetMatList 라는 함수로 뺀다.
+						// 정점의 개수만큼 변환행렬 생성.
 						fbxmesh = (CFBXMesh*)meshes[m];
 						int verticesCount = fbxmesh->GetNumVertices();
 						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
-						// �ʱ�ȭ
+						// 초기화
 						for (int j = 0; j < verticesCount; j++)
 							offsetMatList[j] = Matrix4x4::Identity();
 
 
-						//�Ž��� ���鿡��
+						//매쉬의 본들에서
 						CSkeleton* skelList = fbxmesh->GetSkeletonList();
 						if (skelList)
 						{
@@ -1235,7 +1234,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 							//}
 							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
 							{
-								// ����޴� ������� �� ������ �����ͼ�
+								// 영향받는 정점들과 그 정도를 가져와서
 								int* pIndices = skelList[c].GetIndices();
 								double* Weights = skelList[c].GetWeights();
 
@@ -1244,7 +1243,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
 								{
-									// �ش��ϴ� ������ �� ������ŭ OffsetMatrix�� ���Ѵ�.
+									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
 									int index = pIndices[i];
 									for (int row = 0; row < 4; ++row)
 										for (int col = 0; col < 4; ++col)
@@ -1267,10 +1266,10 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 						}
 						//------------------------------------------------------------------------
 
-						// ������� ����� �����鿡 ����.
-						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // ���� ���� ����.
+						// 만들어진 행렬을 정점들에 적용.
+						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // 아직 버그 있음.
 
-						// ��ȯ��� ����.
+						// 변환행렬 삭제.
 						delete[] offsetMatList;
 					}
 
@@ -1284,7 +1283,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 
 		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
-		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// �� �� �غ�
+		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// 둘 다 해봐
 
 		std::random_device rd;
 		std::default_random_engine dre(rd());
@@ -1296,10 +1295,10 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		XMFLOAT3 planeNormal;
 
 		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// �ڽ� ���� ������Ʈ�� �����Ѵ�.
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
 
 
-		// ���� ��� (������ ����)
+		// 외적 계산 (수직인 벡터)
 		switch (SelectedUInum)
 		{
 		case 0:
@@ -1317,7 +1316,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 			break;
 		}
 		planeNormal = Vector3::CrossProduct(Vector1, Vector2);
-		cutterMesh->SetCutPlaneNormal(planeNormal); // ���ܸ��� ���
+		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
 		cutterObject->SetMesh(0, cutterMesh, true);
 
 
@@ -1328,7 +1327,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
 
-		cutterObject->SetAllowCutting(true);	// �̰� �����־�� �ڸ���?
+		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
@@ -1351,7 +1350,7 @@ void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devic
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
-	WCHAR objText[] = L"�� ���� ������Ʈ ���� : ";
+	WCHAR objText[] = L"맵 상의 오브젝트 갯수 : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
 	int objCount = objList[(int)ObjectLayer::Object].size();
@@ -1460,7 +1459,7 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 			if (CGameObject* pInterObj = dynamic_cast<CGameObject*>(objects)) {
 				float tmin, tmax;
 				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
-					if (nearestDist > tmin) { // ���� ����� ������Ʈ ����
+					if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
 						nearestDist = tmin;
 						m_pSelectedObj = pInterObj;
 					}
@@ -1610,7 +1609,7 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 				}
 			}
 
-			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // ��Ŭ���� ������Ʈ�� ��Ƽ� �̵�
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // 우클릭시 오브젝트를 잡아서 이동
 				if (m_bMoveObj) {
 					if (NULL != m_pSelectedObj) {
 						XMFLOAT3 t0((float)(ptCursorPos.x - m_ptOldCursorPos.x), (float)(ptCursorPos.y - m_ptOldCursorPos.y), 0.0f);
@@ -1668,15 +1667,15 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		std::uniform_real_distribution <float> urd(-1.0, 1.0);
 
 		XMFLOAT3 randomVector(urd(dre), urd(dre), urd(dre));
-		// ���� ��� (������ ����)
+		// 외적 계산 (수직인 벡터)
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
 
 		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// �ڽ� ���� ������Ʈ�� �����Ѵ�.
-		cutterMesh->SetCutPlaneNormal(planeNormal); // ���ܸ��� ���
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
+		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
 		cutterObject->SetMesh(0, cutterMesh, true);
 		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize)));
-		cutterObject->SetAllowCutting(true);	// �̰� �����־�� �ڸ���?
+		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
@@ -1691,7 +1690,7 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		XMFLOAT3 ray2_dir = r2.GetDir();
 
 		XMFLOAT3 rayVec = Vector3::Subtract(ray_dir, ray2_dir);
-		// ���� ��� (������ ����)
+		// 외적 계산 (수직인 벡터)
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(rayVec, ray_dir);
 		rayVec = Vector3::Add(ray_dir, ray2_dir);
 		rayVec = Vector3::Normalize(rayVec);
@@ -1738,7 +1737,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
-	WCHAR objText[] = L"�� ���� ������Ʈ ���� : ";
+	WCHAR objText[] = L"맵 상의 오브젝트 갯수 : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
 	int objCount = objList[(int)ObjectLayer::Object].size();
@@ -1770,7 +1769,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 1, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 2);
-	WCHAR objText3[] = L"�Ҹ� ��� ������Ʈ ���� : ";
+	WCHAR objText3[] = L"소멸 대기 오브젝트 갯수 : ";
 	textLen = _countof(objText3) - 1;
 	objCount = objList[(int)ObjectLayer::TemporaryObject].size();
 	if (objCount == 0) textLen++;
@@ -1796,21 +1795,21 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 3, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 4);
-	WCHAR objText2[] = L"���� ��� (C�� ���� ����) : ";
+	WCHAR objText2[] = L"현재 모드 (C를 눌러 변경) : ";
 	textLen = _countof(objText2) - 1;
 	if (true == m_bCutterMode)
 	{
-		wsprintf(text, L"%s%s", objText2, L"���ܸ��");
+		wsprintf(text, L"%s%s", objText2, L"절단모드");
 		textLen += 5;
 	}
 	else {
-		wsprintf(text, L"%s%s", objText2, L"ī�޶���");
-		textLen += 6;
+		//wsprintf(text, L"%s%s", objText2, L"카메라모드");
+		//textLen += 6;
 	}
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 4, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 5);
-	WCHAR objText4[] = L"���� �˰����� (P�� ���� ����) : ";
+	WCHAR objText4[] = L"절단 알고리즘 (P를 눌러 변경) : ";
 	textLen = _countof(objText4) - 1;
 	if (true == m_bCutAlgorithm)
 	{
@@ -1824,7 +1823,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 5, FRAME_BUFFER_WIDTH / 14 * 3, FRAME_BUFFER_HEIGHT / 14 * 6);
-	WCHAR objText5[] = L"�ʱ�ȭ (M)";
+	WCHAR objText5[] = L"초기화 (M)";
 	textLen = _countof(objText5) - 1;
 	pd2dDeviceContext->DrawText(objText5, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
@@ -1902,7 +1901,7 @@ void CTestScene_PhysX::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"PhysXScene�� Render2D �Դϴ�.";
+	static const WCHAR text[] = L"PhysXScene의 Render2D 입니다.";
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
