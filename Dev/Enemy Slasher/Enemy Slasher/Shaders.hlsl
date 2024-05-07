@@ -292,8 +292,8 @@ VS_BILLBOARD_INSTANCING_OUTPUT VSBillboardInstancing(VS_BILLBOARD_INSTANCING_INP
 		{
 			float fShift = 0.0f;
 			uint nResidual = ((uint)gfCurrentTime % 4);
-			if (nResidual == 1) fShift = -gfElapsedTime * 20.0f;
-			if (nResidual == 3) fShift = +gfElapsedTime * 20.0f;
+			if (nResidual == 1) fShift = -gfElapsedTime * 15.0f;
+			if (nResidual == 3) fShift = +gfElapsedTime * 15.0f;
 			input.uv.x += fShift;
 		}
 	}
