@@ -5,6 +5,7 @@
 //#include "ShaderManager.h"
 #include "PhysXManager.h"
 #include "Ray.h"
+#include "FbxLoader_V2.h"
 
 CBasicScene::CBasicScene()
 {
@@ -789,15 +790,15 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_real_distribution <float> urd_width(0, terrain_width);
 	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
-	for (int i = 0; i < 100; i++) {
-		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
-		xPosition = urd_width(dre);
-		zPosition = urd_length(dre);
+	//for (int i = 0; i < 100; i++) {
+	//	CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
+	//	xPosition = urd_width(dre);
+	//	zPosition = urd_length(dre);
 
-		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-		pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
-		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-	}
+	//	float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//	pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
+	//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+	//}
 
 
 
@@ -815,6 +816,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		float xpitch = 257.0f * 24.0f / 10.0f;
 		float zpitch = 257.0f * 24.0f / 7.0f;
 
+		CFbxLoader_V2 fbxLoader;
 		for (int x = 0; x < 5; x++)
 		{
 			for (int z = 0; z < 5; z++)
@@ -829,13 +831,24 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				////pRotatingObject->SetShaderType(ShaderType::CTextureShader);
 				//m_pObjectManager->AddObj(pRotatingObject, ObjectLayer::TextureObject);
 
+				CFBXTestObject* pTreeObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+				CFBXTestMesh* treeMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fbxLoader.LoadFBX(TREE3));
+				pTreeObject->SetMesh(0, treeMesh, true);
+				//CTexture* ppTextures[1];
+				//ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+				//ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"tree_texture.png", RESOURCE_TEXTURE2D, 0);
+				//CMaterial* treeMaterial = new CMaterial;
+				//treeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+				//treeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+				//treeMaterial->SetTexture(ppTextures[0]);
+				//pTreeObject->SetMaterial(treeMaterial);
 
-				CTreeObject* pTreeObject = new CTreeObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, TREE3, ShaderType::CTextureShader);
+				//CTreeObject* pTreeObject = new CTreeObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, TREE3, ShaderType::CTextureShader);
 				float xPosition = x * xpitch;
 				float zPosition = z * zpitch;
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 				pTreeObject->SetPosition(xPosition, fHeight, zPosition);
-				pTreeObject->Rotate(90.0f, 0.0f, 0.0f);
+				pTreeObject->Rotate(-90.0f, 0.0f, 0.0f);
 				m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
 
 

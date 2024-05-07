@@ -1730,3 +1730,55 @@ CTexturedRectMesh::CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 CTexturedRectMesh::~CTexturedRectMesh()
 {
 }
+
+
+
+// ------------------------------- FBX V2 -----------------------------------
+CFBXTestMesh::CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* loadData) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
+{
+	vector<CFbxVertex>* vertexList = &loadData->m_vVertex;
+
+	m_nVertices = vertexList->size();				// 꼭지점 개수
+	m_nStride = sizeof(CVertex); // x , y, z 좌표
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution <> urd(0.0, 1.0);
+
+	m_pVertices = new CVertex[m_nVertices];
+	for (int i = 0; i < m_nVertices; ++i) {
+		m_pVertices[i] = CVertex((*vertexList)[i].m_Position, (*vertexList)[i].m_Normal, (*vertexList)[i].m_UV);
+	}
+
+	// 버퍼생성
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	// 바인딩위해 버퍼뷰 초기화
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+
+	vector<int>* indexList = &loadData->m_vIndices;
+
+	m_nIndices = indexList->size();
+	m_pnIndices = new UINT[m_nIndices];
+
+	for (int i = 0; i < m_nIndices; ++i) {
+		m_pnIndices[i] = (*indexList)[i];
+	}
+
+	//인덱스 버퍼를 생성한다. 
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	CreateCollider(pd3dDevice, pd3dCommandList);
+}
+
+CFBXTestMesh::~CFBXTestMesh()
+{
+}

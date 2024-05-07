@@ -5,6 +5,7 @@
 #include "BoundingBox.h"
 #include "Ray.h"
 #include "Skeleton.h"
+#include "FbxObjectData.h"
 
 class CSkeleton;
 
@@ -180,6 +181,14 @@ class CRayMesh : public CMesh
 public:
 	CRayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CRay* ray);
 	virtual ~CRayMesh();
+};
+
+// ------------------------------- FBX V2 -----------------------------------
+class CFBXTestMesh : public CDynamicShapeMesh
+{
+public:
+	CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* loadData);
+	virtual ~CFBXTestMesh();
 };
 
 // ------------------------------- FBX -----------------------------------

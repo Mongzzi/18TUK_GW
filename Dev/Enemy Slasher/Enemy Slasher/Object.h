@@ -271,6 +271,17 @@ public:
 
 };
 
+class CFBXTestObject : public CGameObject
+{
+public:
+	CFBXTestObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsShader);
+	virtual ~CFBXTestObject();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
+
+private:
+};
+
 class CRayObject : public CGameObject
 {
 public:

@@ -649,6 +649,25 @@ void CGameObject::MakeCollider()
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+CFBXTestObject::CFBXTestObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 1)
+{
+
+}
+
+CFBXTestObject::~CFBXTestObject()
+{
+
+}
+
+void CFBXTestObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption) {
+	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
 {

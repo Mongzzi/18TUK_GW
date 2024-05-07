@@ -1,21 +1,9 @@
 #pragma once
 #include "stdafx.h"
 #include "fbxsdk.h"
+#include "FbxObjectData.h"
 #include <map>
 #include <string>
-
-class CFbxData
-{
-public:
-	CFbxData() {};
-	~CFbxData() {};
-
-public:
-
-public:
-	int m_nChildCount = 0;
-	CFbxData** m_ppChilds = nullptr;
-};
 
 class CFbxLoader_V2 {
 public:
@@ -26,12 +14,13 @@ private:
 	FbxManager* m_plSdkManager = nullptr;
 
 	std::map<std::string, CFbxData*> m_mLoadedDataMap;
-
 public:
 	void InitializeSDK();
 	void DestroySDK();
 	CFbxData* LoadFBX(const char* fileName);
-	CFbxData* LoadNode(FbxNode* node);
-	void LoadContent(FbxNode* node, CFbxData* pData);
+	void LoadMesh(FbxNode* rootNode, CFbxData* loadData);
+	void ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outNormal);
+	void ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inUVPointIndex, int inUVLayerNum, XMFLOAT2& outUV);
+
 
 };
