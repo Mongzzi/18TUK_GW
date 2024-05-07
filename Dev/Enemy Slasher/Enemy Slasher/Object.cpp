@@ -1613,7 +1613,6 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 
 CBillBoardInstanceObject::~CBillBoardInstanceObject()
 {
-	if (m_pMaterial) m_pMaterial->Release();
 	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 	if (m_pd3dInstancesBuffer) m_pd3dInstancesBuffer->Release();
 }
