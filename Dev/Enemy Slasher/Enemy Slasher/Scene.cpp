@@ -54,7 +54,7 @@ ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3d
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// °ÔÀÓ ¿ÀºêÁ§Æ®
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -97,7 +97,7 @@ ID3D12RootSignature* CBasicScene::CreateGraphicsRootSignature(ID3D12Device* pd3d
 
 void CBasicScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	//UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	//m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	//m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
@@ -153,7 +153,7 @@ bool CBasicScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 {
 	return(false);
 
-	// ¾À¿¡¼­ ÇÁ·¹ÀÓº° ÀÔ·ÂÀ» Ã³¸®ÇÒ °ÍÀÌ¹Ç·Î ÇÁ·¹ÀÓ¸¶´Ù Å° ÀÔ·Â Ã³¸®ÇÏÁö ¸» °Í
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Óºï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¹Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ó¸ï¿½ï¿½ï¿½ Å° ï¿½Ô·ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
 	//return(true);
 }
 
@@ -200,7 +200,7 @@ void CBasicScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"BasicSceneÀÇ Render2D ÀÔ´Ï´Ù.";
+	static const WCHAR text[] = L"BasicSceneï¿½ï¿½ Render2D ï¿½Ô´Ï´ï¿½.";
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
@@ -335,7 +335,7 @@ bool CTitleScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	int xDelta = 0, yDelta = 0;
-	POINT ptCursorPos{ 0,0 }; //ÃÊ±âÈ­¸¦ ÇÏÁö ¾ÊÀ» ½Ã ³·Àº È®·ü·Î ¾Æ·¡ÀÇ if¹®¿¡ ÁøÀÔÇÏÁö ¸øÇÏ¿© ÃÊ±âÈ­µÇÁö ¾ÊÀº °ªÀ» »ç¿ëÇÏ°Ô µÈ´Ù.
+	POINT ptCursorPos{ 0,0 }; //ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ifï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½È´ï¿½.
 	if (GetCapture() == hWnd)
 	{
 		//SetCursor(NULL);
@@ -436,11 +436,11 @@ void CTitleScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 4 * 3);
-	static const WCHAR text2[] = L"°ÔÀÓ ½ÃÀÛ";
+	static const WCHAR text2[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½";
 	pd2dDeviceContext->DrawText(text2, _countof(text2) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 4 * 3, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text3[] = L"°ÔÀÓ Á¾·á";
+	static const WCHAR text3[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½";
 	pd2dDeviceContext->DrawText(text3, _countof(text3) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
 
@@ -516,7 +516,7 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// °ÔÀÓ ¿ÀºêÁ§Æ®
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -563,11 +563,11 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 
 	//pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	//pd3dRootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
-	//pd3dRootParameters[3].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[1]; // °ÔÀÓ ¿ÀºêÁ§Æ®
+	//pd3dRootParameters[3].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[1]; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	//pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 
-	//pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;	// °ÔÀÓ ¿ÀºêÁ§Æ®
+	//pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 	//pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 	//pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[0];
 	//pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
@@ -653,8 +653,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
-				// ¿øÀ§Ä¡·Î µ¹¾Æ°¨.
-				cout << "¿øÀ§Ä¡ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+				// ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½.
+				cout << "ï¿½ï¿½ï¿½ï¿½Ä¡ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 				pSelectedUI->SetPositionUI(pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
 
 			}
@@ -662,14 +662,14 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			{
 				if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
 				{
-					// Ä«µå »ç¿ë
-					// ÀÚ½Å »èÁ¦
+					// Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½
+					// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½
 					m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
-					cout << "»èÁ¦ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+					cout << "ï¿½ï¿½ï¿½ï¿½ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 				}
 				else
 				{
-					cout << "»ç¿ëÇÏÁö¸¸ »èÁ¦´Â ¾È ÇÔ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
+					cout << "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 
 				}
 			}
@@ -723,57 +723,57 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
-	// ÀÓ½Ã
+	// ï¿½Ó½ï¿½
 	SelectedUInum = -1;
-	//--------------------------------- Á¶¸í, ÀçÁú »ý¼º ----------------------------------------
+	//--------------------------------- ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ----------------------------------------
 
 	BuildLightsAndMaterials();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//
 
-	// -------------------------------      ½ºÄ«ÀÌ ¹Ú½º     _____________________________________
+	// -------------------------------      ï¿½ï¿½Ä«ï¿½ï¿½ ï¿½Ú½ï¿½     _____________________________________
 
 	CSkyBox* pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CSkyBoxShader, 6);
 	m_pObjectManager->AddObj(pSkyBox, ObjectLayer::SkyBox);
 
-	// -------------------------------      ½ºÄ«ÀÌ ¹Ú½º ³¡    _____________________________________
+	// -------------------------------      ï¿½ï¿½Ä«ï¿½ï¿½ ï¿½Ú½ï¿½ ï¿½ï¿½    _____________________________________
 
-	// ------------------------------------       ÅÍ·¹ÀÎ      -------------------------------
-	//ÁöÇüÀ» È®´ëÇÒ ½ºÄÉÀÏ º¤ÅÍÀÌ´Ù. x-Ãà°ú z-ÃàÀº 8¹è, y-ÃàÀº 2¹è È®´ëÇÑ´Ù. 
+	// ------------------------------------       ï¿½Í·ï¿½ï¿½ï¿½      -------------------------------
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½. x-ï¿½ï¿½ï¿½ z-ï¿½ï¿½ï¿½ï¿½ 8ï¿½ï¿½, y-ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ñ´ï¿½. 
 	XMFLOAT3 xmf3Scale(240.0f, 60.0f, 240.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.0f, 0.0f, 0.0f);
 
-	//ÁöÇüÀ» ³ôÀÌ ¸Ê ÀÌ¹ÌÁö ÆÄÀÏ(HeightMap.raw)À» »ç¿ëÇÏ¿© »ý¼ºÇÑ´Ù. ³ôÀÌ ¸ÊÀÇ Å©±â´Â °¡·Îx¼¼·Î(257x257)ÀÌ´Ù. 
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(HeightMap.raw)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½(257x257)ï¿½Ì´ï¿½. 
 	CHeightMapTerrain* pTerrain;
 #ifdef _WITH_TERRAIN_PARTITION
-	/*ÇÏ³ªÀÇ °ÝÀÚ ¸Þ½¬ÀÇ Å©±â´Â °¡·Îx¼¼·Î(17x17)ÀÌ´Ù. ÁöÇü ÀüÃ¼´Â °¡·Î ¹æÇâÀ¸·Î 16°³, ¼¼·Î ¹æÇâÀ¸·Î 16ÀÇ °ÝÀÚ ¸Þ½¬¸¦ °¡Áø´Ù. ÁöÇüÀ» ±¸¼ºÇÏ´Â °ÝÀÚ ¸Þ½¬ÀÇ °³¼ö´Â ÃÑ 256(16x16)°³°¡ µÈ´Ù.*/
+	/*ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½(17x17)ï¿½Ì´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 16ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 16ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ 256(16x16)ï¿½ï¿½ï¿½ï¿½ ï¿½È´ï¿½.*/
 	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
 
 #else
-	//ÁöÇüÀ» ÇÏ³ªÀÇ °ÝÀÚ ¸Þ½¬(257x257)·Î »ý¼ºÇÑ´Ù. 
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½(257x257)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½. 
 	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 13, 13, xmf3Scale, xmf4Color, ShaderType::CTerrainShader);
 	pTerrain->GetMaterial()->SetReflection(0);
 #endif
 	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
 
-	// --------------------------------      ÅÍ·¹ÀÎ ³¡     _____________________________________
+	// --------------------------------      ï¿½Í·ï¿½ï¿½ï¿½ ï¿½ï¿½     _____________________________________
 
 
 	{
-		// ÇÃ·¹ÀÌ¾î À§Ä¡ Å×·¹ÀÎ À§·Î ÀÌµ¿
+		// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ä¡ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
 		XMFLOAT3 xmfPlayerPos = m_pPlayer->GetPosition();
 		xmfPlayerPos.y = pTerrain->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 		m_pPlayer->SetPosition(xmfPlayerPos);
 	}
 
 
-	// --------------------------------- ºôº¸µå ÀÎ½ºÅÏ½º ¿ÀºêÁ§Æ® ------------------------------
+	// --------------------------------- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ------------------------------
 
 
 	CBillBoardInstanceObject* pBillBoardObjects = new CBillBoardInstanceObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pTerrain, ShaderType::CBillBoardInstanceShader);
 	m_pObjectManager->AddObj(pBillBoardObjects, ObjectLayer::BillBoardObject);
 
-	// ------------------------------ Àû ¸ó½ºÅÍ ¿ÀºêÁ§Æ® --------------------------------------
+	// ------------------------------ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® --------------------------------------
 
 
 	//Stone_lit_003
@@ -790,15 +790,15 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_real_distribution <float> urd_width(0, terrain_width);
 	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
-	//for (int i = 0; i < 100; i++) {
-	//	CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
-	//	xPosition = urd_width(dre);
-	//	zPosition = urd_length(dre);
 
-	//	float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-	//	pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
-	//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-	//}
+	for (int i = 0; i < 100; i++) {
+		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
+		xPosition = urd_width(dre);
+		zPosition = urd_length(dre);
+		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+		pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
+		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+	}
 
 
 
@@ -858,7 +858,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// UI
 	{
-		//Ä«µå UI Å×½ºÆ®¿ë ¿ÀºêÁ§Æ®.
+		//Ä«ï¿½ï¿½ UI ï¿½×½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®.
 		CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
 
 
@@ -969,11 +969,11 @@ void CTestScene::BuildLightsAndMaterials()
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
 
-	//        Ambient ( ÁÖº¯±¤ )          //         Diffuse ( »ê¶õ±¤ )           //       Specullar ( ¹Ý»ç±¤ )         //       Emissive ( ¹ß±¤ )     //
-	//			Ambient : ÀÏ¹ÝÀûÀ¸·Î Àå¸é Àü¹ÝÀûÀÎ »ö»ó°ú ¹à±â¸¦ ³ªÅ¸³»´Â µ¥ »ç¿ë
-	//			Diffuse : ¹°Ã¼ÀÇ »ö»ó°ú Ç¥¸é Æ¯¼ºÀ» ³ªÅ¸³»´Â µ¥ »ç¿ë
-	//			Specular : ºûÀÌ Ç¥¸é¿¡ ¹Ý»çµÇ´Â ºûÀÇ »ö»ó°ú °­µµ¸¦ ³ªÅ¸³»´Â µ¥ »ç¿ë
-	//			Emissive : ¹°Ã¼°¡ ¹ß±¤ÇÏ´Â °æ¿ì ÇØ´ç ¹°Ã¼ÀÇ »ö»ó°ú °­µµ¸¦ ³ªÅ¸³»´Â µ¥ »ç¿ë
+	//        Ambient ( ï¿½Öºï¿½ï¿½ï¿½ )          //         Diffuse ( ï¿½ï¿½ï¿½ï¿½ï¿½ )           //       Specullar ( ï¿½Ý»ç±¤ )         //       Emissive ( ï¿½ß±ï¿½ )     //
+	//			Ambient : ï¿½Ï¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½â¸¦ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
+	//			Diffuse : ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ Æ¯ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
+	//			Specular : ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½é¿¡ ï¿½Ý»ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
+	//			Emissive : ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ß±ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½
 	//			r g b a
 	m_pMaterials->m_pReflections[0] = { XMFLOAT4(10.0f, 10.0f, 10.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 5.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
@@ -988,15 +988,15 @@ void CTestScene::BuildLightsAndMaterials()
 
 void CTestScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
-	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 
-	UINT ncbTimeBytes = ((sizeof(CB_TIME_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbTimeBytes = ((sizeof(CB_TIME_INFO) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_pd3dcbTimeInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbTimeBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbTimeInfo->Map(0, NULL, (void**)&m_pcbMappedTimeInfo);
 }
@@ -1033,7 +1033,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	int xDelta = 0, yDelta = 0;
-	POINT ptCursorPos{ 0,0 }; //ÃÊ±âÈ­¸¦ ÇÏÁö ¾ÊÀ» ½Ã ³·Àº È®·ü·Î ¾Æ·¡ÀÇ if¹®¿¡ ÁøÀÔÇÏÁö ¸øÇÏ¿© ÃÊ±âÈ­µÇÁö ¾ÊÀº °ªÀ» »ç¿ëÇÏ°Ô µÈ´Ù.
+	POINT ptCursorPos{ 0,0 }; //ï¿½Ê±ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ifï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½È´ï¿½.
 	if (GetCapture() == hWnd)
 	{
 		//SetCursor(NULL);
@@ -1047,7 +1047,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	GetCursorPos(&ptCursorPos);
 	ScreenToClient(hWnd, &ptCursorPos);
-	//-------------- ÇÇÅ·
+	//-------------- ï¿½ï¿½Å·
 	CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
@@ -1148,7 +1148,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 
-	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player°¡ ÀÖ´Ù¸é
+	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Playerï¿½ï¿½ ï¿½Ö´Ù¸ï¿½
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
 
 		if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
@@ -1167,7 +1167,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 			}
 		}
 
-		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain°ú Player°¡ ÀÖ´Ù¸é
+		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrainï¿½ï¿½ Playerï¿½ï¿½ ï¿½Ö´Ù¸ï¿½
 			XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
 			float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 
@@ -1192,7 +1192,7 @@ void CTestScene::AnimateObjects(float fTimeElapsed)
 
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
 {
-	// ÀÓ½Ã ¾Ö´Ï¸ÞÀÌ¼Ç
+	// ï¿½Ó½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½
 	{
 		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
 
@@ -1212,17 +1212,17 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 					{
 
 						//------------------------------------------------------------------------
-						//                     GetOffsetMatList ¶ó´Â ÇÔ¼ö·Î »«´Ù.
-						// Á¤Á¡ÀÇ °³¼ö¸¸Å­ º¯È¯Çà·Ä »ý¼º.
+						//                     GetOffsetMatList ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­ ï¿½ï¿½È¯ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 						fbxmesh = (CFBXMesh*)meshes[m];
 						int verticesCount = fbxmesh->GetNumVertices();
 						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
-						// ÃÊ±âÈ­
+						// ï¿½Ê±ï¿½È­
 						for (int j = 0; j < verticesCount; j++)
 							offsetMatList[j] = Matrix4x4::Identity();
 
 
-						//¸Å½¬ÀÇ º»µé¿¡¼­
+						//ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½é¿¡ï¿½ï¿½
 						CSkeleton* skelList = fbxmesh->GetSkeletonList();
 						if (skelList)
 						{
@@ -1235,7 +1235,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 							//}
 							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
 							{
-								// ¿µÇâ¹Þ´Â Á¤Á¡µé°ú ±× Á¤µµ¸¦ °¡Á®¿Í¼­
+								// ï¿½ï¿½ï¿½ï¿½Þ´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½
 								int* pIndices = skelList[c].GetIndices();
 								double* Weights = skelList[c].GetWeights();
 
@@ -1244,7 +1244,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
 								{
-									// ÇØ´çÇÏ´Â Á¤Á¡¿¡ ±× Á¤µµ¸¸Å­ OffsetMatrix¸¦ °öÇÑ´Ù.
+									// ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­ OffsetMatrixï¿½ï¿½ ï¿½ï¿½ï¿½Ñ´ï¿½.
 									int index = pIndices[i];
 									for (int row = 0; row < 4; ++row)
 										for (int col = 0; col < 4; ++col)
@@ -1267,10 +1267,10 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 						}
 						//------------------------------------------------------------------------
 
-						// ¸¸µé¾îÁø Çà·ÄÀ» Á¤Á¡µé¿¡ Àû¿ë.
-						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // ¾ÆÁ÷ ¹ö±× ÀÖÀ½.
+						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½é¿¡ ï¿½ï¿½ï¿½ï¿½.
+						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 
-						// º¯È¯Çà·Ä »èÁ¦.
+						// ï¿½ï¿½È¯ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 						delete[] offsetMatList;
 					}
 
@@ -1284,7 +1284,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 
 		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
-		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// µÑ ´Ù ÇØºÁ
+		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// ï¿½ï¿½ ï¿½ï¿½ ï¿½Øºï¿½
 
 		std::random_device rd;
 		std::default_random_engine dre(rd());
@@ -1296,10 +1296,10 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		XMFLOAT3 planeNormal;
 
 		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ¹Ú½º ¾ÈÀÇ ¿ÀºêÁ§Æ®¸¦ Àý´ÜÇÑ´Ù.
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 
 
-		// ¿ÜÀû °è»ê (¼öÁ÷ÀÎ º¤ÅÍ)
+		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 		switch (SelectedUInum)
 		{
 		case 0:
@@ -1317,7 +1317,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 			break;
 		}
 		planeNormal = Vector3::CrossProduct(Vector1, Vector2);
-		cutterMesh->SetCutPlaneNormal(planeNormal); // Àý´Ü¸éÀÇ ³ë¸Ö
+		cutterMesh->SetCutPlaneNormal(planeNormal); // ï¿½ï¿½ï¿½Ü¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 		cutterObject->SetMesh(0, cutterMesh, true);
 
 
@@ -1328,7 +1328,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
 
-		cutterObject->SetAllowCutting(true);	// ÀÌ°Ô ÄÑÁ®ÀÖ¾î¾ß ÀÚ¸¥´Ù?
+		cutterObject->SetAllowCutting(true);	// ï¿½Ì°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½?
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
@@ -1351,7 +1351,7 @@ void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devic
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
-	WCHAR objText[] = L"¸Ê »óÀÇ ¿ÀºêÁ§Æ® °¹¼ö : ";
+	WCHAR objText[] = L"ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
 	int objCount = objList[(int)ObjectLayer::Object].size();
@@ -1460,7 +1460,7 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 			if (CGameObject* pInterObj = dynamic_cast<CGameObject*>(objects)) {
 				float tmin, tmax;
 				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
-					if (nearestDist > tmin) { // °¡Àå °¡±î¿î ¿ÀºêÁ§Æ® ¼±º°
+					if (nearestDist > tmin) { // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 						nearestDist = tmin;
 						m_pSelectedObj = pInterObj;
 					}
@@ -1610,7 +1610,7 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 				}
 			}
 
-			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // ¿ìÅ¬¸¯½Ã ¿ÀºêÁ§Æ®¸¦ Àâ¾Æ¼­ ÀÌµ¿
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0) { // ï¿½ï¿½Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½Æ¼ï¿½ ï¿½Ìµï¿½
 				if (m_bMoveObj) {
 					if (NULL != m_pSelectedObj) {
 						XMFLOAT3 t0((float)(ptCursorPos.x - m_ptOldCursorPos.x), (float)(ptCursorPos.y - m_ptOldCursorPos.y), 0.0f);
@@ -1668,15 +1668,15 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		std::uniform_real_distribution <float> urd(-1.0, 1.0);
 
 		XMFLOAT3 randomVector(urd(dre), urd(dre), urd(dre));
-		// ¿ÜÀû °è»ê (¼öÁ÷ÀÎ º¤ÅÍ)
+		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
 
 		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ¹Ú½º ¾ÈÀÇ ¿ÀºêÁ§Æ®¸¦ Àý´ÜÇÑ´Ù.
-		cutterMesh->SetCutPlaneNormal(planeNormal); // Àý´Ü¸éÀÇ ³ë¸Ö
+		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+		cutterMesh->SetCutPlaneNormal(planeNormal); // ï¿½ï¿½ï¿½Ü¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 		cutterObject->SetMesh(0, cutterMesh, true);
 		cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize)));
-		cutterObject->SetAllowCutting(true);	// ÀÌ°Ô ÄÑÁ®ÀÖ¾î¾ß ÀÚ¸¥´Ù?
+		cutterObject->SetAllowCutting(true);	// ï¿½Ì°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½?
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
@@ -1691,7 +1691,7 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		XMFLOAT3 ray2_dir = r2.GetDir();
 
 		XMFLOAT3 rayVec = Vector3::Subtract(ray_dir, ray2_dir);
-		// ¿ÜÀû °è»ê (¼öÁ÷ÀÎ º¤ÅÍ)
+		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 		XMFLOAT3 planeNormal = Vector3::CrossProduct(rayVec, ray_dir);
 		rayVec = Vector3::Add(ray_dir, ray2_dir);
 		rayVec = Vector3::Normalize(rayVec);
@@ -1738,7 +1738,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
-	WCHAR objText[] = L"¸Ê »óÀÇ ¿ÀºêÁ§Æ® °¹¼ö : ";
+	WCHAR objText[] = L"ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
 	int objCount = objList[(int)ObjectLayer::Object].size();
@@ -1770,7 +1770,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 1, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 2);
-	WCHAR objText3[] = L"¼Ò¸ê ´ë±â ¿ÀºêÁ§Æ® °¹¼ö : ";
+	WCHAR objText3[] = L"ï¿½Ò¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ : ";
 	textLen = _countof(objText3) - 1;
 	objCount = objList[(int)ObjectLayer::TemporaryObject].size();
 	if (objCount == 0) textLen++;
@@ -1796,21 +1796,21 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 3, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 4);
-	WCHAR objText2[] = L"ÇöÀç ¸ðµå (C¸¦ ´­·¯ º¯°æ) : ";
+	WCHAR objText2[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (Cï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) : ";
 	textLen = _countof(objText2) - 1;
 	if (true == m_bCutterMode)
 	{
-		wsprintf(text, L"%s%s", objText2, L"Àý´Ü¸ðµå");
+		wsprintf(text, L"%s%s", objText2, L"ï¿½ï¿½ï¿½Ü¸ï¿½ï¿½");
 		textLen += 5;
 	}
 	else {
-		wsprintf(text, L"%s%s", objText2, L"Ä«¸Þ¶ó¸ðµå");
+		wsprintf(text, L"%s%s", objText2, L"Ä«ï¿½Þ¶ï¿½ï¿½ï¿½");
 		textLen += 6;
 	}
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 4, FRAME_BUFFER_WIDTH / 7 * 4, FRAME_BUFFER_HEIGHT / 14 * 5);
-	WCHAR objText4[] = L"Àý´Ü ¾Ë°í¸®Áò (P¸¦ ´­·¯ º¯°æ) : ";
+	WCHAR objText4[] = L"ï¿½ï¿½ï¿½ï¿½ ï¿½Ë°ï¿½ï¿½ï¿½ï¿½ï¿½ (Pï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) : ";
 	textLen = _countof(objText4) - 1;
 	if (true == m_bCutAlgorithm)
 	{
@@ -1824,7 +1824,7 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	pd2dDeviceContext->DrawText(text, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 
 	textRect = D2D1::RectF(0.0f, FRAME_BUFFER_HEIGHT / 14 * 5, FRAME_BUFFER_WIDTH / 14 * 3, FRAME_BUFFER_HEIGHT / 14 * 6);
-	WCHAR objText5[] = L"ÃÊ±âÈ­ (M)";
+	WCHAR objText5[] = L"ï¿½Ê±ï¿½È­ (M)";
 	textLen = _countof(objText5) - 1;
 	pd2dDeviceContext->DrawText(objText5, textLen, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
@@ -1902,7 +1902,7 @@ void CTestScene_PhysX::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	static const WCHAR text[] = L"PhysXSceneÀÇ Render2D ÀÔ´Ï´Ù.";
+	static const WCHAR text[] = L"PhysXSceneï¿½ï¿½ Render2D ï¿½Ô´Ï´ï¿½.";
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;

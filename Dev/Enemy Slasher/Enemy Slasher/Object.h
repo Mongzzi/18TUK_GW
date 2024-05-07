@@ -3,6 +3,7 @@
 #include "Mesh.h"
 
 class CShader;
+class TestPlayer;
 
 enum class ShaderType : int;
 
@@ -230,6 +231,15 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
+	
+	void SetLook(float x, float y, float z);
+	void SetLook(XMFLOAT3 xmf3Position);
+
+	void SetUp(float x, float y, float z);
+	void SetUp(XMFLOAT3 xmf3Position);
+
+	void SetRight(float x, float y, float z);
+	void SetRight(XMFLOAT3 xmf3Position);
 
 	//게임 객체의 위치를 설정한다. 
 	void SetPosition(float x, float y, float z);
@@ -243,6 +253,8 @@ public:
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void MoveForward(float fDistance = 1.0f);
+	void MovePosition(float x, float y, float z);
+	void MovePosition(XMFLOAT3 xmfPosition);
 
 	//게임 객체를 회전(x-축, y-축, z-축)한다. 
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
@@ -346,23 +358,6 @@ public:
 	void RestoreAnimation();
 	CAnimationData* GetCurrentAnimationData() { return m_adCurrentAnimationData; };
 };
-
-
-class CMonsterObject : public CFBXObject
-{
-public:
-	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype = ShaderType::CObjectsShader);
-	virtual ~CMonsterObject();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-
-
-private:
-	MonsterState m_Monster_State;
-
-};
-
-
-
 
 
 //  UI
@@ -501,6 +496,25 @@ class CTextObject
 
 public:
 	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
+};
+
+class CMonsterObject : public CFBXObject
+{
+public:
+	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain,
+		CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype = ShaderType::CObjectsShader);
+	virtual ~CMonsterObject();
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+	void ChangeState(MonsterState state) { m_Monster_State = state; };
+	MonsterState GetState() { return m_Monster_State; };
+
+private:
+	MonsterState m_Monster_State;
+	TestPlayer* m_pTestPlayer;
+	CHeightMapTerrain* m_pTerrain;
+	XMFLOAT3 m_dir = { 0.0f,0.0f,0.0f };
+	float m_speed = 100.0f;
 };
 
 

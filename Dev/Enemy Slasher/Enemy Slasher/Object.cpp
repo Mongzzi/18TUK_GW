@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Shader.h"
 #include "Object.h"
-
+#include "Player.h"
 
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters)
 {
@@ -575,6 +575,48 @@ XMFLOAT3 CGameObject::GetRight()
 	return(Vector3::Normalize(a));
 }
 
+void CGameObject::SetLook(float x, float y, float z)
+{
+	m_xmf4x4Transform._31 = x;
+	m_xmf4x4Transform._32 = y;
+	m_xmf4x4Transform._33 = z;
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::SetLook(XMFLOAT3 xmf3Position)
+{
+	SetLook(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+}
+
+void CGameObject::SetUp(float x, float y, float z)
+{
+	m_xmf4x4Transform._21 = x;
+	m_xmf4x4Transform._22 = y;
+	m_xmf4x4Transform._23 = z;
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::SetUp(XMFLOAT3 xmf3Position)
+{
+	SetUp(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+}
+
+void CGameObject::SetRight(float x, float y, float z)
+{
+	m_xmf4x4Transform._11 = x;
+	m_xmf4x4Transform._12 = y;
+	m_xmf4x4Transform._13 = z;
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::SetRight(XMFLOAT3 xmf3Position)
+{
+	SetRight(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+}
+
 //게임 객체를 로컬 x-축 방향으로 이동한다. 
 void CGameObject::MoveStrafe(float fDistance)
 {
@@ -600,6 +642,20 @@ void CGameObject::MoveForward(float fDistance)
 	XMFLOAT3 xmf3Look = GetLook();
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fDistance);
 	CGameObject::SetPosition(xmf3Position);
+}
+
+void CGameObject::MovePosition(float x, float y, float z)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	xmf3Position.x += x;
+	xmf3Position.y += y;
+	xmf3Position.z += z;
+	SetPosition(xmf3Position);
+}
+
+void CGameObject::MovePosition(XMFLOAT3 xmfPosition)
+{
+	MovePosition(xmfPosition.x, xmfPosition.y, xmfPosition.z);
 }
 
 //게임 객체를 주어진 각도로 회전한다. 
@@ -1579,7 +1635,7 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	//XMFLOAT3 xmf3TerrainScale = pTerrain->GetScale();
 
-	int nBillboardType = 0; 
+	int nBillboardType = 0;
 	int nTextureType = 0; //1:Grass0, 2:Grass1, 3:Flower0, 4:Flower1, 5:Tree1, 6: Tree2, 7: Tree3
 	float fxWidth = 0.0f, fyHeight = 0.0f;
 
@@ -1607,7 +1663,7 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 			case 5:fxWidth = 200; fyHeight = 300; break;
 			case 6:fxWidth = 2000; fyHeight = 3000; break;
 			case 7:fxWidth = 1600; fyHeight = 3000; break;
-				
+
 			}
 
 			float xPosition = x * xpitch;
@@ -1676,7 +1732,8 @@ void CBillBoardInstanceObject::ReleaseShaderVariables()
 {
 }
 
-CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype)
+CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain, 
+	CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype)
 	:CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)
 {
 	CTexture* ppTextures[1];
@@ -1692,8 +1749,8 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		}
 	}
 	m_Monster_State = MonsterState::Default_State;
-
-
+	m_pTestPlayer = ptestplayer;
+	m_pTerrain = pterrain;
 }
 
 CMonsterObject::~CMonsterObject()
@@ -1706,11 +1763,36 @@ void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 	std::random_device rd;
 	std::default_random_engine dre(rd());
-	std::uniform_real_distribution <float> urd_width(0,1);
+	std::uniform_real_distribution <float> urd(-1, 1);
+	XMFLOAT3 player_position = m_pTestPlayer->GetPosition();
+	XMFLOAT3 monster_position = GetPosition();
+	XMFLOAT3 end_position = { 0.0f,0.0f,0.0f };
 
-	if (m_Monster_State == MonsterState::Default_State){}
-	else if (m_Monster_State == MonsterState::Chase_State){}
-	else if (m_Monster_State == MonsterState::Battle_State){}
+
+	if (m_Monster_State == MonsterState::Default_State) {
+		float distance = sqrt(
+			pow(monster_position.x - player_position.x, 2) +
+			pow(monster_position.y - player_position.y, 2) +
+			pow(monster_position.z - player_position.z, 2));
+
+		if (distance >500.0f) {
+			m_dir.x = urd(dre), m_dir.z = urd(dre);
+			SetLook(m_dir);
+			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
+			XMStoreFloat3(&m_dir, vResult);
+			MovePosition(m_dir);
+			
+			end_position.x = GetPosition().x;
+			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
+			end_position.z = GetPosition().z;
+			SetPosition(end_position);
+		}
+
+	}
+	else if (m_Monster_State == MonsterState::Chase_State) {}
+	else if (m_Monster_State == MonsterState::Battle_State) {}
 
 
 }
+
+
