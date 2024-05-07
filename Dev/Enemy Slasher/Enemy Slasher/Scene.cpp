@@ -790,7 +790,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
 	for (int i = 0; i < 100; i++) {
-		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
+		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
 		xPosition = urd_width(dre);
 		zPosition = urd_length(dre);
 
