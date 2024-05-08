@@ -577,9 +577,9 @@ XMFLOAT3 CGameObject::GetRight()
 
 void CGameObject::SetLook(float x, float y, float z)
 {
-	m_xmf4x4Transform._31 = x;
-	m_xmf4x4Transform._32 = y;
-	m_xmf4x4Transform._33 = z;
+	m_xmf4x4World._31 = x;
+	m_xmf4x4World._32 = y;
+	m_xmf4x4World._33 = z;
 
 	UpdateTransform(NULL);
 }
@@ -591,9 +591,9 @@ void CGameObject::SetLook(XMFLOAT3 xmf3Position)
 
 void CGameObject::SetUp(float x, float y, float z)
 {
-	m_xmf4x4Transform._21 = x;
-	m_xmf4x4Transform._22 = y;
-	m_xmf4x4Transform._23 = z;
+	m_xmf4x4World._21 = x;
+	m_xmf4x4World._22 = y;
+	m_xmf4x4World._23 = z;
 
 	UpdateTransform(NULL);
 }
@@ -605,9 +605,9 @@ void CGameObject::SetUp(XMFLOAT3 xmf3Position)
 
 void CGameObject::SetRight(float x, float y, float z)
 {
-	m_xmf4x4Transform._11 = x;
-	m_xmf4x4Transform._12 = y;
-	m_xmf4x4Transform._13 = z;
+	m_xmf4x4World._11 = x;
+	m_xmf4x4World._12 = y;
+	m_xmf4x4World._13 = z;
 
 	UpdateTransform(NULL);
 }
