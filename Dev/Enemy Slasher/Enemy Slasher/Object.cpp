@@ -1732,7 +1732,7 @@ void CBillBoardInstanceObject::ReleaseShaderVariables()
 {
 }
 
-CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain, 
+CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 	ShaderType stype)
 	:CFBXTestObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
@@ -1752,33 +1752,65 @@ void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	std::random_device rd;
 	std::default_random_engine dre(rd());
 	std::uniform_real_distribution <float> urd(-1, 1);
+
 	XMFLOAT3 player_position = m_pTestPlayer->GetPosition();
 	XMFLOAT3 monster_position = GetPosition();
 	XMFLOAT3 end_position = { 0.0f,0.0f,0.0f };
 
+	float distance = sqrt(
+		pow(monster_position.x - player_position.x, 2) +
+		pow(monster_position.y - player_position.y, 2) +
+		pow(monster_position.z - player_position.z, 2));
 
 	if (m_Monster_State == MonsterState::Default_State) {
-		float distance = sqrt(
-			pow(monster_position.x - player_position.x, 2) +
-			pow(monster_position.y - player_position.y, 2) +
-			pow(monster_position.z - player_position.z, 2));
 
-		if (distance >500.0f) {
+		if (distance > 3000.0f) {
 			m_dir.x = urd(dre), m_dir.z = urd(dre);
 			SetLook(m_dir);
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
-			
+
 			end_position.x = GetPosition().x;
 			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
 			end_position.z = GetPosition().z;
 			SetPosition(end_position);
 		}
+		else if (distance < 3000.0f) {
+			SetState(MonsterState::Chase_State);
+		}
 
 	}
-	else if (m_Monster_State == MonsterState::Chase_State) {}
-	else if (m_Monster_State == MonsterState::Battle_State) {}
+	else if (m_Monster_State == MonsterState::Chase_State) {
+		if (distance < 3000.0f) {
+			// 방향벡터 몬스터에서 플레이어로
+			XMFLOAT3 position_difference;
+			position_difference.x = player_position.x - monster_position.x;
+			position_difference.y = player_position.y - monster_position.y;
+			position_difference.z = player_position.z - monster_position.z;
+
+			// 단위벡터로 변환 과정 
+			float length = sqrt(position_difference.x * position_difference.x + position_difference.y * position_difference.y + position_difference.z * position_difference.z);
+			m_dir.x = position_difference.x / length;
+			m_dir.y = position_difference.y / length;
+			m_dir.z = position_difference.z / length;
+			SetLook(m_dir);
+
+			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
+			XMStoreFloat3(&m_dir, vResult);
+			MovePosition(m_dir);
+
+			end_position.x = GetPosition().x;
+			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
+			end_position.z = GetPosition().z;
+			SetPosition(end_position);
+			SetSpeed(10.0f);	// 델타타임 곱해야할지 고민중
+		}
+	}
+	else if (m_Monster_State == MonsterState::Battle_State) {
+		// 배틀 상태 돌입시 씬 변경 할 예정
+
+	}
 
 
 }

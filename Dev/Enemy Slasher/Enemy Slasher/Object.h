@@ -506,7 +506,8 @@ public:
 	virtual ~CMonsterObject();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
-	void ChangeState(MonsterState state) { m_Monster_State = state; };
+	void SetState(MonsterState state) { m_Monster_State = state; };
+	void SetSpeed(float speed) { m_speed = speed; };
 	MonsterState GetState() { return m_Monster_State; };
 
 private:
