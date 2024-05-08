@@ -52,9 +52,17 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 			loadData = new CFbxData;
 			LoadMesh(lRootNode, loadData);
 
+#ifdef _DEBUG
+			FBXSDK_printf("Load Complete file : %s\n", fileName);
+#endif // _DEBUG
 		}
 
 		m_mLoadedDataMap[fName] = loadData;
+	}
+	else {
+#ifdef _DEBUG
+		FBXSDK_printf("File already loaded : %s\n", fileName);
+#endif // _DEBUG
 	}
 
 	return m_mLoadedDataMap[fName];

@@ -1733,21 +1733,9 @@ void CBillBoardInstanceObject::ReleaseShaderVariables()
 }
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain, 
-	CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype)
-	:CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)
+	ShaderType stype)
+	:CFBXTestObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
-	CTexture* ppTextures[1];
-
-	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
-
-	if (m_pMaterial) {
-		if (m_pMaterial->m_pShader) {
-			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
-			m_pMaterial->SetTexture(ppTextures[0]);
-		}
-	}
 	m_Monster_State = MonsterState::Default_State;
 	m_pTestPlayer = ptestplayer;
 	m_pTerrain = pterrain;
@@ -1759,7 +1747,7 @@ CMonsterObject::~CMonsterObject()
 
 void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-	CFBXObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 
 	std::random_device rd;
 	std::default_random_engine dre(rd());

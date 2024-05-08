@@ -778,6 +778,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	//Stone_lit_003
 
+	CFbxLoader_V2 fLoader;
+	CTexture* ppTextures[1];
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
 
 	float xPosition = 0.0f;
 	float zPosition = 0.0f;
@@ -791,7 +795,19 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
 	for (int i = 0; i < 100; i++) {
-		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, pFBXLoader, "fbxsdk/Stone_big_001.fbx", ShaderType::CTextureShader);
+		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, ShaderType::CTextureShader);
+		CFBXTestMesh* pStoneMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stone_big_001.fbx"));
+		pMonsterObject->SetMesh(0, pStoneMesh);
+
+		CMaterial* pTreeMaterial = pMonsterObject->GetMaterial();
+		if (pTreeMaterial) {
+			if (pTreeMaterial->m_pShader) {
+				pTreeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+				pTreeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+				pTreeMaterial->SetTexture(ppTextures[0]);
+			}
+		}
+
 		xPosition = urd_width(dre);
 		zPosition = urd_length(dre);
 
@@ -816,8 +832,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		float xpitch = 257.0f * 24.0f / 10.0f;
 		float zpitch = 257.0f * 24.0f / 7.0f;
 
-		CFbxLoader_V2 fLoader;
-
 		for (int x = 0; x < 5; x++)
 		{
 			for (int z = 0; z < 5; z++)
@@ -837,10 +851,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				CFBXTestMesh* pTreeMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3));
 				pTreeObject->SetMesh(0, pTreeMesh);
 				CMaterial* pTreeMaterial = pTreeObject->GetMaterial();
-				CTexture* ppTextures[1];
-
-				ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-				ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
 
 				if (pTreeMaterial) {
 					if (pTreeMaterial->m_pShader) {

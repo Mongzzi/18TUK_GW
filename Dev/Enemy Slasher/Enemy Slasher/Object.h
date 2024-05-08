@@ -498,11 +498,11 @@ public:
 	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
 };
 
-class CMonsterObject : public CFBXObject
+class CMonsterObject : public CFBXTestObject
 {
 public:
 	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain,
-		CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype = ShaderType::CObjectsShader);
+		ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CMonsterObject();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
