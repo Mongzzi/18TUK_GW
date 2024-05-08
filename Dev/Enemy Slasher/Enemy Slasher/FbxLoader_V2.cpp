@@ -46,6 +46,9 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 		pFbxImporter->Import(lScene);
 		pFbxImporter->Destroy();
 
+		FbxGeometryConverter geometryConverter(m_plSdkManager);
+		geometryConverter.Triangulate(lScene, true);
+
 		FbxNode* lRootNode = lScene->GetRootNode();
 		if (lRootNode)
 		{
