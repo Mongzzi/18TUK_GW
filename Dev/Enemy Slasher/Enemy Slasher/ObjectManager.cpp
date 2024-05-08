@@ -67,7 +67,7 @@ void CObjectManager::ClearLayer(ObjectLayer layer)
 	}
 }
 
-void CObjectManager::AnimateObjects(float fTimeTotal,float fTimeElapsed)
+void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 {
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
