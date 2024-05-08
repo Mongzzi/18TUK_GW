@@ -98,6 +98,6 @@ public:
 	//	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//}
 
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeTotal ,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 };

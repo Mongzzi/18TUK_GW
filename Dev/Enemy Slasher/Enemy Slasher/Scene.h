@@ -68,7 +68,7 @@ public:
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
-	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void AnimateObjects(float fTimeTotal, float fTimeElapsed);
 	virtual void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera= NULL);
@@ -144,7 +144,7 @@ public:
 
 
 	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
-	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void AnimateObjects(float fTotalTime, float fTimeElapsed);
 	virtual void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed);
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
@@ -188,7 +188,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
 
 	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
-	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void AnimateObjects(float fTotalTime , float fTimeElapsed);
 	virtual void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed);
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
 	virtual void Enter();

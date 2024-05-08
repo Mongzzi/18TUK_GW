@@ -579,9 +579,10 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObjects()
 {
+	float fTotalTime = m_GameTimer.GetTotalTime();
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
+	if (m_pScene) m_pScene->AnimateObjects(fTotalTime,fTimeElapsed);
 
 	//m_pPlayer->Animate(fTimeElapsed, NULL);
 }

@@ -157,9 +157,9 @@ bool CBasicScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 	//return(true);
 }
 
-void CBasicScene::AnimateObjects(float fTimeElapsed)
+void CBasicScene::AnimateObjects(float fTimeTotal ,float fTimeElapsed)
 {
-	m_pObjectManager->AnimateObjects(fTimeElapsed);
+	m_pObjectManager->AnimateObjects(fTimeTotal , fTimeElapsed);
 }
 
 void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
@@ -1143,9 +1143,9 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	return(true);
 }
 
-void CTestScene::AnimateObjects(float fTimeElapsed)
+void CTestScene::AnimateObjects(float fTotalTime ,float fTimeElapsed)
 {
-	m_pObjectManager->AnimateObjects(fTimeElapsed);
+	m_pObjectManager->AnimateObjects(fTotalTime, fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 
@@ -1629,9 +1629,9 @@ bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCu
 	return(true);
 }
 
-void CTestScene_Slice::AnimateObjects(float fTimeElapsed)
+void CTestScene_Slice::AnimateObjects(float fTotalTime, float fTimeElapsed)
 {
-	m_pObjectManager->AnimateObjects(fTimeElapsed);
+	m_pObjectManager->AnimateObjects(fTotalTime, fTimeElapsed);
 
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 

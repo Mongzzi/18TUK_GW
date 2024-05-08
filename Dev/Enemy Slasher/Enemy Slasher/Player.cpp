@@ -265,13 +265,13 @@ TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 }
 
 
-void TestPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void TestPlayer::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	//Update(fTimeElapsed);
-	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
-	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
+	if (m_pSibling) m_pSibling->Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+	if (m_pChild) m_pChild->Animate(fTimeTotal,fTimeElapsed, &m_xmf4x4World);
 
-	CFBXObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	CFBXObject::Animate(fTimeTotal,fTimeElapsed, pxmf4x4Parent);
 }
 
 CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)

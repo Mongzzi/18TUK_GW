@@ -323,10 +323,10 @@ void CGameObject::ReleaseUploadBuffers()
 
 }
 
-void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CGameObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
-	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
+	if (m_pSibling) m_pSibling->Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+	if (m_pChild) m_pChild->Animate(fTimeTotal, fTimeElapsed, &m_xmf4x4World);
 }
 
 void CGameObject::OnPrepareRender()
@@ -1061,7 +1061,7 @@ void CFBXObject::RestoreAnimation()
 }
 
 
-void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CFBXObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (m_adCurrentAnimationData)
 	{
@@ -1095,7 +1095,7 @@ void CFBXObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			}
 		}
 	}
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }
 
 
@@ -1392,7 +1392,7 @@ CCardUIObject::~CCardUIObject()
 {
 }
 
-void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CCardUIObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	ScreenSpaceToWorldSpace();
 
@@ -1411,7 +1411,7 @@ void CCardUIObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 				m_fCurrntScale = m_fTargetScale;
 		}
 	}
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }
 
 void CCardUIObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1686,6 +1686,10 @@ CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3
 
 }
 
+CBillBoardInstanceObject::CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, void* pContext, int nMeshes)
+{
+}
+
 CBillBoardInstanceObject::~CBillBoardInstanceObject()
 {
 	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
@@ -1745,10 +1749,8 @@ CMonsterObject::~CMonsterObject()
 {
 }
 
-void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
-
 	std::random_device rd;
 	std::default_random_engine dre(rd());
 	std::uniform_real_distribution <float> urd(-1, 1);
@@ -1763,9 +1765,12 @@ void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		pow(monster_position.z - player_position.z, 2));
 
 	if (m_Monster_State == MonsterState::Default_State) {
+		SetSpeed(100.0f);	// 델타타임 곱해야할지 고민중
 
-		if (distance > 3000.0f) {
+		if (distance > 300.0f) {
+			//if ((int)fTimeTotal % 2 == 0) 
 			m_dir.x = urd(dre), m_dir.z = urd(dre);
+
 			SetLook(m_dir);
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
@@ -1776,13 +1781,14 @@ void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			end_position.z = GetPosition().z;
 			SetPosition(end_position);
 		}
-		else if (distance < 3000.0f) {
+		else if (distance < 300.0f) {
 			SetState(MonsterState::Chase_State);
 		}
 
 	}
 	else if (m_Monster_State == MonsterState::Chase_State) {
-		if (distance < 3000.0f) {
+		if (distance < 300.0f) {
+			SetSpeed(10.0f);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
 			position_difference.x = player_position.x - monster_position.x;
@@ -1804,7 +1810,6 @@ void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
 			end_position.z = GetPosition().z;
 			SetPosition(end_position);
-			SetSpeed(10.0f);	// 델타타임 곱해야할지 고민중
 		}
 	}
 	else if (m_Monster_State == MonsterState::Battle_State) {
@@ -1812,7 +1817,21 @@ void CMonsterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 	}
 
+	CGameObject::Animate(fTimeTotal,fTimeElapsed, pxmf4x4Parent);
+}
 
+bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
+{
+	if (m_pTerrain) {
+		
+		float x = position.x;
+		float z = position.z;
+		float terrain_x = m_pTerrain->GetWidth();
+		float terrain_z = m_pTerrain->GetLength();
+
+		return (x >= 0 && x < terrain_x&& z >= 0 && z < terrain_z);
+
+	}
 }
 
 

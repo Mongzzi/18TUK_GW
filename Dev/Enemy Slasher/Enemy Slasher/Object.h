@@ -273,7 +273,7 @@ public:
 	void ReleaseUploadBuffers();
 	virtual void SetMesh(int nIndex, CMesh* pMesh, bool bMakeColliderFlag = false);
 	virtual void SetMesh(int nIndexSize);
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeTotal,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 	virtual void Render2D() {};
@@ -337,7 +337,7 @@ public:
 	//void LoadAnimation(FbxAnimStack* pAnimStack, FbxNode* pNode, bool isSwitcher = false);
 	//void LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, bool isSwitcher = false);
 
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	//bool IsCursorOverObject();
 	//void ButtenDown();
@@ -420,7 +420,7 @@ private:
 
 
 public:
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeTotal,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -504,17 +504,18 @@ public:
 	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 		ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CMonsterObject();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	void SetState(MonsterState state) { m_Monster_State = state; };
 	void SetSpeed(float speed) { m_speed = speed; };
 	MonsterState GetState() { return m_Monster_State; };
+	bool Check_Inner_Terrain(XMFLOAT3 position);
 
 private:
 	MonsterState m_Monster_State;
 	TestPlayer* m_pTestPlayer;
 	CHeightMapTerrain* m_pTerrain;
-	XMFLOAT3 m_dir = { 0.0f,0.0f,0.0f };
+	XMFLOAT3 m_dir = { -1.0f,0.0f,0.0f };
 	float m_speed = 100.0f;
 };
 
