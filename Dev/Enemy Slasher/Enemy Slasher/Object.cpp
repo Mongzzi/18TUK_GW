@@ -577,29 +577,36 @@ XMFLOAT3 CGameObject::GetRight()
 
 void CGameObject::SetLook(float x, float y, float z)
 {
-	// 주어진 방향 벡터를 향하는 전방 벡터를 설정
-	XMVECTOR newForward = XMVectorSet(x, y, z, 0.0f);
-	newForward = XMVector3Normalize(newForward);
+	// Calculate the direction vector
+	XMVECTOR lookVector = XMVectorSet(x, y, z, 0.0f);
+	lookVector = XMVector3Normalize(lookVector);
 
-	// 전방 벡터를 기반으로 오른쪽 벡터를 계산
-	XMVECTOR newRight = XMVector3Cross(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), newForward);
-	newRight = XMVector3Normalize(newRight);
+	// Calculate the up vector
+	XMVECTOR upVector = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	// 새로운 오른쪽 벡터를 기반으로 위쪽 벡터를 계산
-	XMVECTOR newUp = XMVector3Cross(newForward, newRight);
+	// Calculate the right vector
+	XMVECTOR rightVector = XMVector3Cross(upVector, lookVector);
+	rightVector = XMVector3Normalize(rightVector);
 
-	// 변환 행렬을 업데이트
-	m_xmf4x4World._11 = XMVectorGetX(newRight);
-	m_xmf4x4World._12 = XMVectorGetY(newRight);
-	m_xmf4x4World._13 = XMVectorGetZ(newRight);
+	// Recalculate the up vector
+	upVector = XMVector3Cross(lookVector, rightVector);
+	upVector = XMVector3Normalize(upVector);
 
-	m_xmf4x4World._21 = XMVectorGetX(newUp);
-	m_xmf4x4World._22 = XMVectorGetY(newUp);
-	m_xmf4x4World._23 = XMVectorGetZ(newUp);
+	// Update the transformation matrix
+	m_xmf4x4Transform._11 = rightVector.m128_f32[0];
+	m_xmf4x4Transform._12 = rightVector.m128_f32[1];
+	m_xmf4x4Transform._13 = rightVector.m128_f32[2];
+	m_xmf4x4Transform._14 = 0.0f;
 
-	m_xmf4x4World._31 = XMVectorGetX(newForward);
-	m_xmf4x4World._32 = XMVectorGetY(newForward);
-	m_xmf4x4World._33 = XMVectorGetZ(newForward);
+	m_xmf4x4Transform._21 = upVector.m128_f32[0];
+	m_xmf4x4Transform._22 = upVector.m128_f32[1];
+	m_xmf4x4Transform._23 = upVector.m128_f32[2];
+	m_xmf4x4Transform._24 = 0.0f;
+
+	m_xmf4x4Transform._31 = lookVector.m128_f32[0];
+	m_xmf4x4Transform._32 = lookVector.m128_f32[1];
+	m_xmf4x4Transform._33 = lookVector.m128_f32[2];
+	m_xmf4x4Transform._34 = 0.0f;
 
 	UpdateTransform(nullptr);
 }
@@ -1817,9 +1824,9 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	if (m_Monster_State == MonsterState::Default_State) {
 		SetSpeed(0.0f);	// 델타타임 곱해야할지 고민중
 
-		if (distance > 300.0f) {
+		if (distance > 1000.0f) {
 			//if ((int)fTimeTotal % 2 == 0) 
-			m_dir.x = urd(dre), m_dir.z = urd(dre);
+			//m_dir.x = urd(dre), m_dir.z = urd(dre);
 
 			SetLook(m_dir);
 			if (m_HpObject) { m_HpObject->SetLook(m_dir); }
@@ -1833,14 +1840,14 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			end_position.z = GetPosition().z;
 			SetPosition(end_position);
 		}
-		else if (distance < 300.0f) {
+		else if (distance < 1000.0f) {
 			SetState(MonsterState::Chase_State);
 		}
 
 	}
 	else if (m_Monster_State == MonsterState::Chase_State) {
-		if (distance < 500.0f) {
-			SetSpeed(5.0f);
+		if (distance < 1000.0f) {
+			SetSpeed(3.0f);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
 			position_difference.x = player_position.x - monster_position.x;
@@ -1853,6 +1860,8 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			m_dir.y = position_difference.y / length;
 			m_dir.z = position_difference.z / length;
 			SetLook(m_dir);
+			if (m_HpObject) { m_HpObject->SetLook(m_dir); }
+
 
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
