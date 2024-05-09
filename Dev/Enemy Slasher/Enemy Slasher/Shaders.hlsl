@@ -65,6 +65,14 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination);
 	//return (cColor);
 }
+
+
+float4 PSUITextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+	return (cColor);
+}
+
 //----------------------텍스처끝-------------------------------
 
 // ------------------------------ 스카이 박스 전용 텍스처 ----------------------------------------------

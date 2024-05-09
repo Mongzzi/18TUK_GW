@@ -232,6 +232,7 @@ class CUITextureShader :public CTextureShader
 public:
 	CUITextureShader() {};
 	virtual ~CUITextureShader() {};
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 
 };

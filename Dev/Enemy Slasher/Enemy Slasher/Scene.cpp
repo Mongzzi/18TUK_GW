@@ -795,7 +795,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_real_distribution <float> urd_width(0, terrain_width);
 	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 1; i++) {
 		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, ShaderType::CTextureShader);
 		CFBXTestMesh* pStoneMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stone_big_001.fbx"));
 		pMonsterObject->SetMesh(0, pStoneMesh);
@@ -828,9 +828,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		float xpitch = 257.0f * 24.0f / 10.0f;
 		float zpitch = 257.0f * 24.0f / 7.0f;
 
-		for (int x = 0; x < 5; x++)
+		for (int x = 0; x < 1; x++)
 		{
-			for (int z = 0; z < 5; z++)
+			for (int z = 0; z < 1; z++)
 			{
 
 				CFBXTestObject* pTreeObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
@@ -900,6 +900,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 	}
 
+	CHpbarObject* phpbar = new CHpbarObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
+	phpbar->SetPosition(3000, 3000, 4000);
+	m_pObjectManager->AddObj(phpbar, ObjectLayer::TextureObject);
 
 
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());

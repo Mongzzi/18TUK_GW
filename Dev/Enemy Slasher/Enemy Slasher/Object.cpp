@@ -1786,6 +1786,9 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		pow(monster_position.y - player_position.y, 2) +
 		pow(monster_position.z - player_position.z, 2));
 
+
+	m_PercentHp = m_CurHp / m_MaxHp;
+
 	if (m_Monster_State == MonsterState::Default_State) {
 		SetSpeed(100.0f);	// µ¨Å¸Å¸ÀÓ °öÇØ¾ßÇÒÁö °í¹ÎÁß
 
@@ -1884,3 +1887,30 @@ void Callback_3(CGameObject* self, CGameObject* target) {
 void Callback_4(CGameObject* self, CGameObject* target) {
 	cout << "Callback_4" << endl;
 }
+
+
+
+CHpbarObject::CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+	CTexture* ppTextures[1];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/hphpbar.png", RESOURCE_TEXTURE2D, 0);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+			m_pMaterial->SetTexture(ppTextures[0]);
+		}
+	}
+
+	SetMesh(0, new CHpBarMesh(pd3dDevice, pd3dCommandList, 500.0f,70.0f));
+}
+
+CHpbarObject:: ~CHpbarObject()
+{
+
+}
+

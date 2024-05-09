@@ -510,7 +510,6 @@ class CTreeObject: public CFBXObject
 public:
 	CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CTreeObject();
-
 };
 
 class CTextObject
@@ -540,6 +539,11 @@ private:
 	CHeightMapTerrain* m_pTerrain;
 	XMFLOAT3 m_dir = { -1.0f,0.0f,0.0f };
 	float m_speed = 100.0f;
+
+	int m_MaxHp = 100;
+	int m_CurHp = 100;
+	float m_PercentHp = 1.0f;
+
 };
 
 
@@ -576,3 +580,10 @@ public:
 
 };
 
+class CHpbarObject : public CGameObject
+{
+public:
+	CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
+	virtual ~CHpbarObject();
+
+};

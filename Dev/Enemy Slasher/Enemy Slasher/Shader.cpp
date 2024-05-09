@@ -755,6 +755,11 @@ D3D12_SHADER_BYTECODE CTextureShader::CreatePixelShader()
 
 }
 
+D3D12_SHADER_BYTECODE CUITextureShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSUITextured", "ps_5_1", &m_pd3dPixelShaderBlob));
+}
+
 D3D12_DEPTH_STENCIL_DESC CUITextureShader::CreateDepthStencilState()
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;

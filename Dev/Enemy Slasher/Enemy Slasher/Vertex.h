@@ -18,6 +18,8 @@ public:
 		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
 	}
 	CVertex(XMFLOAT3 v, XMFLOAT2 u) :m_xmf3Vertex(v), m_xmf2UV(u) {
+		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_xmf4Color = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
 	CVertex(XMFLOAT3 v, XMFLOAT4 c) : m_xmf3Vertex(v), m_xmf4Color(c) {
@@ -86,6 +88,23 @@ public:
 
 	XMFLOAT3 GetVertex() const { return vertex; }
 	XMFLOAT4 GetColor() const { return color; }
+	XMFLOAT2 GetTexCoord() const { return texcoord; }
+};
+
+class VertexWithTexCoord
+{
+private:
+	XMFLOAT3 vertex;
+	XMFLOAT2 texcoord;
+
+public:
+	VertexWithTexCoord() : vertex(XMFLOAT3(0.0f, 0.0f, 0.0f)), texcoord(XMFLOAT2(0.0f, 0.0f)) {}
+	VertexWithTexCoord(XMFLOAT3 v, XMFLOAT2 uv) : vertex(v), texcoord(uv) {}
+	VertexWithTexCoord(float x, float y, float z, float u, float v) : vertex(XMFLOAT3(x, y, z)), texcoord(XMFLOAT2(u, v)) {}
+
+	~VertexWithTexCoord() {}
+
+	XMFLOAT3 GetVertex() const { return vertex; }
 	XMFLOAT2 GetTexCoord() const { return texcoord; }
 };
 
