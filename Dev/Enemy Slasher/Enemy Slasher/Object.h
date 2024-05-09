@@ -520,18 +520,38 @@ public:
 	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
 };
 
+class CHpbarObject : public CGameObject
+{
+public:
+	CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
+	virtual ~CHpbarObject();
+
+private:
+	int m_MaxHp = 100;
+	int m_CurHp = 100;
+	float m_PercentHp = 1.0f;
+};
+
 class CMonsterObject : public CFBXTestObject
 {
 public:
 	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 		ShaderType stype = ShaderType::CObjectsShader);
+	
+	
 	virtual ~CMonsterObject();
 	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
+
+
 
 	void SetState(MonsterState state) { m_Monster_State = state; };
 	void SetSpeed(float speed) { m_speed = speed; };
+	
 	MonsterState GetState() { return m_Monster_State; };
 	bool Check_Inner_Terrain(XMFLOAT3 position);
+
+
 
 private:
 	MonsterState m_Monster_State;
@@ -539,11 +559,7 @@ private:
 	CHeightMapTerrain* m_pTerrain;
 	XMFLOAT3 m_dir = { -1.0f,0.0f,0.0f };
 	float m_speed = 100.0f;
-
-	int m_MaxHp = 100;
-	int m_CurHp = 100;
-	float m_PercentHp = 1.0f;
-
+	CHpbarObject* m_HpObject;
 };
 
 
@@ -580,10 +596,3 @@ public:
 
 };
 
-class CHpbarObject : public CGameObject
-{
-public:
-	CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
-	virtual ~CHpbarObject();
-
-};

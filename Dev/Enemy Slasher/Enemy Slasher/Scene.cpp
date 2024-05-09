@@ -809,8 +809,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			}
 		}
 
-		xPosition = urd_width(dre);
-		zPosition = urd_length(dre);
+		xPosition = 3000.0f;
+		zPosition = 3000.0f;
 
 		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 		pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
@@ -828,9 +828,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		float xpitch = 257.0f * 24.0f / 10.0f;
 		float zpitch = 257.0f * 24.0f / 7.0f;
 
-		for (int x = 0; x < 1; x++)
+		for (int x = 0; x <5; x++)
 		{
-			for (int z = 0; z < 1; z++)
+			for (int z = 0; z < 5; z++)
 			{
 
 				CFBXTestObject* pTreeObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
@@ -857,6 +857,14 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			}
 		}
 	}
+	CHpbarObject* phpbar = new CHpbarObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
+
+	float x = m_pPlayer->GetPosition().x;
+	float y = m_pPlayer->GetPosition().y + 100.0f;
+	float z = m_pPlayer->GetPosition().z + 500.0f;
+	phpbar->SetPosition(x, y, z);
+
+	m_pObjectManager->AddObj(phpbar, ObjectLayer::TextureObject);
 
 	// UI
 	{
@@ -900,9 +908,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 	}
 
-	CHpbarObject* phpbar = new CHpbarObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
-	phpbar->SetPosition(3000, 3000, 4000);
-	m_pObjectManager->AddObj(phpbar, ObjectLayer::TextureObject);
+
 
 
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());

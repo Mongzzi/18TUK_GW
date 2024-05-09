@@ -1765,6 +1765,7 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_Monster_State = MonsterState::Default_State;
 	m_pTestPlayer = ptestplayer;
 	m_pTerrain = pterrain;
+	m_HpObject = new CHpbarObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 }
 
 CMonsterObject::~CMonsterObject()
@@ -1786,21 +1787,27 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		pow(monster_position.y - player_position.y, 2) +
 		pow(monster_position.z - player_position.z, 2));
 
-
-	m_PercentHp = m_CurHp / m_MaxHp;
+	if (m_HpObject) {
+		float x = GetPosition().x;
+		float y = GetPosition().y + 200.0f;
+		float z = GetPosition().z;
+		m_HpObject->SetPosition(x, y, z);
+	}
 
 	if (m_Monster_State == MonsterState::Default_State) {
-		SetSpeed(100.0f);	// 델타타임 곱해야할지 고민중
+		SetSpeed(0.0f);	// 델타타임 곱해야할지 고민중
 
 		if (distance > 300.0f) {
 			//if ((int)fTimeTotal % 2 == 0) 
 			m_dir.x = urd(dre), m_dir.z = urd(dre);
 
 			SetLook(m_dir);
+			if (m_HpObject) { m_HpObject->SetLook(m_dir); }
+
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
-
+		
 			end_position.x = GetPosition().x;
 			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
 			end_position.z = GetPosition().z;
@@ -1842,13 +1849,26 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 	}
 
-	CGameObject::Animate(fTimeTotal,fTimeElapsed, pxmf4x4Parent);
+	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }
+
+
+
+void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
+{
+	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
+
+	if (m_HpObject) {
+		m_HpObject->Render(pd3dCommandList, pCamera, pRenderOption);
+	}
+
+}
+
 
 bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
 {
 	if (m_pTerrain) {
-		
+
 		float x = position.x;
 		float z = position.z;
 		float terrain_x = m_pTerrain->GetWidth();
@@ -1868,7 +1888,7 @@ void Callback_0(CGameObject* self, CGameObject* target) {
 }
 
 void Callback_1(CGameObject* self, CGameObject* target) {
-	cout << "Callback_1" << endl; 
+	cout << "Callback_1" << endl;
 	// 만약 이 카드가 이동 후 공격이라면 
 	// 1. self가 이동해야하는지 확인
 	// 2. 이동해야하면 이동한다.
@@ -1877,11 +1897,11 @@ void Callback_1(CGameObject* self, CGameObject* target) {
 }
 
 void Callback_2(CGameObject* self, CGameObject* target) {
-	cout << "Callback_2" << endl; 
+	cout << "Callback_2" << endl;
 }
 
 void Callback_3(CGameObject* self, CGameObject* target) {
-	cout << "Callback_3" << endl; 
+	cout << "Callback_3" << endl;
 }
 
 void Callback_4(CGameObject* self, CGameObject* target) {
@@ -1906,7 +1926,7 @@ CHpbarObject::CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		}
 	}
 
-	SetMesh(0, new CHpBarMesh(pd3dDevice, pd3dCommandList, 500.0f,70.0f));
+	SetMesh(0, new CHpBarMesh(pd3dDevice, pd3dCommandList, 500.0f, 70.0f));
 }
 
 CHpbarObject:: ~CHpbarObject()
