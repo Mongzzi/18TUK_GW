@@ -1408,13 +1408,11 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			//m_pMaterial->m_pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ncbElementBytes);
 			if (m_Card_Ui_Num <= 4 && m_Card_Ui_Num >= 0)
 			{
-				cout << "O" << endl;
 				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[m_Card_Ui_Num], 0, 4);
 				m_pMaterial->SetTexture(ppTextures[m_Card_Ui_Num]);
 			}
 			else
 			{
-				cout << "X" << endl;
 				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
 				m_pMaterial->SetTexture(ppTextures[0]);
 			}
