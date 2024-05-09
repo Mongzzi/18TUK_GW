@@ -660,9 +660,11 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			}
 			else
 			{
+				// 카드 사용
+				((CCardUIObject*)pSelectedUI)->CallFunc(NULL, NULL);
+
 				if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
 				{
-					// 카드 사용
 					// 자신 삭제
 					m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
 					cout << "삭제 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
@@ -670,7 +672,6 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				else
 				{
 					cout << "사용하지만 삭제는 안 함 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
-
 				}
 			}
 			pSelectedUI = NULL;
@@ -867,30 +868,35 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_0);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 1, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(200, 200);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 2, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(300, 300);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_2);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 3, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_3);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
 		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 4, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_4);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 	}
 

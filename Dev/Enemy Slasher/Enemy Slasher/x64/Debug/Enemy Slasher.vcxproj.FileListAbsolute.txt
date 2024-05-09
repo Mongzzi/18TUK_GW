@@ -1,3 +1,4 @@
 C:\Git_Project\18TUK_GW\Dev\Enemy Slasher\Enemy Slasher\x64\Debug\Enemy Slasher.vcxproj.CopyComplete
 C:\Users\KNH\Desktop\18TUK_GW\Dev\Enemy Slasher\Enemy Slasher\x64\Debug\Enemy Slasher.vcxproj.CopyComplete
 C:\Users\hjna0\source\18TUK_GW\Dev\Enemy Slasher\Enemy Slasher\x64\Debug\Enemy Slasher.vcxproj.CopyComplete
+C:\Users\yyyyw\Desktop\종설기\18TUK_GW\Dev\Enemy Slasher\Enemy Slasher\x64\Debug\Enemy Slasher.vcxproj.CopyComplete

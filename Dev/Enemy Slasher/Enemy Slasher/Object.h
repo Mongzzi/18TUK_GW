@@ -405,6 +405,27 @@ public:
 	virtual void SetScale(XMFLOAT3 scale);
 };
 
+// 함수포인터 콜백함수
+typedef void (*CardCallbackFunction)(CGameObject*, CGameObject*);
+ 
+// 카드 사용이 끝날때까지 다른 카드는 사용이 불가능해야함. 아마.
+// 
+// 같은 공격이라도 애니메이션이 다르면 다른 콜백을 부르게 될 듯?
+// 
+// 1. 콜백 함수가 처리
+// 중복되는 기능이 많아지면 콜백의 배열을 갖게 하여 순서대로 부르
+// 아니면 콜백함수를 갖는 연결리스트
+
+// 2. 오브젝트가 각자 행동 큐로 처리
+// 아니면 콜백 함수는 self 오브젝트의 행동 큐에 행동을 채우는 용도로만 사용하는것도 ㄱㅊ을듯.
+void Callback_0(CGameObject* self, CGameObject* target);
+void Callback_1(CGameObject* self, CGameObject* target);
+void Callback_2(CGameObject* self, CGameObject* target);
+void Callback_3(CGameObject* self, CGameObject* target);
+void Callback_4(CGameObject* self, CGameObject* target);
+ 
+//
+
 class CCardUIObject : public CUIObject
 {
 public:
@@ -417,7 +438,7 @@ public:
 	virtual ~CCardUIObject();
 private:
 	int m_Card_Ui_Num;
-
+	CardCallbackFunction m_callbackFunc = NULL;
 
 public:
 	virtual void Animate(float fTimeTotal,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -429,6 +450,8 @@ public:
 	void CursorOverObject(bool flag) override;
 	void ButtenDown() override;
 	void ButtenUp() override;
+	void SetFunc(CardCallbackFunction);
+	void CallFunc(CGameObject* self,  CGameObject* target);
 };
 
 

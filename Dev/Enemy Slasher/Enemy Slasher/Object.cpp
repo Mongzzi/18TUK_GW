@@ -1352,7 +1352,7 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_Card_Ui_Num = UInum;
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-
+	// 이거 계속 새로 만드는거 아님?
 	CTexture* ppTextures[5];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -1370,7 +1370,7 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
-
+	//
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
 
 
@@ -1379,9 +1379,18 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 			//m_pMaterial->m_pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ncbElementBytes);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
-
-			m_pMaterial->SetTexture(ppTextures[0]);
+			if (m_Card_Ui_Num <= 4 && m_Card_Ui_Num >= 0)
+			{
+				cout << "O" << endl;
+				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[m_Card_Ui_Num], 0, 4);
+				m_pMaterial->SetTexture(ppTextures[m_Card_Ui_Num]);
+			}
+			else
+			{
+				cout << "X" << endl;
+				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+				m_pMaterial->SetTexture(ppTextures[0]);
+			}
 			//SetCbvGPUDescriptorHandle(m_pMaterial->m_pShader->GetGPUCbvDescriptorStartHandle());
 		}
 	}
@@ -1506,6 +1515,19 @@ void CCardUIObject::ButtenUp()
 		break;
 	}
 	cout << m_iUInum << endl;
+}
+
+void CCardUIObject::SetFunc(CardCallbackFunction callback)
+{
+	m_callbackFunc = callback;
+}
+
+void CCardUIObject::CallFunc(CGameObject* self, CGameObject* target)
+{
+	if (m_callbackFunc)
+		m_callbackFunc(self, target);
+	else
+		cout << "콜백없음" << endl;
 }
 
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
@@ -1834,4 +1856,31 @@ bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
 	}
 }
 
+void Callback_0(CGameObject* self, CGameObject* target) {
+	cout << "Callback_0" << endl;
+	// 만약 이 카드가 제자리에서 공격이라면 
+	// 1. self의 공격력을 가져와 
+	// 2. target에게 피해를 입힌다.
+	// 위 행동 모두 함수로 구현.
+}
 
+void Callback_1(CGameObject* self, CGameObject* target) {
+	cout << "Callback_1" << endl; 
+	// 만약 이 카드가 이동 후 공격이라면 
+	// 1. self가 이동해야하는지 확인
+	// 2. 이동해야하면 이동한다.
+	// 3. target에게 피해를 입힌다.
+	// 위 행동 모두 함수로 구현.
+}
+
+void Callback_2(CGameObject* self, CGameObject* target) {
+	cout << "Callback_2" << endl; 
+}
+
+void Callback_3(CGameObject* self, CGameObject* target) {
+	cout << "Callback_3" << endl; 
+}
+
+void Callback_4(CGameObject* self, CGameObject* target) {
+	cout << "Callback_4" << endl;
+}
