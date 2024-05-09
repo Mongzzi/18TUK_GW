@@ -577,11 +577,31 @@ XMFLOAT3 CGameObject::GetRight()
 
 void CGameObject::SetLook(float x, float y, float z)
 {
-	m_xmf4x4World._31 = x;
-	m_xmf4x4World._32 = y;
-	m_xmf4x4World._33 = z;
+	// 주어진 방향 벡터를 향하는 전방 벡터를 설정
+	XMVECTOR newForward = XMVectorSet(x, y, z, 0.0f);
+	newForward = XMVector3Normalize(newForward);
 
-	UpdateTransform(NULL);
+	// 전방 벡터를 기반으로 오른쪽 벡터를 계산
+	XMVECTOR newRight = XMVector3Cross(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), newForward);
+	newRight = XMVector3Normalize(newRight);
+
+	// 새로운 오른쪽 벡터를 기반으로 위쪽 벡터를 계산
+	XMVECTOR newUp = XMVector3Cross(newForward, newRight);
+
+	// 변환 행렬을 업데이트
+	m_xmf4x4World._11 = XMVectorGetX(newRight);
+	m_xmf4x4World._12 = XMVectorGetY(newRight);
+	m_xmf4x4World._13 = XMVectorGetZ(newRight);
+
+	m_xmf4x4World._21 = XMVectorGetX(newUp);
+	m_xmf4x4World._22 = XMVectorGetY(newUp);
+	m_xmf4x4World._23 = XMVectorGetZ(newUp);
+
+	m_xmf4x4World._31 = XMVectorGetX(newForward);
+	m_xmf4x4World._32 = XMVectorGetY(newForward);
+	m_xmf4x4World._33 = XMVectorGetZ(newForward);
+
+	UpdateTransform(nullptr);
 }
 
 void CGameObject::SetLook(XMFLOAT3 xmf3Position)
@@ -1819,8 +1839,8 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 	}
 	else if (m_Monster_State == MonsterState::Chase_State) {
-		if (distance < 300.0f) {
-			SetSpeed(10.0f);
+		if (distance < 500.0f) {
+			SetSpeed(5.0f);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
 			position_difference.x = player_position.x - monster_position.x;
