@@ -138,9 +138,11 @@
     <ClInclude Include="Camera.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="CardMaster.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="ColliderWithMesh.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
+    <ClInclude Include="DeckData.h" />
     <ClInclude Include="FbxLoader_V2.h" />
     <ClInclude Include="FbxObjectData.h" />
     <ClInclude Include="PhysXManager.h" />
@@ -178,9 +180,11 @@
     <ClCompile Include="Camera.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="CardMaster.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ColliderWithMesh.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
+    <ClCompile Include="DeckData.cpp" />
     <ClCompile Include="FbxLoader_V2.cpp" />
     <ClCompile Include="FbxObjectData.cpp" />
     <ClCompile Include="PhysXManager.cpp" />

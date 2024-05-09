@@ -105,6 +105,12 @@
     <ClInclude Include="FbxObjectData.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="DeckData.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CardMaster.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Enemy Slasher.cpp">
@@ -183,6 +189,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="FbxObjectData.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DeckData.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CardMaster.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

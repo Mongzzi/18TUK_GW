@@ -1141,6 +1141,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	RECT clientRect;
 	GetClientRect(hWnd, &clientRect);
 
+	// 카드 표시하는 부분.
 	int clientWidth = clientRect.right - clientRect.left;
 	int clientHeight = clientRect.bottom - clientRect.top;
 
