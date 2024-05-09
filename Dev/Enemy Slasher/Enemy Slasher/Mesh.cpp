@@ -1782,3 +1782,44 @@ CFBXTestMesh::CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 CFBXTestMesh::~CFBXTestMesh()
 {
 }
+
+CHpBarMesh::CHpBarMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 6;
+	m_nStride = sizeof(Vertex_Color);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f;
+
+	Vertex_Color pVertices[6];
+	int i = 0;
+	// 왼쪽 상단
+	pVertices[i++] = Vertex_Color(XMFLOAT3(-fx, +fy, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	// 오른쪽 상단
+	pVertices[i++] = Vertex_Color(XMFLOAT3(+fx, +fy, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	// 왼쪽 하단
+	pVertices[i++] = Vertex_Color(XMFLOAT3(-fx, -fy, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	// 오른쪽 상단
+	pVertices[i++] = Vertex_Color(XMFLOAT3(+fx, +fy, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	// 오른쪽 하단
+	pVertices[i++] = Vertex_Color(XMFLOAT3(+fx, -fy, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	// 왼쪽 하단
+	pVertices[i++] = Vertex_Color(XMFLOAT3(-fx, -fy, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CHpBarMesh::~CHpBarMesh()
+{
+}

@@ -315,4 +315,10 @@ public:
 	virtual ~CTexturedRectMesh();
 };
 
+class CHpBarMesh : public CMesh
+{
+public:
+	CHpBarMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight);
+	virtual ~CHpBarMesh();
 
+};
