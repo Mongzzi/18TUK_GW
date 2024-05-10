@@ -542,10 +542,7 @@ void CGameObject::SetScale(float x, float y, float z)
 
 void CGameObject::SetScale(XMFLOAT3 scale)
 {
-	XMMATRIX mtxScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
-
-	UpdateTransform(NULL);
+	SetScale(scale.x, scale.y, scale.z);
 }
 
 XMFLOAT3 CGameObject::GetPosition()
@@ -1812,6 +1809,8 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		pow(monster_position.y - player_position.y, 2) +
 		pow(monster_position.z - player_position.z, 2));
 
+
+	// 룩벡터 설정후 스케일 설정 해줘야함 반대로할시 스케일 적용 x
 	if (m_HpObject) {
 		float x = GetPosition().x;
 		float y = GetPosition().y + 400.0f;
@@ -1819,16 +1818,19 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		m_HpObject->SetPosition(x, y, z);
 	}
 
+
 	if (m_Monster_State == MonsterState::Default_State) {
 		SetSpeed(1.0);	// 델타타임 곱해야할지 고민중
 
 		if (distance > 1000.0f) {
 			if ((int)fTimeTotal % 2 == 0)
 			{
-
 				m_dir.x = urd(dre), m_dir.z = urd(dre);
 				SetLook(m_dir);
-				if (m_HpObject) { m_HpObject->SetLook(m_dir); }
+				if (m_HpObject) {
+					m_HpObject->SetLook(m_dir);
+					m_HpObject->SetScale(m_CurHp/m_MaxHp, 1.0f, 1.0f);
+				}
 			}
 
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
@@ -1847,6 +1849,8 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	}
 	else if (m_Monster_State == MonsterState::Chase_State) {
 		if (distance < 1000.0f) {
+			m_CurHp -= 0.1f;
+
 			SetSpeed(3.0f);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
@@ -1859,9 +1863,12 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			m_dir.x = position_difference.x / length;
 			m_dir.y = position_difference.y / length;
 			m_dir.z = position_difference.z / length;
+			
 			SetLook(m_dir);
-			if (m_HpObject) { m_HpObject->SetLook(m_dir); }
-
+			if (m_HpObject){ 
+				m_HpObject->SetLook(m_dir); 
+				m_HpObject->SetScale((float)m_CurHp / m_MaxHp, 1.0f, 1.0f);
+			}
 
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);

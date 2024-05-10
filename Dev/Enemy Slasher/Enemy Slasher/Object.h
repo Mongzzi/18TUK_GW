@@ -525,11 +525,6 @@ class CHpbarObject : public CGameObject
 public:
 	CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
 	virtual ~CHpbarObject();
-
-private:
-	int m_MaxHp = 100;
-	int m_CurHp = 100;
-	float m_PercentHp = 1.0f;
 };
 
 class CMonsterObject : public CFBXTestObject
@@ -554,12 +549,17 @@ public:
 
 
 private:
-	MonsterState m_Monster_State;
-	TestPlayer* m_pTestPlayer;
 	CHeightMapTerrain* m_pTerrain;
+	TestPlayer* m_pTestPlayer;
+	MonsterState m_Monster_State;
+	
+	CHpbarObject* m_HpObject;
+
+	float m_MaxHp = 100.0f;
+	float m_CurHp = 100.0f;
+
 	XMFLOAT3 m_dir = { 0.0f,0.0f,1.0f };
 	float m_speed = 100.0f;
-	CHpbarObject* m_HpObject;
 };
 
 
