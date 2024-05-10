@@ -821,7 +821,20 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 	}
 
+	// animaition Test Charactor
+	{
+		CFBXTestObject* pAnimObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+		CFBXTestMesh* pAnimMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
+		pAnimObject->SetMesh(0, pAnimMesh);
 
+		float xPosition = 0;
+		float zPosition = 0;
+		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+		pAnimObject->SetPosition(xPosition, fHeight, zPosition);
+		pAnimObject->Rotate(0.0f, 0.0f, 0.0f);
+		pAnimObject->SetScale(5.f, 5.f, 5.f);
+		m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
+	}
 
 	// tree
 	{

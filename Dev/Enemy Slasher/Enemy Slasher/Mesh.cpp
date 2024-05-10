@@ -1748,7 +1748,7 @@ CFBXTestMesh::CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_pVertices = new CVertex[m_nVertices];
 	for (int i = 0; i < m_nVertices; ++i) {
-		m_pVertices[i] = CVertex((*vertexList)[i].m_Position, (*vertexList)[i].m_Normal, (*vertexList)[i].m_UV);
+		m_pVertices[i] = CVertex((*vertexList)[i].m_xmf3Position, (*vertexList)[i].m_xmf3Normal, (*vertexList)[i].m_xmf2UV);
 	}
 
 	// 버퍼생성
