@@ -861,14 +861,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			}
 		}
 	}
-	CHpbarObject* phpbar = new CHpbarObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
-
-	float x = m_pPlayer->GetPosition().x;
-	float y = m_pPlayer->GetPosition().y + 100.0f;
-	float z = m_pPlayer->GetPosition().z + 500.0f;
-	phpbar->SetPosition(x, y, z);
-
-	m_pObjectManager->AddObj(phpbar, ObjectLayer::TextureObject);
 
 	// UI
 	{

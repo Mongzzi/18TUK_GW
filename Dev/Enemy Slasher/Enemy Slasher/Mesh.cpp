@@ -1795,19 +1795,19 @@ CHpBarMesh::CHpBarMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
     VertexWithTexCoord pVertices[6];
 
-    // 왼쪽 상단
-    pVertices[0] = VertexWithTexCoord(XMFLOAT3(-fx, +fy, 0.0f), XMFLOAT2(0.0f, 0.0f));
-    // 오른쪽 상단
-    pVertices[1] = VertexWithTexCoord(XMFLOAT3(+fx, +fy, 0.0f), XMFLOAT2(1.0f, 0.0f));
-    // 왼쪽 하단
-    pVertices[2] = VertexWithTexCoord(XMFLOAT3(-fx, -fy, 0.0f), XMFLOAT2(0.0f, 1.0f));
+	// 왼쪽 상단
+	pVertices[0] = VertexWithTexCoord(XMFLOAT3(-fx, +fy, 0.0f), XMFLOAT2(0.0f, 0.0f));
+	// 왼쪽 하단
+	pVertices[1] = VertexWithTexCoord(XMFLOAT3(-fx, -fy, 0.0f), XMFLOAT2(0.0f, 1.0f));
+	// 오른쪽 상단
+	pVertices[2] = VertexWithTexCoord(XMFLOAT3(+fx, +fy, 0.0f), XMFLOAT2(1.0f, 0.0f));
 
-    // 왼쪽 하단
-    pVertices[3] = VertexWithTexCoord(XMFLOAT3(-fx, -fy, 0.0f), XMFLOAT2(0.0f, 1.0f));
-    // 오른쪽 상단
-    pVertices[4] = VertexWithTexCoord(XMFLOAT3(+fx, +fy, 0.0f), XMFLOAT2(1.0f, 0.0f));
-    // 오른쪽 하단
-    pVertices[5] = VertexWithTexCoord(XMFLOAT3(+fx, -fy, 0.0f), XMFLOAT2(1.0f, 1.0f));
+	// 오른쪽 상단
+	pVertices[3] = VertexWithTexCoord(XMFLOAT3(+fx, +fy, 0.0f), XMFLOAT2(1.0f, 0.0f));
+	// 왼쪽 하단
+	pVertices[4] = VertexWithTexCoord(XMFLOAT3(-fx, -fy, 0.0f), XMFLOAT2(0.0f, 1.0f));
+	// 오른쪽 하단
+	pVertices[5] = VertexWithTexCoord(XMFLOAT3(+fx, -fy, 0.0f), XMFLOAT2(1.0f, 1.0f));
 
     m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 

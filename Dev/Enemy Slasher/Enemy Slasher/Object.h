@@ -557,7 +557,7 @@ private:
 	MonsterState m_Monster_State;
 	TestPlayer* m_pTestPlayer;
 	CHeightMapTerrain* m_pTerrain;
-	XMFLOAT3 m_dir = { -1.0f,0.0f,0.0f };
+	XMFLOAT3 m_dir = { 0.0f,0.0f,1.0f };
 	float m_speed = 100.0f;
 	CHpbarObject* m_HpObject;
 };

@@ -1814,25 +1814,27 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 	if (m_HpObject) {
 		float x = GetPosition().x;
-		float y = GetPosition().y + 200.0f;
+		float y = GetPosition().y + 400.0f;
 		float z = GetPosition().z;
 		m_HpObject->SetPosition(x, y, z);
 	}
 
 	if (m_Monster_State == MonsterState::Default_State) {
-		SetSpeed(0.0f);	// µ¨Å¸Å¸ÀÓ °öÇØ¾ßÇÒÁö °í¹ÎÁß
+		SetSpeed(1.0);	// µ¨Å¸Å¸ÀÓ °öÇØ¾ßÇÒÁö °í¹ÎÁß
 
 		if (distance > 1000.0f) {
-			//if ((int)fTimeTotal % 2 == 0) 
-			//m_dir.x = urd(dre), m_dir.z = urd(dre);
+			if ((int)fTimeTotal % 2 == 0)
+			{
 
-			SetLook(m_dir);
-			if (m_HpObject) { m_HpObject->SetLook(m_dir); }
+				m_dir.x = urd(dre), m_dir.z = urd(dre);
+				SetLook(m_dir);
+				if (m_HpObject) { m_HpObject->SetLook(m_dir); }
+			}
 
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
-		
+
 			end_position.x = GetPosition().x;
 			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
 			end_position.z = GetPosition().z;
@@ -1901,7 +1903,7 @@ bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
 		float terrain_x = m_pTerrain->GetWidth();
 		float terrain_z = m_pTerrain->GetLength();
 
-		return (x >= 0 && x < terrain_x&& z >= 0 && z < terrain_z);
+		return (x >= 0 && x < terrain_x && z >= 0 && z < terrain_z);
 
 	}
 }
@@ -1953,7 +1955,7 @@ CHpbarObject::CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		}
 	}
 
-	SetMesh(0, new CHpBarMesh(pd3dDevice, pd3dCommandList, 500.0f, 70.0f));
+	SetMesh(0, new CHpBarMesh(pd3dDevice, pd3dCommandList, 500.0f, 30.0f));
 }
 
 CHpbarObject:: ~CHpbarObject()
