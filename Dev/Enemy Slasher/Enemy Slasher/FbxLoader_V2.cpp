@@ -561,16 +561,17 @@ void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene,
 	// affecting them.
 	// For a normal renderer, there are usually 4 joints
 	// I am adding more dummy joints if there isn't enough
-	BlendingIndexWeightPair currBlendingIndexWeightPair;
-	currBlendingIndexWeightPair.m_nBlendingIndex = 0;
-	currBlendingIndexWeightPair.m_fBlendingWeight = 0;
-	for (auto itr = loadData->m_vCtrlPoints.begin(); itr != loadData->m_vCtrlPoints.end(); ++itr)
-	{
-		for (unsigned int i = itr->m_vBlendingInfo.size(); i <= 4; ++i)
-		{
-			itr->m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
-		}
-	}
+
+	//BlendingIndexWeightPair currBlendingIndexWeightPair;
+	//currBlendingIndexWeightPair.m_nBlendingIndex = 0;
+	//currBlendingIndexWeightPair.m_fBlendingWeight = 0;
+	//for (auto itr = loadData->m_vCtrlPoints.begin(); itr != loadData->m_vCtrlPoints.end(); ++itr)
+	//{
+	//	for (unsigned int i = itr->m_vBlendingInfo.size(); i <= 4; ++i)
+	//	{
+	//		itr->m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
+	//	}
+	//}
 }
 
 /*

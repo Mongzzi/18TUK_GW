@@ -50,9 +50,7 @@ public:
 	std::vector<CFbxJoint> m_vJoints;
 
 	std::string m_sAnimationName;
-	long long m_nAnimationLength;
-	std::vector<std::string> m_vAnimationNames;
-	std::vector<long long> m_vAnimationLengths;
+	long long m_nAnimationLength = -1;
 };
 
 class CFbxData {
