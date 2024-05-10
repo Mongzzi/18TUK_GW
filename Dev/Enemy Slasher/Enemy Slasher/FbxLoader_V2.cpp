@@ -73,6 +73,8 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 
 void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, CFbxData* loadData)
 {
+	int iVertexCounter = 0;
+
 	for (int i = 0; i < lRootNode->GetChildCount(); i++)
 	{
 		FbxNode* pFbxChildNode = lRootNode->GetChild(i);
@@ -82,14 +84,15 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, CFbxData* loadData)
 
 		FbxNodeAttribute::EType AttributeType = pFbxChildNode->GetNodeAttribute()->GetAttributeType();
 
-		if (AttributeType != FbxNodeAttribute::eMesh)
+		if (AttributeType != FbxNodeAttribute::eMesh) {
+			LoadMesh(pFbxChildNode, loadData);
 			continue;
+		}
 
 		FbxMesh* pMesh = pFbxChildNode->GetMesh();
 
 		FbxVector4* pVertices = pMesh->GetControlPoints();
 
-		int iVertexCounter = 0;
 		for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 		{
 			int iNumVertices = pMesh->GetPolygonSize(j);
