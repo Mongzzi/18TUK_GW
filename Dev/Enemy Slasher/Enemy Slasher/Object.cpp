@@ -300,6 +300,8 @@ void CGameObject::SetMesh(int nIndexSize)
 		for (int i = 0; i < m_nMeshes; i++) NewMeshes[i] = m_ppMeshes[i];
 	if (m_ppMeshes)
 		delete[] m_ppMeshes;
+
+	m_nMeshes = nIndexSize;
 	m_ppMeshes = NewMeshes;
 }
 
@@ -844,7 +846,6 @@ void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			{
 				// 지금은 Mesh 가 아니면 아무것도 안 하므로 이렇게 한다.
 				SetMesh(m_nMeshes, pFBXMesh);
-				m_nMeshes++;
 			}
 			break;
 

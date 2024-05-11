@@ -166,20 +166,20 @@ protected:
 	CB_GAMEOBJECT_INFO				*m_pcbMappedGameObject = NULL;
 
 	int								m_nMeshes = 0;
-	CMesh** m_ppMeshes = NULL;
+	CMesh**							m_ppMeshes = NULL;
 
-	CMaterial* m_pMaterial = NULL;
+	CMaterial*						m_pMaterial = NULL;
 
-	CGameObject* m_pParent = NULL;
-	CGameObject* m_pChild = NULL;
-	CGameObject* m_pSibling = NULL;
+	CGameObject*					m_pParent = NULL;
+	CGameObject*					m_pChild = NULL;
+	CGameObject*					m_pSibling = NULL;
 
 
 protected:
-	COBBColliderWithMesh* m_pCollider = NULL;	// 충돌체
+	COBBColliderWithMesh*			m_pCollider = NULL;	// 충돌체
 
-	bool m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
-	bool m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
+	bool							m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
+	bool							m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
 
 public:
 	void SetChild(CGameObject* pChild);
