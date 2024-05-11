@@ -745,6 +745,17 @@ void CFBXTestObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
 }
 
+void CFBXTestObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData)
+{
+	for (int i = 0; i < pFbxData->m_pvMeshs.size(); ++i) {
+		CFBXTestMesh* pAnimMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, pFbxData->m_pvMeshs[i]);
+		SetMesh(i, pAnimMesh);
+	}
+	if (pFbxData->m_bHasSkeleton) {
+
+	}
+}
+
 
 
 

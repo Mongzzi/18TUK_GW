@@ -76,7 +76,6 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 // LoadMesh Need loadData->ContrlPoint
 void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loadData)
 {
-
 	for (int i = 0; i < lRootNode->GetChildCount(); i++)
 	{
 		FbxNode* pFbxChildNode = lRootNode->GetChild(i);

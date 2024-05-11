@@ -824,11 +824,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// animaition Test Charactor
 	{
 		CFBXTestObject* pAnimObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		CFbxData* pFbxAnimData = fLoader.LoadFBX("fbxsdk/Test_Walking.fbx");
-		for (int i = 0; i < pFbxAnimData->m_pvMeshs.size(); ++i) {
-			CFBXTestMesh* pAnimMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, pFbxAnimData->m_pvMeshs[i]);
-			pAnimObject->SetMesh(i, pAnimMesh);
-		}
+		pAnimObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;
 		float zPosition = 0;
 		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
