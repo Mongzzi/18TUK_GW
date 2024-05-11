@@ -530,7 +530,7 @@ public:
 class CMonsterObject : public CFBXTestObject
 {
 public:
-	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain,
+	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 		ShaderType stype = ShaderType::CObjectsShader);
 	
 	
@@ -550,7 +550,7 @@ public:
 
 private:
 	CHeightMapTerrain* m_pTerrain;
-	TestPlayer* m_pTestPlayer;
+	CPlayer* m_pTestPlayer;
 	MonsterState m_Monster_State;
 	
 	CHpbarObject* m_HpObject;

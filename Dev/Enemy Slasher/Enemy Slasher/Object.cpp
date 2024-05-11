@@ -1780,7 +1780,7 @@ void CBillBoardInstanceObject::ReleaseShaderVariables()
 {
 }
 
-CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TestPlayer* ptestplayer, CHeightMapTerrain* pterrain,
+CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 	ShaderType stype)
 	:CFBXTestObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
@@ -1793,6 +1793,9 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 CMonsterObject::~CMonsterObject()
 {
 }
+
+#define CHASE_DISTANCE 1000.0f
+#define BATTLE_DISTANCE 100.0f
 
 void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -1822,14 +1825,14 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	if (m_Monster_State == MonsterState::Default_State) {
 		SetSpeed(1.0);	// 델타타임 곱해야할지 고민중
 
-		if (distance > 1000.0f) {
+		if (distance > CHASE_DISTANCE) {
 			if ((int)fTimeTotal % 2 == 0)
 			{
 				m_dir.x = urd(dre), m_dir.z = urd(dre);
 				SetLook(m_dir);
 				if (m_HpObject) {
 					m_HpObject->SetLook(m_dir);
-					m_HpObject->SetScale(m_CurHp/m_MaxHp, 1.0f, 1.0f);
+					m_HpObject->SetScale(m_CurHp / m_MaxHp, 1.0f, 1.0f);
 				}
 			}
 
@@ -1842,13 +1845,24 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			end_position.z = GetPosition().z;
 			SetPosition(end_position);
 		}
-		else if (distance < 1000.0f) {
+
+		else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
 			SetState(MonsterState::Chase_State);
 		}
 
+		else if (distance < BATTLE_DISTANCE) {
+			SetState(MonsterState::Battle_State);
+		}
+
 	}
+
+
 	else if (m_Monster_State == MonsterState::Chase_State) {
-		if (distance < 1000.0f) {
+		if (distance > CHASE_DISTANCE) {
+			SetState(MonsterState::Default_State);
+		}
+
+		else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
 			m_CurHp -= 0.1f;
 
 			SetSpeed(3.0f);
@@ -1863,10 +1877,10 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			m_dir.x = position_difference.x / length;
 			m_dir.y = position_difference.y / length;
 			m_dir.z = position_difference.z / length;
-			
+
 			SetLook(m_dir);
-			if (m_HpObject){ 
-				m_HpObject->SetLook(m_dir); 
+			if (m_HpObject) {
+				m_HpObject->SetLook(m_dir);
 				m_HpObject->SetScale((float)m_CurHp / m_MaxHp, 1.0f, 1.0f);
 			}
 
@@ -1879,10 +1893,24 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			end_position.z = GetPosition().z;
 			SetPosition(end_position);
 		}
+		else if (distance < BATTLE_DISTANCE) {
+			SetState(MonsterState::Battle_State);
+		}
 	}
-	else if (m_Monster_State == MonsterState::Battle_State) {
-		// 배틀 상태 돌입시 씬 변경 할 예정
 
+
+	else if (m_Monster_State == MonsterState::Battle_State) {
+		if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
+			SetState(MonsterState::Chase_State);
+		}
+		else if (distance > CHASE_DISTANCE) {
+			SetState(MonsterState::Default_State);
+		}
+		else if (distance < BATTLE_DISTANCE) {
+			// 플레이어 시점 변경
+			//m_pTestPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);;
+
+		}
 	}
 
 	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
@@ -1910,7 +1938,7 @@ bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
 		float terrain_x = m_pTerrain->GetWidth();
 		float terrain_z = m_pTerrain->GetLength();
 
-		return (x >= 0 && x < terrain_x && z >= 0 && z < terrain_z);
+		return (x >= 0 && x < terrain_x&& z >= 0 && z < terrain_z);
 
 	}
 }
