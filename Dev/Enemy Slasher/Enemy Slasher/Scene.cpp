@@ -801,7 +801,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	for (int i = 0; i < 1; i++) {
 		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, ShaderType::CTextureShader);
-		CFBXTestMesh* pStoneMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stone_big_001.fbx"));
+		CFBXTestMesh* pStoneMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stone_big_001.fbx")->m_pvMeshs[0]);
 		pMonsterObject->SetMesh(0, pStoneMesh);
 
 		CMaterial* pTreeMaterial = pMonsterObject->GetMaterial();
@@ -824,9 +824,11 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// animaition Test Charactor
 	{
 		CFBXTestObject* pAnimObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		CFBXTestMesh* pAnimMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
-		pAnimObject->SetMesh(0, pAnimMesh);
-
+		CFbxData* pFbxAnimData = fLoader.LoadFBX("fbxsdk/Test_Walking.fbx");
+		for (int i = 0; i < pFbxAnimData->m_pvMeshs.size(); ++i) {
+			CFBXTestMesh* pAnimMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, pFbxAnimData->m_pvMeshs[i]);
+			pAnimObject->SetMesh(i, pAnimMesh);
+		}
 		float xPosition = 0;
 		float zPosition = 0;
 		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
@@ -851,7 +853,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			{
 
 				CFBXTestObject* pTreeObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-				CFBXTestMesh* pTreeMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3));
+				CFBXTestMesh* pTreeMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3)->m_pvMeshs[0]);
 				pTreeObject->SetMesh(0, pTreeMesh);
 				CMaterial* pTreeMaterial = pTreeObject->GetMaterial();
 

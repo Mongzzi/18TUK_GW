@@ -53,15 +53,27 @@ public:
 	long long m_nAnimationLength = -1;
 };
 
+class CFbxMeshData {
+public:
+	CFbxMeshData() {};
+	~CFbxMeshData() {};
+
+public:
+	std::vector<CFbxCtrlPoint> m_vCtrlPoints;
+	std::vector<CFbxVertex> m_vVertex;
+	std::vector<int> m_vIndices;
+};
+
 class CFbxData {
 public:
 	CFbxData() {};
 	~CFbxData() {};
 
 public:
-	std::vector<CFbxCtrlPoint> m_vCtrlPoints;
-	std::vector<CFbxVertex> m_vVertex;
-	std::vector<int> m_vIndices;
+	std::vector<CFbxMeshData*> m_pvMeshs;
 	CFbxSkeletonData m_Skeleton;
 	bool m_bHasSkeleton = false;
+
+public:
+	int __nLoadMeshCounter = 0;
 };

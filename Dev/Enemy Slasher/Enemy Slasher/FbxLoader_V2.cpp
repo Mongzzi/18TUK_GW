@@ -56,8 +56,6 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 			LoadControlPoints(lRootNode, loadData);
 			ProcessSkeletonHierarchy(lRootNode, loadData);
 			LoadMesh(lRootNode, lScene, loadData);
-			// Clear CtrlPoints for manage memory
-			loadData->m_vCtrlPoints.clear();
 
 #ifdef _DEBUG
 			FBXSDK_printf("Load Complete file : %s\n", fileName);
@@ -78,7 +76,6 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 // LoadMesh Need loadData->ContrlPoint
 void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loadData)
 {
-	int iVertexCounter = 0;
 
 	for (int i = 0; i < lRootNode->GetChildCount(); i++)
 	{
@@ -94,10 +91,13 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 			continue;
 		}
 
-		ProcessJointsAndAnimation(pFbxChildNode, lScene, loadData);
+		CFbxMeshData* pMeshData = loadData->m_pvMeshs[loadData->__nLoadMeshCounter++];
+
+		ProcessJointsAndAnimation(pFbxChildNode, lScene, loadData, pMeshData);
 
 		FbxMesh* pMesh = pFbxChildNode->GetMesh();
 
+		int iVertexCounter = 0;
 		for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 		{
 			int iNumVertices = pMesh->GetPolygonSize(j);
@@ -106,7 +106,7 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 			for (int k = 0; k < iNumVertices; k++) {
 				int iControlPointIndex = pMesh->GetPolygonVertex(j, k);
 
-				CFbxCtrlPoint* currCtrlPoint = &(loadData->m_vCtrlPoints[iControlPointIndex]);
+				CFbxCtrlPoint* currCtrlPoint = &(pMeshData->m_vCtrlPoints[iControlPointIndex]);
 
 				CFbxVertex vertex;
 				vertex.m_xmf3Position = currCtrlPoint->m_xmf3Position;
@@ -130,11 +130,14 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 				}
 
 
-				loadData->m_vVertex.push_back(vertex);
-				loadData->m_vIndices.push_back(iVertexCounter);
+				pMeshData->m_vVertex.push_back(vertex);
+				pMeshData->m_vIndices.push_back(iVertexCounter);
 				++iVertexCounter;
 			}
 		}
+
+		// Clear CtrlPoints for manage memory
+		pMeshData->m_vCtrlPoints.clear();
 	}
 }
 
@@ -158,11 +161,15 @@ void CFbxLoader_V2::LoadControlPoints(FbxNode* lRootNode, CFbxData* loadData)
 
 		FbxMesh* pMesh = pFbxChildNode->GetMesh();
 
-		ReadControlPoints(pMesh, loadData);
+		CFbxMeshData* pNewMeshData = new CFbxMeshData;
+
+		ReadMeshControlPoints(pMesh, pNewMeshData);
+
+		loadData->m_pvMeshs.push_back(pNewMeshData);
 	}
 }
 
-void CFbxLoader_V2::ReadControlPoints(FbxMesh* inMesh, CFbxData* loadData)
+void CFbxLoader_V2::ReadMeshControlPoints(FbxMesh* inMesh, CFbxMeshData* loadData)
 {
 	unsigned int ctrlPointCount = inMesh->GetControlPointsCount();
 	for (unsigned int i = 0; i < ctrlPointCount; ++i)
@@ -361,7 +368,7 @@ void CFbxLoader_V2::storeFbxAMat2XMFLOAT4x4(XMFLOAT4X4& dest, FbxAMatrix& sorce)
 }
 
 // this function need loaded contrlPoints and Skeleton
-void CFbxLoader_V2::ProcessJoints(FbxNode* inNode, CFbxData* loadData)
+void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData, CFbxMeshData* currMeshData)
 {
 	FbxMesh* currMesh = inNode->GetMesh();
 	unsigned int numOfDeformers = currMesh->GetDeformerCount();
@@ -401,127 +408,7 @@ void CFbxLoader_V2::ProcessJoints(FbxNode* inNode, CFbxData* loadData)
 				BlendingIndexWeightPair currBlendingIndexWeightPair;
 				currBlendingIndexWeightPair.m_nBlendingIndex = currJointIndex;
 				currBlendingIndexWeightPair.m_fBlendingWeight = currCluster->GetControlPointWeights()[i];
-				loadData->m_vCtrlPoints[currCluster->GetControlPointIndices()[i]].m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
-			}
-		}
-	}
-
-	// Some of the control points only have less than 4 joints
-	// affecting them.
-	// For a normal renderer, there are usually 4 joints
-	// I am adding more dummy joints if there isn't enough
-	BlendingIndexWeightPair currBlendingIndexWeightPair;
-	currBlendingIndexWeightPair.m_nBlendingIndex = 0;
-	currBlendingIndexWeightPair.m_fBlendingWeight = 0;
-	for (auto itr = loadData->m_vCtrlPoints.begin(); itr != loadData->m_vCtrlPoints.end(); ++itr)
-	{
-		for (unsigned int i = itr->m_vBlendingInfo.size(); i <= 4; ++i)
-		{
-			itr->m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
-		}
-	}
-}
-
-void CFbxLoader_V2::ProcessAnimations(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData)
-{
-	FbxMesh* currMesh = inNode->GetMesh();
-	unsigned int numOfDeformers = currMesh->GetDeformerCount();
-
-	FbxAMatrix geometryTransform = GetGeometryTransformation(inNode);
-
-	for (unsigned int deformerIndex = 0; deformerIndex < numOfDeformers; ++deformerIndex)
-	{
-		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
-		if (!currSkin) continue;
-
-		unsigned int numOfClusters = currSkin->GetClusterCount();
-		for (unsigned int clusterIndex = 0; clusterIndex < numOfClusters; ++clusterIndex)
-		{
-			FbxCluster* currCluster = currSkin->GetCluster(clusterIndex);
-			std::string currJointName = currCluster->GetLink()->GetName();
-			unsigned int currJointIndex = FindJointIndexUsingName(currJointName, loadData);
-			FbxAMatrix transformMatrix;
-			FbxAMatrix transformLinkMatrix;
-			FbxAMatrix globalBindposeInverseMatrix;
-
-			currCluster->GetTransformMatrix(transformMatrix); // The transformation of the mesh at binding time
-			currCluster->GetTransformLinkMatrix(transformLinkMatrix); // The transformation of the cluster(joint) at binding time from joint space to world space
-			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform; // we need this
-
-			// Get animation information
-			FbxAnimStack* currAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);
-
-			FbxString animStackName = currAnimStack->GetName();
-			loadData->m_Skeleton.m_sAnimationName = animStackName.Buffer();
-			loadData->m_Skeleton.m_vAnimationNames.push_back(loadData->m_Skeleton.m_sAnimationName);
-
-			FbxTakeInfo* takeInfo = lScene->GetTakeInfo(animStackName);
-			FbxTime time = takeInfo->mLocalTimeSpan.GetDuration().GetFrameCount();
-
-			FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
-			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
-
-			loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
-			loadData->m_Skeleton.m_vAnimationLengths.push_back(loadData->m_Skeleton.m_nAnimationLength);
-
-			Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
-			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
-			{
-				FbxTime currTime;
-				currTime.SetFrame(i, FbxTime::eFrames24);
-				*currAnim = new Keyframe();
-				(*currAnim)->m_nFrameNum = i;
-
-				FbxAMatrix currentTransformOffset = inNode->EvaluateGlobalTransform(currTime) * geometryTransform;
-				storeFbxAMat2XMFLOAT4x4((*currAnim)->m_xmf4x4GlobalTransform,
-					currentTransformOffset.Inverse() * currCluster->GetLink()->EvaluateGlobalTransform(currTime));
-				currAnim = &((*currAnim)->m_pNext);
-			}
-		}
-	}
-}
-
-void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData)
-{
-	FbxMesh* currMesh = inNode->GetMesh();
-	unsigned int numOfDeformers = currMesh->GetDeformerCount();
-
-	FbxAMatrix geometryTransform = GetGeometryTransformation(inNode);
-
-	for (unsigned int deformerIndex = 0; deformerIndex < numOfDeformers; ++deformerIndex)
-	{
-		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
-		if (!currSkin) continue;
-
-		unsigned int numOfClusters = currSkin->GetClusterCount();
-		for (unsigned int clusterIndex = 0; clusterIndex < numOfClusters; ++clusterIndex)
-		{
-			FbxCluster* currCluster = currSkin->GetCluster(clusterIndex);
-			std::string currJointName = currCluster->GetLink()->GetName();
-			unsigned int currJointIndex = FindJointIndexUsingName(currJointName, loadData);
-			FbxAMatrix transformMatrix;
-			FbxAMatrix transformLinkMatrix;
-			FbxAMatrix globalBindposeInverseMatrix;
-
-			currCluster->GetTransformMatrix(transformMatrix); // The transformation of the mesh at binding time
-			currCluster->GetTransformLinkMatrix(transformLinkMatrix); // The transformation of the cluster(joint) at binding time from joint space to world space
-			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform; // we need this
-
-			// Update the information in mSkeleton 
-			XMFLOAT4X4 xmf4x4BindinverseMat;
-			storeFbxAMat2XMFLOAT4x4(xmf4x4BindinverseMat, globalBindposeInverseMatrix);
-			loadData->m_Skeleton.m_vJoints[currJointIndex].m_xmf4x4GlobalBindposeInverse = xmf4x4BindinverseMat;
-			//loadData->m_Skeleton.m_vJoints[currJointIndex].mNode = currCluster->GetLink();
-
-
-			// Associate each joint with the control points it affects
-			unsigned int numOfIndices = currCluster->GetControlPointIndicesCount();
-			for (unsigned int i = 0; i < numOfIndices; ++i)
-			{
-				BlendingIndexWeightPair currBlendingIndexWeightPair;
-				currBlendingIndexWeightPair.m_nBlendingIndex = currJointIndex;
-				currBlendingIndexWeightPair.m_fBlendingWeight = currCluster->GetControlPointWeights()[i];
-				loadData->m_vCtrlPoints[currCluster->GetControlPointIndices()[i]].m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
+				currMeshData->m_vCtrlPoints[currCluster->GetControlPointIndices()[i]].m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
 			}
 
 
@@ -530,7 +417,6 @@ void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene,
 
 			FbxString animStackName = currAnimStack->GetName();
 			loadData->m_Skeleton.m_sAnimationName = animStackName.Buffer();
-			loadData->m_Skeleton.m_vAnimationNames.push_back(loadData->m_Skeleton.m_sAnimationName);
 
 			FbxTakeInfo* takeInfo = lScene->GetTakeInfo(animStackName);
 			FbxTime time = takeInfo->mLocalTimeSpan.GetDuration().GetFrameCount();
@@ -539,7 +425,6 @@ void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene,
 			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 
 			loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
-			loadData->m_Skeleton.m_vAnimationLengths.push_back(loadData->m_Skeleton.m_nAnimationLength);
 
 			Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
 			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)

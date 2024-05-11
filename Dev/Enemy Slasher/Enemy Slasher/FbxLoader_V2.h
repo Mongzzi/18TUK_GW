@@ -24,16 +24,14 @@ private:
 	void LoadMesh(FbxNode* rootNode, FbxScene* lScene, CFbxData* loadData);
 	void LoadControlPoints(FbxNode* rootNode, CFbxData* loadData);
 	
-	void ReadControlPoints(FbxMesh* inMesh, CFbxData* loadData);
+	void ReadMeshControlPoints(FbxMesh* inMesh, CFbxMeshData* loadData);
 	void ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outNormal);
 	void ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inUVPointIndex, int inUVLayerNum, XMFLOAT2& outUV);
 
 	void ProcessSkeletonHierarchy(FbxNode* inRootNode, CFbxData* loadData);
 	void ProcessSkeletonHierarchyRecursively(FbxNode* inNode, int myIndex, int inParentIndex, CFbxData* loadData);
 
-	void ProcessJoints(FbxNode* inNode, CFbxData* loadData);
-	void ProcessAnimations(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData);
-	void ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData);
+	void ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData, CFbxMeshData* currMeshData);
 
 	FbxAMatrix GetGeometryTransformation(FbxNode* inNode);
 	unsigned int FindJointIndexUsingName(std::string JointName, CFbxData* loadData);

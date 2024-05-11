@@ -187,7 +187,7 @@ public:
 class CFBXTestMesh : public CDynamicShapeMesh
 {
 public:
-	CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* loadData);
+	CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxMeshData* pMeshData);
 	virtual ~CFBXTestMesh();
 };
 

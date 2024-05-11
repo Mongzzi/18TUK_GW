@@ -1734,9 +1734,9 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 
 // ------------------------------- FBX V2 -----------------------------------
-CFBXTestMesh::CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* loadData) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
+CFBXTestMesh::CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxMeshData* pMeshData) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
 {
-	vector<CFbxVertex>* vertexList = &loadData->m_vVertex;
+	vector<CFbxVertex>* vertexList = &pMeshData->m_vVertex;
 
 	m_nVertices = vertexList->size();				// 꼭지점 개수
 	m_nStride = sizeof(CVertex); // x , y, z 좌표
@@ -1760,7 +1760,7 @@ CFBXTestMesh::CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
 
-	vector<int>* indexList = &loadData->m_vIndices;
+	vector<int>* indexList = &pMeshData->m_vIndices;
 
 	m_nIndices = indexList->size();
 	m_pnIndices = new UINT[m_nIndices];
