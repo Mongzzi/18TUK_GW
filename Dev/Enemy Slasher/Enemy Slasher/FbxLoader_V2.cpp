@@ -65,13 +65,24 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 				
 
 				for (int i = 0; i < loadData->m_pvMeshs.size(); ++i)
-					for (int j = 0; j < loadData->m_pvMeshs[i]->m_vVertex.size(); ++j)
+					for (int j = 0; j < loadData->m_pvMeshs[i]->m_vVertex.size(); ++j) {
 						if (loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size() != 4)
-							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingInfo. It has %d Infos\n", 
-								i, 
-								j, 
+							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingInfo. It has %d Infos\n",
+								i,
+								j,
 								loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size());
-
+						float temp = 0.f;
+						for (int k = 0; k < loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size(); ++k) {
+							temp += loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo[k].m_fBlendingWeight;
+						}
+						float t1 = 0.0005f;
+						float t2 = fabs(1.f - temp);
+						if (t2 > t1 && t2 < -t1)
+							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingWeight. It has %d Weight\n",
+								i,
+								j,
+								t2);
+					}
 				if (loadData->m_Skeleton.m_nAnimationLength > 0) {
 					std::cout << "\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
 					std::cout << "\t AnimationFrameLength: " << loadData->m_Skeleton.m_nAnimationLength << '\n';

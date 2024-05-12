@@ -740,16 +740,12 @@ void CGameObject::MakeCollider()
 
 CFBXTestObject::CFBXTestObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 1)
 {
-
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 CFBXTestObject::~CFBXTestObject()
 {
 
-}
-
-void CFBXTestObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption) {
-	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
 }
 
 void CFBXTestObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData)
@@ -758,9 +754,74 @@ void CFBXTestObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		CFBXTestMesh* pAnimMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, pFbxData->m_pvMeshs[i]);
 		SetMesh(i, pAnimMesh);
 	}
-	if (pFbxData->m_bHasSkeleton) {
 
+	if (pFbxData->m_bHasSkeleton) {
+		m_pSkeletonData = &pFbxData->m_Skeleton;
+
+		//m_pcbMappedSkinningObject->m_bIsAvailable = true;
 	}
+	else {
+		//m_pcbMappedSkinningObject->m_bIsAvailable = false;
+	}
+}
+
+void CFBXTestObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_SKINNINGOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbSkinningObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbSkinningObject->Map(0, NULL, (void**)&m_pcbMappedSkinningObject);
+}
+
+void CFBXTestObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcbSkinningObject)
+	{
+		m_pd3dcbSkinningObject->Unmap(0, NULL);
+		m_pd3dcbSkinningObject->Release();
+	}
+
+	CGameObject::ReleaseShaderVariables();
+}
+
+void CFBXTestObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	static int animVal = 0;
+	static int counter = 0;
+	if (m_pSkeletonData) {
+		for (int i = 0; i < m_pSkeletonData->m_vJoints.size(); ++i) {
+			//Keyframe* nowFrame = m_pSkeletonData->m_vJoints[i].m_pAnimFrames;
+			//for (int j = 0; j < animVal; ++j) {
+			//	if (nowFrame->m_pNext) {
+			//		nowFrame = nowFrame->m_pNext;
+			//	}
+			//	else {
+			//		animVal = 0;
+			//	}
+			//}
+			//XMFLOAT4X4* m_Mat = &nowFrame->m_xmf4x4GlobalTransform;
+			//XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(m_Mat)));
+
+			//XMFLOAT4X4* m_Mat = &m_pSkeletonData->m_vJoints[i].m_xmf4x4GlobalBindposeInverse;
+			//XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMLoadFloat4x4(m_Mat));
+
+			m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i] = Matrix4x4::Identity();
+		}
+		if (counter >= 100) {
+			animVal++;
+			counter = 0;
+			cout << "Skeleton - AnimVal : " << animVal << "\n";
+		}
+		counter++;
+	}
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcbSkinningObject->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(10, d3dcbGameObjectGpuVirtualAddress);
+
+	CGameObject::UpdateShaderVariables(pd3dCommandList);
+}
+
+void CFBXTestObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption) {
+	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
 }
 
 

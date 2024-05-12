@@ -36,6 +36,11 @@ struct CB_GAMEOBJECT_INFO
 	UINT	   m_nMaterialID;
 };
 
+struct CB_SKINNINGOBJECT_INFO
+{
+	//bool m_bIsAvailable;
+	XMFLOAT4X4 m_xmf4x4BoneMat[96];
+};
 
 #define RESOURCE_TEXTURE2D			0x01
 #define RESOURCE_TEXTURE2D_ARRAY	0x02
@@ -293,9 +298,22 @@ public:
 	void SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData);
 	void SetAnimData(CFbxData* pFbxData) {};
 
+	//상수 버퍼를 생성한다. 
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	//상수 버퍼의 내용을 갱신한다. 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual void ReleaseShaderVariables();
+
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 
 private:
+	CFbxSkeletonData* m_pSkeletonData = NULL;
+
+	ID3D12Resource* m_pd3dcbSkinningObject = NULL;
+	CB_SKINNINGOBJECT_INFO* m_pcbMappedSkinningObject = NULL;
+
 };
 
 class CRayObject : public CGameObject

@@ -20,6 +20,12 @@ cbuffer cbTimeInfo : register(b4)
 	float gfElapsedTime : packoffset(c0.y);
 };
 
+cbuffer cbSkinningInfo : register(b5)
+{
+    //bool gbIsSkinningAvaliable : packoffset(c0);
+    matrix gmtxBoneMatrices[96] : packoffset(c0);
+}
+
 
 #include "Light.hlsl"
 
@@ -346,24 +352,41 @@ VS_SKINNING_OUTPUT VSSkinning(VS_SKINNING_INPUT input)
 {
     VS_SKINNING_OUTPUT output;
 
-    float4x4 skinnigMatrix = 0;
-    //for (int i = 0; i < 4; ++i)
-    //{
-    //    skinnigMatrix += gSkinningMatrices[input.blendingIndex[i]] * input.blendingWeight[i];
-    //}
+    float4x4 skinningMatrix = 0;
+    for (int i = 0; i < 4; ++i)
+    {
+        skinningMatrix += gmtxBoneMatrices[input.blendingIndex[i]] * input.blendingWeight[i];
+    }
+	
+    float3 newNormal = input.normal;
 	
 	// apply skinning
-    float4 skinningPosition = mul(float4(input.position, 1.0f), skinnigMatrix);
+    float4 skinningPosition = float4(input.position, 1.0f);
+	
+    //if (gbIsSkinningAvaliable == true)
+    //{
+        float3 skinningPos = float3(0.0f, 0.0f, 0.0f);
+        float3 skinningNormal = float3(0.0f, 0.0f, 0.0f);
+        for (int i = 0; i < 4; ++i)
+        {
+            skinningPos += input.blendingWeight[i] * mul(float4(input.position, 1.0f), gmtxBoneMatrices[input.blendingIndex[i]]).xyz;
+            skinningNormal += input.blendingWeight[i] * mul(input.normal, (float3x3) gmtxBoneMatrices[input.blendingIndex[i]]);
+        }
+		
+        skinningPosition = float4(skinningPos, 1.0f);
+        newNormal = skinningNormal;
+    //}
 	// apply gameObjectMat
-    float4 worldPosition = mul(float4(input.position, 1.0f), gmtxGameObject);
+    float4 worldPosition = mul(skinningPosition, gmtxGameObject);
 	// apply viewMat
     float4 viewPosition = mul(worldPosition, gmtxView);
 	// apply projectionMat
-    output.position = mul(viewPosition, gmtxProjection);
+    float4 newPosition = mul(viewPosition, gmtxProjection);
 	
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	
+    output.position = newPosition;
     output.color = input.color;
-    output.normal = input.normal;
+    output.normal = newNormal;
     output.texCoord = input.texCoord;
 
     return (output);
