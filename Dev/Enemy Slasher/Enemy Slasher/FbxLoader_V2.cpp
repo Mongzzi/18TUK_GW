@@ -59,6 +59,24 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 
 #ifdef _DEBUG
 			FBXSDK_printf("Load Complete file : %s\n", fileName);
+			FBXSDK_printf("\t MeshCount: %d\n", loadData->m_pvMeshs.size());
+			if (loadData->m_bHasSkeleton == true) {
+				FBXSDK_printf("\t Skeleton Joint Count: %d\n", loadData->m_Skeleton.m_vJoints.size());
+				
+
+				for (int i = 0; i < loadData->m_pvMeshs.size(); ++i)
+					for (int j = 0; j < loadData->m_pvMeshs[i]->m_vVertex.size(); ++j)
+						if (loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size() != 4)
+							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingInfo. It has %d Infos\n", 
+								i, 
+								j, 
+								loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size());
+
+				if (loadData->m_Skeleton.m_nAnimationLength > 0) {
+					std::cout << "\t\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
+					FBXSDK_printf("\t\t AnimationFrameLength: %d\n", loadData->m_Skeleton.m_nAnimationLength);
+				}
+			}
 #endif // _DEBUG
 		}
 
@@ -446,16 +464,16 @@ void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene,
 	// For a normal renderer, there are usually 4 joints
 	// I am adding more dummy joints if there isn't enough
 
-	//BlendingIndexWeightPair currBlendingIndexWeightPair;
-	//currBlendingIndexWeightPair.m_nBlendingIndex = 0;
-	//currBlendingIndexWeightPair.m_fBlendingWeight = 0;
-	//for (auto itr = loadData->m_vCtrlPoints.begin(); itr != loadData->m_vCtrlPoints.end(); ++itr)
-	//{
-	//	for (unsigned int i = itr->m_vBlendingInfo.size(); i <= 4; ++i)
-	//	{
-	//		itr->m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
-	//	}
-	//}
+	BlendingIndexWeightPair currBlendingIndexWeightPair;
+	currBlendingIndexWeightPair.m_nBlendingIndex = 0;
+	currBlendingIndexWeightPair.m_fBlendingWeight = 0;
+	for (auto itr = currMeshData->m_vCtrlPoints.begin(); itr != currMeshData->m_vCtrlPoints.end(); ++itr)
+	{
+		for (unsigned int i = itr->m_vBlendingInfo.size(); i < 4; ++i)
+		{
+			itr->m_vBlendingInfo.push_back(currBlendingIndexWeightPair);
+		}
+	}
 }
 
 /*
