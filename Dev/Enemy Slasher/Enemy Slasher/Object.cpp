@@ -789,24 +789,27 @@ void CFBXTestObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 	static int counter = 0;
 	if (m_pSkeletonData) {
 		for (int i = 0; i < m_pSkeletonData->m_vJoints.size(); ++i) {
-			//Keyframe* nowFrame = m_pSkeletonData->m_vJoints[i].m_pAnimFrames;
-			//for (int j = 0; j < animVal; ++j) {
-			//	if (nowFrame->m_pNext) {
-			//		nowFrame = nowFrame->m_pNext;
-			//	}
-			//	else {
-			//		animVal = 0;
-			//	}
-			//}
+			Keyframe* nowFrame = m_pSkeletonData->m_vJoints[i].m_pAnimFrames;
+			for (int j = 0; j < animVal; ++j) {
+				if (nowFrame->m_pNext) {
+					nowFrame = nowFrame->m_pNext;
+				}
+				else {
+					animVal = 0;
+				}
+			}
 			//XMFLOAT4X4* m_Mat = &nowFrame->m_xmf4x4GlobalTransform;
 			//XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(m_Mat)));
+
+			XMFLOAT4X4* m_Mat = &Matrix4x4::Multiply(m_pSkeletonData->m_vJoints[i].m_xmf4x4GlobalBindposeInverse, nowFrame->m_xmf4x4GlobalTransform);
+			XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(m_Mat)));
 
 			//XMFLOAT4X4* m_Mat = &m_pSkeletonData->m_vJoints[i].m_xmf4x4GlobalBindposeInverse;
 			//XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMLoadFloat4x4(m_Mat));
 
-			m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i] = Matrix4x4::Identity();
+			//m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i] = Matrix4x4::Identity();
 		}
-		if (counter >= 100) {
+		if (counter >= 10) {
 			animVal++;
 			counter = 0;
 			cout << "Skeleton - AnimVal : " << animVal << "\n";
