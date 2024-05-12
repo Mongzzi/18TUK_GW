@@ -72,6 +72,29 @@ public:
 	XMFLOAT3 GetVertex() { return vertex; };
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
+class CVertex_Skining : public CVertex
+{
+public:
+	float m_f3BlendingWeight[4];
+	int m_n4BlendingIndex[4];
+
+public:
+	CVertex_Skining() {
+		m_f3BlendingWeight[0] = 0.f;
+		m_f3BlendingWeight[1] = 0.f;
+		m_f3BlendingWeight[2] = 0.f;
+		m_f3BlendingWeight[3] = 0.f;
+
+		m_n4BlendingIndex[0] = 0;
+		m_n4BlendingIndex[1] = 0;
+		m_n4BlendingIndex[2] = 0;
+		m_n4BlendingIndex[3] = 0;
+	}
+	~CVertex_Skining() {};
+};
+
 class VertexWithColorAndTexCoord
 {
 private:

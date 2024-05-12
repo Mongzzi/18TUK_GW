@@ -18,7 +18,8 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CUITextureShader,
 	CTexture_Position_Texcoord_Shader,
 	CSkyBoxShader,
-	CBillBoardInstanceShader
+	CBillBoardInstanceShader,
+	CAnimationObjectShader
 };
 
 enum class MonsterState : int {
@@ -286,7 +287,7 @@ public:
 class CFBXTestObject : public CGameObject
 {
 public:
-	CFBXTestObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsShader);
+	CFBXTestObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CAnimationObjectShader);
 	virtual ~CFBXTestObject();
 
 	void SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData);

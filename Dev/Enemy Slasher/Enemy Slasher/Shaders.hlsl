@@ -321,6 +321,62 @@ float4 PSBillboardInstancing(VS_BILLBOARD_INSTANCING_OUTPUT input) : SV_TARGET
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////
+struct VS_SKINNING_INPUT
+{
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float4 color : COLOR;
+    float2 texCoord : TEXCOORD;
+    float4 blendingWeight : BLENDWEIGHT;
+    int4 blendingIndex : BLENDINDICES;
+};
+
+struct VS_SKINNING_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float3 normal : NORMAL;
+    float4 color : COLOR;
+    float2 texCoord : TEXCOORD;
+};
+
+
+
+VS_SKINNING_OUTPUT VSSkinning(VS_SKINNING_INPUT input)
+{
+    VS_SKINNING_OUTPUT output;
+
+    float4x4 skinnigMatrix = 0;
+    //for (int i = 0; i < 4; ++i)
+    //{
+    //    skinnigMatrix += gSkinningMatrices[input.blendingIndex[i]] * input.blendingWeight[i];
+    //}
+	
+	// apply skinning
+    float4 skinningPosition = mul(float4(input.position, 1.0f), skinnigMatrix);
+	// apply gameObjectMat
+    float4 worldPosition = mul(float4(input.position, 1.0f), gmtxGameObject);
+	// apply viewMat
+    float4 viewPosition = mul(worldPosition, gmtxView);
+	// apply projectionMat
+    output.position = mul(viewPosition, gmtxProjection);
+	
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.color = input.color;
+    output.normal = input.normal;
+    output.texCoord = input.texCoord;
+
+    return (output);
+}
+
+float4 PSSkinning(VS_SKINNING_OUTPUT input) : SV_TARGET
+{
+    float4 texColor = gtxtTexture.Sample(gWrapSamplerState, input.texCoord);
+    input.normal = normalize(input.normal);
+    float4 cIllumination = Lighting(input.position.xyz, input.normal);
+    return (texColor * cIllumination);
+}
+////////////////////////////////////////////////////////////////////////////////////////////
 
 
 

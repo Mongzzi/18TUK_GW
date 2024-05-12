@@ -1739,17 +1739,33 @@ CFBXTestMesh::CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	vector<CFbxVertex>* vertexList = &pMeshData->m_vVertex;
 
 	m_nVertices = vertexList->size();				// 꼭지점 개수
-	m_nStride = sizeof(CVertex); // x , y, z 좌표
+	m_nStride = sizeof(CVertex_Skining); // x , y, z 좌표
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	std::random_device rd;
 	std::default_random_engine dre(rd());
 	std::uniform_real_distribution <> urd(0.0, 1.0);
 
-	m_pVertices = new CVertex[m_nVertices];
+	CVertex_Skining* newVertices = new CVertex_Skining[m_nVertices];
 	for (int i = 0; i < m_nVertices; ++i) {
-		m_pVertices[i] = CVertex((*vertexList)[i].m_xmf3Position, (*vertexList)[i].m_xmf3Normal, (*vertexList)[i].m_xmf2UV);
+		newVertices[i].m_xmf3Vertex = (*vertexList)[i].m_xmf3Position;
+		newVertices[i].m_xmf3Normal = (*vertexList)[i].m_xmf3Normal;
+		newVertices[i].m_xmf2UV = (*vertexList)[i].m_xmf2UV;
 	}
+	if ((*vertexList)[0].m_vBlendingInfo.size() > 0) {
+		for (int i = 0; i < m_nVertices; ++i) {
+			newVertices[i].m_f3BlendingWeight[0] = (*vertexList)[i].m_vBlendingInfo[0].m_fBlendingWeight;
+			newVertices[i].m_f3BlendingWeight[1] = (*vertexList)[i].m_vBlendingInfo[1].m_fBlendingWeight;
+			newVertices[i].m_f3BlendingWeight[2] = (*vertexList)[i].m_vBlendingInfo[2].m_fBlendingWeight;
+			newVertices[i].m_f3BlendingWeight[3] = (*vertexList)[i].m_vBlendingInfo[3].m_fBlendingWeight;
+
+			newVertices[i].m_n4BlendingIndex[0] = (*vertexList)[i].m_vBlendingInfo[0].m_nBlendingIndex;
+			newVertices[i].m_n4BlendingIndex[1] = (*vertexList)[i].m_vBlendingInfo[1].m_nBlendingIndex;
+			newVertices[i].m_n4BlendingIndex[2] = (*vertexList)[i].m_vBlendingInfo[2].m_nBlendingIndex;
+			newVertices[i].m_n4BlendingIndex[3] = (*vertexList)[i].m_vBlendingInfo[3].m_nBlendingIndex;
+		}
+	}
+	m_pVertices = newVertices;
 
 	// 버퍼생성
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, m_pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);

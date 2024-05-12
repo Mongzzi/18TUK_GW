@@ -73,8 +73,8 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 								loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size());
 
 				if (loadData->m_Skeleton.m_nAnimationLength > 0) {
-					std::cout << "\t\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
-					FBXSDK_printf("\t\t AnimationFrameLength: %d\n", loadData->m_Skeleton.m_nAnimationLength);
+					std::cout << "\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
+					std::cout << "\t AnimationFrameLength: " << loadData->m_Skeleton.m_nAnimationLength << '\n';
 				}
 			}
 #endif // _DEBUG
