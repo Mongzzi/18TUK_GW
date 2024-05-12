@@ -78,7 +78,7 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 						float t1 = 0.0005f;
 						float t2 = fabs(1.f - temp);
 						if (t2 > t1 && t2 < -t1)
-							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingWeight. It has %d Weight\n",
+							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingWeight. It has %f Weight\n",
 								i,
 								j,
 								t2);

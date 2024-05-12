@@ -809,19 +809,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 	}
 
-	// animaition Test Charactor
-	{
-		CFBXTestObject* pAnimObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-		pAnimObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
-		float xPosition = 0;
-		float zPosition = 0;
-		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-		pAnimObject->SetPosition(xPosition, fHeight, zPosition);
-		pAnimObject->Rotate(0.0f, 0.0f, 0.0f);
-		pAnimObject->SetScale(5.f, 5.f, 5.f);
-		m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
-	}
-
 	// tree
 	{
 		CTexture* pTreeTextures;
@@ -1947,4 +1934,99 @@ void CTestScene_PhysX::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	UpdateShaderVariables(pd3dCommandList);
 
 	m_pObjectManager->Render(pd3dCommandList, pCamera);
+}
+
+
+
+CTestScene_Animation::CTestScene_Animation()
+{
+
+}
+
+CTestScene_Animation::~CTestScene_Animation()
+{
+
+}
+
+void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+{
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	CFbxLoader_V2 fLoader;
+
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	{
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pPlayer->SetMaxVelocityXZ(50.0f);
+		m_pPlayer->SetMaxVelocityY(30.0f);
+		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+	}
+
+	//--------------------------------- 조명, 재질 생성 ----------------------------------------
+
+	BuildLightsAndMaterials();
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//
+
+	// animaition Test Charactor
+	{
+		CFBXTestObject* pAnimObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		pAnimObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
+		float xPosition = 0;
+		float zPosition = 0;
+		float fHeight = 0;
+		pAnimObject->SetPosition(xPosition, fHeight, zPosition);
+		pAnimObject->Rotate(0.0f, 0.0f, 0.0f);
+		m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
+	}
+
+	{
+		CRayObject* pRayObject = NULL;
+		pRayObject = new CRayObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+		pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
+		m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
+	}
+
+}
+
+void CTestScene_Animation::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	//m_pShaderManager->Render(pd3dCommandList, pCamera, ShaderType::CTextShader);
+	m_pTextShader->Render(pd3dCommandList, pCamera);
+
+
+	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	static const WCHAR text[] = L"AnimationScene의 Render2D 입니다.";
+
+	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
+	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
+
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+		L"Verdana",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		25,
+		L"en-us",
+		mDWriteTextFormat.GetAddressOf()));
+
+	mDWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	mDWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }

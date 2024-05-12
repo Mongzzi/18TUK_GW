@@ -245,3 +245,19 @@ protected:
 	CPhysXManager* m_pPhysXManager = nullptr;
 	vector<pair<CGameObject*, physx::PxActor*>> physxPairs;
 };
+
+class CTestScene_Animation : public CTestScene
+{
+public:
+	CTestScene_Animation();
+	~CTestScene_Animation();
+
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader);
+
+	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
+
+	CTextShader* m_pTextShader = NULL;
+
+protected:
+};
