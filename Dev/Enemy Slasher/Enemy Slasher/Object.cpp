@@ -758,10 +758,10 @@ void CFBXTestObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	if (pFbxData->m_bHasSkeleton) {
 		m_pSkeletonData = &pFbxData->m_Skeleton;
 
-		//m_pcbMappedSkinningObject->m_bIsAvailable = true;
+		m_pcbMappedSkinningObject->m_bIsAvailable = true;
 	}
 	else {
-		//m_pcbMappedSkinningObject->m_bIsAvailable = false;
+		m_pcbMappedSkinningObject->m_bIsAvailable = false;
 	}
 }
 

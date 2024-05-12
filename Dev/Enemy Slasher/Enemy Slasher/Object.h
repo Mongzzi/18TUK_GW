@@ -38,8 +38,8 @@ struct CB_GAMEOBJECT_INFO
 
 struct CB_SKINNINGOBJECT_INFO
 {
-	//bool m_bIsAvailable;
 	XMFLOAT4X4 m_xmf4x4BoneMat[96];
+	bool m_bIsAvailable;
 };
 
 #define RESOURCE_TEXTURE2D			0x01

@@ -22,8 +22,8 @@ cbuffer cbTimeInfo : register(b4)
 
 cbuffer cbSkinningInfo : register(b5)
 {
-    //bool gbIsSkinningAvaliable : packoffset(c0);
     matrix gmtxBoneMatrices[96] : packoffset(c0);
+    bool gbIsSkinningAvaliable : packoffset(c384);
 }
 
 
@@ -363,8 +363,8 @@ VS_SKINNING_OUTPUT VSSkinning(VS_SKINNING_INPUT input)
 	// apply skinning
     float4 skinningPosition = float4(input.position, 1.0f);
 	
-    //if (gbIsSkinningAvaliable == true)
-    //{
+    if (gbIsSkinningAvaliable == true)
+    {
         float3 skinningPos = float3(0.0f, 0.0f, 0.0f);
         float3 skinningNormal = float3(0.0f, 0.0f, 0.0f);
         for (int i = 0; i < 4; ++i)
@@ -375,7 +375,7 @@ VS_SKINNING_OUTPUT VSSkinning(VS_SKINNING_INPUT input)
 		
         skinningPosition = float4(skinningPos, 1.0f);
         newNormal = skinningNormal;
-    //}
+    }
 	// apply gameObjectMat
     float4 worldPosition = mul(skinningPosition, gmtxGameObject);
 	// apply viewMat
