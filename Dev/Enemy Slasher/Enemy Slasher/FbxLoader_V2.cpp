@@ -511,46 +511,47 @@ void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene,
 
 			// Get animation information
 			FbxAnimStack* currAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);
+			if (currAnimStack) {
+				FbxString animStackName = currAnimStack->GetName();
+				loadData->m_Skeleton.m_sAnimationName = animStackName.Buffer();
 
-			FbxString animStackName = currAnimStack->GetName();
-			loadData->m_Skeleton.m_sAnimationName = animStackName.Buffer();
+				FbxTakeInfo* takeInfo = lScene->GetTakeInfo(animStackName);
+				FbxTime time = takeInfo->mLocalTimeSpan.GetDuration().GetFrameCount();
 
-			FbxTakeInfo* takeInfo = lScene->GetTakeInfo(animStackName);
-			FbxTime time = takeInfo->mLocalTimeSpan.GetDuration().GetFrameCount();
+				FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
+				FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 
-			FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
-			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
+				loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
 
-			loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
+				Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
 
-			Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
+				Keyframe beforeKeyFrame;
+				FbxAMatrix matBeforeMatrix;
+				FbxAMatrix matCurrMatrix;
 
-			Keyframe beforeKeyFrame;
-			FbxAMatrix matBeforeMatrix;
-			FbxAMatrix matCurrMatrix;
-
-			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
-			{
-				FbxTime currTime;
-				currTime.SetFrame(i, FbxTime::eFrames24);
-				*currAnim = new Keyframe();
-				(*currAnim)->m_nFrameNum = i;
+				for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
+				{
+					FbxTime currTime;
+					currTime.SetFrame(i, FbxTime::eFrames24);
+					*currAnim = new Keyframe();
+					(*currAnim)->m_nFrameNum = i;
 
 
-				matCurrMatrix = currCluster->GetLink()->EvaluateGlobalTransform(currTime);
-				if (matCurrMatrix == matBeforeMatrix) {
-					delete *currAnim;
-					*currAnim = nullptr;
-					continue;
+					matCurrMatrix = currCluster->GetLink()->EvaluateGlobalTransform(currTime);
+					if (matCurrMatrix == matBeforeMatrix) {
+						delete* currAnim;
+						*currAnim = nullptr;
+						continue;
+					}
+
+					FbxAMatrix currentTransformOffset = inNode->EvaluateGlobalTransform(currTime) * geometryTransform;
+
+					storeFbxAMat2XMFLOAT4x4((*currAnim)->m_xmf4x4GlobalTransform,
+						currentTransformOffset.Inverse() * matCurrMatrix);
+					matBeforeMatrix = matCurrMatrix;
+
+					currAnim = &((*currAnim)->m_pNext);
 				}
-
-				FbxAMatrix currentTransformOffset = inNode->EvaluateGlobalTransform(currTime) * geometryTransform;
-
-				storeFbxAMat2XMFLOAT4x4((*currAnim)->m_xmf4x4GlobalTransform,
-					currentTransformOffset.Inverse() * matCurrMatrix);
-				matBeforeMatrix = matCurrMatrix;
-
-				currAnim = &((*currAnim)->m_pNext);
 			}
 		}
 	}
