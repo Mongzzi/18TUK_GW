@@ -1,4 +1,5 @@
 #include "FbxLoader_V2.h"
+#include <chrono>
 
 CFbxLoader_V2::CFbxLoader_V2()
 {
@@ -38,6 +39,10 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 	std::string fName(fileName);
 	CFbxData* loadData = nullptr;
 
+#ifdef _DEBUG
+	auto start = chrono::high_resolution_clock::now();
+#endif // _DEBUG
+
 	if (m_mLoadedDataMap.contains(fName) == false) {
 		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
 		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
@@ -60,6 +65,10 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 #ifdef _DEBUG
 			FBXSDK_printf("Load Complete file : %s\n", fileName);
 			FBXSDK_printf("\t MeshCount: %d\n", loadData->m_pvMeshs.size());
+			for (int i = 0; i < loadData->m_pvMeshs.size(); ++i) {
+				FBXSDK_printf("\t\t VertexCount: %d , %d\n", loadData->m_pvMeshs[i]->m_vVertex.size(), loadData->m_pvMeshs[i]->m_nVertices);
+			}
+
 			if (loadData->m_bHasSkeleton == true) {
 				FBXSDK_printf("\t Skeleton Joint Count: %d\n", loadData->m_Skeleton.m_vJoints.size());
 				
@@ -99,8 +108,62 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 #endif // _DEBUG
 	}
 
+
+#ifdef _DEBUG
+	{
+		auto time = chrono::high_resolution_clock::now() - start;
+		auto millisecond = chrono::duration_cast<chrono::milliseconds>(time);
+		auto seconds = chrono::duration_cast<chrono::seconds>(time);
+		millisecond -= seconds;
+		auto minutes = chrono::duration_cast<chrono::minutes>(seconds);
+		seconds -= minutes;
+
+		std::cout << "FBX Load All Data Time: " << minutes.count() << " m "
+			<< seconds.count() << " s "
+			<< millisecond.count() << " ms\n";
+	}
+#endif // _DEBUG
+
+
 	return m_mLoadedDataMap[fName];
 }
+
+
+CFbxData* CFbxLoader_V2::LoadAnim(const char* fileName)
+{
+	std::string fName(fileName);
+	CFbxData* loadData = nullptr;
+
+	auto start = chrono::high_resolution_clock::now();
+
+	if (m_mLoadedDataMap.contains(fName) == false) {
+		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+		pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
+
+		pFbxImporter->Import(lScene);
+		pFbxImporter->Destroy();
+
+		FbxGeometryConverter geometryConverter(m_plSdkManager);
+		geometryConverter.Triangulate(lScene, true);
+
+		FbxNode* lRootNode = lScene->GetRootNode();
+		if (lRootNode)
+		{
+			loadData = new CFbxData;
+			ProcessSkeletonHierarchy(lRootNode, loadData);
+			LoadAnimationOnly(lRootNode, lScene, loadData);
+		}
+
+		m_mLoadedDataMap[fName] = loadData;
+	}
+	else {
+
+	}
+
+	return m_mLoadedDataMap[fName];
+}
+
 
 // LoadMesh Need loadData->ContrlPoint
 void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loadData)
@@ -128,10 +191,10 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 		int iVertexCounter = 0;
 		for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 		{
-			int iNumVertices = pMesh->GetPolygonSize(j);
-			assert(iNumVertices == 3);
+			//int iNumVertices = pMesh->GetPolygonSize(j);
+			//assert(iNumVertices == 3);
 
-			for (int k = 0; k < iNumVertices; k++) {
+			for (int k = 0; k < 3; k++) {
 				int iControlPointIndex = pMesh->GetPolygonVertex(j, k);
 
 				CFbxCtrlPoint* currCtrlPoint = &(pMeshData->m_vCtrlPoints[iControlPointIndex]);
@@ -161,6 +224,8 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 				pMeshData->m_vVertex.push_back(vertex);
 				pMeshData->m_vIndices.push_back(iVertexCounter);
 				++iVertexCounter;
+
+				loadData->ProgressLoadVertex();
 			}
 		}
 
@@ -194,6 +259,8 @@ void CFbxLoader_V2::LoadControlPoints(FbxNode* lRootNode, CFbxData* loadData)
 		ReadMeshControlPoints(pMesh, pNewMeshData);
 
 		loadData->m_pvMeshs.push_back(pNewMeshData);
+
+		loadData->AddVertexCount(pNewMeshData->m_nVertices);
 	}
 }
 
@@ -210,6 +277,8 @@ void CFbxLoader_V2::ReadMeshControlPoints(FbxMesh* inMesh, CFbxMeshData* loadDat
 		currCtrlPoint.m_xmf3Position = currPosition;
 		loadData->m_vCtrlPoints.push_back(currCtrlPoint);
 	}
+
+	loadData->m_nVertices = inMesh->GetPolygonCount() * 3;
 }
 
 void CFbxLoader_V2::ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outNormal)
@@ -503,75 +572,91 @@ void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene,
 	}
 }
 
-/*
-struct Triangle {
-	vector<int> mIndices;
-};
-struct CtrlPoint {
-	XMFLOAT3 mPosition;
-};
 
-int mTriangleCount;
-vector<Triangle> mTriangles;
-vector<CtrlPoint*> mControlPoints;
-void ProcessMesh(FbxNode* inNode)
+
+void CFbxLoader_V2::LoadAnimationOnly(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loadData)
+{
+	for (int i = 0; i < lRootNode->GetChildCount(); i++)
+	{
+		FbxNode* pFbxChildNode = lRootNode->GetChild(i);
+
+		if (pFbxChildNode->GetNodeAttribute() == NULL)
+			continue;
+
+		FbxNodeAttribute::EType AttributeType = pFbxChildNode->GetNodeAttribute()->GetAttributeType();
+
+		if (AttributeType != FbxNodeAttribute::eMesh) {
+			LoadAnimationOnly(pFbxChildNode, lScene, loadData);
+			continue;
+		}
+
+		ReadAnimationOnly(pFbxChildNode, lScene, loadData);
+	}
+}
+
+void CFbxLoader_V2::ReadAnimationOnly(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData)
 {
 	FbxMesh* currMesh = inNode->GetMesh();
+	unsigned int numOfDeformers = currMesh->GetDeformerCount();
 
-	mTriangleCount = currMesh->GetPolygonCount();
-	int vertexCounter = 0;
-	mTriangles.reserve(mTriangleCount);
+	FbxAMatrix geometryTransform = GetGeometryTransformation(inNode);
 
-	for (unsigned int i = 0; i < mTriangleCount; ++i)
+	for (unsigned int deformerIndex = 0; deformerIndex < numOfDeformers; ++deformerIndex)
 	{
-		XMFLOAT3 normal[3];
-		XMFLOAT3 tangent[3];
-		XMFLOAT3 binormal[3];
-		XMFLOAT2 UV[3][2];
-		Triangle currTriangle;
-		mTriangles.push_back(currTriangle);
+		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
+		if (!currSkin) continue;
 
-		for (unsigned int j = 0; j < 3; ++j)
+		unsigned int numOfClusters = currSkin->GetClusterCount();
+		for (unsigned int clusterIndex = 0; clusterIndex < numOfClusters; ++clusterIndex)
 		{
-			int ctrlPointIndex = currMesh->GetPolygonVertex(i, j);
-			CtrlPoint* currCtrlPoint = mControlPoints[ctrlPointIndex];
+			FbxCluster* currCluster = currSkin->GetCluster(clusterIndex);
+			std::string currJointName = currCluster->GetLink()->GetName();
+			unsigned int currJointIndex = FindJointIndexUsingName(currJointName, loadData);
 
 
-			ReadNormal(currMesh, ctrlPointIndex, vertexCounter, normal[j]);
-			// We only have diffuse texture
-			for (int k = 0; k < 1; ++k)
+			// Get animation information
+			FbxAnimStack* currAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);
+
+			FbxString animStackName = currAnimStack->GetName();
+			loadData->m_Skeleton.m_sAnimationName = animStackName.Buffer();
+
+			FbxTakeInfo* takeInfo = lScene->GetTakeInfo(animStackName);
+			FbxTime time = takeInfo->mLocalTimeSpan.GetDuration().GetFrameCount();
+
+			FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
+			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
+
+			loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
+
+			Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
+
+			Keyframe beforeKeyFrame;
+			FbxAMatrix matBeforeMatrix;
+			FbxAMatrix matCurrMatrix;
+
+			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
 			{
-				ReadUV(currMesh, ctrlPointIndex, currMesh->GetTextureUVIndex(i, j), k, UV[j][k]);
+				FbxTime currTime;
+				currTime.SetFrame(i, FbxTime::eFrames24);
+				*currAnim = new Keyframe();
+				(*currAnim)->m_nFrameNum = i;
+
+
+				matCurrMatrix = currCluster->GetLink()->EvaluateGlobalTransform(currTime);
+				if (matCurrMatrix == matBeforeMatrix) {
+					delete* currAnim;
+					*currAnim = nullptr;
+					continue;
+				}
+
+				FbxAMatrix currentTransformOffset = inNode->EvaluateGlobalTransform(currTime) * geometryTransform;
+
+				storeFbxAMat2XMFLOAT4x4((*currAnim)->m_xmf4x4GlobalTransform,
+					currentTransformOffset.Inverse() * matCurrMatrix);
+				matBeforeMatrix = matCurrMatrix;
+
+				currAnim = &((*currAnim)->m_pNext);
 			}
-
-
-			PNTIWVertex temp;
-			temp.mPosition = currCtrlPoint->mPosition;
-			temp.mNormal = normal[j];
-			temp.mUV = UV[j][0];
-			// Copy the blending info from each control point
-			for (unsigned int i = 0; i < currCtrlPoint->mBlendingInfo.size(); ++i)
-			{
-				VertexBlendingInfo currBlendingInfo;
-				currBlendingInfo.mBlendingIndex = currCtrlPoint->mBlendingInfo[i].mBlendingIndex;
-				currBlendingInfo.mBlendingWeight = currCtrlPoint->mBlendingInfo[i].mBlendingWeight;
-				temp.mVertexBlendingInfos.push_back(currBlendingInfo);
-			}
-			// Sort the blending info so that later we can remove
-			// duplicated vertices
-			temp.SortBlendingInfoByWeight();
-
-			mVertices.push_back(temp);
-			mTriangles.back().mIndices.push_back(vertexCounter);
-			++vertexCounter;
 		}
 	}
-
-	// Now mControlPoints has served its purpose
-	// We can free its memory
-	for (auto itr = mControlPoints.begin(); itr != mControlPoints.end(); ++itr)
-	{
-		delete itr->second;
-	}
-	mControlPoints.clear();
-}*/
+}

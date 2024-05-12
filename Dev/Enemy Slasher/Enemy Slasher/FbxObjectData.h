@@ -62,6 +62,9 @@ public:
 	std::vector<CFbxCtrlPoint> m_vCtrlPoints;
 	std::vector<CFbxVertex> m_vVertex;
 	std::vector<int> m_vIndices;
+
+public:
+	int m_nVertices = 0;
 };
 
 class CFbxData {
@@ -76,4 +79,11 @@ public:
 
 public:
 	int __nLoadMeshCounter = 0;
+
+	float GetProgressVal() { return ((float)m_nVertexCounter / (float)m_nAllVertexCount); }
+	void AddVertexCount(int val) { m_nAllVertexCount += val; }
+	void ProgressLoadVertex() { m_nVertexCounter += 1; }
+private:
+	int m_nAllVertexCount = 0;
+	int m_nVertexCounter = 0;
 };

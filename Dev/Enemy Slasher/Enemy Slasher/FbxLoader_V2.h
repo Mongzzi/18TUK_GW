@@ -15,7 +15,11 @@ private:
 
 	std::map<std::string, CFbxData*> m_mLoadedDataMap;
 public:
+	// Load All Data from FBX
 	CFbxData* LoadFBX(const char* fileName);
+
+	// Load Only Animation Data from FBX
+	CFbxData* LoadAnim(const char* fileName);
 
 private:
 	void InitializeSDK();
@@ -36,4 +40,8 @@ private:
 	FbxAMatrix GetGeometryTransformation(FbxNode* inNode);
 	unsigned int FindJointIndexUsingName(std::string JointName, CFbxData* loadData);
 	void storeFbxAMat2XMFLOAT4x4(XMFLOAT4X4& dest, FbxAMatrix& sorce);
+
+
+	void LoadAnimationOnly(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loadData);
+	void ReadAnimationOnly(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData);
 };
