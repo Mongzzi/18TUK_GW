@@ -755,7 +755,7 @@ void CFBXTestObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		SetMesh(i, pAnimMesh);
 	}
 
-	if (pFbxData->m_bHasSkeleton) {
+	if (pFbxData->m_bHasSkeleton == true) {
 		m_pSkeletonData = &pFbxData->m_Skeleton;
 
 		m_pcbMappedSkinningObject->m_bIsAvailable = true;
