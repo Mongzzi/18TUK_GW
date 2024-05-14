@@ -615,6 +615,19 @@ void CFbxLoader_V2::ReadAnimationOnly(FbxNode* inNode, FbxScene* lScene, CFbxDat
 			std::string currJointName = currCluster->GetLink()->GetName();
 			unsigned int currJointIndex = FindJointIndexUsingName(currJointName, loadData);
 
+			FbxAMatrix transformMatrix;
+			FbxAMatrix transformLinkMatrix;
+			FbxAMatrix globalBindposeInverseMatrix;
+
+			currCluster->GetTransformMatrix(transformMatrix); // The transformation of the mesh at binding time
+			currCluster->GetTransformLinkMatrix(transformLinkMatrix); // The transformation of the cluster(joint) at binding time from joint space to world space
+			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform; // we need this
+
+			// Update the information in mSkeleton 
+			XMFLOAT4X4 xmf4x4BindinverseMat;
+			storeFbxAMat2XMFLOAT4x4(xmf4x4BindinverseMat, globalBindposeInverseMatrix);
+			loadData->m_Skeleton.m_vJoints[currJointIndex].m_xmf4x4GlobalBindposeInverse = xmf4x4BindinverseMat;
+
 
 			// Get animation information
 			FbxAnimStack* currAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);

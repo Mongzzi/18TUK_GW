@@ -782,7 +782,19 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 {
 	static int animVal = 0;
 	static int counter = 0;
-	if (m_pSkeletonData) {
+	if (m_pAnimationData != NULL) {
+		for (int i = 0; i < m_pAnimationData->m_nJoint; ++i) {
+			XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(&m_pAnimationData->m_ppxmf4x4AnimMat[animVal][i])));
+		}
+		if (counter >= 30) {
+			animVal++;
+			counter = 0;
+			if (animVal >= m_pAnimationData->m_nAnimLen) animVal = 0;
+			cout << "Skeleton - AnimVal : " << animVal << "\n";
+		}
+		counter++;
+	}
+	if (m_pSkeletonData && false) {
 		for (int i = 0; i < m_pSkeletonData->m_vJoints.size(); ++i) {
 			Keyframe* nowFrame = m_pSkeletonData->m_vJoints[i].m_pAnimFrames;
 			if (nowFrame) {

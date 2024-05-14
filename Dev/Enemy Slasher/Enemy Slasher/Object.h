@@ -296,7 +296,7 @@ public:
 	virtual ~CFBXObject();
 
 	void SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData);
-	void SetAnimData(CFbxData* pFbxData) {};
+	void SetAnimData(CAnimationData* pAnimData) { m_pAnimationData = pAnimData; m_pcbMappedSkinningObject->m_bIsAvailable = true; };
 
 	//상수 버퍼를 생성한다. 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -310,6 +310,7 @@ public:
 
 private:
 	CFbxSkeletonData* m_pSkeletonData = NULL;
+	CAnimationData* m_pAnimationData = NULL;
 
 	ID3D12Resource* m_pd3dcbSkinningObject = NULL;
 	CB_SKINNINGOBJECT_INFO* m_pcbMappedSkinningObject = NULL;

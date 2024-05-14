@@ -10,7 +10,7 @@ CResorceManager::~CResorceManager()
 	if (m_pFBXLoader) delete m_pFBXLoader;
 }
 
-CGameObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName)
+CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName)
 {
 	std::string fName(fileName);
 	CFbxData* loadData = nullptr;
@@ -47,10 +47,9 @@ CAnimationData* CResorceManager::LoadAnimDataFromFBX(const char* fileName)
 			newAnimData->m_ppxmf4x4AnimMat[frame] = new XMFLOAT4X4[newAnimData->m_nJoint];
 
 			for (int joint = 0; joint < newAnimData->m_nJoint; ++joint) {
-				nowFrame = loadData->m_Skeleton.m_vJoints[frame].m_pAnimFrames;
+				nowFrame = loadData->m_Skeleton.m_vJoints[joint].m_pAnimFrames;
 				for (int k = 0; k < frame; ++k)
 					nowFrame = nowFrame->m_pNext;
-				
 
 				newAnimData->m_ppxmf4x4AnimMat[frame][joint] = Matrix4x4::Multiply(loadData->m_Skeleton.m_vJoints[joint].m_xmf4x4GlobalBindposeInverse, nowFrame->m_xmf4x4GlobalTransform);
 			}

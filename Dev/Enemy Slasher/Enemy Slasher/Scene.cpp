@@ -1875,23 +1875,17 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	// animaition Test Charactor
 	{
-		CFBXObject* pAnimObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-		pAnimObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
-		//float xPosition = 0;
-		//float zPosition = 0;
-		//float fHeight = 0;
-		//pAnimObject->SetPosition(xPosition, fHeight, zPosition);
-		//pAnimObject->Rotate(0.0f, 0.0f, 0.0f);
-		CFBXObject* pTest = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
+		pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;
 		float zPosition = 0;
 		float fHeight = 0;
-		pTest->SetPosition(xPosition, fHeight, zPosition);
-		pTest->Rotate(0.0f, 0.0f, 0.0f);
-		pTest->SetChild(pAnimObject);
+		pNewObject->SetPosition(xPosition, fHeight, zPosition);
+		pNewObject->Rotate(0.0f, 0.0f, 0.0f);
+		pNewObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx"));
 
 		//m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
-		m_pObjectManager->AddObj(pTest, ObjectLayer::ObjectNormal);
+		m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
 	}
 
 	{
