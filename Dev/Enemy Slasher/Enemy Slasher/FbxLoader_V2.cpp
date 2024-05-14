@@ -167,7 +167,8 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 
 		CFbxMeshData* pMeshData = loadData->m_pvMeshs[loadData->__nLoadMeshCounter++];
 
-		ProcessJointsAndAnimation(pFbxChildNode, lScene, loadData, pMeshData);
+		if(loadData->m_bHasSkeleton)
+			ProcessJointsAndAnimation(pFbxChildNode, lScene, loadData, pMeshData);
 
 		FbxMesh* pMesh = pFbxChildNode->GetMesh();
 
@@ -217,11 +218,13 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 	}
 
 	{
-		Keyframe* head = loadData->m_Skeleton.m_vJoints[0].m_pAnimFrames;
-		loadData->m_Skeleton.m_nAnimationLength = 0;
-		while (head != nullptr) {
-			head = head->m_pNext;
-			loadData->m_Skeleton.m_nAnimationLength += 1;
+		if (loadData->m_bHasSkeleton) {
+			Keyframe* head = loadData->m_Skeleton.m_vJoints[0].m_pAnimFrames;
+			loadData->m_Skeleton.m_nAnimationLength = 0;
+			while (head != nullptr) {
+				head = head->m_pNext;
+				loadData->m_Skeleton.m_nAnimationLength += 1;
+			}
 		}
 	}
 }
