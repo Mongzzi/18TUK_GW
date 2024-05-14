@@ -738,20 +738,20 @@ void CGameObject::MakeCollider()
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-CFBXTestObject::CFBXTestObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 1)
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 1)
 {
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-CFBXTestObject::~CFBXTestObject()
+CFBXObject::~CFBXObject()
 {
 
 }
 
-void CFBXTestObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData)
+void CFBXObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData)
 {
 	for (int i = 0; i < pFbxData->m_pvMeshs.size(); ++i) {
-		CFBXTestMesh* pAnimMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, pFbxData->m_pvMeshs[i]);
+		CFBXMesh* pAnimMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, pFbxData->m_pvMeshs[i]);
 		SetMesh(i, pAnimMesh);
 	}
 
@@ -765,14 +765,14 @@ void CFBXTestObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	}
 }
 
-void CFBXTestObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CFBXObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(CB_SKINNINGOBJECT_INFO) + 255) & ~255); //256의 배수
 	m_pd3dcbSkinningObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbSkinningObject->Map(0, NULL, (void**)&m_pcbMappedSkinningObject);
 }
 
-void CFBXTestObject::ReleaseShaderVariables()
+void CFBXObject::ReleaseShaderVariables()
 {
 	if (m_pd3dcbSkinningObject)
 	{
@@ -783,7 +783,7 @@ void CFBXTestObject::ReleaseShaderVariables()
 	CGameObject::ReleaseShaderVariables();
 }
 
-void CFBXTestObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	static int animVal = 0;
 	static int counter = 0;
@@ -826,388 +826,12 @@ void CFBXTestObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
 }
 
-void CFBXTestObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption) {
+void CFBXObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption) {
 	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
 }
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype)
-	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 0)//  모델에 mesh가 있으면 LoadContent에서 증가시킨다.
-{
-	//------------------------------------------------------------------------------------------
-	//FbxManager* plSdkManager = NULL;
-	//FbxScene* plScene = NULL;
-	LoadResult lResult;
-
-	//InitializeSdkObjects(plSdkManager, plScene);
-
-	FbxString lFilePath(fileName);
-
-	lResult = pFBXLoader->LoadScene(lFilePath);
-
-	if (lResult == LoadResult::False)
-	{
-#ifdef _DEBUG
-		FBXSDK_printf("\n\nAn error occurred while loading the scene...\n");
-#endif // _DEBUG
-
-	}
-	else if (lResult == LoadResult::First)
-	{
-		m_sFileName = fileName;
-		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
-		LoadHierarchy(pFBXLoader, lFilePath.Buffer()); // 이 함수가 true 를 반환해야 본이 있는것. false를 반환하면 없어야함.
-		LoadHierarchyFromMesh(); //이건 꼭 해야하는가 의문이 들긴 함.
-		pFBXLoader->LoadAnimation(lFilePath.Buffer());
-	}
-	else if (lResult == LoadResult::Overlapping)
-	{
-		m_sFileName = fileName;
-		// 일단 아직 위와 동일한 코드를 넣어놓는다.
-		LoadContent(pd3dDevice, pd3dCommandList, pFBXLoader, lFilePath.Buffer());
-		LoadHierarchy(pFBXLoader, lFilePath.Buffer()); // 이 함수가 true 를 반환해야 본이 있는것. false를 반환하면 없어야함.
-		LoadHierarchyFromMesh();
-		// 애니메이션은 중복 로드 할 필요가 없음. 경우도 없을것으로 예상.
-	}
-
-	//------------------------------------------------------------------------------------------
-
-	//SetShaderType(shaderType);
-
-
-	MakeCollider();
-}
-
-CFBXObject::~CFBXObject()
-{
-}
-
-void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* filePath)
-{
-	int i;
-	FbxNode* lNode = pFBXLoader->GetRootNode(filePath);
-	if (lNode)
-	{
-		for (i = 0; i < lNode->GetChildCount(); i++)
-		{
-			LoadContent(pd3dDevice, pd3dCommandList, lNode->GetChild(i), i);
-		}
-	}
-}
-
-void CFBXObject::LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId)
-{
-	FbxNodeAttribute::EType lAttributeType;
-	CFBXMesh* pFBXMesh = NULL;
-	int p = 0;
-
-	if (pNode->GetNodeAttribute() == NULL)
-	{
-		//FBXSDK_printf("NULL Node Attribute\n\n");
-	}
-	else
-	{
-		lAttributeType = (pNode->GetNodeAttribute()->GetAttributeType());
-
-		switch (lAttributeType)
-		{
-		default:
-			break;
-		case FbxNodeAttribute::eMarker:
-			//DisplayMarker(pNode);
-			break;
-
-		case FbxNodeAttribute::eSkeleton:
-			//DisplaySkeleton(pNode);
-			break;
-
-		case FbxNodeAttribute::eMesh:
-			pFBXMesh = new CFBXMesh(pd3dDevice, pd3dCommandList);
-			if (pFBXMesh->LoadMesh(pd3dDevice, pd3dCommandList, pNode))
-			{
-				// 지금은 Mesh 가 아니면 아무것도 안 하므로 이렇게 한다.
-				SetMesh(m_nMeshes, pFBXMesh);
-			}
-			break;
-
-		case FbxNodeAttribute::eNurbs:
-			//DisplayNurb(pNode);
-			break;
-
-		case FbxNodeAttribute::ePatch:
-			//DisplayPatch(pNode);
-			break;
-
-		case FbxNodeAttribute::eCamera:
-			//DisplayCamera(pNode);
-			break;
-
-		case FbxNodeAttribute::eLight:
-			//DisplayLight(pNode);
-			break;
-
-		case FbxNodeAttribute::eLODGroup:
-			//DisplayLodGroup(pNode);
-			break;
-		}
-	}
-
-	//DisplayUserProperties(pNode);
-	//DisplayTarget(pNode);
-	//DisplayPivotsAndLimits(pNode);
-	//DisplayTransformPropagation(pNode);
-	//DisplayGeometricTransform(pNode);
-
-	for (int i = 0; i < pNode->GetChildCount(); i++)
-	{
-		LoadContent(pd3dDevice, pd3dCommandList, pNode->GetChild(i), i);
-	}
-}
-
-bool CFBXObject::LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName)
-{
-	int i;
-	FbxNode* lNode = pFBXLoader->GetRootNode(fileName);
-
-	for (i = 0; i < lNode->GetChildCount(); i++)
-	{
-		if (LoadHierarchy(lNode->GetChild(i)))
-			return true;
-	}
-	return false;
-}
-
-bool CFBXObject::LoadHierarchy(FbxNode* pNode)
-{
-	FbxNodeAttribute::EType lAttributeType;
-
-	if (pNode->GetNodeAttribute() == NULL)
-	{
-		//FBXSDK_printf("NULL Node Attribute\n\n");
-	}
-	else
-	{
-		lAttributeType = (pNode->GetNodeAttribute()->GetAttributeType());
-
-		if (lAttributeType == FbxNodeAttribute::eSkeleton)
-		{
-			m_skelRoot = new CSkeleton(pNode->GetName(), pNode->GetChildCount());
-			m_skelRoot->LoadHierarchy(pNode);
-			return true;
-		}
-		else
-		{
-			for (int i = 0; i < pNode->GetChildCount(); i++)
-			{
-				if (LoadHierarchy(pNode->GetChild(i)))
-					return true;
-			}
-		}
-	}
-	return false;
-}
-
-void CFBXObject::LoadHierarchyFromMesh()
-{
-	CFBXMesh* pMesh;
-
-	if (m_ppMeshes[0])
-	{
-		pMesh = (CFBXMesh*)m_ppMeshes[0];
-		if (m_skelRoot)
-			m_skelRoot->LoadHierarchyFromMesh(pMesh);
-	}
-
-}
-
-//void CFBXObject::LoadAnimation(CFBXLoader* pFBXLoader, const char* fileName)
-//{
-//	int i;
-//	FbxScene* pScene = pFBXLoader->GetScene();
-//
-//	// 스택이 하나임을 가정한다.
-//	for (i = 0; i < pScene->GetSrcObjectCount<FbxAnimStack>(); i++)
-//	{
-//		FbxAnimStack* lAnimStack = pScene->GetSrcObject<FbxAnimStack>(i);
-//
-//		//FbxString lOutputString = "Animation Stack Name: ";
-//		//lOutputString += lAnimStack->GetName();
-//		//lOutputString += "\n";
-//		//FBXSDK_printf(lOutputString);
-//
-//
-//		// pFBXLoader의 m_mAnimationList에 새로운 애니메이션을 저장
-//		// 저장할때 파일 이름을 기준으로 저장하므로 주의할것.
-//		// 함수 인자 줄줄이 바꿔야함.
-//		LoadAnimation(lAnimStack, pScene->GetRootNode());
-//	}
-//}
-//
-//void CFBXObject::LoadAnimation(FbxAnimStack* pAnimStack, FbxNode* pNode, bool isSwitcher)
-//{
-//	int l;
-//	int nbAnimLayers = pAnimStack->GetMemberCount<FbxAnimLayer>();
-//	//int nbAudioLayers = pAnimStack->GetMemberCount<FbxAudioLayer>();
-//	//FbxString lOutputString;
-//
-//	//lOutputString = "   contains ";
-//	//if (nbAnimLayers == 0 /*&& nbAudioLayers == 0*/)
-//	//	lOutputString += "no layers";
-//
-//	//if (nbAnimLayers)
-//	//{
-//	//	lOutputString += nbAnimLayers;
-//	//	lOutputString += " Animation Layer";
-//	//	if (nbAnimLayers > 1)
-//	//		lOutputString += "s";
-//	//}
-//
-//	//if (nbAudioLayers)
-//	//{
-//	//	if (nbAnimLayers)
-//	//		lOutputString += " and ";
-//	//
-//	//	lOutputString += nbAudioLayers;
-//	//	lOutputString += " Audio Layer";
-//	//	if (nbAudioLayers > 1)
-//	//		lOutputString += "s";
-//	//}
-//	//lOutputString += "\n\n";
-//	//FBXSDK_printf(lOutputString);
-//
-//	// 레이어는 하나임을 가정한다.
-//	for (l = 0; l < nbAnimLayers; l++)
-//	{
-//		FbxAnimLayer* lAnimLayer = pAnimStack->GetMember<FbxAnimLayer>(l);
-//
-//		//lOutputString = "AnimLayer ";
-//		//lOutputString += l;
-//		//lOutputString += "\n";
-//		//FBXSDK_printf(lOutputString);
-//
-//		LoadAnimation(lAnimLayer, pNode, isSwitcher);
-//	}
-//
-//	//for (l = 0; l < nbAudioLayers; l++)
-//	//{
-//	//	FbxAudioLayer* lAudioLayer = pAnimStack->GetMember<FbxAudioLayer>(l);
-//	//
-//	//	lOutputString = "AudioLayer ";
-//	//	lOutputString += l;
-//	//	lOutputString += "\n";
-//	//	FBXSDK_printf(lOutputString);
-//	//
-//	//	DisplayAnimation(lAudioLayer, isSwitcher);
-//	//	FBXSDK_printf("\n");
-//	//}
-//}
-//
-//void CFBXObject::LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, bool isSwitcher)
-//{
-//	int lModelCount;
-//	//FbxString lOutputString;
-//
-//	//lOutputString = "     Node Name: ";
-//	//lOutputString += pNode->GetName();
-//	//lOutputString += "\n\n";
-//	//FBXSDK_printf(lOutputString);
-//
-//	// 아래의 함수에서 
-//	//DisplayChannels(pNode, pAnimLayer, DisplayCurveKeys, DisplayListCurveKeys, isSwitcher);
-//	//FBXSDK_printf("\n");
-//
-//	for (lModelCount = 0; lModelCount < pNode->GetChildCount(); lModelCount++)
-//	{
-//		LoadAnimation(pAnimLayer, pNode->GetChild(lModelCount), isSwitcher);
-//	}
-//}
-
-// 
-//bool CFBXObject::IsCursorOverObject()
-//{
-//	return false;
-//}
-//
-//void CFBXObject::ButtenDown()
-//{
-//}
-//
-//void CFBXObject::ButtenUp()
-//{
-//}
-
-CAABB* CFBXObject::GetAABB()
-{
-	// 만약 하나의 오브젝트에 매쉬가 더 늘어날 경우 수정해야함.
-	CFBXMesh* tmp = (CFBXMesh*)m_ppMeshes[0];
-	return tmp->GetAABB(m_xmf4x4World);
-}
-
-void CFBXObject::SetAnimation(CAnimationData* ani, bool loofFlag)
-{
-	if (m_adCurrentAnimationData)
-	{
-		m_adOldAnimationData = m_adCurrentAnimationData;
-		m_bOldLoofFlag = m_bCurrentLoofFlag;
-	}
-	m_adCurrentAnimationData = ani;
-	m_bCurrentLoofFlag = loofFlag;
-
-	m_fProgressedFrame = 0.f;
-}
-
-void CFBXObject::RestoreAnimation()
-{
-	if (m_adOldAnimationData)
-	{
-		m_adCurrentAnimationData = m_adOldAnimationData;
-		m_bCurrentLoofFlag = m_bOldLoofFlag;
-	}
-	m_fProgressedFrame = 0.f;
-}
-
-
-void CFBXObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
-{
-	if (m_adCurrentAnimationData)
-	{
-		// 애니메이션 데이터에 있는 정보로 본 정보 바꾸기.
-		// 0번 매쉬가 본의 리스트를 갖고 있다고 가정.
-
-		CSkeleton* skelList = ((CFBXMesh*)m_ppMeshes[0])->GetSkeletonList();
-		int clusterCOunt = ((CFBXMesh*)m_ppMeshes[0])->GetClusterCount();
-		for (const auto& pair : m_adCurrentAnimationData->m_mAnimationData)
-		{
-			for (int i = 0; i < clusterCOunt; i++)
-			{
-				if (pair.first == skelList[i].GetName())
-				{
-					XMFLOAT4X4 mat = pair.second.at((int)m_fProgressedFrame);
-					skelList[i].SetTransformMatrix(mat);
-					break;
-				}
-			}
-		}
-
-		// --
-		m_fProgressedFrame += fTimeElapsed * DEFAULT_FRAME_RATIO;
-		if (m_fProgressedFrame > m_adCurrentAnimationData->GetTotalFrames())
-		{
-			if (m_bCurrentLoofFlag)
-				m_fProgressedFrame = 0.f;
-			else
-			{
-				RestoreAnimation();
-			}
-		}
-	}
-	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
-}
-
 
 
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName,
@@ -1335,8 +959,8 @@ void CRayObject::Reset(CRay ray)
 #endif // _DEBUG
 }
 
-CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType stype)
-	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype)
+	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
 
@@ -1346,8 +970,8 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_iUInum = -1;
 }
 
-CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType stype)
-	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, int UInum, ShaderType stype)
+	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
 
@@ -1451,13 +1075,13 @@ void CUIObject::SetScale(XMFLOAT3 scale)
 	CGameObject::SetScale(Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false));
 }
 
-CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType stype)
-	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName, stype)
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype)
+	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, stype)
 {
 }
 
-CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType stype)
-	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, pCamera, fileName, UInum, stype)
+CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, int UInum, ShaderType stype)
+	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, UInum, stype)
 {
 	m_Card_Ui_Num = UInum;
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1698,7 +1322,7 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 }
 
-CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype) :CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFBXLoader, fileName, stype)
+CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	CTexture* ppTextures[1];
 
@@ -1868,7 +1492,7 @@ void CBillBoardInstanceObject::ReleaseShaderVariables()
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 	ShaderType stype)
-	:CFBXTestObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
+	:CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_Monster_State = MonsterState::Default_State;
 	m_pTestPlayer = ptestplayer;

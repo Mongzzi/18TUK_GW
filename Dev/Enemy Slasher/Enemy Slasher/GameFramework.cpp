@@ -35,7 +35,7 @@ CGameFramework::CGameFramework()
 
 CGameFramework::~CGameFramework()
 {
-	m_pFBXLoader->DestroySdkObjects(true);	// 이거 해줘야하나?
+
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
@@ -54,7 +54,6 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CoInitialize(NULL);
 	
-	m_pFBXLoader = new CFBXLoader();	//생성자에서 부르면 터짐.BuildObjects() 보다 먼저 불려야함.
 
 	BuildObjects();
 
@@ -480,6 +479,7 @@ void CGameFramework::BuildObjects()
 {
 	float a = XMConvertToDegrees(atan(0.5));
 
+	m_pFBXDataManager = new CFBXDataManager();
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
@@ -487,12 +487,13 @@ void CGameFramework::BuildObjects()
 		// m_pvScenelist 에 여러 씬 등록 및 각 씬의 플레이어 생성
 
 		m_pvScenelist.push_back(new CTitleScene);
-		m_pvScenelist.push_back(new CTestScene);
+		//m_pvScenelist.push_back(new CTestScene);
 		//m_pvScenelist.push_back(new CTestScene_Slice);
-		m_pvScenelist.push_back(new CTestScene_PhysX);
+		//m_pvScenelist.push_back(new CTestScene_PhysX);
+		m_pvScenelist.push_back(new CTestScene_Animation);
 
 		for (auto scene : m_pvScenelist)
-			scene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader);
+			scene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXDataManager);
 		// 현재 프레임워크에 Scenelist에서 Scene을 뽑아서 등록
 		m_pScene = m_pvScenelist[m_nSceneCounter];
 		m_pPlayer = m_pScene->m_pPlayer;
@@ -600,7 +601,7 @@ void CGameFramework::DynamicShaping()
 
 		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-		if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList, m_pFBXLoader, fTimeElapsed);
+		if (m_pScene) m_pScene->DynamicShaping(m_pd3dDevice, m_pd3dCommandList, m_pFBXDataManager, fTimeElapsed);
 
 		m_pd3dCommandList->Close();
 		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };

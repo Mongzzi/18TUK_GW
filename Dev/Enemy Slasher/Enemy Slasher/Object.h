@@ -289,11 +289,11 @@ public:
 
 };
 
-class CFBXTestObject : public CGameObject
+class CFBXObject : public CGameObject
 {
 public:
-	CFBXTestObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CAnimationObjectShader);
-	virtual ~CFBXTestObject();
+	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CAnimationObjectShader);
+	virtual ~CFBXObject();
 
 	void SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData);
 	void SetAnimData(CFbxData* pFbxData) {};
@@ -335,59 +335,12 @@ public:
 };
 
 
-class CFBXObject : public CGameObject
-{
-public:
-	CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype= ShaderType::CObjectsShader);
-	virtual ~CFBXObject();
-private:
-	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	float m_fRotationSpeed = 0.0f;
-
-	CSkeleton* m_skelRoot = NULL;
-
-	string m_sFileName;
-public:
-	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, const char* fileName);
-	void LoadContent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, int childId);
-
-	bool LoadHierarchy(CFBXLoader* pFBXLoader, const char* fileName);
-	bool LoadHierarchy(FbxNode* pNode);
-	void LoadHierarchyFromMesh();
-
-	//void LoadAnimation(CFBXLoader* pFBXLoader, const char* fileName);
-	//void LoadAnimation(FbxAnimStack* pAnimStack, FbxNode* pNode, bool isSwitcher = false);
-	//void LoadAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, bool isSwitcher = false);
-
-	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-
-	//bool IsCursorOverObject();
-	//void ButtenDown();
-	//void ButtenUp();
-	CAABB* GetAABB();
-	string GetFileName() { return m_sFileName; };
-
-	// 애니메이션 관련
-private:
-	float  m_fProgressedFrame;
-	bool m_bCurrentLoofFlag;
-	bool m_bOldLoofFlag;
-	CAnimationData* m_adOldAnimationData = NULL;
-	CAnimationData* m_adCurrentAnimationData = NULL;
-
-public:
-	void SetAnimation(CAnimationData* ani, bool loofFlag);
-	void RestoreAnimation();
-	CAnimationData* GetCurrentAnimationData() { return m_adCurrentAnimationData; };
-};
-
-
 //  UI
 class CUIObject : public CFBXObject
 {
 public:
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType stype= ShaderType::CObjectsShader);
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, int UInum, ShaderType stype = ShaderType::CObjectsShader);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype= ShaderType::CObjectsShader);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, int UInum, ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CUIObject();
 protected:
 	static constexpr float TARGET_SCALE = 1.5f;
@@ -452,10 +405,10 @@ class CCardUIObject : public CUIObject
 {
 public:
 	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		 CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName, ShaderType stype= ShaderType::CObjectsShader);
+		 CCamera* pCamera, ShaderType stype= ShaderType::CObjectsShader);
 
 	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		 CFBXLoader* pFBXLoader, CCamera* pCamera, const char* fileName,  int UInum, ShaderType stype= ShaderType::CObjectsShader);
+		 CCamera* pCamera, int UInum, ShaderType stype= ShaderType::CObjectsShader);
 
 	virtual ~CCardUIObject();
 private:
@@ -530,7 +483,7 @@ public:
 class CTreeObject: public CFBXObject
 {
 public:
-	CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFBXLoader* pFBXLoader, const char* fileName, ShaderType stype = ShaderType::CObjectsShader);
+	CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CTreeObject();
 };
 
@@ -549,7 +502,7 @@ public:
 	virtual ~CHpbarObject();
 };
 
-class CMonsterObject : public CFBXTestObject
+class CMonsterObject : public CFBXObject
 {
 public:
 	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,

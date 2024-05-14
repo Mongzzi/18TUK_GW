@@ -1,13 +1,9 @@
 #pragma once
 #include "Vertex.h"
 #include "ColliderWithMesh.h"
-#include "FbxLoader.h"
 #include "BoundingBox.h"
 #include "Ray.h"
-#include "Skeleton.h"
 #include "FbxObjectData.h"
-
-class CSkeleton;
 
 class CMesh
 {
@@ -184,37 +180,11 @@ public:
 };
 
 // ------------------------------- FBX V2 -----------------------------------
-class CFBXTestMesh : public CDynamicShapeMesh
-{
-public:
-	CFBXTestMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxMeshData* pMeshData);
-	virtual ~CFBXTestMesh();
-};
-
-// ------------------------------- FBX -----------------------------------
-
 class CFBXMesh : public CDynamicShapeMesh
 {
-private:
-	CSkeleton* m_skelList = NULL;	// lSkinCount가 늘어나면 2중배열로 바꿔야함.
-
-	int m_nICluster = 0;
 public:
-	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxMeshData* pMeshData);
 	virtual ~CFBXMesh();
-
-	bool LoadMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode);
-
-	CVertex* GetVertices() { return m_pVertices; };
-	UINT* GetUnit() { return m_pnIndices; };
-	CSkeleton* GetSkeletonList() { return m_skelList; };
-
-	int GetClusterCount() { return m_nICluster; };
-
-	CAABB* GetAABB(XMFLOAT4X4 m_xmf4x4World);
-
-	void UpdateVerticesBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* offsetMat);
-
 };
 
 // ------------------------------- 터레인 맵 -----------------------------------

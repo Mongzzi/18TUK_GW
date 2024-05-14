@@ -133,7 +133,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AnimationData.h" />
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="Camera.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -147,14 +146,12 @@
     <ClInclude Include="FbxLoader_V2.h" />
     <ClInclude Include="FbxObjectData.h" />
     <ClInclude Include="PhysXManager.h" />
-    <ClInclude Include="Skeleton.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DirectXHelper.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Enemy Slasher.h" />
-    <ClInclude Include="FbxLoader.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
@@ -176,7 +173,6 @@
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AnimationData.cpp" />
     <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="Camera.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -190,10 +186,8 @@
     <ClCompile Include="FbxLoader_V2.cpp" />
     <ClCompile Include="FbxObjectData.cpp" />
     <ClCompile Include="PhysXManager.cpp" />
-    <ClCompile Include="Skeleton.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="Enemy Slasher.cpp" />
-    <ClCompile Include="FbxLoader.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />

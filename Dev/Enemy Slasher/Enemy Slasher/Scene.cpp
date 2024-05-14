@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "Scene.h"
-#include "FbxLoader.h"
 #include "ObjectManager.h"
 //#include "ShaderManager.h"
 #include "PhysXManager.h"
 #include "Ray.h"
 #include "FbxLoader_V2.h"
+#include "FBXDataManager.h"
 
 CBasicScene::CBasicScene()
 {
@@ -21,7 +21,7 @@ CBasicScene::~CBasicScene()
 	//delete m_pShaderManager;
 }
 
-void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -162,7 +162,7 @@ void CBasicScene::AnimateObjects(float fTimeTotal ,float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeTotal , fTimeElapsed);
 }
 
-void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
+void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed)
 {
 	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed);
 }
@@ -277,14 +277,14 @@ bool CTitleScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 	return(false);
 }
 
-void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pTextShader = new CTextShader();
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	{
-		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
@@ -300,14 +300,14 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	{
 		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, 100, 100, 1000);
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), PEASANT_1_FBX, ShaderType::CUIObjectsShader);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUIObjectsShader);
 		pCardUIObject->SetMesh(0, pBox);
 		pCardUIObject->SetPositionUI(480, 300);
 		pCardUIObject->SetScale(1, 1, 1);
 		//pCardUIObject->SetShaderType(ShaderType::CUIObjectsShader);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), PEASANT_1_FBX, ShaderType::CUIObjectsShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUIObjectsShader);
 		pCardUIObject->SetMesh(0, pBox);
 		pCardUIObject->SetPositionUI(480, 420);
 		pCardUIObject->SetScale(1, 1, 1);
@@ -696,7 +696,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return(false);
 }
 
-void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -706,7 +706,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 
-	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, PEASANT_1_FBX, ShaderType::CTextureShader);
+	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
 	//CFBXTestMesh* pPlayerMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(PEASANT_1_FBX));
 	//m_pPlayer->SetMesh(0, pPlayerMesh);
 
@@ -789,7 +789,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	for (int i = 0; i < 1; i++) {
 		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, ShaderType::CTextureShader);
-		CFBXTestMesh* pStoneMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stone_big_001.fbx")->m_pvMeshs[0]);
+		CFBXMesh* pStoneMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stone_big_001.fbx")->m_pvMeshs[0]);
 		pMonsterObject->SetMesh(0, pStoneMesh);
 
 		CMaterial* pTreeMaterial = pMonsterObject->GetMaterial();
@@ -823,8 +823,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			for (int z = 0; z < 5; z++)
 			{
 
-				CFBXTestObject* pTreeObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-				CFBXTestMesh* pTreeMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3)->m_pvMeshs[0]);
+				CFBXObject* pTreeObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+				CFBXMesh* pTreeMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3)->m_pvMeshs[0]);
 				pTreeObject->SetMesh(0, pTreeMesh);
 				CMaterial* pTreeMaterial = pTreeObject->GetMaterial();
 
@@ -854,35 +854,35 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
 
 
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 0, ShaderType::CUITextureShader);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 0, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(100, 100);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
 		pCardUIObject->SetFunc(Callback_0);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 1, ShaderType::CUITextureShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 1, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(200, 200);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
 		pCardUIObject->SetFunc(Callback_1);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 2, ShaderType::CUITextureShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 2, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(300, 300);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
 		pCardUIObject->SetFunc(Callback_2);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 3, ShaderType::CUITextureShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 3, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
 		pCardUIObject->SetFunc(Callback_3);
 		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, m_pPlayer->GetCamera(), CARD_FBX, 4, ShaderType::CUITextureShader);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 4, ShaderType::CUITextureShader);
 		pCardUIObject->SetPositionUI(400, 400);
 		pCardUIObject->SetMesh(0, pCubeMesh);
 		pCardUIObject->SetScale(2, 2, 1);
@@ -899,19 +899,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pRayObject = new CRayObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 	pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
 	m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
-
-
-	// animations
-	{
-		pFBXLoader->LoadAnimationOnly(IDLE_ANI_FBX);
-		pFBXLoader->LoadAnimationOnly(RUN_ANI_FBX);
-		pFBXLoader->LoadAnimationOnly(ANI_TEST_ANI_FBX);
-		pFBXLoader->LoadAnimationOnly(ANI_TEST2_ANI_FBX);
-
-		//m_pPlayer->SetAnimation(pFBXLoader->GetAnimationData(IDLE_ANI_FBX), true);
-	}
-
-
 }
 
 void CTestScene::BuildLightsAndMaterials()
@@ -1189,95 +1176,8 @@ void CTestScene::AnimateObjects(float fTotalTime ,float fTimeElapsed)
 	}
 }
 
-void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
+void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed)
 {
-	// 임시 애니메이션
-	{
-		vector<CGameObject*> vGO = ((vector<CGameObject*>)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Player]));
-
-		CFBXObject* fbxobj = NULL;
-		CMesh** meshes = NULL;
-		CFBXMesh* fbxmesh = NULL;
-
-		for (CGameObject* obj : vGO)
-		{
-			fbxobj = (CFBXObject*)obj;
-			//if (fbxobj->GetCurrentAnimationData())
-			{
-				if (fbxobj->GetMeshes())
-				{
-					meshes = ((CFBXObject*)obj)->GetMeshes();
-					for (int m = 0; m < fbxobj->GetNumMeshes(); m++)
-					{
-
-						//------------------------------------------------------------------------
-						//                     GetOffsetMatList 라는 함수로 뺀다.
-						// 정점의 개수만큼 변환행렬 생성.
-						fbxmesh = (CFBXMesh*)meshes[m];
-						int verticesCount = fbxmesh->GetNumVertices();
-						XMFLOAT4X4* offsetMatList = new XMFLOAT4X4[verticesCount];
-						// 초기화
-						for (int j = 0; j < verticesCount; j++)
-							offsetMatList[j] = Matrix4x4::Identity();
-
-
-						//매쉬의 본들에서
-						CSkeleton* skelList = fbxmesh->GetSkeletonList();
-						if (skelList)
-						{
-							float* weightSum = new float[verticesCount];
-							for (int asdf = 0; asdf < verticesCount; asdf++)
-								weightSum[asdf] = 0.f;
-							//for (int i = 0;i < fbxmesh->GetClusterCount();i++)
-							//{
-								//cout << skelList[i] << endl;
-							//}
-							for (int c = 0; c < fbxmesh->GetClusterCount(); c++)
-							{
-								// 영향받는 정점들과 그 정도를 가져와서
-								int* pIndices = skelList[c].GetIndices();
-								double* Weights = skelList[c].GetWeights();
-
-								//XMFLOAT4X4 tmp = skelList[c].GetTransformMatrix();
-								XMFLOAT4X4 tmp = skelList[c].GetOffsetMatrix();
-
-								for (int i = 0; i < skelList[c].GetIndicesCount(); i++)
-								{
-									// 해당하는 정점에 그 정도만큼 OffsetMatrix를 곱한다.
-									int index = pIndices[i];
-									for (int row = 0; row < 4; ++row)
-										for (int col = 0; col < 4; ++col)
-										{
-											{
-												tmp.m[row][col] *= (float)Weights[i];
-												offsetMatList[index].m[row][col] += tmp.m[row][col];
-											}
-										}
-									weightSum[index] += (float)Weights[i];
-								}
-							}
-							for (int asdf = 0; asdf < verticesCount; asdf++)
-							{
-#ifdef _DEBUG
-								//cout << "weightSum[" << asdf << "] : " << weightSum[asdf] << endl;
-#endif // _DEBUG
-							}
-							delete[] weightSum;
-						}
-						//------------------------------------------------------------------------
-
-						// 만들어진 행렬을 정점들에 적용.
-						fbxmesh->UpdateVerticesBuffer(pd3dDevice, pd3dCommandList, offsetMatList); // 아직 버그 있음.
-
-						// 변환행렬 삭제.
-						delete[] offsetMatList;
-					}
-
-				}
-			}
-		}
-
-	}
 	if (SelectedUInum != -1) {
 		float fBoxSize = 200.0f;
 
@@ -1333,7 +1233,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
 		SelectedUInum = -1;
 	}
-	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, pFBXLoader, fTimeElapsed);
+	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, pFBXDataManager, fTimeElapsed);
 }
 
 void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
@@ -1521,7 +1421,7 @@ bool CTestScene_Slice::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 	return(false);
 }
 
-void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -1529,7 +1429,7 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pTextShader = new CTextShader();
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	{
-		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -1537,7 +1437,7 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		//CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
@@ -1653,7 +1553,7 @@ void CTestScene_Slice::AnimateObjects(float fTotalTime, float fTimeElapsed)
 #endif // DEBUG
 }
 
-void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
+void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed)
 {
 	if (m_bAddCutter) {
 		m_bAddCutter = false;
@@ -1710,7 +1610,7 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		m_bResetFlag = false;
 		m_pObjectManager->ClearLayer(ObjectLayer::Object);
 
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
@@ -1847,7 +1747,7 @@ CTestScene_PhysX::~CTestScene_PhysX()
 	delete m_pPhysXManager;
 }
 
-void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -1856,7 +1756,7 @@ void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	{
-		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -1864,14 +1764,14 @@ void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 
 		for (int i = 0; i < (10); ++i) {
-			pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, STONE_LIT_001_FBX, ShaderType::CObjectsShader);
+			pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 			pFBXObject->SetPosition(50.0f, 50.0f * i, 100.0f);
 			m_pObjectManager->AddObj(pFBXObject, ObjectLayer::ObjectPhysX);
 		}
@@ -1948,7 +1848,7 @@ CTestScene_Animation::~CTestScene_Animation()
 
 }
 
-void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader)
+void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -1958,7 +1858,7 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	{
-		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFBXLoader, NULL, ShaderType::CObjectsShader);
+		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -1975,14 +1875,14 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	// animaition Test Charactor
 	{
-		CFBXTestObject* pAnimObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		CFBXObject* pAnimObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 		pAnimObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
 		//float xPosition = 0;
 		//float zPosition = 0;
 		//float fHeight = 0;
 		//pAnimObject->SetPosition(xPosition, fHeight, zPosition);
 		//pAnimObject->Rotate(0.0f, 0.0f, 0.0f);
-		CFBXTestObject* pTest = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		CFBXObject* pTest = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 		float xPosition = 0;
 		float zPosition = 0;
 		float fHeight = 0;

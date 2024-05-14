@@ -17,6 +17,6 @@ void CCardMaster::AnimateObjects(float fTotalTime, float fTimeElapsed)
 {
 }
 
-void CCardMaster::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXLoader* pFBXLoader, float fTimeElapsed)
+void CCardMaster::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed)
 {
 }

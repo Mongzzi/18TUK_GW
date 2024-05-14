@@ -3,7 +3,7 @@
 #include "Timer.h"
 #include "Scene.h"
 #include "Player.h"
-#include "FbxLoader.h"
+#include "FBXDataManager.h"
 
 class CGameFramework
 {
@@ -109,6 +109,6 @@ private:
 
 	_TCHAR						m_pszFrameRate[75];
 
-	CFBXLoader*					m_pFBXLoader = NULL;
+	CFBXDataManager*			m_pFBXDataManager = NULL;
 };
 
