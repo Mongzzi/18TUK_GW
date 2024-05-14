@@ -13,7 +13,6 @@ public:
 private:
 	FbxManager* m_plSdkManager = nullptr;
 
-	std::map<std::string, CFbxData*> m_mLoadedDataMap;
 public:
 	// Load All Data from FBX
 	CFbxData* LoadFBX(const char* fileName);

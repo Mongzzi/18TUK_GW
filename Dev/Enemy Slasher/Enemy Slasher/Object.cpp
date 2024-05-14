@@ -741,6 +741,8 @@ void CGameObject::MakeCollider()
 CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 1)
 {
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_pcbMappedSkinningObject->m_bIsAvailable = false;
 }
 
 CFBXObject::~CFBXObject()
@@ -755,13 +757,10 @@ void CFBXObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		SetMesh(i, pAnimMesh);
 	}
 
-	m_pcbMappedSkinningObject->m_bIsAvailable = false;
-
 	if (pFbxData->m_bHasSkeleton == true) {
 		m_pSkeletonData = &pFbxData->m_Skeleton;
 
-		if(m_pSkeletonData->m_nAnimationLength > 0)
-			m_pcbMappedSkinningObject->m_bIsAvailable = true;
+		//m_pSkeletonData->deleteAnimData();
 	}
 }
 

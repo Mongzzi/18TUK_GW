@@ -1,6 +1,7 @@
 #pragma once
 #include "FbxLoader_V2.h"
 #include "Object.h"
+#include <map>
 
 #define STONE_LIT_001_FBX "fbxsdk/Stone_lit_001.fbx"
 #define STONE_LIT_002_FBX "fbxsdk/Stone_lit_002.fbx"
@@ -30,7 +31,24 @@
 #define ANI_TEST_ANI_FBX "fbxsdk/aniTest.fbx"
 #define ANI_TEST2_ANI_FBX "fbxsdk/aniTest2.fbx"
 
+
+
 class CResorceManager
 {
+public:
+	CResorceManager();
+	~CResorceManager();
+
+public:
+	CGameObject* LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName);
+	CAnimationData* LoadAnimDataFromFBX(const char* fileName);
+	//CTexture* LoadTexture(const char* fileName);
+
+private:
+	CFbxLoader_V2* m_pFBXLoader = NULL;
+
+	std::map<std::string, CGameObject*> m_mLoadedFBXDataMap;
+	std::map<std::string, CAnimationData*> m_mLoadedAnimDataMap;
+
 };
 

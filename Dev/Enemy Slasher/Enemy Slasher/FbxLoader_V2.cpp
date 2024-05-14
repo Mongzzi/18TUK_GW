@@ -43,71 +43,61 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 	auto start = chrono::high_resolution_clock::now();
 #endif // _DEBUG
 
-	if (m_mLoadedDataMap.contains(fName) == false) {
-		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
-		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
-		pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
+	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+	pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
 
-		pFbxImporter->Import(lScene);
-		pFbxImporter->Destroy();
+	pFbxImporter->Import(lScene);
+	pFbxImporter->Destroy();
 
-		FbxGeometryConverter geometryConverter(m_plSdkManager);
-		geometryConverter.Triangulate(lScene, true);
+	FbxGeometryConverter geometryConverter(m_plSdkManager);
+	geometryConverter.Triangulate(lScene, true);
 
-		FbxNode* lRootNode = lScene->GetRootNode();
-		if (lRootNode)
-		{
-			loadData = new CFbxData;
-			LoadControlPoints(lRootNode, loadData);
-			ProcessSkeletonHierarchy(lRootNode, loadData);
-			LoadMesh(lRootNode, lScene, loadData);
+	FbxNode* lRootNode = lScene->GetRootNode();
+	if (lRootNode)
+	{
+		loadData = new CFbxData;
+		LoadControlPoints(lRootNode, loadData);
+		ProcessSkeletonHierarchy(lRootNode, loadData);
+		LoadMesh(lRootNode, lScene, loadData);
 
 #ifdef _DEBUG
-			FBXSDK_printf("Load Complete file : %s\n", fileName);
-			FBXSDK_printf("\t MeshCount: %d\n", loadData->m_pvMeshs.size());
-			for (int i = 0; i < loadData->m_pvMeshs.size(); ++i) {
-				FBXSDK_printf("\t\t VertexCount: %d , %d\n", loadData->m_pvMeshs[i]->m_vVertex.size(), loadData->m_pvMeshs[i]->m_nVertices);
-			}
-
-			if (loadData->m_bHasSkeleton == true) {
-				FBXSDK_printf("\t Skeleton Joint Count: %d\n", loadData->m_Skeleton.m_vJoints.size());
-				
-
-				for (int i = 0; i < loadData->m_pvMeshs.size(); ++i)
-					for (int j = 0; j < loadData->m_pvMeshs[i]->m_vVertex.size(); ++j) {
-						if (loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size() != 4)
-							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingInfo. It has %d Infos\n",
-								i,
-								j,
-								loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size());
-						float temp = 0.f;
-						for (int k = 0; k < loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size(); ++k) {
-							temp += loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo[k].m_fBlendingWeight;
-						}
-						float t1 = 0.0005f;
-						float t2 = fabs(1.f - temp);
-						if (t2 > t1 && t2 < -t1)
-							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingWeight. It has %f Weight\n",
-								i,
-								j,
-								t2);
-					}
-				if (loadData->m_Skeleton.m_nAnimationLength > 0) {
-					std::cout << "\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
-					std::cout << "\t AnimationFrameLength: " << loadData->m_Skeleton.m_nAnimationLength << '\n';
-				}
-			}
-#endif // _DEBUG
+		FBXSDK_printf("Load Complete file : %s\n", fileName);
+		FBXSDK_printf("\t MeshCount: %d\n", loadData->m_pvMeshs.size());
+		for (int i = 0; i < loadData->m_pvMeshs.size(); ++i) {
+			FBXSDK_printf("\t\t VertexCount: %d , %d\n", loadData->m_pvMeshs[i]->m_vVertex.size(), loadData->m_pvMeshs[i]->m_nVertices);
 		}
 
-		m_mLoadedDataMap[fName] = loadData;
-	}
-	else {
-#ifdef _DEBUG
-		FBXSDK_printf("File already loaded : %s\n", fileName);
+		if (loadData->m_bHasSkeleton == true) {
+			FBXSDK_printf("\t Skeleton Joint Count: %d\n", loadData->m_Skeleton.m_vJoints.size());
+
+
+			for (int i = 0; i < loadData->m_pvMeshs.size(); ++i)
+				for (int j = 0; j < loadData->m_pvMeshs[i]->m_vVertex.size(); ++j) {
+					if (loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size() != 4)
+						FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingInfo. It has %d Infos\n",
+							i,
+							j,
+							loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size());
+					float temp = 0.f;
+					for (int k = 0; k < loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size(); ++k) {
+						temp += loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo[k].m_fBlendingWeight;
+					}
+					float t1 = 0.0005f;
+					float t2 = fabs(1.f - temp);
+					if (t2 > t1 && t2 < -t1)
+						FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingWeight. It has %f Weight\n",
+							i,
+							j,
+							t2);
+				}
+			if (loadData->m_Skeleton.m_nAnimationLength > 0) {
+				std::cout << "\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
+				std::cout << "\t AnimationFrameLength: " << loadData->m_Skeleton.m_nAnimationLength << '\n';
+			}
+		}
 #endif // _DEBUG
 	}
-
 
 #ifdef _DEBUG
 	{
@@ -125,7 +115,7 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 #endif // _DEBUG
 
 
-	return m_mLoadedDataMap[fName];
+	return loadData;
 }
 
 
@@ -136,32 +126,25 @@ CFbxData* CFbxLoader_V2::LoadAnim(const char* fileName)
 
 	auto start = chrono::high_resolution_clock::now();
 
-	if (m_mLoadedDataMap.contains(fName) == false) {
-		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
-		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
-		pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
+	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+	pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
 
-		pFbxImporter->Import(lScene);
-		pFbxImporter->Destroy();
+	pFbxImporter->Import(lScene);
+	pFbxImporter->Destroy();
 
-		FbxGeometryConverter geometryConverter(m_plSdkManager);
-		geometryConverter.Triangulate(lScene, true);
+	FbxGeometryConverter geometryConverter(m_plSdkManager);
+	geometryConverter.Triangulate(lScene, true);
 
-		FbxNode* lRootNode = lScene->GetRootNode();
-		if (lRootNode)
-		{
-			loadData = new CFbxData;
-			ProcessSkeletonHierarchy(lRootNode, loadData);
-			LoadAnimationOnly(lRootNode, lScene, loadData);
-		}
-
-		m_mLoadedDataMap[fName] = loadData;
-	}
-	else {
-
+	FbxNode* lRootNode = lScene->GetRootNode();
+	if (lRootNode)
+	{
+		loadData = new CFbxData;
+		ProcessSkeletonHierarchy(lRootNode, loadData);
+		LoadAnimationOnly(lRootNode, lScene, loadData);
 	}
 
-	return m_mLoadedDataMap[fName];
+	return loadData;
 }
 
 
@@ -231,6 +214,15 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 
 		// Clear CtrlPoints for manage memory
 		pMeshData->m_vCtrlPoints.clear();
+	}
+
+	{
+		Keyframe* head = loadData->m_Skeleton.m_vJoints[0].m_pAnimFrames;
+		loadData->m_Skeleton.m_nAnimationLength = 0;
+		while (head != nullptr) {
+			head = head->m_pNext;
+			loadData->m_Skeleton.m_nAnimationLength += 1;
+		}
 	}
 }
 
@@ -521,7 +513,7 @@ void CFbxLoader_V2::ProcessJointsAndAnimation(FbxNode* inNode, FbxScene* lScene,
 				FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
 				FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 
-				loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
+				//loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
 
 				Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
 
@@ -593,6 +585,15 @@ void CFbxLoader_V2::LoadAnimationOnly(FbxNode* lRootNode, FbxScene* lScene, CFbx
 
 		ReadAnimationOnly(pFbxChildNode, lScene, loadData);
 	}
+
+	{
+		Keyframe* head = loadData->m_Skeleton.m_vJoints[0].m_pAnimFrames;
+		loadData->m_Skeleton.m_nAnimationLength = 0;
+		while (head != nullptr) {
+			head = head->m_pNext;
+			loadData->m_Skeleton.m_nAnimationLength += 1;
+		}
+	}
 }
 
 void CFbxLoader_V2::ReadAnimationOnly(FbxNode* inNode, FbxScene* lScene, CFbxData* loadData)
@@ -627,7 +628,7 @@ void CFbxLoader_V2::ReadAnimationOnly(FbxNode* inNode, FbxScene* lScene, CFbxDat
 			FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
 			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 
-			loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
+			//loadData->m_Skeleton.m_nAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
 
 			Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
 

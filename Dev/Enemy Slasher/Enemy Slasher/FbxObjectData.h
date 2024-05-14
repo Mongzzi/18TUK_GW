@@ -50,7 +50,10 @@ public:
 	std::vector<CFbxJoint> m_vJoints;
 
 	std::string m_sAnimationName;
-	long long m_nAnimationLength = -1;
+	long long m_nAnimationLength = 0;
+
+public:
+	void deleteAnimData();
 };
 
 class CFbxMeshData {
@@ -86,4 +89,20 @@ public:
 private:
 	int m_nAllVertexCount = 0;
 	int m_nVertexCounter = 0;
+};
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+class CAnimationData {
+public:
+	CAnimationData() {};
+	~CAnimationData() {};
+
+public:
+	int m_nAnimLen = -1;
+	int m_nJoint = -1;
+	XMFLOAT4X4** m_ppxmf4x4AnimMat = NULL;
 };
