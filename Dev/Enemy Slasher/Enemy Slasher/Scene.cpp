@@ -819,13 +819,13 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		float xpitch = 257.0f * 24.0f / 10.0f;
 		float zpitch = 257.0f * 24.0f / 7.0f;
 
+		CFBXObject* pTreeObject;// = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+		CFBXMesh* pTreeMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3)->m_pvMeshs[0]);
 		for (int x = 0; x <5; x++)
 		{
 			for (int z = 0; z < 5; z++)
 			{
-
-				CFBXObject* pTreeObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-				CFBXMesh* pTreeMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3)->m_pvMeshs[0]);
+				pTreeObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
 				pTreeObject->SetMesh(0, pTreeMesh);
 				CMaterial* pTreeMaterial = pTreeObject->GetMaterial();
 
@@ -850,46 +850,47 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 
 	//// UI
-	//{
-	//	//카드 UI 테스트용 오브젝트.
-	//	CCubeMeshTextured* pCubeMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
+	{
+		//카드 UI 테스트용 오브젝트.
+		//CCubeMeshTextured* pCardMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
+		CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(CARD_FBX)->m_pvMeshs[0]);
 
 
-	//	CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 0, ShaderType::CUITextureShader);
-	//	pCardUIObject->SetPositionUI(100, 100);
-	//	pCardUIObject->SetMesh(0, pCubeMesh);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	pCardUIObject->SetFunc(Callback_0);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 0, ShaderType::CUITextureShader);
+		pCardUIObject->SetPositionUI(100, 100);
+		pCardUIObject->SetMesh(0, pCardMesh,true);
+		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_0);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 1, ShaderType::CUITextureShader);
-	//	pCardUIObject->SetPositionUI(200, 200);
-	//	pCardUIObject->SetMesh(0, pCubeMesh);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	pCardUIObject->SetFunc(Callback_1);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 1, ShaderType::CUIObjectsShader);
+		pCardUIObject->SetPositionUI(200, 200);
+		pCardUIObject->SetMesh(0, pCardMesh, true);
+		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_1);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 2, ShaderType::CUITextureShader);
-	//	pCardUIObject->SetPositionUI(300, 300);
-	//	pCardUIObject->SetMesh(0, pCubeMesh);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	pCardUIObject->SetFunc(Callback_2);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 2, ShaderType::CUITextureShader);
+		pCardUIObject->SetPositionUI(300, 300);
+		pCardUIObject->SetMesh(0, pCardMesh, true);
+		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_2);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 3, ShaderType::CUITextureShader);
-	//	pCardUIObject->SetPositionUI(400, 400);
-	//	pCardUIObject->SetMesh(0, pCubeMesh);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	pCardUIObject->SetFunc(Callback_3);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 3, ShaderType::CUITextureShader);
+		pCardUIObject->SetPositionUI(400, 400);
+		pCardUIObject->SetMesh(0, pCardMesh, true);
+		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_3);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 
-	//	pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 4, ShaderType::CUITextureShader);
-	//	pCardUIObject->SetPositionUI(400, 400);
-	//	pCardUIObject->SetMesh(0, pCubeMesh);
-	//	pCardUIObject->SetScale(2, 2, 1);
-	//	pCardUIObject->SetFunc(Callback_4);
-	//	m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-	//}
+		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 4, ShaderType::CUITextureShader);
+		pCardUIObject->SetPositionUI(400, 400);
+		pCardUIObject->SetMesh(0, pCardMesh, true);
+		pCardUIObject->SetScale(2, 2, 1);
+		pCardUIObject->SetFunc(Callback_4);
+		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	}
 
 
 
@@ -1053,8 +1054,8 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, obj, tmin, tmax)) {
 					pCoveredUI = obj;
 #ifdef _DEBUG
-					//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
-#endif // _DEBUG
+					cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
+#endif // _DEBUG	
 				}
 				else
 					;//obj->CursorOverObject(false);

@@ -1466,7 +1466,7 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	//CreateCollider(pd3dDevice, pd3dCommandList);
+	CreateCollider(pd3dDevice, pd3dCommandList);
 }
 
 CFBXMesh::~CFBXMesh()
