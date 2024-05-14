@@ -160,8 +160,6 @@ private:
 	CUIObject* pCoveredUI = NULL;
 	CUIObject* pSelectedUI = NULL;
 
-	// юс╫ц
-	int SelectedUInum;
 
 protected:
 

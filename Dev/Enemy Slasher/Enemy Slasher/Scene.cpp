@@ -637,7 +637,6 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_RBUTTONUP:
 		if (pSelectedUI)
 		{
-			SelectedUInum = pSelectedUI->GetUInum();
 			pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
@@ -717,8 +716,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
-	// 임시
-	SelectedUInum = -1;
 	//--------------------------------- 조명, 재질 생성 ----------------------------------------
 
 	BuildLightsAndMaterials();
@@ -1180,61 +1177,62 @@ void CTestScene::AnimateObjects(float fTotalTime ,float fTimeElapsed)
 
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
-	if (SelectedUInum != -1) {
-		float fBoxSize = 200.0f;
+	//if (SelectedUInum != -1) {
+	//	float fBoxSize = 200.0f;
+	//
+	//
+	//	CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
+	//	//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// 둘 다 해봐
+	//
+	//	std::random_device rd;
+	//	std::default_random_engine dre(rd());
+	//	std::uniform_real_distribution <float> urd(-1.0, 1.0);
+	//
+	//	XMFLOAT3 playerLook = m_pPlayer->GetLook();
+	//	XMFLOAT3 Vector1;
+	//	XMFLOAT3 Vector2 = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	//	XMFLOAT3 planeNormal;
+	//
+	//	CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+	//	CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
+	//
+	//
+	//	// 외적 계산 (수직인 벡터)
+	//	switch (SelectedUInum)
+	//	{
+	//	case 0:
+	//	case 1:
+	//		//Vector1 = m_pPlayer->GetRight();
+	//		Vector1 = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	//		break;
+	//	case 2:
+	//	case 3:
+	//		//Vector1 = m_pPlayer->GetUp();
+	//		Vector1 = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	//		break;
+	//	default:
+	//		Vector1 = XMFLOAT3(urd(dre), urd(dre), urd(dre));
+	//		break;
+	//	}
+	//	planeNormal = Vector3::CrossProduct(Vector1, Vector2);
+	//	cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
+	//	cutterObject->SetMesh(0, cutterMesh, true);
+	//
+	//
+	//	XMFLOAT3 pos = m_pPlayer->GetPosition();
+	//	pos = Vector3::Add(pos, Vector3::ScalarProduct(playerLook, 500, false));
+	//	pos.y = pos.y + 200.f;
+	//	cutterObject->SetPosition(pos);
+	//
+	//	cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
+	//
+	//	cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
+	//	//cutterObject->SetShaderType(ShaderType::CObjectsShader);
+	//
+	//	m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
+	//	SelectedUInum = -1;
+	//}
 
-
-		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
-		//XMFLOAT3 ray_dir = m_pPlayer->GetLookVector();	// 둘 다 해봐
-
-		std::random_device rd;
-		std::default_random_engine dre(rd());
-		std::uniform_real_distribution <float> urd(-1.0, 1.0);
-
-		XMFLOAT3 playerLook = m_pPlayer->GetLook();
-		XMFLOAT3 Vector1;
-		XMFLOAT3 Vector2 = XMFLOAT3(0.0f, 0.0f, 1.0f);
-		XMFLOAT3 planeNormal;
-
-		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		CCutterBox_NonMesh* cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
-
-
-		// 외적 계산 (수직인 벡터)
-		switch (SelectedUInum)
-		{
-		case 0:
-		case 1:
-			//Vector1 = m_pPlayer->GetRight();
-			Vector1 = XMFLOAT3(1.0f, 0.0f, 0.0f);
-			break;
-		case 2:
-		case 3:
-			//Vector1 = m_pPlayer->GetUp();
-			Vector1 = XMFLOAT3(0.0f, 1.0f, 0.0f);
-			break;
-		default:
-			Vector1 = XMFLOAT3(urd(dre), urd(dre), urd(dre));
-			break;
-		}
-		planeNormal = Vector3::CrossProduct(Vector1, Vector2);
-		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
-		cutterObject->SetMesh(0, cutterMesh, true);
-
-
-		XMFLOAT3 pos = m_pPlayer->GetPosition();
-		pos = Vector3::Add(pos, Vector3::ScalarProduct(playerLook, 500, false));
-		pos.y = pos.y + 200.f;
-		cutterObject->SetPosition(pos);
-
-		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
-
-		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
-		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
-
-		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
-		SelectedUInum = -1;
-	}
 	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, pFBXDataManager, fTimeElapsed);
 }
 
