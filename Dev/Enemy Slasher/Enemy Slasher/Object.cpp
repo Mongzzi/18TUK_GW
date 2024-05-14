@@ -1100,6 +1100,35 @@ void CUIObject::SetScale(XMFLOAT3 scale)
 	CGameObject::SetScale(Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false));
 }
 
+void Callback_0(CGameObject* self, CGameObject* target) {
+	cout << "Callback_0" << endl;
+	// 만약 이 카드가 제자리에서 공격이라면 
+	// 1. self의 공격력을 가져와 
+	// 2. target에게 피해를 입힌다.
+	// 위 행동 모두 함수로 구현.
+}
+
+void Callback_1(CGameObject* self, CGameObject* target) {
+	cout << "Callback_1" << endl;
+	// 만약 이 카드가 이동 후 공격이라면 
+	// 1. self가 이동해야하는지 확인
+	// 2. 이동해야하면 이동한다.
+	// 3. target에게 피해를 입힌다.
+	// 위 행동 모두 함수로 구현.
+}
+
+void Callback_2(CGameObject* self, CGameObject* target) {
+	cout << "Callback_2" << endl;
+}
+
+void Callback_3(CGameObject* self, CGameObject* target) {
+	cout << "Callback_3" << endl;
+}
+
+void Callback_4(CGameObject* self, CGameObject* target) {
+	cout << "Callback_4" << endl;
+}
+
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype)
 	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, stype)
 {
@@ -1201,39 +1230,6 @@ void CCardUIObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 	}
 }
 
-//void CCardUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
-//{
-//	OnPrepareRender();
-//
-//	UpdateShaderVariables(pd3dCommandList);
-//
-//	if (m_pMaterial)
-//	{
-//		if (m_pMaterial->m_pShader)
-//		{
-//			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
-//		}
-//
-//		if (m_pMaterial->m_pTexture)
-//		{
-//			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-//		}
-//
-//	}
-//	pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_d3dCbvGPUDescriptorHandle);
-//
-//	if (m_ppMeshes)
-//	{
-//		for (int i = 0; i < m_nMeshes; i++)
-//		{
-//			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, pRenderOption);
-//		}
-//	}
-//
-//	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-//	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
-//}
-
 void CCardUIObject::CursorOverObject(bool flag)
 {
 	if (flag)
@@ -1249,29 +1245,7 @@ void CCardUIObject::ButtenDown()
 
 void CCardUIObject::ButtenUp()
 {
-	// 모든 카드는 공격카드
-	switch (m_iUInum)
-	{
-	case 0:
-		// 세로로 절단
-		break;
-	case 1:
-		// 가로 절단
-		break;
-	case 2:
-		// 랜덤 절단
-		break;
-	case 3:
-		// 이동 후 절단.
-		// 이동은 가장 가까운 오브젝트를 향함.
-		break;
-	case 4:
-
-		break;
-	default:
-		break;
-	}
-	cout << m_iUInum << endl;
+	// 
 }
 
 void CCardUIObject::SetFunc(CardCallbackFunction callback)
@@ -1678,34 +1652,6 @@ bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
 	}
 }
 
-void Callback_0(CGameObject* self, CGameObject* target) {
-	cout << "Callback_0" << endl;
-	// 만약 이 카드가 제자리에서 공격이라면 
-	// 1. self의 공격력을 가져와 
-	// 2. target에게 피해를 입힌다.
-	// 위 행동 모두 함수로 구현.
-}
-
-void Callback_1(CGameObject* self, CGameObject* target) {
-	cout << "Callback_1" << endl;
-	// 만약 이 카드가 이동 후 공격이라면 
-	// 1. self가 이동해야하는지 확인
-	// 2. 이동해야하면 이동한다.
-	// 3. target에게 피해를 입힌다.
-	// 위 행동 모두 함수로 구현.
-}
-
-void Callback_2(CGameObject* self, CGameObject* target) {
-	cout << "Callback_2" << endl;
-}
-
-void Callback_3(CGameObject* self, CGameObject* target) {
-	cout << "Callback_3" << endl;
-}
-
-void Callback_4(CGameObject* self, CGameObject* target) {
-	cout << "Callback_4" << endl;
-}
 
 
 
