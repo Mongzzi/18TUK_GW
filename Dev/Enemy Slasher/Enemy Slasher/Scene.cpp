@@ -5,7 +5,7 @@
 #include "PhysXManager.h"
 #include "Ray.h"
 #include "FbxLoader_V2.h"
-#include "FBXDataManager.h"
+#include "ResorceManager.h"
 
 CBasicScene::CBasicScene()
 {
@@ -21,7 +21,7 @@ CBasicScene::~CBasicScene()
 	//delete m_pShaderManager;
 }
 
-void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
+void CBasicScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -162,7 +162,7 @@ void CBasicScene::AnimateObjects(float fTimeTotal ,float fTimeElapsed)
 	m_pObjectManager->AnimateObjects(fTimeTotal , fTimeElapsed);
 }
 
-void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed)
+void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
 	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed);
 }
@@ -277,7 +277,7 @@ bool CTitleScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 	return(false);
 }
 
-void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
+void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -696,7 +696,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	return(false);
 }
 
-void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
+void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -1176,7 +1176,7 @@ void CTestScene::AnimateObjects(float fTotalTime ,float fTimeElapsed)
 	}
 }
 
-void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed)
+void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
 	if (SelectedUInum != -1) {
 		float fBoxSize = 200.0f;
@@ -1421,7 +1421,7 @@ bool CTestScene_Slice::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 	return(false);
 }
 
-void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
+void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -1553,7 +1553,7 @@ void CTestScene_Slice::AnimateObjects(float fTotalTime, float fTimeElapsed)
 #endif // DEBUG
 }
 
-void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed)
+void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
 	if (m_bAddCutter) {
 		m_bAddCutter = false;
@@ -1747,7 +1747,7 @@ CTestScene_PhysX::~CTestScene_PhysX()
 	delete m_pPhysXManager;
 }
 
-void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
+void CTestScene_PhysX::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -1848,7 +1848,7 @@ CTestScene_Animation::~CTestScene_Animation()
 
 }
 
-void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager)
+void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 

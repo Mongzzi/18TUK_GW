@@ -479,7 +479,7 @@ void CGameFramework::BuildObjects()
 {
 	float a = XMConvertToDegrees(atan(0.5));
 
-	m_pFBXDataManager = new CFBXDataManager();
+	m_pFBXDataManager = new CResorceManager();
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 

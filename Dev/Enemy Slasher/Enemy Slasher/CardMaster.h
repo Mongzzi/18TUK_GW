@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "FBXDataManager.h"
+#include "ResorceManager.h"
 
 //
 // 화면에 보여줄 패를 보여줄 캐릭터 등 여기서 설정.
@@ -22,7 +22,7 @@ private:
 public:
 	bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
 	void AnimateObjects(float fTotalTime, float fTimeElapsed);
-	void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFBXDataManager* pFBXDataManager, float fTimeElapsed);
+	void DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed);
 	// 전투 할 캐릭터 추가함수
 };
 
