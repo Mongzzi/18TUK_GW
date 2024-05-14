@@ -991,19 +991,6 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	m_fCurrntScale = m_fTargetScale = 1.0f;
 	SetCamera(pCamera);
-
-	m_iUInum = -1;
-}
-
-CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, int UInum, ShaderType stype)
-	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
-{
-	m_xmfScale.z = m_xmfScale.y = m_xmfScale.z = 1.0;
-
-	m_fCurrntScale = m_fTargetScale = 1.0f;
-	SetCamera(pCamera);
-
-	m_iUInum = UInum;
 }
 
 CUIObject::~CUIObject()
@@ -1132,10 +1119,11 @@ void Callback_4(CGameObject* self, CGameObject* target) {
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype)
 	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, stype)
 {
+	m_Card_Ui_Num = -1;
 }
 
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, int UInum, ShaderType stype)
-	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, UInum, stype)
+	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, stype)
 {
 	m_Card_Ui_Num = UInum;
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1259,6 +1247,12 @@ void CCardUIObject::CallFunc(CGameObject* self, CGameObject* target)
 		m_callbackFunc(self, target);
 	else
 		cout << "콜백없음" << endl;
+}
+
+void CCardUIObject::UpdateData(int num)
+{
+	m_Card_Ui_Num = num;
+	// 콜백함수도 바꿔야함.
 }
 
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)

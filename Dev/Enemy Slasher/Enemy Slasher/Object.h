@@ -343,7 +343,6 @@ class CUIObject : public CFBXObject
 {
 public:
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype= ShaderType::CObjectsShader);
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, int UInum, ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CUIObject();
 protected:
 	static constexpr float TARGET_SCALE = 1.5f;
@@ -359,7 +358,6 @@ protected:
 
 	XMFLOAT3 m_xmfScale;
 
-	int m_iUInum;
 public:
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };
 
@@ -371,7 +369,6 @@ public:
 	void AddPositionUI(POINT pos);
 
 	POINT GetPositionUI() { return POINT(m_iXPosition, m_iYPosition); }
-	int GetUInum() { return m_iUInum; };
 
 	// 계속 불리는 함수
 	virtual void CursorOverObject(bool flag) = 0;
@@ -415,7 +412,7 @@ public:
 
 	virtual ~CCardUIObject();
 private:
-	int m_Card_Ui_Num;
+	int m_Card_Ui_Num;	// 카드 목록중 카드의 번호
 	CardCallbackFunction m_callbackFunc = NULL;
 
 public:
@@ -430,6 +427,8 @@ public:
 	void ButtenUp() override;
 	void SetFunc(CardCallbackFunction);
 	void CallFunc(CGameObject* self,  CGameObject* target);
+
+	void UpdateData(int num);
 };
 
 

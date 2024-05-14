@@ -637,6 +637,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_RBUTTONUP:
 		if (pSelectedUI)
 		{
+			// 현재 카드UI 전용코드가 올라가있음.
+			// 아래 내용을 CCardUIObject.ButtenUp()에 넣어야함.
 			pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
@@ -1051,7 +1053,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, obj, tmin, tmax)) {
 					pCoveredUI = obj;
 #ifdef _DEBUG
-					cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
+					//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
 #endif // _DEBUG	
 				}
 				else
