@@ -214,7 +214,7 @@ CGameObject::CGameObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 {
 	m_xmf4x4Transform = Matrix4x4::Identity();
 	m_xmf4x4World = Matrix4x4::Identity();
-
+	m_xmf4x4InitialRotate = Matrix4x4::Identity();
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
 
@@ -432,7 +432,7 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 
 void CGameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4InitialRotate, m_xmf4x4Transform), *pxmf4x4Parent) : Matrix4x4::Multiply(m_xmf4x4InitialRotate, m_xmf4x4Transform);
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
@@ -710,6 +710,24 @@ void CGameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
+}
+
+void CGameObject::SetInitialRotate(float fPitch, float fYaw, float fRoll)
+{
+	// 초기 회전 값을 XMFLOAT4X4 형식으로 변경합니다.
+	m_xmf4x4InitialRotate = XMFLOAT4X4(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	);
+
+	// XMFLOAT4X4 형식으로 변경된 초기 회전 값을 회전 행렬로 변환합니다.
+	XMMATRIX mtxInitialRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
+
+	// 회전 행렬을 XMFLOAT4X4 형식으로 변환하여 m_xmf4x4InitialRotate에 저장합니다.
+	XMStoreFloat4x4(&m_xmf4x4InitialRotate, mtxInitialRotate);
+
 }
 
 void CGameObject::SetShader(CShader* pShader)
@@ -1533,7 +1551,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	// 룩벡터 설정후 스케일 설정 해줘야함 반대로할시 스케일 적용 x
 	if (m_HpObject) {
 		float x = GetPosition().x;
-		float y = GetPosition().y + 400.0f;
+		float y = GetPosition().y + 500.0f;
 		float z = GetPosition().z;
 		m_HpObject->SetPosition(x, y, z);
 	}
@@ -1580,7 +1598,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		}
 
 		else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
-			m_CurHp -= 0.1f;
+			m_CurHp -= 0.005f;
 
 			SetSpeed(3.0f);
 			// 방향벡터 몬스터에서 플레이어로
@@ -1655,7 +1673,7 @@ bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
 		float terrain_x = m_pTerrain->GetWidth();
 		float terrain_z = m_pTerrain->GetLength();
 
-		return (x >= 0 && x < terrain_x&& z >= 0 && z < terrain_z);
+		return (x >= 0 && x < terrain_x && z >= 0 && z < terrain_z);
 
 	}
 }

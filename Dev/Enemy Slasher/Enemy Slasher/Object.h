@@ -167,6 +167,7 @@ public:
 protected:
 	XMFLOAT4X4						m_xmf4x4World;
 	XMFLOAT4X4						m_xmf4x4Transform;
+	XMFLOAT4X4						m_xmf4x4InitialRotate;
 
 	ID3D12Resource					*m_pd3dcbGameObject = NULL;
 	CB_GAMEOBJECT_INFO				*m_pcbMappedGameObject = NULL;
@@ -266,6 +267,7 @@ public:
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	virtual void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	virtual void Rotate(XMFLOAT4* pxmf4Quaternion);
+	void SetInitialRotate(float fPitch, float fYaw, float fRoll);
 
 	//m_pShader
 	void SetShader(CShader* pShader);
