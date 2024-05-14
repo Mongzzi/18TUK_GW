@@ -583,36 +583,32 @@ XMFLOAT3 CGameObject::GetRight()
 
 void CGameObject::SetLook(float x, float y, float z)
 {
-	// Calculate the direction vector
 	XMVECTOR lookVector = XMVectorSet(x, y, z, 0.0f);
 	lookVector = XMVector3Normalize(lookVector);
 
-	// Calculate the up vector
 	XMVECTOR upVector = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	// Calculate the right vector
 	XMVECTOR rightVector = XMVector3Cross(upVector, lookVector);
 	rightVector = XMVector3Normalize(rightVector);
 
-	// Recalculate the up vector
 	upVector = XMVector3Cross(lookVector, rightVector);
 	upVector = XMVector3Normalize(upVector);
 
-	// Update the transformation matrix
-	m_xmf4x4Transform._11 = rightVector.m128_f32[0];
-	m_xmf4x4Transform._12 = rightVector.m128_f32[1];
-	m_xmf4x4Transform._13 = rightVector.m128_f32[2];
-	m_xmf4x4Transform._14 = 0.0f;
+	float scaleX = sqrtf(m_xmf4x4Transform._11 * m_xmf4x4Transform._11 + m_xmf4x4Transform._12 * m_xmf4x4Transform._12 + m_xmf4x4Transform._13 * m_xmf4x4Transform._13);
+	float scaleY = sqrtf(m_xmf4x4Transform._21 * m_xmf4x4Transform._21 + m_xmf4x4Transform._22 * m_xmf4x4Transform._22 + m_xmf4x4Transform._23 * m_xmf4x4Transform._23);
+	float scaleZ = sqrtf(m_xmf4x4Transform._31 * m_xmf4x4Transform._31 + m_xmf4x4Transform._32 * m_xmf4x4Transform._32 + m_xmf4x4Transform._33 * m_xmf4x4Transform._33);
 
-	m_xmf4x4Transform._21 = upVector.m128_f32[0];
-	m_xmf4x4Transform._22 = upVector.m128_f32[1];
-	m_xmf4x4Transform._23 = upVector.m128_f32[2];
-	m_xmf4x4Transform._24 = 0.0f;
+	m_xmf4x4Transform._11 = rightVector.m128_f32[0] * scaleX;
+	m_xmf4x4Transform._12 = rightVector.m128_f32[1] * scaleX;
+	m_xmf4x4Transform._13 = rightVector.m128_f32[2] * scaleX;
 
-	m_xmf4x4Transform._31 = lookVector.m128_f32[0];
-	m_xmf4x4Transform._32 = lookVector.m128_f32[1];
-	m_xmf4x4Transform._33 = lookVector.m128_f32[2];
-	m_xmf4x4Transform._34 = 0.0f;
+	m_xmf4x4Transform._21 = upVector.m128_f32[0] * scaleY;
+	m_xmf4x4Transform._22 = upVector.m128_f32[1] * scaleY;
+	m_xmf4x4Transform._23 = upVector.m128_f32[2] * scaleY;
+
+	m_xmf4x4Transform._31 = lookVector.m128_f32[0] * scaleZ;
+	m_xmf4x4Transform._32 = lookVector.m128_f32[1] * scaleZ;
+	m_xmf4x4Transform._33 = lookVector.m128_f32[2] * scaleZ;
 
 	UpdateTransform(nullptr);
 }
