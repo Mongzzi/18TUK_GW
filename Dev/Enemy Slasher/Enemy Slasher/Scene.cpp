@@ -1977,12 +1977,21 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	{
 		CFBXTestObject* pAnimObject = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 		pAnimObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Test_Walking.fbx"));
+		//float xPosition = 0;
+		//float zPosition = 0;
+		//float fHeight = 0;
+		//pAnimObject->SetPosition(xPosition, fHeight, zPosition);
+		//pAnimObject->Rotate(0.0f, 0.0f, 0.0f);
+		CFBXTestObject* pTest = new CFBXTestObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 		float xPosition = 0;
 		float zPosition = 0;
 		float fHeight = 0;
-		pAnimObject->SetPosition(xPosition, fHeight, zPosition);
-		pAnimObject->Rotate(0.0f, 0.0f, 0.0f);
-		m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
+		pTest->SetPosition(xPosition, fHeight, zPosition);
+		pTest->Rotate(0.0f, 0.0f, 0.0f);
+		pTest->SetChild(pAnimObject);
+
+		//m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
+		m_pObjectManager->AddObj(pTest, ObjectLayer::ObjectNormal);
 	}
 
 	{
