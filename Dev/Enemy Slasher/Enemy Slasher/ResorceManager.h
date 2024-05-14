@@ -30,7 +30,7 @@
 #define ANI_TEST_ANI_FBX "fbxsdk/aniTest.fbx"
 #define ANI_TEST2_ANI_FBX "fbxsdk/aniTest2.fbx"
 
-class CFBXDataManager
+class CResorceManager
 {
 };
 

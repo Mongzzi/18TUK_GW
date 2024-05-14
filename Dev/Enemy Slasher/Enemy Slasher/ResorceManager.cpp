@@ -1,0 +1,1 @@
+#include "ResorceManager.h"
