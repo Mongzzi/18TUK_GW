@@ -551,7 +551,7 @@ void CGameObject::SetScale(float x, float y, float z)
 
 void CGameObject::SetScale(XMFLOAT3 scale)
 {
-	SetScale(scale.x, scale.y, scale.z);
+	CGameObject::SetScale(scale.x, scale.y, scale.z);
 }
 
 XMFLOAT3 CGameObject::GetPosition()
