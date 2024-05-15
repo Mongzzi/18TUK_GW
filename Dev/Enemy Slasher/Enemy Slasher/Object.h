@@ -1,6 +1,7 @@
 #pragma once
 #include "Camera.h"
 #include "Mesh.h"
+#include "DeckData.h"
 
 class CShader;
 class TestPlayer;
@@ -427,6 +428,8 @@ public:
 	void ButtenUp() override;
 	void SetFunc(CardCallbackFunction);
 	void CallFunc(CGameObject* self,  CGameObject* target);
+
+	int GetUiNum() { return m_Card_Ui_Num; };
 
 	void UpdateData(int num);
 };

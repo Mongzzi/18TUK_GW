@@ -91,7 +91,7 @@ class TestPlayer : public CPlayer
 {
 public:
 	TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType);
-
+	~TestPlayer();
 	//TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 	//{
 	//	ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
@@ -100,4 +100,9 @@ public:
 
 	virtual void Animate(float fTimeTotal ,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+
+	CDeckData* GetDeckData() { return m_pDeck; };
+private:
+	
+	CDeckData* m_pDeck;
 };

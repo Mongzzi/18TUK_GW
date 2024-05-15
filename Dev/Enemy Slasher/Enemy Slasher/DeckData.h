@@ -14,7 +14,6 @@ public:
 	CDeckData();
 	~CDeckData();
 private:
-
 	std::vector<int> m_InitialDeck;	// 덱을 구성하는 원본
 	std::vector<int> m_Deck;	// 실제 사용할 덱
 	std::vector<int> m_Hand;
@@ -22,7 +21,7 @@ private:
 public:
 	// 코드 가시성때문에 아래 세 함수에서 셔플을 빼는거 고려
 	// 드로우
-	bool Draw(std::default_random_engine& DRE);
+	int Draw(std::default_random_engine& DRE);
 	// 셔플
 	void ShuffleDeck(std::default_random_engine& DRE);
 	// 묘지로 덱 재생성
@@ -33,6 +32,7 @@ public:
 	// 원본 카드 추출
 	// void ExtractCardFromDeck();
 	// 패 버리기
+	void SendHandToUsed(int index);
 	// 특정카드 검색?
 	// void SearchCard();
 	// 덱 최대 크기
@@ -45,5 +45,9 @@ public:
 	int GetCurrentUsedSize();
 	// 덱 초기화
 	void InitializeDeck();
+
+	std::vector<int> GetDeck() { return m_Deck; };
+	std::vector<int> GetHand() { return m_Hand; };
+	std::vector<int> GetUsed() { return m_Used; };
 };
 

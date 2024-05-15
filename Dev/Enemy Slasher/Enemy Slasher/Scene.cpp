@@ -643,25 +643,15 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
 				// 원위치로 돌아감.
-				cout << "원위치 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
 				pSelectedUI->SetPositionUI(pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
 
 			}
 			else
 			{
 				// 카드 사용
-				((CCardUIObject*)pSelectedUI)->CallFunc(NULL, NULL);
-
-				if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
-				{
-					// 자신 삭제
-					m_pObjectManager->DelObj((CGameObject*)pSelectedUI, ObjectLayer::InteractiveUIObject);
-					cout << "삭제 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
-				}
-				else
-				{
-					cout << "사용하지만 삭제는 안 함 " << ptCursorPos.y << ", " << (float)clientHeight / 5 * 4 << endl;
-				}
+				CCardUIObject* pcUI = dynamic_cast<CCardUIObject*>(pSelectedUI);
+				pcUI->CallFunc(NULL, NULL);
+				dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->SendHandToUsed(pcUI->GetUiNum());
 			}
 			pSelectedUI = NULL;
 		}
@@ -674,6 +664,9 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 
 bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	int drawnCard;
+	std::vector<int> intVector;
+	std::default_random_engine dre(0);
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
@@ -687,6 +680,35 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+		case 'Z':
+		case 'z': 
+			drawnCard = dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->Draw(dre); 
+			// 오브젝트레이어의 카드 정보를 핸드의 정보로 바꿔줘야함.
+			if (drawnCard != -1)
+				std::cout << drawnCard << " 드로우" << endl;
+			else
+				std::cout << " 드로우 실패. 이미 5장이거나 덱이 없음." << endl;
+			break;
+		case 'X':
+		case 'x':
+			intVector = dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->GetHand();
+			std::cout << "hand : ";
+			for (int card : intVector)
+				std::cout << card << ", ";
+			std::cout << std::endl;
+
+			intVector = dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->GetDeck();
+			std::cout << "Deck : ";
+			for (int card : intVector)
+				std::cout << card << ", ";
+			std::cout << std::endl;
+
+			intVector = dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->GetUsed();
+			std::cout << "Used : ";
+			for (int card : intVector)
+				std::cout << card << ", ";
+			std::cout << std::endl;
+			break;
 		default:
 			break;
 		}
@@ -1097,6 +1119,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			}
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
+				// 선택 카드 드래그.
 				if (pSelectedUI)
 				{
 					pSelectedUI->SetPositionUI(ptCursorPos);
@@ -1111,19 +1134,29 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	RECT clientRect;
 	GetClientRect(hWnd, &clientRect);
 
-	// 카드 표시하는 부분.
+	// 카드 위치지정하는 부분.
 	int clientWidth = clientRect.right - clientRect.left;
 	int clientHeight = clientRect.bottom - clientRect.top;
 
-	int count = pObjectList[(int)ObjectLayer::InteractiveUIObject].size();
+	//int count = pObjectList[(int)ObjectLayer::InteractiveUIObject].size();
 
-	for (int i = 0; i < count; i++)
+	TestPlayer* tp = dynamic_cast<TestPlayer*> (m_pPlayer);
+
+	int handSize = tp->GetDeckData()->GetCurrentHandSize();
+
+	for (int i = 0; i < handSize; i++)
 	{
 		CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
 		if (obj != pSelectedUI)
-			obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)count / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
+			obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)handSize / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
 	}
-
+	// 손에 없는 카드 위치
+	for (int i = handSize; i < 5; i++)
+	{
+		CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+		if (obj != pSelectedUI)
+			obj->SetPositionUI(clientWidth * 1.2, (float)clientHeight / 10 * 9);
+	}
 
 
 	return(true);

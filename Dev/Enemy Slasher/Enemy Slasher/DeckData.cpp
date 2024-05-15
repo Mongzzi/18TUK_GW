@@ -2,33 +2,37 @@
 
 CDeckData::CDeckData()
 {
-    // 일단 덱을 0~4로 5장씩 채움.
-    for (int i = 0; i < 5; ++i) {
+    // 일단 덱을 0~4로 2장씩 채움.
+    for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 5; ++j) {
-            m_InitialDeck.push_back(i);
+            m_InitialDeck.push_back(j);
         }
     }
+    InitializeDeck();// 여기 말고 다른곳에서 해야함.
 }
 
 CDeckData::~CDeckData()
 {
 }
 
-bool CDeckData::Draw(std::default_random_engine& DRE)
+int CDeckData::Draw(std::default_random_engine& DRE)
 {
-    if (!m_Deck.empty()) {
-        int drawnCard = m_Deck.back();
-        m_Deck.pop_back();
-        m_Hand.push_back(drawnCard);
-        return true;
+    if (m_Deck.size() != 0) {
+        if (m_Hand.size() < 5)// 이건 바뀔 수 있음.
+        {
+            int drawnCard = m_Deck.back();
+            m_Deck.pop_back();
+            m_Hand.push_back(drawnCard);
+            return drawnCard;
+        }
     }
     else
     {
-        if(!RefreshDeck(DRE))
+        if (RefreshDeck(DRE) != 0)
             Draw(DRE);// 여기서 터질 수 있음.
     }
-    // 덱과 묘지에 카드가 없으면 false 리턴.
-    return false;
+    // 덱과 묘지에 카드가 없으면 -1 리턴.
+    return -1;
 }
 
 void CDeckData::ShuffleDeck(std::default_random_engine& DRE)
@@ -49,6 +53,13 @@ void CDeckData::AddCardToInitialDeck(int i)
     m_InitialDeck.push_back(i);
     // 최적화를 위해 위치를 바꿀지도
     std::sort(m_InitialDeck.begin(), m_InitialDeck.end());
+}
+
+void CDeckData::SendHandToUsed(int index)
+{
+    int card = m_Hand[index];
+    m_Hand.erase(m_Hand.begin() + index);
+    m_Used.push_back(card);
 }
 
 int CDeckData::GetMaxDeckSize()

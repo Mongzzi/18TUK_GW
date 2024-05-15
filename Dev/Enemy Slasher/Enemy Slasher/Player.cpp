@@ -245,6 +245,8 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType)
 	:CPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
 {
+	m_pDeck = new CDeckData();
+
 	if (false)	//
 	{
 		CTexture* ppTextures[1];
@@ -262,6 +264,11 @@ TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	}
 	ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+TestPlayer::~TestPlayer()
+{
+	if (m_pDeck)
+		delete m_pDeck;
 }
 
 
