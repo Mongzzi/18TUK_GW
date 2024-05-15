@@ -1144,18 +1144,22 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	int handSize = tp->GetDeckData()->GetCurrentHandSize();
 
-	for (int i = 0; i < handSize; i++)
-	{
-		CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
-		if (obj != pSelectedUI)
-			obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)handSize / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
-	}
-	// 손에 없는 카드 위치
-	for (int i = handSize; i < 5; i++)
-	{
-		CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
-		if (obj != pSelectedUI)
-			obj->SetPositionUI(clientWidth * 1.2, (float)clientHeight / 10 * 9);
+	// 이 레이어가 비어있을 수 있기 떄문에 먼저 포인터를 받아 검사
+	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
+	if (pInteractiveUIObj->size() > 0) {
+		for (int i = 0; i < handSize; i++)
+		{
+			CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+			if (obj != pSelectedUI)
+				obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)handSize / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
+		}
+		// 손에 없는 카드 위치
+		for (int i = handSize; i < 5; i++)
+		{
+			CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+			if (obj != pSelectedUI)
+				obj->SetPositionUI(clientWidth * 1.2, (float)clientHeight / 10 * 9);
+		}
 	}
 
 
@@ -1911,13 +1915,16 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	// animaition Test Charactor
 	{
 		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
-		pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
+		CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
+		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;
 		float zPosition = 0;
 		float fHeight = 0;
 		pNewObject->SetPosition(xPosition, fHeight, zPosition);
 		pNewObject->Rotate(0.0f, 0.0f, 0.0f);
-		pNewObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx"));
+
+		pNewChildObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
+		pNewObject->SetChild(pNewChildObject);
 
 		//m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
 		m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
