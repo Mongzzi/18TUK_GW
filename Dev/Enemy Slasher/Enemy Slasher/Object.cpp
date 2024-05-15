@@ -1253,6 +1253,16 @@ void CCardUIObject::UpdateData(int num)
 {
 	m_Card_Ui_Num = num;
 	// 콜백함수도 바꿔야함.
+	// 임시코드
+	switch (num) {
+	case 0: m_callbackFunc = Callback_0; break;
+	case 1: m_callbackFunc = Callback_1; break;
+	case 2: m_callbackFunc = Callback_2; break;
+	case 3: m_callbackFunc = Callback_3; break;
+	case 4: m_callbackFunc = Callback_4; break;
+	default:
+		break;
+	}
 }
 
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)

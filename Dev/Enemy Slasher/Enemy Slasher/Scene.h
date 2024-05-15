@@ -159,7 +159,7 @@ public:
 private:
 	CUIObject* pCoveredUI = NULL;
 	CUIObject* pSelectedUI = NULL;
-
+	bool bCardUpdateFlag = false;
 
 protected:
 

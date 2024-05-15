@@ -651,7 +651,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				// 카드 사용
 				CCardUIObject* pcUI = dynamic_cast<CCardUIObject*>(pSelectedUI);
 				pcUI->CallFunc(NULL, NULL);
-				dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->SendHandToUsed(pcUI->GetUiNum());
+				dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->SendHandToUsedByNum(pcUI->GetUiNum());
+				bCardUpdateFlag = true;
 			}
 			pSelectedUI = NULL;
 		}
@@ -685,7 +686,10 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			drawnCard = dynamic_cast<TestPlayer*> (m_pPlayer)->GetDeckData()->Draw(dre); 
 			// 오브젝트레이어의 카드 정보를 핸드의 정보로 바꿔줘야함.
 			if (drawnCard != -1)
+			{
 				std::cout << drawnCard << " 드로우" << endl;
+				bCardUpdateFlag = true;
+			}
 			else
 				std::cout << " 드로우 실패. 이미 5장이거나 덱이 없음." << endl;
 			break;
@@ -1142,14 +1146,21 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	TestPlayer* tp = dynamic_cast<TestPlayer*> (m_pPlayer);
 
+	vector hand = tp->GetDeckData()->GetHand();
 	int handSize = tp->GetDeckData()->GetCurrentHandSize();
 
+	
 	for (int i = 0; i < handSize; i++)
 	{
 		CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
 		if (obj != pSelectedUI)
+		{
 			obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)handSize / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
+			if (bCardUpdateFlag)
+				dynamic_cast<CCardUIObject*> (obj)->UpdateData(hand[i]);
+		}
 	}
+	bCardUpdateFlag = false; // 지금은 여기 있지만 다이나믹 쉐이핑 함수를 활성화 하면 거기 마지막으로 가면 됨.
 	// 손에 없는 카드 위치
 	for (int i = handSize; i < 5; i++)
 	{

@@ -32,7 +32,8 @@ public:
 	// 원본 카드 추출
 	// void ExtractCardFromDeck();
 	// 패 버리기
-	void SendHandToUsed(int index);
+	void SendHandToUsedByIndex(int index);
+	void SendHandToUsedByNum(int num);
 	// 특정카드 검색?
 	// void SearchCard();
 	// 덱 최대 크기

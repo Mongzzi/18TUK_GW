@@ -55,11 +55,23 @@ void CDeckData::AddCardToInitialDeck(int i)
     std::sort(m_InitialDeck.begin(), m_InitialDeck.end());
 }
 
-void CDeckData::SendHandToUsed(int index)
+void CDeckData::SendHandToUsedByIndex(int index)
 {
     int card = m_Hand[index];
     m_Hand.erase(m_Hand.begin() + index);
     m_Used.push_back(card);
+}
+
+void CDeckData::SendHandToUsedByNum(int num)
+{
+    auto it = std::find(m_Hand.begin(), m_Hand.end(), num);
+
+    if (it != m_Hand.end()) {
+        m_Used.push_back(*it);
+        m_Hand.erase(it);
+    }
+    else
+        ;
 }
 
 int CDeckData::GetMaxDeckSize()
