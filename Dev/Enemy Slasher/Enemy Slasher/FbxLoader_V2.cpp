@@ -39,83 +39,86 @@ CFbxData* CFbxLoader_V2::LoadFBX(const char* fileName)
 	std::string fName(fileName);
 	CFbxData* loadData = nullptr;
 
+	if (m_pvFbxDataMap.contains(fName) == false) {
 #ifdef _DEBUG
-	auto start = chrono::high_resolution_clock::now();
+		auto start = chrono::high_resolution_clock::now();
 #endif // _DEBUG
 
-	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
-	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
-	pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
+		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+		pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
 
-	pFbxImporter->Import(lScene);
-	pFbxImporter->Destroy();
+		pFbxImporter->Import(lScene);
+		pFbxImporter->Destroy();
 
-	FbxGeometryConverter geometryConverter(m_plSdkManager);
-	geometryConverter.Triangulate(lScene, true);
+		FbxGeometryConverter geometryConverter(m_plSdkManager);
+		geometryConverter.Triangulate(lScene, true);
 
-	FbxNode* lRootNode = lScene->GetRootNode();
-	if (lRootNode)
-	{
-		loadData = new CFbxData;
-		LoadControlPoints(lRootNode, loadData);
-		ProcessSkeletonHierarchy(lRootNode, loadData);
-		LoadMesh(lRootNode, lScene, loadData);
+		FbxNode* lRootNode = lScene->GetRootNode();
+		if (lRootNode)
+		{
+			loadData = new CFbxData;
+			LoadControlPoints(lRootNode, loadData);
+			ProcessSkeletonHierarchy(lRootNode, loadData);
+			LoadMesh(lRootNode, lScene, loadData);
 
 #ifdef _DEBUG
-		FBXSDK_printf("Load Complete file : %s\n", fileName);
-		FBXSDK_printf("\t MeshCount: %d\n", loadData->m_pvMeshs.size());
-		for (int i = 0; i < loadData->m_pvMeshs.size(); ++i) {
-			FBXSDK_printf("\t\t VertexCount: %d , %d\n", loadData->m_pvMeshs[i]->m_vVertex.size(), loadData->m_pvMeshs[i]->m_nVertices);
-		}
-
-		if (loadData->m_bHasSkeleton == true) {
-			FBXSDK_printf("\t Skeleton Joint Count: %d\n", loadData->m_Skeleton.m_vJoints.size());
-
-
-			for (int i = 0; i < loadData->m_pvMeshs.size(); ++i)
-				for (int j = 0; j < loadData->m_pvMeshs[i]->m_vVertex.size(); ++j) {
-					if (loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size() != 4)
-						FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingInfo. It has %d Infos\n",
-							i,
-							j,
-							loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size());
-					float temp = 0.f;
-					for (int k = 0; k < loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size(); ++k) {
-						temp += loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo[k].m_fBlendingWeight;
-					}
-					float t1 = 0.0005f;
-					float t2 = fabs(1.f - temp);
-					if (t2 > t1 && t2 < -t1)
-						FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingWeight. It has %f Weight\n",
-							i,
-							j,
-							t2);
-				}
-			if (loadData->m_Skeleton.m_nAnimationLength > 0) {
-				std::cout << "\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
-				std::cout << "\t AnimationFrameLength: " << loadData->m_Skeleton.m_nAnimationLength << '\n';
+			FBXSDK_printf("Load Complete file : %s\n", fileName);
+			FBXSDK_printf("\t MeshCount: %d\n", loadData->m_pvMeshs.size());
+			for (int i = 0; i < loadData->m_pvMeshs.size(); ++i) {
+				FBXSDK_printf("\t\t VertexCount: %d , %d\n", loadData->m_pvMeshs[i]->m_vVertex.size(), loadData->m_pvMeshs[i]->m_nVertices);
 			}
-		}
+
+			if (loadData->m_bHasSkeleton == true) {
+				FBXSDK_printf("\t Skeleton Joint Count: %d\n", loadData->m_Skeleton.m_vJoints.size());
+
+
+				for (int i = 0; i < loadData->m_pvMeshs.size(); ++i)
+					for (int j = 0; j < loadData->m_pvMeshs[i]->m_vVertex.size(); ++j) {
+						if (loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size() != 4)
+							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingInfo. It has %d Infos\n",
+								i,
+								j,
+								loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size());
+						float temp = 0.f;
+						for (int k = 0; k < loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo.size(); ++k) {
+							temp += loadData->m_pvMeshs[i]->m_vVertex[j].m_vBlendingInfo[k].m_fBlendingWeight;
+						}
+						float t1 = 0.0005f;
+						float t2 = fabs(1.f - temp);
+						if (t2 > t1 && t2 < -t1)
+							FBXSDK_printf("\t\t %d Mesh, %d vertex has Error BlendingWeight. It has %f Weight\n",
+								i,
+								j,
+								t2);
+					}
+				if (loadData->m_Skeleton.m_nAnimationLength > 0) {
+					std::cout << "\t AnimationName: " << loadData->m_Skeleton.m_sAnimationName << '\n';
+					std::cout << "\t AnimationFrameLength: " << loadData->m_Skeleton.m_nAnimationLength << '\n';
+				}
+			}
 #endif // _DEBUG
-	}
+		}
 
 #ifdef _DEBUG
-	{
-		auto time = chrono::high_resolution_clock::now() - start;
-		auto millisecond = chrono::duration_cast<chrono::milliseconds>(time);
-		auto seconds = chrono::duration_cast<chrono::seconds>(time);
-		millisecond -= seconds;
-		auto minutes = chrono::duration_cast<chrono::minutes>(seconds);
-		seconds -= minutes;
+		{
+			auto time = chrono::high_resolution_clock::now() - start;
+			auto millisecond = chrono::duration_cast<chrono::milliseconds>(time);
+			auto seconds = chrono::duration_cast<chrono::seconds>(time);
+			millisecond -= seconds;
+			auto minutes = chrono::duration_cast<chrono::minutes>(seconds);
+			seconds -= minutes;
 
-		std::cout << "FBX Load All Data Time: " << minutes.count() << " m "
-			<< seconds.count() << " s "
-			<< millisecond.count() << " ms\n";
-	}
+			std::cout << "FBX Load All Data Time: " << minutes.count() << " m "
+				<< seconds.count() << " s "
+				<< millisecond.count() << " ms\n";
+		}
 #endif // _DEBUG
 
+		m_pvFbxDataMap[fName] = loadData;
+	}
 
-	return loadData;
+	return m_pvFbxDataMap[fName];
 }
 
 
@@ -124,27 +127,32 @@ CFbxData* CFbxLoader_V2::LoadAnim(const char* fileName)
 	std::string fName(fileName);
 	CFbxData* loadData = nullptr;
 
-	auto start = chrono::high_resolution_clock::now();
+	if (m_pvFbxDataMap.contains(fName) == false) {
 
-	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
-	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
-	pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
+		auto start = chrono::high_resolution_clock::now();
 
-	pFbxImporter->Import(lScene);
-	pFbxImporter->Destroy();
+		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+		pFbxImporter->Initialize(fileName, -1, m_plSdkManager->GetIOSettings());
 
-	FbxGeometryConverter geometryConverter(m_plSdkManager);
-	geometryConverter.Triangulate(lScene, true);
+		pFbxImporter->Import(lScene);
+		pFbxImporter->Destroy();
 
-	FbxNode* lRootNode = lScene->GetRootNode();
-	if (lRootNode)
-	{
-		loadData = new CFbxData;
-		ProcessSkeletonHierarchy(lRootNode, loadData);
-		LoadAnimationOnly(lRootNode, lScene, loadData);
+		FbxGeometryConverter geometryConverter(m_plSdkManager);
+		geometryConverter.Triangulate(lScene, true);
+
+		FbxNode* lRootNode = lScene->GetRootNode();
+		if (lRootNode)
+		{
+			loadData = new CFbxData;
+			ProcessSkeletonHierarchy(lRootNode, loadData);
+			LoadAnimationOnly(lRootNode, lScene, loadData);
+		}
+
+		m_pvFbxDataMap[fName] = loadData;
 	}
 
-	return loadData;
+	return m_pvFbxDataMap[fName];
 }
 
 
