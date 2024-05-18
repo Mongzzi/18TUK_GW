@@ -292,3 +292,19 @@ public:
 	virtual ~CHpBarMesh();
 
 };
+
+class AttackRangeMesh : public CMesh
+{
+public:
+	AttackRangeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fInnerRadius, float fOuterRadius, int nSlices);
+	virtual ~AttackRangeMesh();
+
+};
+
+class AttackRangeCircleMesh : public CMesh
+{
+public:
+	AttackRangeCircleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fRadius, int nSlices);
+	virtual ~AttackRangeCircleMesh();
+
+};

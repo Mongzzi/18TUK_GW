@@ -170,21 +170,21 @@ protected:
 	XMFLOAT4X4						m_xmf4x4Transform;
 	XMFLOAT4X4						m_xmf4x4InitialRotate;
 
-	ID3D12Resource					*m_pd3dcbGameObject = NULL;
-	CB_GAMEOBJECT_INFO				*m_pcbMappedGameObject = NULL;
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 
 	int								m_nMeshes = 0;
-	CMesh**							m_ppMeshes = NULL;
+	CMesh** m_ppMeshes = NULL;
 
-	CMaterial*						m_pMaterial = NULL;
+	CMaterial* m_pMaterial = NULL;
 
-	CGameObject*					m_pParent = NULL;
-	CGameObject*					m_pChild = NULL;
-	CGameObject*					m_pSibling = NULL;
+	CGameObject* m_pParent = NULL;
+	CGameObject* m_pChild = NULL;
+	CGameObject* m_pSibling = NULL;
 
 
 protected:
-	COBBColliderWithMesh*			m_pCollider = NULL;	// 충돌체
+	COBBColliderWithMesh* m_pCollider = NULL;	// 충돌체
 
 	bool							m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
 	bool							m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
@@ -239,7 +239,7 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
-	
+
 	void SetLook(float x, float y, float z);
 	void SetLook(XMFLOAT3 xmf3Position);
 
@@ -282,7 +282,7 @@ public:
 	void ReleaseUploadBuffers();
 	virtual void SetMesh(int nIndex, CMesh* pMesh, bool bMakeColliderFlag = false);
 	virtual void SetMesh(int nIndexSize);
-	virtual void Animate(float fTimeTotal,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 	virtual void Render2D() {};
@@ -323,7 +323,7 @@ private:
 class CRayObject : public CGameObject
 {
 public:
-	CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype= ShaderType::CObjectsShader);
+	CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CRayObject();
 
 	void Reset(CRay ray);
@@ -343,7 +343,7 @@ public:
 class CUIObject : public CFBXObject
 {
 public:
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype= ShaderType::CObjectsShader);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype = ShaderType::CObjectsShader);
 	virtual ~CUIObject();
 protected:
 	static constexpr float TARGET_SCALE = 1.5f;
@@ -383,7 +383,7 @@ public:
 
 // 함수포인터 콜백함수
 typedef void (*CardCallbackFunction)(CGameObject*, CGameObject*);
- 
+
 // 카드 사용이 끝날때까지 다른 카드는 사용이 불가능해야함. 아마.
 // 
 // 같은 공격이라도 애니메이션이 다르면 다른 콜백을 부르게 될 듯?
@@ -399,17 +399,17 @@ void Callback_1(CGameObject* self, CGameObject* target);
 void Callback_2(CGameObject* self, CGameObject* target);
 void Callback_3(CGameObject* self, CGameObject* target);
 void Callback_4(CGameObject* self, CGameObject* target);
- 
+
 //
 
 class CCardUIObject : public CUIObject
 {
 public:
-	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		 CCamera* pCamera, ShaderType stype= ShaderType::CObjectsShader);
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
+		CCamera* pCamera, ShaderType stype = ShaderType::CObjectsShader);
 
-	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		 CCamera* pCamera, int UInum, ShaderType stype= ShaderType::CObjectsShader);
+	CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
+		CCamera* pCamera, int UInum, ShaderType stype = ShaderType::CObjectsShader);
 
 	virtual ~CCardUIObject();
 private:
@@ -417,7 +417,7 @@ private:
 	CardCallbackFunction m_callbackFunc = NULL;
 
 public:
-	virtual void Animate(float fTimeTotal,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -427,7 +427,7 @@ public:
 	void ButtenDown() override;
 	void ButtenUp() override;
 	void SetFunc(CardCallbackFunction);
-	void CallFunc(CGameObject* self,  CGameObject* target);
+	void CallFunc(CGameObject* self, CGameObject* target);
 
 	int GetUiNum() { return m_Card_Ui_Num; };
 
@@ -478,14 +478,14 @@ public:
 class CSkyBox : public CGameObject
 {
 public:
-	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,ShaderType stype, int nMeshes = 6);
+	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 6);
 	virtual ~CSkyBox();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool pRenderOption = false);
 };
 
 
-class CTreeObject: public CFBXObject
+class CTreeObject : public CFBXObject
 {
 public:
 	CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::CObjectsShader);
@@ -507,13 +507,21 @@ public:
 	virtual ~CHpbarObject();
 };
 
+class CAttackRangeObject : public CGameObject
+{
+public:
+	CAttackRangeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
+	virtual ~CAttackRangeObject();
+};
+
+
 class CMonsterObject : public CFBXObject
 {
 public:
 	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 		ShaderType stype = ShaderType::CObjectsShader);
-	
-	
+
+
 	virtual ~CMonsterObject();
 	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
@@ -522,7 +530,7 @@ public:
 
 	void SetState(MonsterState state) { m_Monster_State = state; };
 	void SetSpeed(float speed) { m_speed = speed; };
-	
+
 	MonsterState GetState() { return m_Monster_State; };
 	bool Check_Inner_Terrain(XMFLOAT3 position);
 
@@ -532,8 +540,9 @@ private:
 	CHeightMapTerrain* m_pTerrain;
 	CPlayer* m_pTestPlayer;
 	MonsterState m_Monster_State;
-	
+
 	CHpbarObject* m_HpObject;
+	CAttackRangeObject* m_AttackRangeObject;
 
 	float m_MaxHp = 100.0f;
 	float m_CurHp = 100.0f;
@@ -552,7 +561,7 @@ struct VS_VB_BILLBOARD_INSTANCE
 class CBillBoardInstanceObject : public CGameObject
 {
 public:
-	CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL , ShaderType stype = ShaderType::NON, int nMeshes = 0);
+	CBillBoardInstanceObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL, ShaderType stype = ShaderType::NON, int nMeshes = 0);
 	virtual ~CBillBoardInstanceObject();
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);

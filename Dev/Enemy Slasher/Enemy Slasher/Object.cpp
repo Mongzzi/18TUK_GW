@@ -1493,6 +1493,32 @@ void CBillBoardInstanceObject::ReleaseShaderVariables()
 {
 }
 
+CAttackRangeObject::CAttackRangeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+	CTexture* ppTextures[1];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/a.jpg", RESOURCE_TEXTURE2D, 0);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+			m_pMaterial->SetTexture(ppTextures[0]);
+		}
+	}
+
+	SetMesh(0, new AttackRangeMesh(pd3dDevice, pd3dCommandList, CHASE_DISTANCE-10.0f, CHASE_DISTANCE, 40));
+	//SetMesh(0, new AttackRangeCircleMesh(pd3dDevice, pd3dCommandList,CHASE_DISTANCE, 40));
+}
+
+CAttackRangeObject::~CAttackRangeObject()
+{
+}
+
+
+
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 	ShaderType stype)
 	:CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
@@ -1501,14 +1527,13 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pTestPlayer = ptestplayer;
 	m_pTerrain = pterrain;
 	m_HpObject = new CHpbarObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
+	m_AttackRangeObject = new CAttackRangeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 }
 
 CMonsterObject::~CMonsterObject()
 {
 }
 
-#define CHASE_DISTANCE 1000.0f
-#define BATTLE_DISTANCE 100.0f
 
 void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -1534,6 +1559,12 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		m_HpObject->SetPosition(x, y, z);
 	}
 
+	if (m_AttackRangeObject) {
+		float x = GetPosition().x;
+		float y = GetPosition().y + 100.0f;
+		float z = GetPosition().z;
+		m_AttackRangeObject->SetPosition(x, y, z);
+	}
 
 	if (m_Monster_State == MonsterState::Default_State) {
 		SetSpeed(1.0);	// µ¨Å¸Å¸ÀÓ °öÇØ¾ßÇÒÁö °í¹ÎÁß
@@ -1637,6 +1668,10 @@ void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 
 	if (m_HpObject) {
 		m_HpObject->Render(pd3dCommandList, pCamera, pRenderOption);
+	}
+
+	if (m_AttackRangeObject) {
+		m_AttackRangeObject->Render(pd3dCommandList, pCamera, pRenderOption);
 	}
 
 }

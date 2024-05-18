@@ -70,6 +70,10 @@ using Microsoft::WRL::ComPtr;
 #define FRAME_BUFFER_WIDTH		640
 #define FRAME_BUFFER_HEIGHT		480
 
+
+#define CHASE_DISTANCE 1000.0f
+#define BATTLE_DISTANCE 100.0f
+
 #include <cassert>
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE

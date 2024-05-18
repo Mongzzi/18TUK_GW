@@ -17,13 +17,13 @@ CMesh::~CMesh()
 	if (m_pnIndices) delete[] m_pnIndices;
 	if (m_pxmfUV)
 	{
-		for (int i = 0;i < m_nInElementUVCount;i++)
+		for (int i = 0; i < m_nInElementUVCount; i++)
 			delete[]m_pxmfUV[i];
 		delete[]m_pxmfUV;
 	}
 	if (m_pxmfNormal)
 	{
-		for (int i = 0;i < m_nInElementNormalCount;i++)
+		for (int i = 0; i < m_nInElementNormalCount; i++)
 			delete[]m_pxmfNormal[i];
 		delete[]m_pxmfNormal;
 	}
@@ -125,7 +125,7 @@ CMeshIlluminated::~CMeshIlluminated()
 {
 }
 
-void CMeshIlluminated::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals,XMFLOAT3* pxmf3Positions, int nVertices)
+void CMeshIlluminated::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices)
 {
 	int nPrimitives = nVertices / 3;
 	UINT nIndex0, nIndex1, nIndex2;
@@ -134,13 +134,13 @@ void CMeshIlluminated::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals
 		nIndex0 = i * 3 + 0;
 		nIndex1 = i * 3 + 1;
 		nIndex2 = i * 3 + 2;
-		XMFLOAT3 xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1],pxmf3Positions[nIndex0]);
-		XMFLOAT3 xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2],pxmf3Positions[nIndex0]);
-		pxmf3Normals[nIndex0] = pxmf3Normals[nIndex1] = pxmf3Normals[nIndex2] =Vector3::CrossProduct(xmf3Edge01, xmf3Edge02, true);
+		XMFLOAT3 xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1], pxmf3Positions[nIndex0]);
+		XMFLOAT3 xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2], pxmf3Positions[nIndex0]);
+		pxmf3Normals[nIndex0] = pxmf3Normals[nIndex1] = pxmf3Normals[nIndex2] = Vector3::CrossProduct(xmf3Edge01, xmf3Edge02, true);
 	}
 }
 
-void CMeshIlluminated::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals,XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+void CMeshIlluminated::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
 	UINT nPrimitives = (pnIndices) ? (nIndices / 3) : (nVertices / 3);
 	XMFLOAT3 xmf3SumOfNormal, xmf3Edge01, xmf3Edge02, xmf3Normal;
@@ -155,8 +155,8 @@ void CMeshIlluminated::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals
 			nIndex2 = pnIndices[i * 3 + 2];
 			if (pnIndices && ((nIndex0 == j) || (nIndex1 == j) || (nIndex2 == j)))
 			{
-				xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1],pxmf3Positions[nIndex0]);
-				xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2],pxmf3Positions[nIndex0]);
+				xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1], pxmf3Positions[nIndex0]);
+				xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2], pxmf3Positions[nIndex0]);
 				xmf3Normal = Vector3::CrossProduct(xmf3Edge01, xmf3Edge02, false);
 				xmf3SumOfNormal = Vector3::Add(xmf3SumOfNormal, xmf3Normal);
 			}
@@ -165,7 +165,7 @@ void CMeshIlluminated::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals
 	}
 }
 
-void CMeshIlluminated::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals,XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+void CMeshIlluminated::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
 	UINT nPrimitives = (pnIndices) ? (nIndices - 2) : (nVertices - 2);
 	XMFLOAT3 xmf3SumOfNormal(0.0f, 0.0f, 0.0f);
@@ -182,8 +182,8 @@ void CMeshIlluminated::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normal
 			nIndex2 = (pnIndices) ? pnIndices[i + 2] : (i + 2);
 			if ((nIndex0 == j) || (nIndex1 == j) || (nIndex2 == j))
 			{
-				XMFLOAT3 xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1],pxmf3Positions[nIndex0]);
-				XMFLOAT3 xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2],pxmf3Positions[nIndex0]);
+				XMFLOAT3 xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1], pxmf3Positions[nIndex0]);
+				XMFLOAT3 xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2], pxmf3Positions[nIndex0]);
 				XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge01, xmf3Edge02, true);
 				xmf3SumOfNormal = Vector3::Add(xmf3SumOfNormal, xmf3Normal);
 			}
@@ -198,13 +198,13 @@ void CMeshIlluminated::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* 
 	{
 	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST:
 		if (pnIndices)
-			CalculateTriangleListVertexNormals(pxmf3Normals, pxmf3Positions, nVertices,pnIndices, nIndices);
+			CalculateTriangleListVertexNormals(pxmf3Normals, pxmf3Positions, nVertices, pnIndices, nIndices);
 		else
 			CalculateTriangleListVertexNormals(pxmf3Normals, pxmf3Positions, nVertices);
 		break;
 
 	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
-		CalculateTriangleStripVertexNormals(pxmf3Normals, pxmf3Positions, nVertices,pnIndices, nIndices);
+		CalculateTriangleStripVertexNormals(pxmf3Normals, pxmf3Positions, nVertices, pnIndices, nIndices);
 		break;
 
 	default:
@@ -213,7 +213,7 @@ void CMeshIlluminated::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* 
 }
 
 
-CCubeMeshIlluminated::CCubeMeshIlluminated(ID3D12Device* pd3dDevice,ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) :CMeshIlluminated(pd3dDevice, pd3dCommandList)
+CCubeMeshIlluminated::CCubeMeshIlluminated(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) :CMeshIlluminated(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 8;
 	m_nStride = sizeof(CIlluminatedVertex);
@@ -234,7 +234,7 @@ CCubeMeshIlluminated::CCubeMeshIlluminated(ID3D12Device* pd3dDevice,ID3D12Graphi
 	pnIndices[27] = 3; pnIndices[28] = 7; pnIndices[29] = 2;
 	pnIndices[30] = 6; pnIndices[31] = 4; pnIndices[32] = 5;
 	pnIndices[33] = 7; pnIndices[34] = 4; pnIndices[35] = 6;
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,&m_pd3dIndexUploadBuffer);
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
@@ -254,8 +254,8 @@ CCubeMeshIlluminated::CCubeMeshIlluminated(ID3D12Device* pd3dDevice,ID3D12Graphi
 	for (int i = 0; i < 8; i++) pxmf3Normals[i] = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	CalculateVertexNormals(pxmf3Normals, pxmf3Positions, m_nVertices, pnIndices, m_nIndices);
 	CIlluminatedVertex pVertices[8];
-	for (int i = 0; i < 8; i++) pVertices[i] = CIlluminatedVertex(pxmf3Positions[i],pxmf3Normals[i]);
-	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	for (int i = 0; i < 8; i++) pVertices[i] = CIlluminatedVertex(pxmf3Positions[i], pxmf3Normals[i]);
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
@@ -337,7 +337,7 @@ bool CDynamicShapeMesh::DSM_Triangle::LineTriangleIntersect(DSM_Line& dsmLine, f
 		xmfIntersectionPoint.x = dsmLine.m_xmfStart.x + t * dsmLine.m_xmfDir.x;
 		xmfIntersectionPoint.y = dsmLine.m_xmfStart.y + t * dsmLine.m_xmfDir.y;
 		xmfIntersectionPoint.z = dsmLine.m_xmfStart.z + t * dsmLine.m_xmfDir.z;
-		
+
 		return true;
 	}
 
@@ -364,15 +364,15 @@ vector<pair<CVertex, UINT>> CDynamicShapeMesh::ConvexHull(vector<pair<CVertex, U
 	std::sort(vVertex.begin(), vVertex.end(),
 		[](const pair<CVertex, UINT>& a, const pair<CVertex, UINT>& b) {
 			return (a.first.m_xmf3Vertex.x < b.first.m_xmf3Vertex.x ||
-			(a.first.m_xmf3Vertex.x == b.first.m_xmf3Vertex.x && a.first.m_xmf3Vertex.y < b.first.m_xmf3Vertex.y) ||
+				(a.first.m_xmf3Vertex.x == b.first.m_xmf3Vertex.x && a.first.m_xmf3Vertex.y < b.first.m_xmf3Vertex.y) ||
 				(a.first.m_xmf3Vertex.x == b.first.m_xmf3Vertex.x && a.first.m_xmf3Vertex.y == b.first.m_xmf3Vertex.y && a.first.m_xmf3Vertex.z < b.first.m_xmf3Vertex.z));
 		});
 
 	// 중복 제거
 	auto last = std::unique(vVertex.begin(), vVertex.end(), [](const auto& a, const auto& b) {
 		return a.first.m_xmf3Vertex.x == b.first.m_xmf3Vertex.x &&
-		a.first.m_xmf3Vertex.y == b.first.m_xmf3Vertex.y &&
-		a.first.m_xmf3Vertex.z == b.first.m_xmf3Vertex.z;
+			a.first.m_xmf3Vertex.y == b.first.m_xmf3Vertex.y &&
+			a.first.m_xmf3Vertex.z == b.first.m_xmf3Vertex.z;
 		});
 	vVertex.erase(last, vVertex.end());
 	n = vVertex.size();
@@ -508,7 +508,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Push(ID3D12Device* pd3dDevice, 
 						delete pVector.first;
 						return true;
 					}
-			return false;
+					return false;
 				});
 			vvNewVertices.erase(it, vvNewVertices.end());
 			nNewVertices = vvNewVertices.size();
@@ -542,7 +542,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Push(ID3D12Device* pd3dDevice, 
 vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat)
 {
 	// 이 절단은 절단 Object의 절단평면을 사용하여 절단한다.
-	
+
 	// 이 함수는 자신이 다른 오브젝트에 의해 잘리는 함수이다.
 	// 이 함수에 의해 자신의 Mesh가 변형된다.
 	// 절단된 CMesh 2개 이상을 리턴한다.
@@ -576,7 +576,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDe
 		constexpr int PLANE_UP = 0;
 		constexpr int PLANE_DOWN = 1;
 
-		
+
 
 		int nNewVertices = 0;
 		{
@@ -613,7 +613,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDe
 				}
 			}
 		}
-		
+
 		vector<pair<CVertex, UINT>> vConvexHullVertex;			// 절단 평면 외곽점으로 ConvexHull을 한 결과값을 저장할 vector
 		vector<vector<pair<CVertex, UINT>>> vvPlaneVertices;	// 절단 평면 외곽점과 Index를 저장할 vector
 		for (int i = 0; i < nNewVertices; ++i) {
@@ -644,8 +644,8 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDe
 								// ConvexHull 계산을 위해 Vertex를 별도 저장
 								vvPlaneVertices[PLANE_DOWN].emplace_back(
 									CVertex(xmf3Vertex,
-									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
-									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainUnderCounter);
+										m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
+										m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainUnderCounter);
 							}
 
 							nPlainUnderCounter++;
@@ -661,8 +661,8 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDe
 								// ConvexHull 계산을 위해 Vertex를 별도 저장
 								vvPlaneVertices[PLANE_UP].emplace_back(
 									CVertex(xmf3Vertex,
-									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
-									m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainAboveCounter);
+										m_pVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
+										m_pVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainAboveCounter);
 							}
 
 							nPlainAboveCounter++;
@@ -1088,7 +1088,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 			XMFLOAT4 xmf3Color = Vector4::Add(get_color, xmf4Color);
 			XMFLOAT2 xmTexCoord0 = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
 			XMFLOAT2 xmTexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
-			
+
 			XMFLOAT3 xmNormal = pHeightMapImage->GetHeightMapNormal(x, z);
 
 
@@ -1183,14 +1183,14 @@ XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* pContext)
 	float fScale = Vector3::DotProduct(height_map_normal, xmf3LightDirection);
 
 	height_map_normal = pHeightMapImage->GetHeightMapNormal(x + 1, z);
-	fScale += Vector3::DotProduct(height_map_normal,xmf3LightDirection);
+	fScale += Vector3::DotProduct(height_map_normal, xmf3LightDirection);
 
-	height_map_normal = pHeightMapImage->GetHeightMapNormal(x + 1, z+1);
-	fScale += Vector3::DotProduct(height_map_normal,xmf3LightDirection);
+	height_map_normal = pHeightMapImage->GetHeightMapNormal(x + 1, z + 1);
+	fScale += Vector3::DotProduct(height_map_normal, xmf3LightDirection);
 
-	height_map_normal = pHeightMapImage->GetHeightMapNormal(x, z+1);
-	fScale += Vector3::DotProduct(height_map_normal,xmf3LightDirection);
-	
+	height_map_normal = pHeightMapImage->GetHeightMapNormal(x, z + 1);
+	fScale += Vector3::DotProduct(height_map_normal, xmf3LightDirection);
+
 	fScale = (fScale / 4.0f) + 0.05f;
 	if (fScale > 1.0f) fScale = 1.0f;
 	if (fScale < 0.25f) fScale = 0.25f;
@@ -1210,11 +1210,11 @@ CRayMesh::CRayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	XMFLOAT3 Dir = { 0, 0, 1 };
 	if (ray)
 	{
-		 Ori = ray->GetOriginal();
-		 Dir = ray->GetDir();
+		Ori = ray->GetOriginal();
+		Dir = ray->GetDir();
 	}
 	XMFLOAT3 End = Vector3::Add(Ori, Vector3::ScalarProduct(Dir, 5000, false));
-	
+
 
 	m_pVertices = new CVertex[m_nVertices];
 	m_pVertices[0] = CVertex(XMFLOAT3(Ori.x, Ori.y, Ori.z), XMFLOAT4(0.f, 1.f, 0.0f, 1.0f));
@@ -1320,7 +1320,7 @@ CCubeMeshTextured::~CCubeMeshTextured()
 }
 
 
-CTexturedRectMesh::CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, float fxPosition, float fyPosition, float fzPosition) : CMesh(pd3dDevice,pd3dCommandList)
+CTexturedRectMesh::CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, float fxPosition, float fyPosition, float fzPosition) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 6;
 	m_nStride = sizeof(CTexturedVertex);
@@ -1475,15 +1475,15 @@ CFBXMesh::~CFBXMesh()
 
 CHpBarMesh::CHpBarMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight) : CMesh(pd3dDevice, pd3dCommandList)
 {
-    m_nVertices = 6;
-    m_nStride = sizeof(VertexWithTexCoord);
-    m_nOffset = 0;
-    m_nSlot = 0;
-    m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	m_nVertices = 6;
+	m_nStride = sizeof(VertexWithTexCoord);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    float fx = fWidth * 0.5f, fy = fHeight * 0.5f;
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f;
 
-    VertexWithTexCoord pVertices[6];
+	VertexWithTexCoord pVertices[6];
 
 	// 왼쪽 상단
 	pVertices[0] = VertexWithTexCoord(XMFLOAT3(-fx, +fy, 0.0f), XMFLOAT2(0.0f, 0.0f));
@@ -1499,13 +1499,99 @@ CHpBarMesh::CHpBarMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	// 오른쪽 하단
 	pVertices[5] = VertexWithTexCoord(XMFLOAT3(+fx, -fy, 0.0f), XMFLOAT2(1.0f, 1.0f));
 
-    m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
-    m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-    m_d3dVertexBufferView.StrideInBytes = m_nStride;
-    m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 }
 
 CHpBarMesh::~CHpBarMesh()
+{
+}
+
+AttackRangeMesh::AttackRangeMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fInnerRadius, float fOuterRadius, int nSlices) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = nSlices * 6; 
+	m_nStride = sizeof(VertexWithTexCoord);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	std::vector<VertexWithTexCoord> vertices(m_nVertices);
+
+	float thetaStep = XM_2PI / nSlices;
+
+	for (int i = 0; i < nSlices; ++i)
+	{
+		float theta = i * thetaStep;
+		float nextTheta = (i + 1) * thetaStep;
+
+		float cosTheta = cosf(theta);
+		float sinTheta = sinf(theta);
+		float cosNextTheta = cosf(nextTheta);
+		float sinNextTheta = sinf(nextTheta);
+
+		vertices[i * 6] = VertexWithTexCoord(XMFLOAT3(fInnerRadius * cosTheta, 0.0f, fInnerRadius * sinTheta), XMFLOAT2(i / static_cast<float>(nSlices), 1.0f));
+		vertices[i * 6 + 2] = VertexWithTexCoord(XMFLOAT3(fOuterRadius * cosTheta, 0.0f, fOuterRadius * sinTheta), XMFLOAT2(i / static_cast<float>(nSlices), 0.0f));
+		vertices[i * 6 + 1] = VertexWithTexCoord(XMFLOAT3(fInnerRadius * cosNextTheta, 0.0f, fInnerRadius * sinNextTheta), XMFLOAT2((i + 1) / static_cast<float>(nSlices), 1.0f));
+
+		vertices[i * 6 + 3] = VertexWithTexCoord(XMFLOAT3(fInnerRadius * cosNextTheta, 0.0f, fInnerRadius * sinNextTheta), XMFLOAT2((i + 1) / static_cast<float>(nSlices), 1.0f));
+		vertices[i * 6 + 5] = VertexWithTexCoord(XMFLOAT3(fOuterRadius * cosTheta, 0.0f, fOuterRadius * sinTheta), XMFLOAT2(i / static_cast<float>(nSlices), 0.0f));
+		vertices[i * 6 + 4] = VertexWithTexCoord(XMFLOAT3(fOuterRadius * cosNextTheta, 0.0f, fOuterRadius * sinNextTheta), XMFLOAT2((i + 1) / static_cast<float>(nSlices), 0.0f));
+	}
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, vertices.data(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+AttackRangeMesh::~AttackRangeMesh()
+{
+}
+
+AttackRangeCircleMesh::AttackRangeCircleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fRadius, int nSlices) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = nSlices * 6; 
+	m_nStride = sizeof(VertexWithTexCoord);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	std::vector<VertexWithTexCoord> vertices(m_nVertices);
+
+	float thetaStep = XM_2PI / nSlices;
+
+	for (int i = 0; i < nSlices; ++i)
+	{
+		float theta = i * thetaStep;
+		float nextTheta = (i + 1) * thetaStep;
+
+		float cosTheta = cosf(theta);
+		float sinTheta = sinf(theta);
+		float cosNextTheta = cosf(nextTheta);
+		float sinNextTheta = sinf(nextTheta);
+
+		int index = i * 6;
+
+		vertices[index] = VertexWithTexCoord(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f)); 
+		vertices[index + 1] = VertexWithTexCoord(XMFLOAT3(fRadius * cosTheta, 0.0f, fRadius * sinTheta), XMFLOAT2(cosTheta * 0.5f + 0.5f, sinTheta * 0.5f + 0.5f));
+		vertices[index + 2] = VertexWithTexCoord(XMFLOAT3(fRadius * cosNextTheta, 0.0f, fRadius * sinNextTheta), XMFLOAT2(cosNextTheta * 0.5f + 0.5f, sinNextTheta * 0.5f + 0.5f));
+
+		vertices[index + 3] = VertexWithTexCoord(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f)); 
+		vertices[index + 4] = VertexWithTexCoord(XMFLOAT3(fRadius * cosNextTheta, 0.0f, fRadius * sinNextTheta), XMFLOAT2(cosNextTheta * 0.5f + 0.5f, sinNextTheta * 0.5f + 0.5f));
+		vertices[index + 5] = VertexWithTexCoord(XMFLOAT3(fRadius * cosTheta, 0.0f, fRadius * sinTheta), XMFLOAT2(cosTheta * 0.5f + 0.5f, sinTheta * 0.5f + 0.5f));
+	}
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, vertices.data(), m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+AttackRangeCircleMesh::~AttackRangeCircleMesh()
 {
 }
