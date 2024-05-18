@@ -183,23 +183,45 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 		int iVertexCounter = 0;
 		for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 		{
-			//int iNumVertices = pMesh->GetPolygonSize(j);
+			int iNumVertices = pMesh->GetPolygonSize(j);
 			//assert(iNumVertices == 3);
 
-			for (int k = 0; k < 3; k++) {
+			for (int k = 0; k < iNumVertices; k++) {
 				int iControlPointIndex = pMesh->GetPolygonVertex(j, k);
 
 				CFbxCtrlPoint* currCtrlPoint = &(pMeshData->m_vCtrlPoints[iControlPointIndex]);
 
+				// Position
 				CFbxVertex vertex;
 				vertex.m_xmf3Position = currCtrlPoint->m_xmf3Position;
 
-				ReadNormal(pMesh, iControlPointIndex, iVertexCounter, vertex.m_xmf3Normal);
+				// Normal
+				FbxVector4 pNormal;
+				pMesh->GetPolygonVertexNormal(j, k, pNormal);
+				vertex.m_xmf3Normal.x = static_cast<float>(pNormal.mData[0]);
+				vertex.m_xmf3Normal.y = static_cast<float>(pNormal.mData[1]);
+				vertex.m_xmf3Normal.z = static_cast<float>(pNormal.mData[2]);
 
+				// UV
 				//기본 TextureUV 만 로드
-				for (int k = 0; k < 1; ++k)
+				int iUVcount = 1; // pMesh->GetElementUVCount();
+				FbxStringList lUVNames;
+				pMesh->GetUVSetNames(lUVNames);
+				const char* lUVName = NULL;
+
+				for (int l = 0; l < iUVcount; ++l)
 				{
-					ReadUV(pMesh, iControlPointIndex, pMesh->GetTextureUVIndex(i, j), k, vertex.m_xmf2UV);
+					lUVName = lUVNames[l];
+
+					FbxVector2 pUVs;
+					bool bUnMappedUV;
+					if (!pMesh->GetPolygonVertexUV(j, k, lUVName, pUVs, bUnMappedUV))
+					{
+						//MessageBox(0, L"UV not found", 0, 0);
+						//std::cout << "UV Error ";
+					}
+					vertex.m_xmf2UV.x = pUVs[0];
+					vertex.m_xmf2UV.y = 1.0f - pUVs[1];
 				}
 
 
@@ -283,127 +305,6 @@ void CFbxLoader_V2::ReadMeshControlPoints(FbxMesh* inMesh, CFbxMeshData* loadDat
 
 	loadData->m_nVertices = inMesh->GetPolygonCount() * 3;
 }
-
-void CFbxLoader_V2::ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter, XMFLOAT3& outNormal)
-{
-	if (inMesh->GetElementNormalCount() < 1)
-	{
-		throw std::exception("Invalid Normal Number");
-	}
-
-	FbxGeometryElementNormal* vertexNormal = inMesh->GetElementNormal(0);
-	switch (vertexNormal->GetMappingMode())
-	{
-	case FbxGeometryElement::eByControlPoint:
-		switch (vertexNormal->GetReferenceMode())
-		{
-		case FbxGeometryElement::eDirect:
-		{
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[2]);
-		}
-		break;
-
-		case FbxGeometryElement::eIndexToDirect:
-		{
-			int index = vertexNormal->GetIndexArray().GetAt(inCtrlPointIndex);
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
-		}
-		break;
-
-		default:
-			throw std::exception("Invalid Reference");
-		}
-		break;
-
-	case FbxGeometryElement::eByPolygonVertex:
-		switch (vertexNormal->GetReferenceMode())
-		{
-		case FbxGeometryElement::eDirect:
-		{
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[2]);
-		}
-		break;
-
-		case FbxGeometryElement::eIndexToDirect:
-		{
-			int index = vertexNormal->GetIndexArray().GetAt(inVertexCounter);
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
-		}
-		break;
-
-		default:
-			throw std::exception("Invalid Reference");
-		}
-		break;
-	}
-}
-
-void CFbxLoader_V2::ReadUV(FbxMesh* inMesh, int inCtrlPointIndex, int inUVPointIndex, int inUVLayerNum, XMFLOAT2& outUV)
-{
-	if (inMesh->GetElementUVCount() < 1)
-	{
-		throw std::exception("Invalid UV Number");
-	}
-
-	FbxGeometryElementUV* vertexUV = inMesh->GetElementUV(inUVLayerNum);
-	switch (vertexUV->GetMappingMode())
-	{
-	case FbxGeometryElement::eByControlPoint:
-		switch (vertexUV->GetReferenceMode())
-		{
-		case FbxGeometryElement::eDirect:
-		{
-			outUV.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(inCtrlPointIndex).mData[0]);
-			outUV.y = static_cast<float>(vertexUV->GetDirectArray().GetAt(inCtrlPointIndex).mData[1]);
-		}
-		break;
-
-		case FbxGeometryElement::eIndexToDirect:
-		{
-			int index = vertexUV->GetIndexArray().GetAt(inCtrlPointIndex);
-			outUV.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(index).mData[0]);
-			outUV.y = static_cast<float>(vertexUV->GetDirectArray().GetAt(index).mData[1]);
-		}
-		break;
-
-		default:
-			throw std::exception("Invalid Reference");
-		}
-		break;
-
-	case FbxGeometryElement::eByPolygonVertex:
-		switch (vertexUV->GetReferenceMode())
-		{
-		case FbxGeometryElement::eDirect:
-		{
-			outUV.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(inUVPointIndex).mData[0]);
-			outUV.y = static_cast<float>(vertexUV->GetDirectArray().GetAt(inUVPointIndex).mData[1]);
-		}
-		break;
-
-		case FbxGeometryElement::eIndexToDirect:
-		{
-			int index = vertexUV->GetIndexArray().GetAt(inUVPointIndex);
-			outUV.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(index).mData[0]);
-			outUV.y = static_cast<float>(vertexUV->GetDirectArray().GetAt(index).mData[1]);
-		}
-		break;
-
-		default:
-			throw std::exception("Invalid Reference");
-		}
-		break;
-	}
-}
-
 
 void CFbxLoader_V2::ProcessSkeletonHierarchy(FbxNode* inRootNode, CFbxData* loadData)
 {

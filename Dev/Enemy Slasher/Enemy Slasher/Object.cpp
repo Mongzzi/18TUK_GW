@@ -1020,7 +1020,7 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	// 카메라의 역행렬을 가져옴. 회전때문에
 	// 이걸 사용하면 카메라벡터의 반대를 보게됨.
 	// 카메라의Look의 반대, 카메라UP으로 만들어도 될듯? 아마?
-	XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
+	//XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
 
 	// 스케일 적용.
 	SetScale(m_xmfScale);
@@ -1132,7 +1132,7 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	CTexture* ppTextures[5];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/card_UV2.jpg", RESOURCE_TEXTURE2D, 0);
 
 	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack2.jpg", RESOURCE_TEXTURE2D, 0);
