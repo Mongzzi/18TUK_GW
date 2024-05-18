@@ -198,11 +198,35 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 
 				//기본 TextureUV 만 로드
 				int iUVcount = 1; // pMesh->GetElementUVCount();
+				FbxStringList lUVNames;
+				pMesh->GetUVSetNames(lUVNames);
+				const char* lUVName = NULL;
+
 				for (int l = 0; l < iUVcount; ++l)
 				{
-					ReadUV(pMesh, iControlPointIndex, pMesh->GetTextureUVIndex(j, k), l, vertex.m_xmf2UV);
+					lUVName = lUVNames[l];
+
+					FbxVector2 pUVs;
+					bool bUnMappedUV;
+					if (!pMesh->GetPolygonVertexUV(j, k, lUVName, pUVs, bUnMappedUV))
+					{
+						//MessageBox(0, L"UV not found", 0, 0);
+						//std::cout << "UV Error ";
+					}
+					vertex.m_xmf2UV.x = pUVs[0];
+					vertex.m_xmf2UV.y = 1.0f - pUVs[1];
+
+
+					//ReadUV(pMesh, iControlPointIndex, pMesh->GetTextureUVIndex(j, k), l, vertex.m_xmf2UV);
 					//vertex.m_xmf2UV.y = 1.0f - vertex.m_xmf2UV.y;
 					//std::cout << "Debug - " << "UV Index: " << pMesh->GetTextureUVIndex(j, iNumVertices) << "\tUV : \t" << vertex.m_xmf2UV.x << "\t\t" << vertex.m_xmf2UV.y << '\n';
+					//std::cout << "Debug - "
+					//	<< "VertexCount: " << iVertexCounter << '\t'
+					//	<< "Pos : " << '\t'
+					//	<< vertex.m_xmf3Position.x << '\t'
+					//	<< vertex.m_xmf3Position.y << '\t'
+					//	<< vertex.m_xmf3Position.z << '\t'
+					//	<< "UV: " << "\tUV : \t" << vertex.m_xmf2UV.x << "\t\t" << vertex.m_xmf2UV.y << '\n';
 				}
 
 
