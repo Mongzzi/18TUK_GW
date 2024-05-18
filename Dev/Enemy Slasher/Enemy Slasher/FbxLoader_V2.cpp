@@ -183,10 +183,10 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 		int iVertexCounter = 0;
 		for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 		{
-			//int iNumVertices = pMesh->GetPolygonSize(j);
+			int iNumVertices = pMesh->GetPolygonSize(j);
 			//assert(iNumVertices == 3);
 
-			for (int k = 0; k < 3; k++) {
+			for (int k = 0; k < iNumVertices; k++) {
 				int iControlPointIndex = pMesh->GetPolygonVertex(j, k);
 
 				CFbxCtrlPoint* currCtrlPoint = &(pMeshData->m_vCtrlPoints[iControlPointIndex]);
@@ -197,9 +197,12 @@ void CFbxLoader_V2::LoadMesh(FbxNode* lRootNode, FbxScene* lScene, CFbxData* loa
 				ReadNormal(pMesh, iControlPointIndex, iVertexCounter, vertex.m_xmf3Normal);
 
 				//기본 TextureUV 만 로드
-				for (int k = 0; k < 1; ++k)
+				int iUVcount = 1; // pMesh->GetElementUVCount();
+				for (int l = 0; l < iUVcount; ++l)
 				{
-					ReadUV(pMesh, iControlPointIndex, pMesh->GetTextureUVIndex(i, j), k, vertex.m_xmf2UV);
+					ReadUV(pMesh, iControlPointIndex, pMesh->GetTextureUVIndex(j, k), l, vertex.m_xmf2UV);
+					//vertex.m_xmf2UV.y = 1.0f - vertex.m_xmf2UV.y;
+					//std::cout << "Debug - " << "UV Index: " << pMesh->GetTextureUVIndex(j, iNumVertices) << "\tUV : \t" << vertex.m_xmf2UV.x << "\t\t" << vertex.m_xmf2UV.y << '\n';
 				}
 
 
