@@ -85,11 +85,7 @@ public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 	ID3D12RootSignature* m_pd3dComputeRootSignature = NULL;
 	CObjectManager* m_pObjectManager = NULL;
-
-private:
 	CTextShader* m_pTextShader = NULL;
-	std::vector<CTextObject*> m_textObjects;
-
 
 protected:
 	float m_CurrentTime;
@@ -113,12 +109,11 @@ public:
 	virtual void Enter();
 	virtual void Exit();
 
+	CTextShader* m_pTextShader = NULL;
 
 private:
 	CUIObject* pCoveredUI = NULL;
 	CUIObject* pSelectedUI = NULL;
-	CTextShader* m_pTextShader = NULL;
-	std::vector<CTextObject*> m_textObjects;
 
 };
 
