@@ -925,17 +925,7 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
 
-void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext)
-{
-	//pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Translation(m_position.x, m_position.y));
-	//pd2dDeviceContext->DrawText(
-	//	m_text.c_str(),
-	//	static_cast<UINT32>(m_text.size()),
-	//	s_formats[m_format].Get(),
-	//	&m_rect,
-	//	s_brushes[m_brush].Get()
-	//);
-}
+
 
 CRayObject::CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
@@ -1718,3 +1708,61 @@ CHpbarObject:: ~CHpbarObject()
 
 }
 
+CTextObject::CTextObject(const WCHAR* text, const D2D1_RECT_F& rect, const WCHAR* fontName, float fontSize, D2D1::ColorF::Enum color)
+: m_text(text), m_rect(rect), m_fontName(fontName), m_fontSize(fontSize), m_color(color)
+{
+}
+
+CTextObject::~CTextObject()
+{
+}
+
+void CTextObject::SetText(const WCHAR* text)
+{
+	m_text = text;
+}
+
+void CTextObject::SetPosition(const D2D1_RECT_F& rect)
+{
+	m_rect = rect;
+}
+
+void CTextObject::SetFont(const WCHAR* fontName, float fontSize)
+{
+	m_fontName = fontName;
+	m_fontSize = fontSize;
+}
+
+void CTextObject::SetColor(D2D1::ColorF::Enum color)
+{
+	m_color = color;
+}
+
+void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory)
+{ 
+	// Create the solid color brush if it hasn't been created yet
+	if (!m_solidColorBrush)
+	{
+		DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(m_color), m_solidColorBrush.GetAddressOf()));
+	}
+
+	// Create the text format if it hasn't been created yet
+	if (!m_dWriteTextFormat)
+	{
+		DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
+			m_fontName.c_str(),
+			nullptr,
+			DWRITE_FONT_WEIGHT_NORMAL,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			m_fontSize,
+			L"en-us",
+			m_dWriteTextFormat.GetAddressOf()));
+
+		m_dWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+		m_dWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	}
+
+	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	pd2dDeviceContext->DrawText(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_dWriteTextFormat.Get(), &m_rect, m_solidColorBrush.Get());
+}
