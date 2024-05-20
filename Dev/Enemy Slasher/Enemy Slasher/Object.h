@@ -492,13 +492,6 @@ public:
 	virtual ~CTreeObject();
 };
 
-class CTextObject
-{
-	POINT m_position;
-
-public:
-	void Render(ID2D1DeviceContext3* pd2dDeviceContext);
-};
 
 class CHpbarObject : public CGameObject
 {
@@ -585,3 +578,26 @@ public:
 
 };
 
+class CTextObject
+{
+public:
+    CTextObject(const WCHAR* text, const D2D1_RECT_F& rect, const WCHAR* fontName = L"Verdana", float fontSize = 25.0f, D2D1::ColorF::Enum color = D2D1::ColorF::White);
+    ~CTextObject();
+
+    void SetText(const WCHAR* text);
+    void SetPosition(const D2D1_RECT_F& rect);
+    void SetFont(const WCHAR* fontName, float fontSize);
+    void SetColor(D2D1::ColorF::Enum color);
+
+    void Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory);
+
+private:
+    std::wstring m_text;
+    D2D1_RECT_F m_rect;
+    std::wstring m_fontName;
+    float m_fontSize;
+    D2D1::ColorF::Enum m_color;
+
+    ComPtr<ID2D1SolidColorBrush> m_solidColorBrush;
+    ComPtr<IDWriteTextFormat> m_dWriteTextFormat;
+};
