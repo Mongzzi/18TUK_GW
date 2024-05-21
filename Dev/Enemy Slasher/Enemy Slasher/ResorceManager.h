@@ -50,6 +50,7 @@ private:
 private:
 	CFbxLoader_V3* m_pFBXLoader = NULL;
 
-	std::map<std::string, CFBXObject*> m_mLoadedFBXDataMap;
+	std::unordered_map<std::string, CFBXObject*> m_mLoadedFBXDataMap;
+	std::unordered_map<std::string, CTexture*> m_mLoadedTextureMap;
 };
 

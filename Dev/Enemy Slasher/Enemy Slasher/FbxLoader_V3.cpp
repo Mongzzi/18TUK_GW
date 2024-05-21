@@ -649,7 +649,9 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 		}
 	}
 
-	if (isAlreadyLoaded == false) {
+	if (isAlreadyLoaded == false &&
+		animData.m_vBoneAnimations.size() > 0 &&
+		animData.m_vBoneAnimations[0].m_vKeyFrames.size() > 0) {
 		m_pSkeleton->m_vAnimationNames.push_back(clipName);
 		m_pSkeleton->m_mAnimations[clipName] = animData;
 	}

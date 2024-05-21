@@ -803,7 +803,7 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 {
 	static int animVal = 0;
 	static int counter = 0;
-	if (m_pSkeletonData && true) {
+	if (m_pSkeletonData && m_pSkeletonData->m_vAnimationNames.size() > 0 && true) {
 		m_pcbMappedSkinningObject->m_bIsAvailable = true;
 		if (m_pSkeletonData->m_mAnimations.size() > 0) {
 			CFbx_V3::AnimationClip* currAnim = &m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[0]];

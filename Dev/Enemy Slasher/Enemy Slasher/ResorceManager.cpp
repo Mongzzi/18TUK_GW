@@ -23,7 +23,7 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 
 		CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
 		pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		//pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+		pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
 #ifdef _DEBUG
 		std::cout << "Loaded DataCount : " << loadData->m_nDataCount << '\n';
@@ -41,7 +41,7 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
 	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	//pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
 #ifdef _DEBUG
 	std::cout << "Loaded DataCount : " << pFbxData->m_nDataCount << '\n';
@@ -64,15 +64,28 @@ CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID
 		CMaterial* pNewMaterial = newGameObject->GetMaterial();
 		pNewMaterial->m_xmf4Albedo = pInputMaterial->DiffuseAlbedo;
 		if (pInputMaterial->Name != "") {
-			//std::string filePath = "Image/" + pInputMaterial->Name;
-			//if (std::filesystem::exists(filePath)) {
-			//	std::cout << "Exists : " << filePath << '\n';
-			//	//pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
-			//	//pNewMaterial->SetTexture(pNewTextures);
-			//}
-			//else {
-			//	std::cout << "Non : " << filePath << '\n';
-			//}
+			std::string filePath = "Image/" + pInputMaterial->Name;
+			if (std::filesystem::exists(filePath)) {
+				std::cout << "Exists : " << filePath << '\n';
+				CTexture* pNewTextures = nullptr;
+				if (m_mLoadedTextureMap.contains(pInputMaterial->Name) == false) {
+					int bufferSize = MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, NULL, 0);
+					std::wstring wideFileFullPath(bufferSize, 0);
+					MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, &wideFileFullPath[0], bufferSize);
+
+					pNewTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+					pNewTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, &wideFileFullPath[0], RESOURCE_TEXTURE2D, 0);
+					m_mLoadedTextureMap[pInputMaterial->Name] = pNewTextures;
+				}
+				pNewTextures = m_mLoadedTextureMap[pInputMaterial->Name];
+				if (pNewTextures) {
+					pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
+					pNewMaterial->SetTexture(pNewTextures);
+				}
+			}
+			else {
+				std::cout << "Non : " << filePath << '\n';
+			}
 		}
 	}
 
