@@ -45,7 +45,7 @@ public:
 	//CTexture* LoadTexture(const char* fileName);
 
 private:
-	CFBXObject* LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData);
+	CFBXObject* LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData, CShader* pShader);
 
 private:
 	CFbxLoader_V3* m_pFBXLoader = NULL;

@@ -1,4 +1,5 @@
 #include "ResorceManager.h"
+#include "Shader.h"
 
 CResorceManager::CResorceManager()
 {
@@ -19,7 +20,10 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 
 		loadData = m_pFBXLoader->LoadFbx(filePath, fileName);
 
-		CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, loadData->m_pRootObjectData);
+		CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
+		pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+		CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, loadData->m_pRootObjectData, pShader);
 
 		m_mLoadedFBXDataMap[fName] = newGameObject;
 	}
@@ -29,19 +33,23 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 
 CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::CFbxData* pFbxData)
 {
-	CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData);
+	CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
+	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
 
 	return newGameObject;
 }
 
-CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData)
+CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData, CShader* pShader)
 {
 	CFBXObject* newGameObject;
-	newGameObject = new CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
+	newGameObject = new CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::NON);
 	newGameObject->SetFbxData(pd3dDevice, pd3dCommandList, pObjectData);
+	newGameObject->SetShader(pShader);
 
 	for (int i = 0; i < pObjectData->m_vChildObjects.size(); ++i) {
-		CFBXObject* newChildObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pObjectData->m_vChildObjects[i]);
+		CFBXObject* newChildObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pObjectData->m_vChildObjects[i], pShader);
 		newGameObject->SetChild(newChildObject);
 	}
 
