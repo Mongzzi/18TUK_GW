@@ -41,7 +41,7 @@ struct CB_GAMEOBJECT_INFO
 struct CB_2D_GAMEOBJECT_INFO
 {
 	XMFLOAT2 m_xmf2Position; // 오브젝트의 화면 좌표 (x, y)
-	XMFLOAT2 m_xmf2Size;     // 오브젝트의 크기 (width, height)
+	bool m_IsClicked;		//	클릭 되었는지
 };
 
 struct CB_SKINNINGOBJECT_INFO
@@ -610,6 +610,20 @@ private:
 
 class CButtonObject : public CGameObject
 {
-	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
+public:
+	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
 	~CButtonObject();
+
+private:
+	float m_x, m_y;				// 오브젝트의 화면 좌표 (x, y)
+	bool m_IsClicked;
+
+	ID3D12Resource* m_pd3dcb2DGameObject = NULL;
+	CB_2D_GAMEOBJECT_INFO* m_pcbMapped2DGameObject = NULL;
+
+public:
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
 };

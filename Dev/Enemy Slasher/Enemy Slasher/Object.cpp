@@ -1747,12 +1747,58 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3
 }
 
 
-CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float width, float height, ShaderType stype, int nMeshes)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
+	m_x = x;
+	m_y = y;    
+	m_IsClicked = false;
 
+
+	CTexture* ppTextures[1];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/img.jpg", RESOURCE_TEXTURE2D, 0);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+			m_pMaterial->SetTexture(ppTextures[0]);
+		}
+	}
+
+	SetMesh(0, new CHpBarMesh(pd3dDevice, pd3dCommandList, width, height));
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 CButtonObject::~CButtonObject()
 {
+}
+
+void CButtonObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_2D_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcb2DGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcb2DGameObject->Map(0, NULL, (void**)&m_pcbMapped2DGameObject);
+}
+
+void CButtonObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pcbMapped2DGameObject->m_xmf2Position = XMFLOAT2(m_x, m_y);
+	m_pcbMapped2DGameObject->m_IsClicked = m_IsClicked;
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcb2DGameObject->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dcbGameObjectGpuVirtualAddress);
+
+}
+
+void CButtonObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcb2DGameObject)
+	{
+		m_pd3dcb2DGameObject->Unmap(0, NULL);
+		m_pd3dcb2DGameObject->Release();
+	}
+	CGameObject::ReleaseShaderVariables();
 }

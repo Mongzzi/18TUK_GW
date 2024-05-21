@@ -470,7 +470,7 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 
 
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[11];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[12];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Camera
@@ -526,6 +526,11 @@ ID3D12RootSignature* CTestScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[10].Constants.ShaderRegister = 5;
 	pd3dRootParameters[10].Constants.RegisterSpace = 0;
 	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[11].Constants.ShaderRegister = 6;
+	pd3dRootParameters[11].Constants.RegisterSpace = 0;
+	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
@@ -751,6 +756,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		xmfPlayerPos.y = pTerrain->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
 		m_pPlayer->SetPosition(xmfPlayerPos);
 	}
+	// ----------------- 버튼 오브젝트 ------------------
+	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 320.0f, 240.f, 100.0f, 100.0f, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::TextureObject);
 
 
 	// --------------------------------- 빌보드 인스턴스 오브젝트 ------------------------------

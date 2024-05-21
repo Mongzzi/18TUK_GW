@@ -293,6 +293,13 @@ public:
 
 };
 
+class C2DTextureMesh : public CMesh
+{
+public:
+	C2DTextureMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight);
+	virtual ~C2DTextureMesh();
+};
+
 class AttackRangeMesh : public CMesh
 {
 public:

@@ -22,8 +22,14 @@ cbuffer cbTimeInfo : register(b4)
 
 cbuffer cbSkinningInfo : register(b5)
 {
-    matrix gmtxBoneMatrices[96] : packoffset(c0);
-    bool gbIsSkinningAvaliable : packoffset(c384);
+	matrix gmtxBoneMatrices[96] : packoffset(c0);
+	bool gbIsSkinningAvaliable : packoffset(c384);
+}
+
+cbuffer cb2DGameObjectInfo : register(b6)
+{
+	float2 position; // 오브젝트의 화면 좌표 (x, y)
+	bool IsClicked;
 }
 
 
@@ -75,7 +81,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 
 float4 PSUITextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+	float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
 	return (cColor);
 }
 
@@ -115,18 +121,28 @@ float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitive
 // ------ 2D 버튼 오브젝트 ---------------
 VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
 {
-    VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
+	VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
 
-    output.position = float4(input.position.xy, 0.0f, 1.0f);
-    output.uv = input.uv;
+	float2 screenPos = position + input.position.xy;
 
-    return (output);
+	screenPos = screenPos / float2(640.0f, 480.0f) * 2.0f - 1.0f;		// 현재 콘솔창 크기 640 * 480
+	screenPos.y = -screenPos.y;
+
+	output.position = float4(screenPos, 0.0f, 1.0f);
+	output.uv = input.uv;
+	return output;
 }
 
 float4 PS_2D_OBJECT(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
 {
-    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
-    return (cColor);
+	float4 cColor;
+	if (!IsClicked) {
+		cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+	}
+	else {
+		cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	}
+	return cColor;
 }
 // ------ 2D 버튼 오브젝트 끝 ---------------
 
@@ -347,75 +363,75 @@ float4 PSBillboardInstancing(VS_BILLBOARD_INSTANCING_OUTPUT input) : SV_TARGET
 ////////////////////////////////////////////////////////////////////////////////////////////
 struct VS_SKINNING_INPUT
 {
-    float3 position : POSITION;
-    float3 normal : NORMAL;
-    float4 color : COLOR;
-    float2 texCoord : TEXCOORD;
-    float4 blendingWeight : BLENDWEIGHT;
-    int4 blendingIndex : BLENDINDICES;
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+	float4 color : COLOR;
+	float2 texCoord : TEXCOORD;
+	float4 blendingWeight : BLENDWEIGHT;
+	int4 blendingIndex : BLENDINDICES;
 };
 
 struct VS_SKINNING_OUTPUT
 {
-    float4 position : SV_POSITION;
-    float3 normal : NORMAL;
-    float4 color : COLOR;
-    float2 texCoord : TEXCOORD;
+	float4 position : SV_POSITION;
+	float3 normal : NORMAL;
+	float4 color : COLOR;
+	float2 texCoord : TEXCOORD;
 };
 
 
 
 VS_SKINNING_OUTPUT VSSkinning(VS_SKINNING_INPUT input)
 {
-    VS_SKINNING_OUTPUT output;
+	VS_SKINNING_OUTPUT output;
 
-    float4x4 skinningMatrix = 0;
-    for (int i = 0; i < 4; ++i)
-    {
-        skinningMatrix += gmtxBoneMatrices[input.blendingIndex[i]] * input.blendingWeight[i];
-    }
-	
-    float3 newNormal = input.normal;
-	
+	float4x4 skinningMatrix = 0;
+	for (int i = 0; i < 4; ++i)
+	{
+		skinningMatrix += gmtxBoneMatrices[input.blendingIndex[i]] * input.blendingWeight[i];
+	}
+
+	float3 newNormal = input.normal;
+
 	// apply skinning
-    float4 skinningPosition = float4(input.position, 1.0f);
-	
-    if (gbIsSkinningAvaliable == true)
-    {
-        float3 skinningPos = float3(0.0f, 0.0f, 0.0f);
-        float3 skinningNormal = float3(0.0f, 0.0f, 0.0f);
-        for (int i = 0; i < 4; ++i)
-        {
-            skinningPos += input.blendingWeight[i] * mul(float4(input.position, 1.0f), gmtxBoneMatrices[input.blendingIndex[i]]).xyz;
-            skinningNormal += input.blendingWeight[i] * mul(input.normal, (float3x3) gmtxBoneMatrices[input.blendingIndex[i]]);
-        }
-		
-        skinningPosition = float4(skinningPos, 1.0f);
-        newNormal = skinningNormal;
-    }
-	// apply gameObjectMat
-    float4 worldPosition = mul(skinningPosition, gmtxGameObject);
-	// apply viewMat
-    float4 viewPosition = mul(worldPosition, gmtxView);
-	// apply projectionMat
-    float4 newPosition = mul(viewPosition, gmtxProjection);
-	
-	
-    output.position = newPosition;
-    output.color = input.color;
-    output.normal = newNormal;
-    output.texCoord = input.texCoord;
+	float4 skinningPosition = float4(input.position, 1.0f);
 
-    return (output);
+	if (gbIsSkinningAvaliable == true)
+	{
+		float3 skinningPos = float3(0.0f, 0.0f, 0.0f);
+		float3 skinningNormal = float3(0.0f, 0.0f, 0.0f);
+		for (int i = 0; i < 4; ++i)
+		{
+			skinningPos += input.blendingWeight[i] * mul(float4(input.position, 1.0f), gmtxBoneMatrices[input.blendingIndex[i]]).xyz;
+			skinningNormal += input.blendingWeight[i] * mul(input.normal, (float3x3) gmtxBoneMatrices[input.blendingIndex[i]]);
+		}
+
+		skinningPosition = float4(skinningPos, 1.0f);
+		newNormal = skinningNormal;
+	}
+	// apply gameObjectMat
+	float4 worldPosition = mul(skinningPosition, gmtxGameObject);
+	// apply viewMat
+	float4 viewPosition = mul(worldPosition, gmtxView);
+	// apply projectionMat
+	float4 newPosition = mul(viewPosition, gmtxProjection);
+
+
+	output.position = newPosition;
+	output.color = input.color;
+	output.normal = newNormal;
+	output.texCoord = input.texCoord;
+
+	return (output);
 }
 
 float4 PSSkinning(VS_SKINNING_OUTPUT input) : SV_TARGET
 {
-    //float4 texColor = gtxtTexture.Sample(gWrapSamplerState, input.texCoord);
-    //input.normal = normalize(input.normal);
-    //float4 cIllumination = Lighting(input.position.xyz, input.normal);
-    //return (texColor * cIllumination);
-    return (float4(input.texCoord, 0.f, 1.f));
+	//float4 texColor = gtxtTexture.Sample(gWrapSamplerState, input.texCoord);
+	//input.normal = normalize(input.normal);
+	//float4 cIllumination = Lighting(input.position.xyz, input.normal);
+	//return (texColor * cIllumination);
+	return (float4(input.texCoord, 0.f, 1.f));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
