@@ -521,8 +521,13 @@ void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		SetShader(pObjectsShader);
 		break;
 	}
-
-
+	case ShaderType::C2DObjectShader:
+	{
+		C2DObjectShader* pObjectsShader = new C2DObjectShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	}
 	}
 }
 
@@ -1739,4 +1744,15 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3
 
 	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	pd2dDeviceContext->DrawText(m_text.c_str(), static_cast<UINT32>(m_text.length()), m_dWriteTextFormat.Get(), &m_rect, m_solidColorBrush.Get());
+}
+
+
+CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+
+}
+
+CButtonObject::~CButtonObject()
+{
 }

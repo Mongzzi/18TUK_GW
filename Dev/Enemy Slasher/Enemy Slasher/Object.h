@@ -20,7 +20,8 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CTexture_Position_Texcoord_Shader,
 	CSkyBoxShader,
 	CBillBoardInstanceShader,
-	CAnimationObjectShader
+	CAnimationObjectShader,
+	C2DObjectShader
 };
 
 enum class MonsterState : int {
@@ -35,6 +36,12 @@ struct CB_GAMEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4World;
 	UINT	   m_nMaterialID;
+};
+
+struct CB_2D_GAMEOBJECT_INFO
+{
+	XMFLOAT2 m_xmf2Position; // 오브젝트의 화면 좌표 (x, y)
+	XMFLOAT2 m_xmf2Size;     // 오브젝트의 크기 (width, height)
 };
 
 struct CB_SKINNINGOBJECT_INFO
@@ -579,23 +586,30 @@ public:
 class CTextObject
 {
 public:
-    CTextObject(const WCHAR* text, const D2D1_RECT_F& rect, const WCHAR* fontName = L"Verdana", float fontSize = 25.0f, D2D1::ColorF::Enum color = D2D1::ColorF::White);
-    ~CTextObject();
+	CTextObject(const WCHAR* text, const D2D1_RECT_F& rect, const WCHAR* fontName = L"Verdana", float fontSize = 25.0f, D2D1::ColorF::Enum color = D2D1::ColorF::White);
+	~CTextObject();
 
-    void SetText(const WCHAR* text);
-    void SetPosition(const D2D1_RECT_F& rect);
-    void SetFont(const WCHAR* fontName, float fontSize);
-    void SetColor(D2D1::ColorF::Enum color);
+	void SetText(const WCHAR* text);
+	void SetPosition(const D2D1_RECT_F& rect);
+	void SetFont(const WCHAR* fontName, float fontSize);
+	void SetColor(D2D1::ColorF::Enum color);
 
-    void Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory);
+	void Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory);
 
 private:
-    std::wstring m_text;
-    D2D1_RECT_F m_rect;
-    std::wstring m_fontName;
-    float m_fontSize;
-    D2D1::ColorF::Enum m_color;
+	std::wstring m_text;
+	D2D1_RECT_F m_rect;
+	std::wstring m_fontName;
+	float m_fontSize;
+	D2D1::ColorF::Enum m_color;
 
-    ComPtr<ID2D1SolidColorBrush> m_solidColorBrush;
-    ComPtr<IDWriteTextFormat> m_dWriteTextFormat;
+	ComPtr<ID2D1SolidColorBrush> m_solidColorBrush;
+	ComPtr<IDWriteTextFormat> m_dWriteTextFormat;
+};
+
+
+class CButtonObject : public CGameObject
+{
+	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
+	~CButtonObject();
 };

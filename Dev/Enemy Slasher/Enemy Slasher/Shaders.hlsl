@@ -112,6 +112,23 @@ float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitive
 	return (cColor);
 }
 
+// ------ 2D 버튼 오브젝트 ---------------
+VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
+{
+    VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
+
+    output.position = float4(input.position.xy, 0.0f, 1.0f);
+    output.uv = input.uv;
+
+    return (output);
+}
+
+float4 PS_2D_OBJECT(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
+{
+    float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+    return (cColor);
+}
+// ------ 2D 버튼 오브젝트 끝 ---------------
 
 
 float4 PSSkyBox(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
