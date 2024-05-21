@@ -142,6 +142,7 @@
     <ClInclude Include="ColliderWithMesh.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DeckData.h" />
+    <ClInclude Include="FbxLoader_V3.h" />
     <ClInclude Include="ResorceManager.h" />
     <ClInclude Include="FbxLoader_V2.h" />
     <ClInclude Include="FbxObjectData.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="ColliderWithMesh.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DeckData.cpp" />
+    <ClCompile Include="FbxLoader_V3.cpp" />
     <ClCompile Include="ResorceManager.cpp" />
     <ClCompile Include="FbxLoader_V2.cpp" />
     <ClCompile Include="FbxObjectData.cpp" />

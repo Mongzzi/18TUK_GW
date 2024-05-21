@@ -4,6 +4,7 @@
 #include "BoundingBox.h"
 #include "Ray.h"
 #include "FbxObjectData.h"
+#include "FbxLoader_V3.h"
 
 class CMesh
 {
@@ -183,7 +184,7 @@ public:
 class CFBXMesh : public CDynamicShapeMesh
 {
 public:
-	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxMeshData* pMeshData);
+	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbx_V3::MeshData* pMeshData);
 	virtual ~CFBXMesh();
 };
 

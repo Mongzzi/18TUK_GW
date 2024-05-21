@@ -764,19 +764,18 @@ CFBXObject::~CFBXObject()
 
 }
 
-void CFBXObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxData* pFbxData)
+void CFBXObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbx_V3::ObjectData* pObjectData)
 {
-	for (int i = 0; i < pFbxData->m_pvMeshs.size(); ++i) {
-		CFBXMesh* pAnimMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, pFbxData->m_pvMeshs[i]);
+	for (int i = 0; i < pObjectData->m_vpMeshs.size(); ++i) {
+		CFBXMesh* pAnimMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, pObjectData->m_vpMeshs[i]);
 		SetMesh(i, pAnimMesh);
 	}
 
-	if (pFbxData->m_bHasSkeleton == true) {
-		m_pSkeletonData = &pFbxData->m_Skeleton;
-
-		//m_pSkeletonData->deleteAnimData();
+	if (pObjectData->m_pSkeleton) {
+		m_pSkeletonData = pObjectData->m_pSkeleton;
 	}
 }
+
 
 void CFBXObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -800,49 +799,22 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 {
 	static int animVal = 0;
 	static int counter = 0;
-	if (m_pAnimationData != NULL) {
-		for (int i = 0; i < m_pAnimationData->m_nJoint; ++i) {
-			XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(&m_pAnimationData->m_ppxmf4x4AnimMat[animVal][i])));
-		}
-		if (counter >= 30) {
-			animVal++;
-			counter = 0;
-			if (animVal >= m_pAnimationData->m_nAnimLen) animVal = 0;
-			cout << "Skeleton - AnimVal : " << animVal << "\n";
-		}
-		counter++;
-	}
-	if (m_pSkeletonData && false) {
-		for (int i = 0; i < m_pSkeletonData->m_vJoints.size(); ++i) {
-			Keyframe* nowFrame = m_pSkeletonData->m_vJoints[i].m_pAnimFrames;
-			if (nowFrame) {
-				for (int j = 0; j < animVal; ++j) {
-					if (nowFrame->m_pNext) {
-						nowFrame = nowFrame->m_pNext;
-					}
-					else {
-						animVal = 0;
-					}
-				}
-				XMFLOAT4X4* m_Mat = &Matrix4x4::Multiply(m_pSkeletonData->m_vJoints[i].m_xmf4x4GlobalBindposeInverse, nowFrame->m_xmf4x4GlobalTransform);
-				XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(m_Mat)));
+	if (m_pSkeletonData && true) {
+		m_pcbMappedSkinningObject->m_bIsAvailable = true;
+		if (m_pSkeletonData->m_mAnimations.size() > 0) {
+			CFbx_V3::AnimationClip* currAnim = &m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[0]];
+			for (int i = 0; i < currAnim->m_vBoneAnimations.size(); ++i) {
+				XMFLOAT4X4 mMat = Matrix4x4::Multiply(m_pSkeletonData->m_vxmf4x4BoneOffsetMat[i], currAnim->m_vBoneAnimations[i].m_vKeyFrames[animVal].m_xmf4x4AnimMat);
+				XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(&mMat)));
 			}
-			else {
-				m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i] = Matrix4x4::Identity();
+			if (counter >= 30) {
+				animVal++;
+				counter = 0;
+				if (animVal >= currAnim->m_vBoneAnimations[0].m_vKeyFrames.size()) animVal = 0;
+				cout << "Skeleton - AnimVal : " << animVal << "\n";
 			}
-			//XMFLOAT4X4* m_Mat = &nowFrame->m_xmf4x4GlobalTransform;
-			//XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(m_Mat)));
-
-
-			//XMFLOAT4X4* m_Mat = &m_pSkeletonData->m_vJoints[i].m_xmf4x4GlobalBindposeInverse;
-			//XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMLoadFloat4x4(m_Mat));
+			counter++;
 		}
-		if (counter >= 10) {
-			animVal++;
-			counter = 0;
-			cout << "Skeleton - AnimVal : " << animVal << "\n";
-		}
-		counter++;
 	}
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcbSkinningObject->GetGPUVirtualAddress();

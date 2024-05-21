@@ -1408,9 +1408,10 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 
 // ------------------------------- FBX V2 -----------------------------------
-CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbxMeshData* pMeshData) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
+CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbx_V3::MeshData* pMeshData) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
 {
-	vector<CFbxVertex>* vertexList = &pMeshData->m_vVertex;
+	using namespace CFbx_V3;
+	vector<VertexData>* vertexList = &pMeshData->m_vVertices;
 
 	m_nVertices = vertexList->size();				// 꼭지점 개수
 	m_nStride = sizeof(CVertex_Skining); // x , y, z 좌표
@@ -1425,19 +1426,16 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		newVertices[i].m_xmf3Vertex = (*vertexList)[i].m_xmf3Position;
 		newVertices[i].m_xmf3Normal = (*vertexList)[i].m_xmf3Normal;
 		newVertices[i].m_xmf2UV = (*vertexList)[i].m_xmf2UV;
-	}
-	if ((*vertexList)[0].m_vBlendingInfo.size() > 0) {
-		for (int i = 0; i < m_nVertices; ++i) {
-			newVertices[i].m_f3BlendingWeight[0] = (*vertexList)[i].m_vBlendingInfo[0].m_fBlendingWeight;
-			newVertices[i].m_f3BlendingWeight[1] = (*vertexList)[i].m_vBlendingInfo[1].m_fBlendingWeight;
-			newVertices[i].m_f3BlendingWeight[2] = (*vertexList)[i].m_vBlendingInfo[2].m_fBlendingWeight;
-			newVertices[i].m_f3BlendingWeight[3] = (*vertexList)[i].m_vBlendingInfo[3].m_fBlendingWeight;
 
-			newVertices[i].m_n4BlendingIndex[0] = (*vertexList)[i].m_vBlendingInfo[0].m_nBlendingIndex;
-			newVertices[i].m_n4BlendingIndex[1] = (*vertexList)[i].m_vBlendingInfo[1].m_nBlendingIndex;
-			newVertices[i].m_n4BlendingIndex[2] = (*vertexList)[i].m_vBlendingInfo[2].m_nBlendingIndex;
-			newVertices[i].m_n4BlendingIndex[3] = (*vertexList)[i].m_vBlendingInfo[3].m_nBlendingIndex;
-		}
+		newVertices[i].m_f3BlendingWeight[0] = (*vertexList)[i].m_flBlendingWeight[0];
+		newVertices[i].m_f3BlendingWeight[1] = (*vertexList)[i].m_flBlendingWeight[1];
+		newVertices[i].m_f3BlendingWeight[2] = (*vertexList)[i].m_flBlendingWeight[2];
+		newVertices[i].m_f3BlendingWeight[3] = (*vertexList)[i].m_flBlendingWeight[3];
+
+		newVertices[i].m_n4BlendingIndex[0] = (*vertexList)[i].m_nlBlendingIndex[0];
+		newVertices[i].m_n4BlendingIndex[1] = (*vertexList)[i].m_nlBlendingIndex[1];
+		newVertices[i].m_n4BlendingIndex[2] = (*vertexList)[i].m_nlBlendingIndex[2];
+		newVertices[i].m_n4BlendingIndex[3] = (*vertexList)[i].m_nlBlendingIndex[3];
 	}
 	m_pVertices = newVertices;
 
@@ -1450,7 +1448,7 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
 
-	vector<int>* indexList = &pMeshData->m_vIndices;
+	vector<int>* indexList = &pMeshData->m_nIndices;
 
 	m_nIndices = indexList->size();
 	m_pnIndices = new UINT[m_nIndices];

@@ -1,5 +1,6 @@
 #pragma once
 #include "FbxLoader_V2.h"
+#include "FbxLoader_V3.h"
 #include "Object.h"
 #include <map>
 
@@ -40,12 +41,15 @@ public:
 	~CResorceManager();
 
 public:
-	CFBXObject* LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const char* fileName);
-	CAnimationData* LoadAnimDataFromFBX(const char* fileName);
+	CFBXObject* LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const string& filePath, const string& fileName);
+	CFBXObject* LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::CFbxData* pFbxData);
 	//CTexture* LoadTexture(const char* fileName);
 
 private:
-	CFbxLoader_V2* m_pFBXLoader = NULL;
+	CFBXObject* LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData);
+
+private:
+	CFbxLoader_V3* m_pFBXLoader = NULL;
 
 	std::map<std::string, CFBXObject*> m_mLoadedFBXDataMap;
 	std::map<std::string, CAnimationData*> m_mLoadedAnimDataMap;

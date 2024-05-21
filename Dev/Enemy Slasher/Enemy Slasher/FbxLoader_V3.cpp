@@ -1,4 +1,5 @@
 #include "FbxLoader_V3.h"
+#include <filesystem>
 
 CFbxLoader_V3::CFbxLoader_V3()
 {
@@ -23,7 +24,19 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbx(const std::string& filePath, const std
 	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
 	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
 	std::string fileFullName = filePath + fileName + ".fbx";
-	pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
+	bool res = pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
+
+	if (res == false) {
+		// Convert std::string to std::wstring using MultiByteToWideChar
+		int bufferSize = MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, NULL, 0);
+
+		std::wstring wideFileFullName(bufferSize, 0);
+		MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, &wideFileFullName[0], bufferSize);
+
+		// Display the message box with the file name
+		std::wstring message = L"File not found: " + wideFileFullName;
+		MessageBox(0, message.c_str(), L"Error", 0);
+	}
 
 	pFbxImporter->Import(lScene);
 	pFbxImporter->Destroy();
@@ -36,7 +49,9 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbx(const std::string& filePath, const std
 	{
 		loadData = new CFbx_V3::CFbxData;
 
-		ProgressNodes(lRootNode, lScene, fileName);
+		CFbx_V3::ObjectData* pRootObject;
+		pRootObject = ProgressNodes(lRootNode, lScene, fileName);
+		loadData->m_pRootObjectData = pRootObject;
 	}
 
 	return loadData;
@@ -44,7 +59,8 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbx(const std::string& filePath, const std
 
 void CFbxLoader_V3::LoadAnim(CFbx_V3::Skeleton* pTargetSkeleton, const std::string& filePath, const std::string& fileName)
 {
-	//m_pSkeleton = pTargetSkeleton;
+	// Load data to this Skeleton pointer
+	m_pSkeleton = pTargetSkeleton;
 
 	if (m_plSdkManager == nullptr) {
 		m_plSdkManager = FbxManager::Create();
@@ -79,14 +95,51 @@ void CFbxLoader_V3::LoadAnim(CFbx_V3::Skeleton* pTargetSkeleton, const std::stri
 			if (AttributeType == FbxNodeAttribute::eMesh)
 			{
 				// Get Animation Clip
-				LoadAnimation(pFbxChildNode, lScene, fileName, true);
+				// 동일한 이름의 애니메이션이 없다면 로드
+				if (m_pSkeleton->m_mAnimations.end() == m_pSkeleton->m_mAnimations.find(fileName))
+					LoadAnimation(pFbxChildNode, lScene, fileName, true);
 			}
 		}
 	}
 }
 
-void CFbxLoader_V3::ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const std::string& fileName)
+CFbx_V3::ObjectData* CFbxLoader_V3::ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const std::string& fileName)
 {
+	// Make return object
+	CFbx_V3::ObjectData* pNewObject = new CFbx_V3::ObjectData();
+	
+	// input translate data
+	{
+		FbxDouble3 translation = lRootNode->LclTranslation.Get();
+		FbxDouble3 rotation = lRootNode->LclRotation.Get();
+		FbxDouble3 scaling = lRootNode->LclScaling.Get();
+		pNewObject->m_xmf3Translate.x = static_cast<float>(translation.mData[0]);
+		pNewObject->m_xmf3Translate.y = static_cast<float>(translation.mData[1]);
+		pNewObject->m_xmf3Translate.z = static_cast<float>(translation.mData[2]);
+		pNewObject->m_xmf3Rotate.x = static_cast<float>(rotation.mData[0]);
+		pNewObject->m_xmf3Rotate.y = static_cast<float>(rotation.mData[1]);
+		pNewObject->m_xmf3Rotate.z = static_cast<float>(rotation.mData[2]);
+		pNewObject->m_xmf3Scale.x = static_cast<float>(scaling.mData[0]);
+		pNewObject->m_xmf3Scale.y = static_cast<float>(scaling.mData[1]);
+		pNewObject->m_xmf3Scale.z = static_cast<float>(scaling.mData[2]);
+	}
+
+	// loop for all childs and make object Hierarch
+	for (int i = 0; i < lRootNode->GetChildCount(); ++i) {
+		FbxNode* pChildNode = lRootNode->GetChild(i);
+		if (pChildNode->GetNodeAttribute() == NULL) { 
+			CFbx_V3::ObjectData* pNewChildObject = ProgressNodes(lRootNode->GetChild(i), lScene, fileName);
+			pNewObject->m_vChildObjects.push_back(pNewChildObject);
+			continue;
+		}
+		FbxNodeAttribute::EType AttributeType = pChildNode->GetNodeAttribute()->GetAttributeType();
+		if (AttributeType != FbxNodeAttribute::eSkeleton &&
+			AttributeType != FbxNodeAttribute::eMesh) {
+			CFbx_V3::ObjectData* pNewChildObject = ProgressNodes(lRootNode->GetChild(i), lScene, fileName);
+			pNewObject->m_vChildObjects.push_back(pNewChildObject);
+		}
+	}
+
 	// Get Skeleton Hierarchy
 	bool isSkeletonExist = false;
 	m_pSkeleton = new CFbx_V3::Skeleton();
@@ -106,6 +159,7 @@ void CFbxLoader_V3::ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const st
 	}
 	else {
 		delete m_pSkeleton;
+		m_pSkeleton = nullptr;
 	}
 
 	// Get Mesh Data
@@ -129,6 +183,9 @@ void CFbxLoader_V3::ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const st
 			LoadMaterials(pChildNode);
 		}
 	}
+
+	storeObjectData(pNewObject);
+	return pNewObject;
 }
 
 void CFbxLoader_V3::LoadSkeletonHierarch(FbxNode* inNode, int myIndex, int inParentIndex)
@@ -160,7 +217,7 @@ void CFbxLoader_V3::LoadControlPoints(FbxNode* inNode)
 	}
 }
 
-CFbx_V3::MeshData* CFbxLoader_V3::LoadVertexAndIndiceWithSkeleton(FbxNode* inNode)
+void CFbxLoader_V3::LoadVertexAndIndiceWithSkeleton(FbxNode* inNode)
 {
 	CFbx_V3::MeshData* pNewMeshData = new CFbx_V3::MeshData();
 
@@ -236,12 +293,16 @@ CFbx_V3::MeshData* CFbxLoader_V3::LoadVertexAndIndiceWithSkeleton(FbxNode* inNod
 				// BlendigInfo (Bone)
 				currControlPoint->SortBlendingInfoByWeight();
 				for (int k = 0; k < currControlPoint->m_vBoneInfo.size(); ++k) {
-					if (k >= 4) break;
+					if (k >= 3) break;
 
 					vertex.m_nlBlendingIndex[k] = currControlPoint->m_vBoneInfo[k].m_nBlendingIndex;
-					if (k >= 3) continue;
 					vertex.m_flBlendingWeight[k] = currControlPoint->m_vBoneInfo[k].m_fBlendingWeight;
 				}
+				vertex.m_nlBlendingIndex[3] = currControlPoint->m_vBoneInfo[3].m_nBlendingIndex;
+				vertex.m_flBlendingWeight[3] = 1.f
+					- currControlPoint->m_vBoneInfo[0].m_fBlendingWeight
+					- currControlPoint->m_vBoneInfo[1].m_fBlendingWeight
+					- currControlPoint->m_vBoneInfo[2].m_fBlendingWeight;
 
 				pNewMeshData->m_vVertices.push_back(vertex);
 			}
@@ -253,10 +314,10 @@ CFbx_V3::MeshData* CFbxLoader_V3::LoadVertexAndIndiceWithSkeleton(FbxNode* inNod
 		pNewMeshData->m_nIndices.insert(pNewMeshData->m_nIndices.end(), indexVector->begin(), indexVector->end());
 	}
 
-	return pNewMeshData;
+	m_vpMeshs.push_back(pNewMeshData);
 }
 
-CFbx_V3::MeshData* CFbxLoader_V3::LoadVertexAndIndiceNonSkeleton(FbxNode* inNode)
+void CFbxLoader_V3::LoadVertexAndIndiceNonSkeleton(FbxNode* inNode)
 {
 	CFbx_V3::MeshData* pNewMeshData = new CFbx_V3::MeshData();
 
@@ -331,7 +392,7 @@ CFbx_V3::MeshData* CFbxLoader_V3::LoadVertexAndIndiceNonSkeleton(FbxNode* inNode
 		}
 	}
 
-	return pNewMeshData;
+	m_vpMeshs.push_back(pNewMeshData);
 }
 
 void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::string& clipName, bool isOnlyGetAnim)
@@ -342,6 +403,8 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 	CFbx_V3::AnimationClip animData;
 
 	animData.m_vBoneAnimations.resize(m_pSkeleton->m_vsBoneNames.size());
+
+	bool isAlreadyLoaded = m_pSkeleton->m_mAnimations.contains(clipName);
 
 	// Deformer
 	int numOfDeformers = pMesh->GetDeformerCount();
@@ -385,48 +448,49 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 				}
 			}
 
-
 			// Get animation information
-			FbxAnimStack* currAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);
-			if (currAnimStack) {
-				FbxString animStackName = currAnimStack->GetName();
+			if (isAlreadyLoaded == false) {
+				FbxAnimStack* currAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);
+				if (currAnimStack) {
+					FbxString animStackName = currAnimStack->GetName();
 
-				FbxTakeInfo* takeInfo = lScene->GetTakeInfo(animStackName);
-				FbxTime time = takeInfo->mLocalTimeSpan.GetDuration().GetFrameCount();
+					FbxTakeInfo* takeInfo = lScene->GetTakeInfo(animStackName);
+					FbxTime time = takeInfo->mLocalTimeSpan.GetDuration().GetFrameCount();
 
-				FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
-				FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
+					FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
+					FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 
-				CFbx_V3::BoneAnimation boneAnim;
+					CFbx_V3::BoneAnimation boneAnim;
 
-				//Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
+					//Keyframe** currAnim = &loadData->m_Skeleton.m_vJoints[currJointIndex].m_pAnimFrames;
 
 
-				CFbx_V3::KeyFrame beforeKeyFrame;
-				FbxAMatrix matBeforeMatrix;
-				FbxAMatrix matCurrMatrix;
+					CFbx_V3::KeyFrame beforeKeyFrame;
+					FbxAMatrix matBeforeMatrix;
+					FbxAMatrix matCurrMatrix;
 
-				for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
-				{
-					FbxTime currTime;
-					currTime.SetFrame(i, FbxTime::eFrames24);
+					for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
+					{
+						FbxTime currTime;
+						currTime.SetFrame(i, FbxTime::eFrames24);
 
-					matCurrMatrix = currCluster->GetLink()->EvaluateGlobalTransform(currTime);
+						matCurrMatrix = currCluster->GetLink()->EvaluateGlobalTransform(currTime);
 
-					if (matCurrMatrix == matBeforeMatrix) continue; // 중복처리
+						if (matCurrMatrix == matBeforeMatrix) continue; // 중복처리
 
-					CFbx_V3::KeyFrame currAnim;
-					currAnim.m_nFrameNum = i;
+						CFbx_V3::KeyFrame currAnim;
+						currAnim.m_nFrameNum = i;
 
-					FbxAMatrix currentTransformOffset = inNode->EvaluateGlobalTransform(currTime) * geometryTransform;
+						FbxAMatrix currentTransformOffset = inNode->EvaluateGlobalTransform(currTime) * geometryTransform;
 
-					storeFbxAMat2XMFLOAT4x4(currAnim.m_xmf4x4AnimMat,
-						currentTransformOffset.Inverse() * matCurrMatrix);
-					matBeforeMatrix = matCurrMatrix;
+						storeFbxAMat2XMFLOAT4x4(currAnim.m_xmf4x4AnimMat,
+							currentTransformOffset.Inverse() * matCurrMatrix);
+						matBeforeMatrix = matCurrMatrix;
 
-					boneAnim.m_vKeyFrames.push_back(currAnim);
+						boneAnim.m_vKeyFrames.push_back(currAnim);
+					}
+					animData.m_vBoneAnimations[currJointIndex] = boneAnim;
 				}
-				animData.m_vBoneAnimations[currJointIndex] = boneAnim;
 			}
 		}
 	}
@@ -444,7 +508,10 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 		}
 	}
 
-	m_pSkeleton->m_mAnimations[clipName] = animData;
+	if (isAlreadyLoaded == false) {
+		m_pSkeleton->m_vAnimationNames.push_back(clipName);
+		m_pSkeleton->m_mAnimations[clipName] = animData;
+	}
 }
 
 void CFbxLoader_V3::LoadMaterials(FbxNode* inNode)
@@ -452,14 +519,14 @@ void CFbxLoader_V3::LoadMaterials(FbxNode* inNode)
 	int nMaterialCount = inNode->GetMaterialCount();
 
 	for (int i = 0; i < nMaterialCount; ++i) {
-		CFbx_V3::Material tempMaterial;
+		CFbx_V3::Material* tempMaterial = new CFbx_V3::Material();
 		FbxSurfaceMaterial* pSurfaceMaterial = inNode->GetMaterial(i);
 
-		LoadMaterialAttribute(pSurfaceMaterial, tempMaterial);
-		LoadMaterialTexture(pSurfaceMaterial, tempMaterial);
+		LoadMaterialAttribute(pSurfaceMaterial, *tempMaterial);
+		LoadMaterialTexture(pSurfaceMaterial, *tempMaterial);
 
-		if (tempMaterial.Name != "") {
-			m_vMaterials.push_back(tempMaterial);
+		if (tempMaterial->Name != "") {
+			m_vpMaterials.push_back(tempMaterial);
 		}
 	}
 }
@@ -568,7 +635,9 @@ void CFbxLoader_V3::LoadMaterialTexture(FbxSurfaceMaterial* pMaterial, CFbx_V3::
 						{
 							if (textureType == "DiffuseColor")
 							{
-								outMaterial.Name = fileTexture->GetFileName();
+								std::string textureName = fileTexture->GetFileName();
+								std::filesystem::path filePath(textureName);
+								outMaterial.Name = filePath.filename().string();
 							}
 							/*else if (textureType == "SpecularColor")
 							{
@@ -617,4 +686,17 @@ void CFbxLoader_V3::storeFbxAMat2XMFLOAT4x4(XMFLOAT4X4& dest, FbxAMatrix& sorce)
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j)
 			dest.m[i][j] = static_cast<float>(sorce.Get(i, j));
+}
+
+void CFbxLoader_V3::storeObjectData(CFbx_V3::ObjectData* pObject)
+{
+	if(m_pSkeleton)
+		pObject->m_pSkeleton = m_pSkeleton;
+	pObject->m_vpMeshs = m_vpMeshs;
+	pObject->m_vpMaterials = m_vpMaterials;
+
+	m_pSkeleton = nullptr;
+	m_vpMeshs.clear();
+	m_vpMaterials.clear();
+	m_mControlPoint.clear();
 }

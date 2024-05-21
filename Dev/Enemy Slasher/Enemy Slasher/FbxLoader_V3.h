@@ -21,7 +21,7 @@ namespace CFbx_V3 {
 		XMFLOAT2 m_xmf2UV;
 
 		int m_nlBlendingIndex[4];
-		float m_flBlendingWeight[3];
+		float m_flBlendingWeight[4];
 
 		bool operator == (const VertexData& rhs) const {
 			if (m_xmf3Position.x != rhs.m_xmf3Position.x ||
@@ -66,16 +66,33 @@ namespace CFbx_V3 {
 		std::vector<XMFLOAT4X4> m_vxmf4x4BoneOffsetMat;
 
 		// animation datas
+		std::vector<std::string> m_vAnimationNames;
 		std::unordered_map<std::string, AnimationClip> m_mAnimations;
+	};
+
+	struct Material {
+		std::string Name;
+
+		XMFLOAT3 Ambient = { 0.0f, 0.0f, 0.0f };
+		XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
 	};
 
 	struct ObjectData {
 		ObjectData() {};
 		~ObjectData() {
 			for (auto& a : m_vpMeshs) delete a;
+			for (auto& a : m_vChildObjects) delete a;
 		};
 
+		XMFLOAT3 m_xmf3Translate{ 0.f, 0.f, 0.f };
+		XMFLOAT3 m_xmf3Rotate{ 0.f, 0.f, 0.f };
+		XMFLOAT3 m_xmf3Scale{ 1.f, 1.f, 1.f };
+
 		std::vector<MeshData*> m_vpMeshs;
+		std::vector<Material*> m_vpMaterials;
+		Skeleton* m_pSkeleton = nullptr;
+
+		std::vector<ObjectData*> m_vChildObjects;
 	};
 
 	struct ControlPoint {
@@ -92,15 +109,8 @@ namespace CFbx_V3 {
 		}
 	};
 
-	struct Material {
-		std::string Name;
-
-		XMFLOAT3 Ambient = { 0.0f, 0.0f, 0.0f };
-		XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-	};
-
 	struct CFbxData {
-
+		ObjectData* m_pRootObjectData;
 	};
 }
 
@@ -133,13 +143,13 @@ public:
 		const std::string& fileName);
 
 private:
-	void ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const std::string& fileName);
+	CFbx_V3::ObjectData* ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const std::string& fileName);
 
 	void LoadSkeletonHierarch(FbxNode* inNode, int myIndex, int inParentIndex);
 
 	void LoadControlPoints(FbxNode* inNode);
-	CFbx_V3::MeshData* LoadVertexAndIndiceWithSkeleton(FbxNode* inNode);
-	CFbx_V3::MeshData* LoadVertexAndIndiceNonSkeleton(FbxNode* inNode);
+	void LoadVertexAndIndiceWithSkeleton(FbxNode* inNode);
+	void LoadVertexAndIndiceNonSkeleton(FbxNode* inNode);
 	void LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::string& clipName, bool isOnlyGetAnim);
 
 	void LoadMaterials(FbxNode* inNode);
@@ -150,6 +160,8 @@ private:
 	int FindJointIndexUsingName(std::string JointName);
 	void storeFbxAMat2XMFLOAT4x4(XMFLOAT4X4& dest, FbxAMatrix& sorce);
 
+	void storeObjectData(CFbx_V3::ObjectData* pObject);
+
 private:
 	FbxManager* m_plSdkManager = nullptr;
 
@@ -157,9 +169,12 @@ private:
 	// ControlPoint
 	std::unordered_map<unsigned int, CFbx_V3::ControlPoint*> m_mControlPoint;
 	
+	// Mesh Data
+	std::vector<CFbx_V3::MeshData*> m_vpMeshs;
+
 	// Animation Object Data
 	CFbx_V3::Skeleton* m_pSkeleton;
 
 	// Material
-	std::vector<CFbx_V3::Material> m_vMaterials;
+	std::vector<CFbx_V3::Material*> m_vpMaterials;
 };

@@ -5,6 +5,7 @@
 #include "PhysXManager.h"
 #include "Ray.h"
 #include "FbxLoader_V2.h"
+#include "FbxLoader_V3.h"
 #include "ResorceManager.h"
 
 CBasicScene::CBasicScene()
@@ -779,69 +780,72 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_real_distribution <float> urd_width(0, terrain_width);
 	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
-	for (int i = 0; i < 1; i++) {
-		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(TestPlayer*)m_pPlayer, pTerrain, ShaderType::CTextureShader);
-		pMonsterObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stonefbx.fbx"));
-		pMonsterObject->SetScale(50.0f, 50.0f, 50.0f);
-		pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+	// monster
+	//{
+	//	for (int i = 0; i < 1; i++) {
+	//		CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, pTerrain, ShaderType::CTextureShader);
+	//		pMonsterObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stonefbx.fbx"));
+	//		pMonsterObject->SetScale(50.0f, 50.0f, 50.0f);
+	//		pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
 
-		CMaterial* pTreeMaterial = pMonsterObject->GetMaterial();
-		if (pTreeMaterial) {
-			if (pTreeMaterial->m_pShader) {
-				pTreeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-				pTreeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
-				pTreeMaterial->SetTexture(ppTextures[0]);
-			}
-		}
+	//		CMaterial* pTreeMaterial = pMonsterObject->GetMaterial();
+	//		if (pTreeMaterial) {
+	//			if (pTreeMaterial->m_pShader) {
+	//				pTreeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//				pTreeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+	//				pTreeMaterial->SetTexture(ppTextures[0]);
+	//			}
+	//		}
 
-		xPosition = 3000.0f;
-		zPosition = 3000.0f;
+	//		xPosition = 3000.0f;
+	//		zPosition = 3000.0f;
 
-		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-		pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
-		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-	}
+	//		float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//		pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
+	//		m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+	//	}
+	//}
 
 
 
 	// tree
-	{
-		CTexture* pTreeTextures;
-		pTreeTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-		pTreeTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
+	//{
+	//	CTexture* pTreeTextures;
+	//	pTreeTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//	pTreeTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
 
-		float xpitch = 257.0f * 24.0f / 10.0f;
-		float zpitch = 257.0f * 24.0f / 7.0f;
+	//	float xpitch = 257.0f * 24.0f / 10.0f;
+	//	float zpitch = 257.0f * 24.0f / 7.0f;
 
-		CFBXObject* pTreeObject;// = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-		CFBXMesh* pTreeMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3)->m_pvMeshs[0]);
-		for (int x = 0; x <5; x++)
-		{
-			for (int z = 0; z < 5; z++)
-			{
-				pTreeObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-				pTreeObject->SetMesh(0, pTreeMesh);
-				CMaterial* pTreeMaterial = pTreeObject->GetMaterial();
+	//	CFBXObject* pTreeObject;// = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+	//	CFBXMesh* pTreeMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(TREE3)->m_pvMeshs[0]);
+	//	for (int x = 0; x <5; x++)
+	//	{
+	//		for (int z = 0; z < 5; z++)
+	//		{
+	//			pTreeObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+	//			pTreeObject->SetMesh(0, pTreeMesh);
+	//			CMaterial* pTreeMaterial = pTreeObject->GetMaterial();
 
-				if (pTreeMaterial) {
-					if (pTreeMaterial->m_pShader) {
-						pTreeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-						pTreeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pTreeTextures, 0, 4);
-						pTreeMaterial->SetTexture(pTreeTextures);
-					}
-				}
+	//			if (pTreeMaterial) {
+	//				if (pTreeMaterial->m_pShader) {
+	//					pTreeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//					pTreeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pTreeTextures, 0, 4);
+	//					pTreeMaterial->SetTexture(pTreeTextures);
+	//				}
+	//			}
 
-				float xPosition = x * xpitch;
-				float zPosition = z * zpitch;
-				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				pTreeObject->SetPosition(xPosition, fHeight, zPosition);
-				pTreeObject->Rotate(-90.0f, 0.0f, 0.0f);
-				m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
+	//			float xPosition = x * xpitch;
+	//			float zPosition = z * zpitch;
+	//			float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+	//			pTreeObject->SetPosition(xPosition, fHeight, zPosition);
+	//			pTreeObject->Rotate(-90.0f, 0.0f, 0.0f);
+	//			m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
 
 
-			}
-		}
-	}
+	//		}
+	//	}
+	//}
 
 	////// UI
 	//{
@@ -1893,17 +1897,43 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	// animaition Test Charactor
 	{
+		CFbxLoader_V3 loader;
+		//loader.LoadFbx("fbxsdk/", "box");
+		CFbx_V3::CFbxData* pFbxData = loader.LoadFbx("fbxsdk/", "Test_Walking");
+		//loader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Test_Walking");
+		//pFbxData = loader.LoadFbx("fbxsdk/", "Tree_temp_climate_003");
+		//pFbxData = loader.LoadFbx("fbxsdk/", "peasant_1");
+
 		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
-		CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
+		//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
+		//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
+		CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+		pNewObject->SetChild(pNewChildObject);
 		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;
-		float zPosition = 0;
+		float zPosition = 100;
 		float fHeight = 0;
 		pNewObject->SetPosition(xPosition, fHeight, zPosition);
 		pNewObject->Rotate(0.0f, 0.0f, 0.0f);
+		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
 
-		pNewChildObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
-		pNewObject->SetChild(pNewChildObject);
+		if(true) {
+			CTexture* pNewTextures;
+			pNewTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+			pNewTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
+			CMaterial* pNewMaterial = pNewObject->GetMaterial();
+
+			if (pNewMaterial) {
+				if (pNewMaterial->m_pShader) {
+					pNewMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+					pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
+					pNewMaterial->SetTexture(pNewTextures);
+				}
+			}
+			pNewObject->SetScale(0.5f, 0.5f, 0.5f);
+		}
+
+		//pNewChildObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 
 		//m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
 		m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
