@@ -1,5 +1,6 @@
 #include "ResorceManager.h"
 #include "Shader.h"
+#include <filesystem>
 
 CResorceManager::CResorceManager()
 {
@@ -22,6 +23,7 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 
 		CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
 		pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		//pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
 		CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, loadData->m_pRootObjectData, pShader);
 
@@ -35,6 +37,7 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
 	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
 	CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
 
@@ -47,6 +50,23 @@ CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID
 	newGameObject = new CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::NON);
 	newGameObject->SetFbxData(pd3dDevice, pd3dCommandList, pObjectData);
 	newGameObject->SetShader(pShader);
+
+	if (pObjectData->m_vpMaterials.size() > 0) {
+		CFbx_V3::Material* pInputMaterial = pObjectData->m_vpMaterials[0];
+		CMaterial* pNewMaterial = newGameObject->GetMaterial();
+		pNewMaterial->m_xmf4Albedo = pInputMaterial->DiffuseAlbedo;
+		if (pInputMaterial->Name != "") {
+			//std::string filePath = "Image/" + pInputMaterial->Name;
+			//if (std::filesystem::exists(filePath)) {
+			//	std::cout << "Exists : " << filePath << '\n';
+			//	//pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
+			//	//pNewMaterial->SetTexture(pNewTextures);
+			//}
+			//else {
+			//	std::cout << "Non : " << filePath << '\n';
+			//}
+		}
+	}
 
 	for (int i = 0; i < pObjectData->m_vChildObjects.size(); ++i) {
 		CFBXObject* newChildObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pObjectData->m_vChildObjects[i], pShader);

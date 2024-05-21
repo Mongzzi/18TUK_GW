@@ -339,8 +339,6 @@ void CFbxLoader_V3::LoadControlPoints(FbxNode* inNode)
 {
 	FbxMesh* pMesh = inNode->GetMesh();
 
-	for (auto& a : m_mControlPoint) delete a.second;
-
 	unsigned int ctrlPointCount = pMesh->GetControlPointsCount();
 	for (unsigned int i = 0; i < ctrlPointCount; ++i)
 	{
