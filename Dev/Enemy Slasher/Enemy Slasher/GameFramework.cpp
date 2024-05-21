@@ -751,4 +751,83 @@ void CGameFramework::Render2D()
 
 	// Flush to submit the 11 command list to the shared command queue.
 	m_pd3d11DeviceContext->Flush();
+
+
+
+	{
+		// Make D3D11 Texture Resource and Draw
+		int width = 300;
+		int height = 300;
+
+		D3D11_TEXTURE2D_DESC textureDesc = {};
+		textureDesc.Width = width;
+		textureDesc.Height = height;
+		textureDesc.MipLevels = 1;
+		textureDesc.ArraySize = 1;
+		textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		textureDesc.SampleDesc.Count = 1;
+		textureDesc.Usage = D3D11_USAGE_DEFAULT;
+		textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+		ComPtr<ID3D11Texture2D> d3d11Texture;
+		m_cd3d11Device->CreateTexture2D(&textureDesc, nullptr, &d3d11Texture);
+		
+		D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
+			D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+			D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+		);
+
+		ComPtr<IDXGISurface> dxgiSurface;
+		d3d11Texture.As(&dxgiSurface);
+
+		ComPtr<ID2D1Bitmap1> d2dRenderTarget;
+		m_pd2dDeviceContext->CreateBitmapFromDxgiSurface(
+			dxgiSurface.Get(),
+			&bitmapProperties,
+			&d2dRenderTarget
+		);
+
+		m_pd2dDeviceContext->SetTarget(d2dRenderTarget.Get());
+
+
+		//////////////////////////////
+		// Draw Here
+		//////////////////////////////
+
+		// Flush to submit the 11 command list to the shared command queue.
+		m_pd3d11DeviceContext->Flush();
+
+
+		// Wrap D3D11 texture as a D3D12 resource
+		ComPtr<ID3D12Resource> d3d12WrappedTexture;
+		D3D12_RESOURCE_DESC resourceDesc = {};
+		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		resourceDesc.Width = width;
+		resourceDesc.Height = height;
+		resourceDesc.DepthOrArraySize = 1;
+		resourceDesc.MipLevels = 1;
+		resourceDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		resourceDesc.SampleDesc.Count = 1;
+		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		D3D11_RESOURCE_FLAGS resourceFlags = { D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE };
+		m_cd3d11On12Device->CreateWrappedResource(
+			d3d11Texture.Get(),
+			&resourceFlags,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			IID_PPV_ARGS(&d3d12WrappedTexture)
+		);
+
+		// Transition the wrapped resource to PIXEL_SHADER_RESOURCE state
+		D3D12_RESOURCE_BARRIER barrier = {};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Transition.pResource = d3d12WrappedTexture.Get();
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+		m_pd3dCommandList->ResourceBarrier(1, &barrier);
+	}
 }
