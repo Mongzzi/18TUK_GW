@@ -771,6 +771,10 @@ void CFBXObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		SetMesh(i, pAnimMesh);
 	}
 
+	SetPosition(pObjectData->m_xmf3Translate);
+	Rotate(pObjectData->m_xmf3Rotate.x, pObjectData->m_xmf3Rotate.y, pObjectData->m_xmf3Rotate.z);
+	SetScale(pObjectData->m_xmf3Scale);
+
 	if (pObjectData->m_pSkeleton) {
 		m_pSkeletonData = pObjectData->m_pSkeleton;
 	}

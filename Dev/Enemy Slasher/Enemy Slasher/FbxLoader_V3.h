@@ -142,8 +142,13 @@ public:
 		const std::string& filePath,
 		const std::string& fileName);
 
+	CFbx_V3::CFbxData* LoadFbxScene(
+		const std::string& filePath,
+		const std::string& fileName);
+
 private:
 	CFbx_V3::ObjectData* ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const std::string& fileName);
+	CFbx_V3::ObjectData* ProgressNodes_LoadOnlyMesh(FbxNode* lRootNode);
 
 	void LoadSkeletonHierarch(FbxNode* inNode, int myIndex, int inParentIndex);
 

@@ -103,6 +103,87 @@ void CFbxLoader_V3::LoadAnim(CFbx_V3::Skeleton* pTargetSkeleton, const std::stri
 	}
 }
 
+CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbxScene(const std::string& filePath, const std::string& fileName)
+{
+	CFbx_V3::CFbxData* loadData = nullptr;
+
+	if (m_plSdkManager == nullptr) {
+		m_plSdkManager = FbxManager::Create();
+
+		FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
+		m_plSdkManager->SetIOSettings(ios);
+	}
+
+
+	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+	std::string fileFullName = filePath + fileName + ".fbx";
+	bool res = pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
+
+	if (res == false) {
+		// Convert std::string to std::wstring using MultiByteToWideChar
+		int bufferSize = MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, NULL, 0);
+
+		std::wstring wideFileFullName(bufferSize, 0);
+		MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, &wideFileFullName[0], bufferSize);
+
+		// Display the message box with the file name
+		std::wstring message = L"File not found: " + wideFileFullName;
+		MessageBox(0, message.c_str(), L"Error", 0);
+	}
+
+	pFbxImporter->Import(lScene);
+	pFbxImporter->Destroy();
+
+	FbxGeometryConverter geometryConverter(m_plSdkManager);
+	geometryConverter.Triangulate(lScene, true);
+
+	FbxNode* lRootNode = lScene->GetRootNode();
+	if (lRootNode)
+	{
+		loadData = new CFbx_V3::CFbxData;
+
+
+		// Make return object
+		CFbx_V3::ObjectData* pRootObject = new CFbx_V3::ObjectData();
+
+		// input translate data
+		{
+			FbxDouble3 translation = lRootNode->LclTranslation.Get();
+			FbxDouble3 rotation = lRootNode->LclRotation.Get();
+			FbxDouble3 scaling = lRootNode->LclScaling.Get();
+			pRootObject->m_xmf3Translate.x = static_cast<float>(translation.mData[0]);
+			pRootObject->m_xmf3Translate.y = static_cast<float>(translation.mData[1]);
+			pRootObject->m_xmf3Translate.z = static_cast<float>(translation.mData[2]);
+			pRootObject->m_xmf3Rotate.x = static_cast<float>(rotation.mData[0]);
+			pRootObject->m_xmf3Rotate.y = static_cast<float>(rotation.mData[1]);
+			pRootObject->m_xmf3Rotate.z = static_cast<float>(rotation.mData[2]);
+			pRootObject->m_xmf3Scale.x = static_cast<float>(scaling.mData[0]);
+			pRootObject->m_xmf3Scale.y = static_cast<float>(scaling.mData[1]);
+			pRootObject->m_xmf3Scale.z = static_cast<float>(scaling.mData[2]);
+		}
+
+		// loop for all childs and make object Hierarch
+		for (int i = 0; i < lRootNode->GetChildCount(); ++i) {
+			FbxNode* pChildNode = lRootNode->GetChild(i);
+			if (pChildNode->GetNodeAttribute() == NULL) {
+				CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
+				pRootObject->m_vChildObjects.push_back(pNewChildObject);
+				continue;
+			}
+			FbxNodeAttribute::EType AttributeType = pChildNode->GetNodeAttribute()->GetAttributeType();
+			if (AttributeType != FbxNodeAttribute::eSkeleton) {
+				CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
+				pRootObject->m_vChildObjects.push_back(pNewChildObject);
+			}
+		}
+
+		loadData->m_pRootObjectData = pRootObject;
+	}
+
+	return loadData;
+}
+
 CFbx_V3::ObjectData* CFbxLoader_V3::ProgressNodes(FbxNode* lRootNode, FbxScene* lScene, const std::string& fileName)
 {
 	// Make return object
@@ -188,6 +269,62 @@ CFbx_V3::ObjectData* CFbxLoader_V3::ProgressNodes(FbxNode* lRootNode, FbxScene* 
 	return pNewObject;
 }
 
+CFbx_V3::ObjectData* CFbxLoader_V3::ProgressNodes_LoadOnlyMesh(FbxNode* lRootNode)
+{
+	// Make return object
+	CFbx_V3::ObjectData* pNewObject = new CFbx_V3::ObjectData();
+
+	// input translate data
+	{
+		FbxDouble3 translation = lRootNode->LclTranslation.Get();
+		FbxDouble3 rotation = lRootNode->LclRotation.Get();
+		FbxDouble3 scaling = lRootNode->LclScaling.Get();
+		pNewObject->m_xmf3Translate.x = static_cast<float>(translation.mData[0]);
+		pNewObject->m_xmf3Translate.y = static_cast<float>(translation.mData[1]);
+		pNewObject->m_xmf3Translate.z = static_cast<float>(translation.mData[2]);
+		pNewObject->m_xmf3Rotate.x = static_cast<float>(rotation.mData[0]);
+		pNewObject->m_xmf3Rotate.y = static_cast<float>(rotation.mData[1]);
+		pNewObject->m_xmf3Rotate.z = static_cast<float>(rotation.mData[2]);
+		pNewObject->m_xmf3Scale.x = static_cast<float>(scaling.mData[0]);
+		pNewObject->m_xmf3Scale.y = static_cast<float>(scaling.mData[1]);
+		pNewObject->m_xmf3Scale.z = static_cast<float>(scaling.mData[2]);
+	}
+
+	// Get Curr Node Mesh
+	if (lRootNode->GetNodeAttribute() != NULL) {
+		FbxNodeAttribute::EType AttributeType = lRootNode->GetNodeAttribute()->GetAttributeType();
+
+		if (AttributeType == FbxNodeAttribute::eMesh) {
+			FbxMesh* pMesh = lRootNode->GetMesh();
+
+			LoadControlPoints(lRootNode);
+
+			LoadVertexAndIndiceNonSkeleton(lRootNode);
+
+			LoadMaterials(lRootNode);
+		}
+	}
+	storeObjectData(pNewObject);
+
+
+	// loop for all childs and make object Hierarch
+	for (int i = 0; i < lRootNode->GetChildCount(); ++i) {
+		FbxNode* pChildNode = lRootNode->GetChild(i);
+		if (pChildNode->GetNodeAttribute() == NULL) {
+			CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
+			pNewObject->m_vChildObjects.push_back(pNewChildObject);
+			continue;
+		}
+		FbxNodeAttribute::EType AttributeType = pChildNode->GetNodeAttribute()->GetAttributeType();
+		if (AttributeType != FbxNodeAttribute::eSkeleton) {
+			CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
+			pNewObject->m_vChildObjects.push_back(pNewChildObject);
+		}
+	}
+
+	return pNewObject;
+}
+
 void CFbxLoader_V3::LoadSkeletonHierarch(FbxNode* inNode, int myIndex, int inParentIndex)
 {
 	m_pSkeleton->m_vnBoneHierarcht.push_back(inParentIndex);
@@ -201,6 +338,8 @@ void CFbxLoader_V3::LoadSkeletonHierarch(FbxNode* inNode, int myIndex, int inPar
 void CFbxLoader_V3::LoadControlPoints(FbxNode* inNode)
 {
 	FbxMesh* pMesh = inNode->GetMesh();
+
+	for (auto& a : m_mControlPoint) delete a.second;
 
 	unsigned int ctrlPointCount = pMesh->GetControlPointsCount();
 	for (unsigned int i = 0; i < ctrlPointCount; ++i)
@@ -698,5 +837,6 @@ void CFbxLoader_V3::storeObjectData(CFbx_V3::ObjectData* pObject)
 	m_pSkeleton = nullptr;
 	m_vpMeshs.clear();
 	m_vpMaterials.clear();
+	for (auto& a : m_mControlPoint) delete a.second;
 	m_mControlPoint.clear();
 }
