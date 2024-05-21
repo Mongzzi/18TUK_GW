@@ -52,6 +52,8 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbx(const std::string& filePath, const std
 		CFbx_V3::ObjectData* pRootObject;
 		pRootObject = ProgressNodes(lRootNode, lScene, fileName);
 		loadData->m_pRootObjectData = pRootObject;
+
+		loadData->RecursiveCountMeshs(loadData->m_pRootObjectData);
 	}
 
 	return loadData;
@@ -179,6 +181,8 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbxScene(const std::string& filePath, cons
 		}
 
 		loadData->m_pRootObjectData = pRootObject;
+
+		loadData->RecursiveCountMeshs(loadData->m_pRootObjectData);
 	}
 
 	return loadData;

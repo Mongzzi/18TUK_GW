@@ -111,6 +111,17 @@ namespace CFbx_V3 {
 
 	struct CFbxData {
 		ObjectData* m_pRootObjectData;
+
+		int m_nDataCount = 0; // Count Mesh
+
+		void RecursiveCountMeshs(ObjectData* pObject) {
+
+			m_nDataCount += pObject->m_vpMeshs.size();
+
+			for (int i = 0; i < pObject->m_vChildObjects.size(); ++i) {
+				RecursiveCountMeshs(pObject->m_vChildObjects[i]);
+			}
+		}
 	};
 }
 
