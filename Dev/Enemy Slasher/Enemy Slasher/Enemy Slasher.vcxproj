@@ -144,8 +144,6 @@
     <ClInclude Include="DeckData.h" />
     <ClInclude Include="FbxLoader_V3.h" />
     <ClInclude Include="ResorceManager.h" />
-    <ClInclude Include="FbxLoader_V2.h" />
-    <ClInclude Include="FbxObjectData.h" />
     <ClInclude Include="PhysXManager.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="d3dx12.h" />
@@ -185,8 +183,6 @@
     <ClCompile Include="DeckData.cpp" />
     <ClCompile Include="FbxLoader_V3.cpp" />
     <ClCompile Include="ResorceManager.cpp" />
-    <ClCompile Include="FbxLoader_V2.cpp" />
-    <ClCompile Include="FbxObjectData.cpp" />
     <ClCompile Include="PhysXManager.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="Enemy Slasher.cpp" />

@@ -1,5 +1,4 @@
 #pragma once
-#include "FbxLoader_V2.h"
 #include "FbxLoader_V3.h"
 #include "Object.h"
 #include <map>
@@ -52,7 +51,5 @@ private:
 	CFbxLoader_V3* m_pFBXLoader = NULL;
 
 	std::map<std::string, CFBXObject*> m_mLoadedFBXDataMap;
-	std::map<std::string, CAnimationData*> m_mLoadedAnimDataMap;
-
 };
 

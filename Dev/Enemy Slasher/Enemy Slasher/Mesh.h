@@ -3,7 +3,6 @@
 #include "ColliderWithMesh.h"
 #include "BoundingBox.h"
 #include "Ray.h"
-#include "FbxObjectData.h"
 #include "FbxLoader_V3.h"
 
 class CMesh
