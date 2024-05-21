@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "fbxsdk.h"
 #include <unordered_map>
+#include <set>
 #include <string>
 
 namespace CFbx_V3 {
@@ -113,6 +114,8 @@ namespace CFbx_V3 {
 		ObjectData* m_pRootObjectData;
 
 		int m_nDataCount = 0; // Count Mesh
+		int m_nTextureCount = 0; // Count Texture
+
 
 		void RecursiveCountMeshs(ObjectData* pObject) {
 
@@ -122,6 +125,28 @@ namespace CFbx_V3 {
 				RecursiveCountMeshs(pObject->m_vChildObjects[i]);
 			}
 		}
+
+		void RecursiveCountTexture(ObjectData* pObject) {
+
+			for (int i = 0; i < pObject->m_vpMaterials.size(); ++i) {
+				if (pObject->m_vpMaterials[i]->Name != "")
+					m_sTempSet.insert(pObject->m_vpMaterials[i]->Name);
+			}
+			for (int i = 0; i < pObject->m_vChildObjects.size(); ++i) {
+				RecursiveCountTexture(pObject->m_vChildObjects[i]);
+			}
+		}
+
+		void RecursiveCountAll(ObjectData* pObject) {
+			RecursiveCountMeshs(pObject);
+
+			m_sTempSet.clear();
+			RecursiveCountTexture(pObject);
+			m_nTextureCount = m_sTempSet.size();
+		}
+
+	private:
+		std::set<std::string> m_sTempSet;
 	};
 }
 

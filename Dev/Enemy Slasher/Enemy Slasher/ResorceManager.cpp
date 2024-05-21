@@ -23,10 +23,11 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 
 		CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
 		pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+		pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, loadData->m_nTextureCount);
 
 #ifdef _DEBUG
 		std::cout << "Loaded DataCount : " << loadData->m_nDataCount << '\n';
+		std::cout << "Loaded TextureCount : " << loadData->m_nTextureCount << '\n';
 #endif
 
 		CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, loadData->m_pRootObjectData, pShader);
@@ -41,10 +42,11 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
 	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
 
 #ifdef _DEBUG
 	std::cout << "Loaded DataCount : " << pFbxData->m_nDataCount << '\n';
+	std::cout << "Loaded TextureCount : " << pFbxData->m_nTextureCount << '\n';
 #endif
 
 	CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
