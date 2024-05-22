@@ -77,11 +77,11 @@ CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID
 
 					pNewTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 					pNewTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, &wideFileFullPath[0], RESOURCE_TEXTURE2D, 0);
+					pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
 					m_mLoadedTextureMap[pInputMaterial->Name] = pNewTextures;
 				}
 				pNewTextures = m_mLoadedTextureMap[pInputMaterial->Name];
 				if (pNewTextures) {
-					pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
 					pNewMaterial->SetTexture(pNewTextures);
 				}
 			}

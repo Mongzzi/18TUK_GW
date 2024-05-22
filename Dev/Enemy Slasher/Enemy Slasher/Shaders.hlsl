@@ -434,11 +434,11 @@ VS_SKINNING_OUTPUT VSSkinning(VS_SKINNING_INPUT input)
 
 float4 PSSkinning(VS_SKINNING_OUTPUT input) : SV_TARGET
 {
-	//float4 texColor = gtxtTexture.Sample(gWrapSamplerState, input.texCoord);
-	//input.normal = normalize(input.normal);
-	//float4 cIllumination = Lighting(input.position.xyz, input.normal);
-	//return (texColor * cIllumination);
-	return (float4(input.texCoord, 0.f, 1.f));
+    float4 texColor = gtxtTexture.Sample(gWrapSamplerState, input.texCoord);
+    input.normal = normalize(input.normal);
+    float4 cIllumination = Lighting(input.position.xyz, input.normal);
+    return (texColor * cIllumination);
+	//return (float4(input.texCoord, 0.f, 1.f));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
