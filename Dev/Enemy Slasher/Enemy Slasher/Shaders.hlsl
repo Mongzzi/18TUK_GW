@@ -126,7 +126,12 @@ VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
 
 	float2 screenPos = position + input.position.xy;
 
-	screenPos = screenPos / float2(640.0f, 480.0f) * 2.0f - 1.0f;		// 현재 콘솔창 크기 640 * 480
+	// 눌림 상태에서 버튼을 약간 이동시킴
+	if (IsClicked) {
+		screenPos += float2(2.0f, -2.0f); 
+	}
+
+	screenPos = screenPos / float2(640.0f, 480.0f) * 2.0f - 1.0f; // 현재 콘솔창 크기 640 * 480
 	screenPos.y = -screenPos.y;
 
 	output.position = float4(screenPos, 0.0f, 1.0f);
@@ -137,12 +142,13 @@ VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
 float4 PS_2D_OBJECT(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
 {
 	float4 cColor;
-	if (!IsClicked) {
-		cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+	cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+
+	if (IsClicked) {
+		// 색상을 어둡게 하여 눌림 효과를 줌
+		cColor.rgb *= 0.8f;
 	}
-	else {
-		cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	}
+
 	return cColor;
 }
 // ------ 2D 버튼 오브젝트 끝 ---------------
