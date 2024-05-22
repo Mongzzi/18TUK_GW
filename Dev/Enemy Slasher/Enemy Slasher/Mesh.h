@@ -66,7 +66,7 @@ public:
 	virtual COBBCollider* GetCollider() { return m_pCollider->GetCollider(); };
 
 public:
-	virtual void CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride);
+	virtual void CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 class CMeshIlluminated : public CMesh
