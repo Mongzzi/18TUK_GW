@@ -113,11 +113,11 @@ void CMesh::SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 }
 
-void CMesh::CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CMesh::CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride)
 {
 	if (m_pVertices) {
 		if (m_pCollider) delete m_pCollider;
-		m_pCollider = new COBBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+		m_pCollider = new COBBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices, nStride);
 	}
 }
 
@@ -538,7 +538,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Push(ID3D12Device* pd3dDevice, 
 		for (int i = 0; i < nNewVertices; ++i) {
 			pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
 			pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pvNewVertices[i], m_nVertices, pvNewIndices[i], m_nIndices);
-			((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
+			((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList, m_nStride);
 			((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
 		}
 	}
@@ -746,7 +746,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDe
 
 				pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
 				pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, m_nStride, pNewVertices, vvNewVertices[i].first.size(), pNewIndices, vvnNewIndices[i].size());
-				((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
+				((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList, m_nStride);
 				((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
 			}
 		}
@@ -820,7 +820,7 @@ CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	CreateCollider(pd3dDevice, pd3dCommandList);
+	CreateCollider(pd3dDevice, pd3dCommandList, m_nStride);
 }
 
 CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float r, float g, float b, float width, float height, float depth) : CDynamicShapeMesh(pd3dDevice, pd3dCommandList)
@@ -884,7 +884,7 @@ CBoxMesh::CBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	CreateCollider(pd3dDevice, pd3dCommandList);
+	CreateCollider(pd3dDevice, pd3dCommandList, m_nStride);
 }
 
 CBoxMesh::~CBoxMesh()
@@ -920,7 +920,7 @@ CCutterBox_NonMesh::CCutterBox_NonMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	SetCuttable(true);
 
-	CreateCollider(pd3dDevice, pd3dCommandList);
+	CreateCollider(pd3dDevice, pd3dCommandList, m_nStride);
 }
 
 CCutterBox_NonMesh::~CCutterBox_NonMesh()
@@ -1470,7 +1470,7 @@ CFBXMesh::CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	CreateCollider(pd3dDevice, pd3dCommandList);
+	CreateCollider(pd3dDevice, pd3dCommandList, m_nStride);
 }
 
 CFBXMesh::~CFBXMesh()
