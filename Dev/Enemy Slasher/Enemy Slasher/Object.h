@@ -293,6 +293,7 @@ public:
 	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
+	virtual void RenderColliderMesh(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void Render2D() {};
 
 public:

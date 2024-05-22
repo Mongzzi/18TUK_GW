@@ -369,6 +369,18 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
+void CGameObject::RenderColliderMesh(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->RenderCollider(pd3dCommandList);
+		}
+	}
+}
+
+
 void CGameObject::SetChild(CGameObject* pChild)
 {
 	if (m_pChild)

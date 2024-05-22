@@ -743,6 +743,11 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pTextShader = new CTextShader();
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
+	// Collider Shader µî·Ï
+	CObjectsShader* pColliderShader = new CObjectsShader();
+	pColliderShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pObjectManager->SetColliderShader(pColliderShader);
+
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
 	//CFBXTestMesh* pPlayerMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(PEASANT_1_FBX));
@@ -1946,25 +1951,40 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	// animaition Test Charactor
 	{
 		//fLoader.LoadFbx("fbxsdk/", "box");
-		CFbx_V3::CFbxData* pFbxData = fLoader.LoadFbx("fbxsdk/", "Test_Walking");
 		//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Test_Walking");
 		//pFbxData = fLoader.LoadFbx("fbxsdk/", "Tree_temp_climate_003");
 		//pFbxData = fLoader.LoadFbx("fbxsdk/", "peasant_1");
 
+		CFbx_V3::CFbxData* pFbxData;
+		CFBXObject* pNewChildObject;
+
 		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
 		//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
 		//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
-		CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+
+		//pFbxData = fLoader.LoadFbxScene("fbxsdk/", "citymap");
+		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+		//pNewObject->SetChild(pNewChildObject);
+
+		//pFbxData = fLoader.LoadFbx("fbxsdk/", "Test_Walking");
+		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+		//pNewObject->SetChild(pNewChildObject);
+		
+		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
+		//pNewObject->SetChild(pNewChildObject);
+
+		pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
 		pNewObject->SetChild(pNewChildObject);
+
 		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;
-		float zPosition = 100;
+		float zPosition = 500;
 		float fHeight = 0;
 		pNewObject->SetPosition(xPosition, fHeight, zPosition);
-		pNewObject->Rotate(0.0f, 0.0f, 0.0f);
+		pNewObject->Rotate(0.0f, 180.0f, 0.0f);
 		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
 
-		if(true) {
+		if(false) {
 			CTexture* pNewTextures;
 			pNewTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 			pNewTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);

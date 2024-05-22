@@ -228,7 +228,20 @@ void CObjectManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	{
 		for (auto& b : a)
 		{
-			b->Render(pd3dCommandList, pCamera, true);
+			b->Render(pd3dCommandList, pCamera, false);
+		}
+	}
+
+	// Render Collider
+	if (m_pColliderShader) {
+		// Shader Regist only one time
+		m_pColliderShader->Render(pd3dCommandList, pCamera);
+		for (auto& a : m_pvObjectManager)
+		{
+			for (auto& b : a)
+			{
+				b->RenderColliderMesh(pd3dCommandList, pCamera);
+			}
 		}
 	}
 }

@@ -41,6 +41,9 @@ private:
 	CPhysXManager* m_pPhysXManager = nullptr;
 	vector<pair<CGameObject*, physx::PxActor*>> m_vPhysxPairs;
 
+private:
+	CShader* m_pColliderShader = nullptr;
+
 public:
 	CObjectManager();
 	~CObjectManager();
@@ -67,6 +70,8 @@ public:
 	
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
+
+	void SetColliderShader(CShader* pInputShader) { m_pColliderShader = pInputShader; }
 
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 

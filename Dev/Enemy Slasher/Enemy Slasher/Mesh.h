@@ -53,6 +53,7 @@ protected:
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOption = false);
+	virtual void RenderCollider(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride, CVertex* pVertices, UINT nVertices, UINT* pnIndices, UINT nIndices);
 

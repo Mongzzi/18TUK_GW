@@ -74,6 +74,12 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, bool pRenderOptio
 		m_pCollider->RenderCollider(pd3dCommandList);
 }
 
+void CMesh::RenderCollider(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (nullptr != m_pCollider)
+		m_pCollider->RenderCollider(pd3dCommandList);
+}
+
 void CMesh::SetMeshData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nStride, CVertex* pVertices, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
 	m_nVertices = nVertices;
