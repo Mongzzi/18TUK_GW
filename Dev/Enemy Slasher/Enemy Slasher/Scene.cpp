@@ -593,11 +593,47 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	int clientWidth = clientRect.right - clientRect.left;
 	int clientHeight = clientRect.bottom - clientRect.top;
 
+	// 프레임 버퍼 크기를 기준으로 마우스 좌표 변환
+	float mouseX = static_cast<float>(ptCursorPos.x) / (clientWidth)*FRAME_BUFFER_WIDTH;
+	float mouseY = static_cast<float>(ptCursorPos.y) / (clientHeight)*FRAME_BUFFER_HEIGHT;
 
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+	{
+		std::cout << "마우스눌림" << std::endl;
+
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			if (pButton && pButton->IsPointInside(mouseX, mouseY))
+			{
+				std::cout << "쿼카눌림" << std::endl;
+
+				pButton->m_IsClicked = true;
+			}
+		}
+	}
 		break;
+
+	case WM_LBUTTONUP:
+	{
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			if (pButton && pButton->m_IsClicked)
+			{
+				if (pButton->IsPointInside(mouseX, mouseY))
+				{
+					pButton->m_IsClicked = false;
+				}
+			}
+		}
+	}
+	break;
+
 	case WM_RBUTTONDOWN:
 		if (pCoveredUI)
 		{
@@ -605,6 +641,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			pSelectedUI->ButtenDown();
 		}
 		break;
+
 	case WM_RBUTTONUP:
 		if (pSelectedUI)
 		{
@@ -628,6 +665,9 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			pSelectedUI = NULL;
 		}
 		break;
+
+	
+
 	default:
 		break;
 	}
@@ -758,7 +798,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 	// ----------------- 버튼 오브젝트 ------------------
 	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 320.0f, 240.f, 100.0f, 100.0f, ShaderType::C2DObjectShader);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::TextureObject);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 
 	// --------------------------------- 빌보드 인스턴스 오브젝트 ------------------------------

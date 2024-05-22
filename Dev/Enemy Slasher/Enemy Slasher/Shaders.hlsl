@@ -29,6 +29,7 @@ cbuffer cbSkinningInfo : register(b5)
 cbuffer cb2DGameObjectInfo : register(b6)
 {
 	float2 position; // 오브젝트의 화면 좌표 (x, y)
+	float2 size;	// 오브젝트의 가로 세로길이 // 절반 길이아님
 	bool IsClicked;
 }
 

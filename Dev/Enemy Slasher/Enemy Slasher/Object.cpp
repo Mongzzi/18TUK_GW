@@ -1752,6 +1752,8 @@ CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	m_x = x;
 	m_y = y;    
+	m_width = width;
+	m_height = height;
 	m_IsClicked = false;
 
 
@@ -1786,11 +1788,26 @@ void CButtonObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphi
 void CButtonObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pcbMapped2DGameObject->m_xmf2Position = XMFLOAT2(m_x, m_y);
+	m_pcbMapped2DGameObject->m_xmfSize = XMFLOAT2(m_width, m_height);
 	m_pcbMapped2DGameObject->m_IsClicked = m_IsClicked;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcb2DGameObject->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dcbGameObjectGpuVirtualAddress);
 
+}
+
+bool CButtonObject::IsPointInside(float x, float y)
+{
+	float halfWidth = m_width * 0.5f;
+	float halfHeight = m_height * 0.5f;
+
+	// 중심 좌표에서 절반 크기만큼 이동한 영역 내에 있는지 확인
+	float left = m_x - halfWidth;
+	float right = m_x + halfWidth;
+	float top = m_y - halfHeight;
+	float bottom = m_y + halfHeight;
+
+	return (x >= left && x <= right && y >= top && y <= bottom);
 }
 
 void CButtonObject::ReleaseShaderVariables()

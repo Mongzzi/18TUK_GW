@@ -41,6 +41,7 @@ struct CB_GAMEOBJECT_INFO
 struct CB_2D_GAMEOBJECT_INFO
 {
 	XMFLOAT2 m_xmf2Position; // 오브젝트의 화면 좌표 (x, y)
+	XMFLOAT2 m_xmfSize;		// 오브젝트의 가로 세로길이  // 절반아님
 	bool m_IsClicked;		//	클릭 되었는지
 };
 
@@ -616,7 +617,7 @@ public:
 
 private:
 	float m_x, m_y;				// 오브젝트의 화면 좌표 (x, y)
-	bool m_IsClicked;
+	float m_width, m_height;	// 오브젝트의 가로길이 , 세로길이
 
 	ID3D12Resource* m_pd3dcb2DGameObject = NULL;
 	CB_2D_GAMEOBJECT_INFO* m_pcbMapped2DGameObject = NULL;
@@ -625,5 +626,9 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+
+public:
+	bool m_IsClicked;
+	bool IsPointInside(float x, float y);
 
 };

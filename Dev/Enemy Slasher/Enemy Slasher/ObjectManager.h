@@ -26,6 +26,7 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	// ------------------------따라서 앞에 그려질지를 결정하려면 vector상에서의 순서를 바꿔야함.
 	UIObject,				// 상호작용 불가능한 UI 오브젝트
 	InteractiveUIObject,	// 상호작용 가능한 UI 오브젝트
+	ButtonObject,
 	Count					// Layer 개수
 };
 
