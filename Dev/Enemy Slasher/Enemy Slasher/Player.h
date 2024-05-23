@@ -10,7 +10,8 @@
 #include "Object.h"
 #include "Camera.h"
 
-class CPlayer : public CFBXObject
+
+class CPlayer : public CCharacterObject
 {
 protected:
 	XMFLOAT3					m_xmf3Position;
@@ -100,9 +101,5 @@ public:
 
 	virtual void Animate(float fTimeTotal ,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
-
-	CDeckData* GetDeckData() { return m_pDeck; };
 private:
-	
-	CDeckData* m_pDeck;
 };

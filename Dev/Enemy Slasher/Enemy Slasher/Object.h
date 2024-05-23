@@ -327,6 +327,39 @@ private:
 
 };
 
+class CCharacterObject : public CFBXObject
+{
+public:
+	CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType);
+	~CCharacterObject();
+private:
+	CDeckData* m_pDeck;
+	float m_iTurnSpeed; // 속도 관련 기능을 서머너즈워처럼 바꿀것.
+	// 속도 게이지가 있어서 m_iTurnSpeed만큼 오르는데 이 게이지가 꽉 차면 행동 가능.
+	// 만약 꽉 찬 오브젝트가 2 이상이면게이지가 오르지 않거나 조금만 오른다.
+	// 위 같은 경우 먼저 싸우기 시작한 순서대로 행동함.
+	// 선빵 선빵친 객채부터 턴을 진행.
+
+	// 체력
+	float m_fCurHp;
+	float m_fMaxHp;
+	float m_fAtk;
+	int m_iTeamId;
+	// 이름?
+	// 등등
+public:
+	CDeckData* GetDeckData() { return m_pDeck; };
+	float GetSpeed() { return m_iTurnSpeed; };
+	float GetAtk() { return m_fAtk; };
+	float GetCurHp() { return m_fCurHp; };
+	int GetTeamId() { return m_iTeamId; };
+	void Reset();
+	void SetTeamId(int teamId) { m_iTeamId = teamId; };
+
+	void TakeDamage(float atk);
+	void Heal(float ratio = 0.2);
+};
+
 class CRayObject : public CGameObject
 {
 public:
@@ -389,7 +422,8 @@ public:
 };
 
 // 함수포인터 콜백함수
-typedef void (*CardCallbackFunction)(CGameObject*, CGameObject*);
+// 반환값을 타겟으로 해도 ㄱㅊ을듯
+typedef void (*CardCallbackFunction)(CGameObject*, std::vector<CCharacterObject*>&);
 
 // 카드 사용이 끝날때까지 다른 카드는 사용이 불가능해야함. 아마.
 // 
@@ -401,11 +435,11 @@ typedef void (*CardCallbackFunction)(CGameObject*, CGameObject*);
 
 // 2. 오브젝트가 각자 행동 큐로 처리
 // 아니면 콜백 함수는 self 오브젝트의 행동 큐에 행동을 채우는 용도로만 사용하는것도 ㄱㅊ을듯.
-void Callback_0(CGameObject* self, CGameObject* target);
-void Callback_1(CGameObject* self, CGameObject* target);
-void Callback_2(CGameObject* self, CGameObject* target);
-void Callback_3(CGameObject* self, CGameObject* target);
-void Callback_4(CGameObject* self, CGameObject* target);
+void Callback_0(CGameObject* self, std::vector<CCharacterObject*>& target);
+void Callback_1(CGameObject* self, std::vector<CCharacterObject*>& target);
+void Callback_2(CGameObject* self, std::vector<CCharacterObject*>& target);
+void Callback_3(CGameObject* self, std::vector<CCharacterObject*>& target);
+void Callback_4(CGameObject* self, std::vector<CCharacterObject*>& target);
 
 //
 
@@ -434,7 +468,7 @@ public:
 	void ButtenDown() override;
 	void ButtenUp() override;
 	void SetFunc(CardCallbackFunction);
-	void CallFunc(CGameObject* self, CGameObject* target);
+	void CallFunc(CGameObject* self, std::vector<CCharacterObject*>& target);
 
 	int GetUiNum() { return m_Card_Ui_Num; };
 
@@ -515,7 +549,7 @@ public:
 };
 
 
-class CMonsterObject : public CFBXObject
+class CMonsterObject : public CCharacterObject
 {
 public:
 	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,

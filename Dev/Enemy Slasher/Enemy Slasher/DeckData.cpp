@@ -97,4 +97,8 @@ int CDeckData::GetCurrentUsedSize()
 void CDeckData::InitializeDeck()
 {
     m_Deck = m_InitialDeck;
+    m_Hand.clear();
+    m_Used.clear();
 }
+
+

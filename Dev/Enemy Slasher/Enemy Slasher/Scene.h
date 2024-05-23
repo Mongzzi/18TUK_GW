@@ -165,7 +165,15 @@ private:
 	CUIObject* pCoveredUI = NULL;
 	CUIObject* pSelectedUI = NULL;
 	bool bCardUpdateFlag = false;
+	int iMaxHandCount = 5;
 
+
+	std::vector<CCharacterObject*> m_pvEngagedObjects;
+	int m_iCurrentTurnCount;
+	int m_iTurnFlag;		//m_pvEngagedObjects의 m_iTurnFlag번째 원소의 턴임.
+public:
+	void Engage(CCharacterObject* obj);
+	void IncreaseTurnFlag();
 protected:
 
 	LIGHTS* m_pLights = NULL;

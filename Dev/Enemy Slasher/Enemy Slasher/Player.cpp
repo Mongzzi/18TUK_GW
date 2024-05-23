@@ -10,7 +10,7 @@
 // CPlayer
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType)
-	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
+	: CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
 {
 	m_pCamera = NULL;
 
@@ -245,7 +245,6 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType)
 	:CPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
 {
-	m_pDeck = new CDeckData();
 
 	if (false)	//
 	{
@@ -267,8 +266,6 @@ TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 }
 TestPlayer::~TestPlayer()
 {
-	if (m_pDeck)
-		delete m_pDeck;
 }
 
 

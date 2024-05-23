@@ -920,6 +920,39 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 
 
 
+CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType) :CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
+{
+	m_pDeck = new CDeckData();
+	m_iTurnSpeed = 5.;
+	m_fMaxHp = m_fCurHp = 100;
+	m_fAtk = 10.f;
+	m_iTeamId = 0;
+}
+
+CCharacterObject::~CCharacterObject()
+{
+	if (m_pDeck)
+		delete m_pDeck;
+}
+
+void CCharacterObject::Reset()
+{
+	m_fCurHp = m_fMaxHp;
+	m_pDeck->InitializeDeck();
+}
+
+void CCharacterObject::TakeDamage(float atk) 
+{
+	m_fCurHp - atk;
+};
+void CCharacterObject::Heal(float ratio)
+{
+	m_fCurHp += m_fMaxHp * ratio;
+	if (m_fCurHp > m_fMaxHp)
+		m_fCurHp = m_fMaxHp;
+}
+
+
 CRayObject::CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
@@ -1003,7 +1036,7 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	// 카메라의 역행렬을 가져옴. 회전때문에
 	// 이걸 사용하면 카메라벡터의 반대를 보게됨.
 	// 카메라의Look의 반대, 카메라UP으로 만들어도 될듯? 아마?
-	//XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
+	XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
 
 	// 스케일 적용.
 	SetScale(m_xmfScale);
@@ -1070,32 +1103,53 @@ void CUIObject::SetScale(XMFLOAT3 scale)
 	CGameObject::SetScale(Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false));
 }
 
-void Callback_0(CGameObject* self, CGameObject* target) {
-	cout << "Callback_0" << endl;
+void Callback_0(CGameObject* self, std::vector<CCharacterObject*>& target) {
+	cout << "Callback_0 : atk 1" << endl;
+	CCharacterObject* selfObj = static_cast<CCharacterObject*>(self); //dynamic_cast 고려
 	// 만약 이 카드가 제자리에서 공격이라면 
 	// 1. self의 공격력을 가져와 
-	// 2. target에게 피해를 입힌다.
-	// 위 행동 모두 함수로 구현.
+	int selfTeamId = selfObj->GetTeamId();
+	float atk = selfObj->GetAtk();
+	// 2. target에게 피해를 입힌다. 그냥 확인용으로 간단히 만듦.
+	// 팀이 다른 모든 적ㅇ게 피해를 가할듯
+	// 이런 카드는 줘도 안쓸지도
+	for (CCharacterObject* targetObj : target)
+	{
+		if (targetObj->GetTeamId() != selfTeamId)
+		{
+			cout << "targetObj HP : " << targetObj->GetCurHp() << " -> ";
+			targetObj->TakeDamage(atk);
+			cout << targetObj->GetCurHp() << endl;
+		}
+	}
 }
 
-void Callback_1(CGameObject* self, CGameObject* target) {
+void Callback_1(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "Callback_1" << endl;
 	// 만약 이 카드가 이동 후 공격이라면 
 	// 1. self가 이동해야하는지 확인
 	// 2. 이동해야하면 이동한다.
 	// 3. target에게 피해를 입힌다.
 	// 위 행동 모두 함수로 구현.
+	// 이동을 해야한다면 이동해야하는 위치를 기억할 변수 추가.
+	// 이동이 끝났는지 확인해야함
+	// 이동이 끝났다면 공격함.
+	// 위 행동 중 애니메이션 출력
 }
 
-void Callback_2(CGameObject* self, CGameObject* target) {
-	cout << "Callback_2" << endl;
+void Callback_2(CGameObject* self, std::vector<CCharacterObject*>& target) {
+	cout << "Callback_2 : Heal" << endl;
+	CCharacterObject* selfObj = static_cast<CCharacterObject*>(self);
+	cout << "self HP : " << selfObj->GetCurHp() << " -> ";
+	selfObj->Heal();
+	cout << selfObj->GetCurHp() << endl;
 }
 
-void Callback_3(CGameObject* self, CGameObject* target) {
+void Callback_3(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "Callback_3" << endl;
 }
 
-void Callback_4(CGameObject* self, CGameObject* target) {
+void Callback_4(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "Callback_4" << endl;
 }
 
@@ -1224,7 +1278,7 @@ void CCardUIObject::SetFunc(CardCallbackFunction callback)
 	m_callbackFunc = callback;
 }
 
-void CCardUIObject::CallFunc(CGameObject* self, CGameObject* target)
+void CCardUIObject::CallFunc(CGameObject* self, std::vector<CCharacterObject*>& target)
 {
 	if (m_callbackFunc)
 		m_callbackFunc(self, target);
@@ -1504,7 +1558,7 @@ CAttackRangeObject::~CAttackRangeObject()
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
 	ShaderType stype)
-	:CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
+	:CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_Monster_State = MonsterState::Default_State;
 	m_pTestPlayer = ptestplayer;
