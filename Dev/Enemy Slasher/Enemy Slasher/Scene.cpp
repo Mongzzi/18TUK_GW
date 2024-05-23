@@ -1952,6 +1952,12 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	CFbxLoader_V3 fLoader;
 
+	// Collider Shader µî·Ï
+	CObjectsShader* pColliderShader = new CObjectsShader();
+	pColliderShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pObjectManager->SetColliderShader(pColliderShader);
+
+
 	m_pTextShader = new CTextShader();
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 

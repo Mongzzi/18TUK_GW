@@ -217,15 +217,17 @@ void COBBColliderWithMesh::MakeCollider(ID3D12Device* pd3dDevice, ID3D12Graphics
 	if (nStride == sizeof(CVertex_Skining))
 		pointerIncrement = nStride;
 	for (int i = 0; i < nVertices; ++i) {
-		vertex = ((CVertex*)bytePointer + pointerIncrement)->m_xmf3Vertex;
+		vertex = (reinterpret_cast<CVertex*>(bytePointer))->m_xmf3Vertex;
 		if (vertex.x < min_x) min_x = vertex.x;
 		if (vertex.y < min_y) min_y = vertex.y;
 		if (vertex.z < min_z) min_z = vertex.z;
 		if (vertex.x > max_x) max_x = vertex.x;
 		if (vertex.y > max_y) max_y = vertex.y;
 		if (vertex.z > max_z) max_z = vertex.z;
+		bytePointer += pointerIncrement;
 	}
 
+	//std::cout << max_x << '\t' << max_y << '\t' << max_z << "\t\t" << min_x << '\t' << min_y << '\t' << min_z << '\n';
 
 	CVertex OBBVertex[2];
 	OBBVertex[0].m_xmf3Vertex = XMFLOAT3(max_x, max_y, max_z);

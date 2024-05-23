@@ -233,6 +233,7 @@ struct VS_STANDARD_INPUT
 	float3 position : POSITION;
 	float3 normal : NORMAL;
 	float4 color : COLOR;
+	float2 uv : TEXCOORD;
 };
 
 struct VS_STANDARD_OUTPUT
@@ -240,7 +241,7 @@ struct VS_STANDARD_OUTPUT
 	float4 position : SV_POSITION;
 	float3 normal : NORMAL;
 	float4 color : COLOR;
-
+    float2 uv : TEXCOORD;
 };
 
 
@@ -255,6 +256,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.color = input.color;
+    output.uv = input.uv;
 
 	return (output);
 }
