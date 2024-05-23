@@ -199,6 +199,8 @@ protected:
 
 public:
 	void SetChild(CGameObject* pChild);
+	CGameObject* GetChild() { return m_pChild; }
+	CGameObject* GetSibling() { return m_pSibling; }
 
 	CGameObject* GetParent() { return(m_pParent); }
 	void SetWorldMat(XMFLOAT4X4 xmf4x4World) { m_xmf4x4World = xmf4x4World; }
@@ -209,7 +211,7 @@ public:
 	CMesh** GetMeshes() { return m_ppMeshes; }
 	int GetNumMeshes() { return m_nMeshes; }
 
-	COBBCollider* GetCollider() { return m_pCollider->GetCollider(); }
+	COBBCollider* GetCollider() { if (m_pCollider) { return m_pCollider->GetCollider(); } return NULL; }
 
 	// true 라면 다른 오브젝트를 자를 수 있다.
 	void SetAllowCutting(bool bState) { m_bAllowCutting = bState; }

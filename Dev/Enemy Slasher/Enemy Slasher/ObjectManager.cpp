@@ -256,36 +256,48 @@ bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CGameObject* obj, flo
 	CAABBCollider* objCollider = obj->GetCollider();
 	XMFLOAT4X4 objWorldMat = obj->GetWorldMat();
 
-	XMFLOAT3 aabbMax = objCollider->GetAABBMaxPos();
-	XMFLOAT3 aabbMin = objCollider->GetAABBMinPos();
-	XMStoreFloat3(&aabbMax, XMVector3TransformCoord(XMLoadFloat3(&aabbMax), XMLoadFloat4x4(&objWorldMat)));
-	XMStoreFloat3(&aabbMin, XMVector3TransformCoord(XMLoadFloat3(&aabbMin), XMLoadFloat4x4(&objWorldMat)));
-	XMFLOAT3 ray_dir = ray->GetDir();
-	XMFLOAT3 ray_origin = ray->GetOriginal();
-	XMVECTOR invDirection = XMVectorReciprocal(XMLoadFloat3(&ray_dir));
+	if (objCollider) {
 
-	XMVECTOR t1 = (XMLoadFloat3(&aabbMin) - XMLoadFloat3(&ray_origin)) * invDirection;
-	XMVECTOR t2 = (XMLoadFloat3(&aabbMax) - XMLoadFloat3(&ray_origin)) * invDirection;
+		XMFLOAT3 aabbMax = objCollider->GetAABBMaxPos();
+		XMFLOAT3 aabbMin = objCollider->GetAABBMinPos();
+		XMStoreFloat3(&aabbMax, XMVector3TransformCoord(XMLoadFloat3(&aabbMax), XMLoadFloat4x4(&objWorldMat)));
+		XMStoreFloat3(&aabbMin, XMVector3TransformCoord(XMLoadFloat3(&aabbMin), XMLoadFloat4x4(&objWorldMat)));
+		XMFLOAT3 ray_dir = ray->GetDir();
+		XMFLOAT3 ray_origin = ray->GetOriginal();
+		XMVECTOR invDirection = XMVectorReciprocal(XMLoadFloat3(&ray_dir));
 
-	XMVECTOR tmin_vec = XMVectorMax(XMVectorMin(t1, t2), XMVectorZero());
-	XMVECTOR tmax_vec = XMVectorMin(XMVectorMax(t1, t2), XMVectorReplicate(FLT_MAX));
+		XMVECTOR t1 = (XMLoadFloat3(&aabbMin) - XMLoadFloat3(&ray_origin)) * invDirection;
+		XMVECTOR t2 = (XMLoadFloat3(&aabbMax) - XMLoadFloat3(&ray_origin)) * invDirection;
 
-	XMFLOAT3 tmin_array, tmax_array;
-	XMStoreFloat3(&tmin_array, tmin_vec);
-	XMStoreFloat3(&tmax_array, tmax_vec);
+		XMVECTOR tmin_vec = XMVectorMax(XMVectorMin(t1, t2), XMVectorZero());
+		XMVECTOR tmax_vec = XMVectorMin(XMVectorMax(t1, t2), XMVectorReplicate(FLT_MAX));
 
-	float tmin_value = max(max(tmin_array.x, tmin_array.y), tmin_array.z);
-	float tmax_value = min(min(tmax_array.x, tmax_array.y), tmax_array.z);
+		XMFLOAT3 tmin_array, tmax_array;
+		XMStoreFloat3(&tmin_array, tmin_vec);
+		XMStoreFloat3(&tmax_array, tmax_vec);
 
-	// 교차하지 않으면 tmax < 0
-	// tmin_value > tmax_value는 뒤집힌 AABB와의 교차를 피하기 위한 조건
-	bool result = tmax_value > 0 && tmin_value <= tmax_value;
-	if (result) { // 충돌했다면 최소점, 최대점 또한 넘겨준다.
-		tmin = tmin_value;
-		tmax = tmax_value;
+		float tmin_value = max(max(tmin_array.x, tmin_array.y), tmin_array.z);
+		float tmax_value = min(min(tmax_array.x, tmax_array.y), tmax_array.z);
+
+		// 교차하지 않으면 tmax < 0
+		// tmin_value > tmax_value는 뒤집힌 AABB와의 교차를 피하기 위한 조건
+		bool result = tmax_value > 0 && tmin_value <= tmax_value;
+		if (result) { // 충돌했다면 최소점, 최대점 또한 넘겨준다.
+			tmin = tmin_value;
+			tmax = tmax_value;
+
+		}
+
+		return true;
 	}
+	if (obj->GetChild())
+		if (CollisionCheck_RayWithAABB(ray, obj->GetChild(), tmin, tmax))
+			return true;
+	if (obj->GetSibling())
+		if (CollisionCheck_RayWithAABB(ray, obj->GetSibling(), tmin, tmax))
+			return true;
 
-	return result;
+	return false;
 }
 
 void CObjectManager::ScreenBasedObjectMove(CGameObject* obj, CCamera* pCamera, float cxDelta, float cyDelta, float fSensitivity)
