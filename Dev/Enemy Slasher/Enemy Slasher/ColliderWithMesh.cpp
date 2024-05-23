@@ -54,9 +54,9 @@ CAABBColliderWithMesh::CAABBColliderWithMesh()
 	m_pAABBColider = new CAABBCollider;
 }
 
-CAABBColliderWithMesh::CAABBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices) : CColliderWithMesh(pd3dDevice, pd3dCommandList, pVertices, nVertices)
+CAABBColliderWithMesh::CAABBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride) : CColliderWithMesh(pd3dDevice, pd3dCommandList, pVertices, nVertices)
 {
-	MakeCollider(pd3dDevice, pd3dCommandList, pVertices, nVertices);
+	MakeCollider(pd3dDevice, pd3dCommandList, pVertices, nVertices, nStride);
 }
 
 CAABBColliderWithMesh::~CAABBColliderWithMesh()
@@ -64,7 +64,7 @@ CAABBColliderWithMesh::~CAABBColliderWithMesh()
 	if (m_pAABBColider) delete m_pAABBColider;
 }
 
-void CAABBColliderWithMesh::MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices)
+void CAABBColliderWithMesh::MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride)
 {
 	if (m_pVertices) { // 이미 AABB가 있다면 지우고 다시 만든다.
 		delete[] m_pVertices;
@@ -173,9 +173,9 @@ COBBColliderWithMesh::COBBColliderWithMesh()
 	m_pOBBCollider = new COBBCollider;
 }
 
-COBBColliderWithMesh::COBBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices) : CColliderWithMesh(pd3dDevice, pd3dCommandList, pVertices, nVertices)
+COBBColliderWithMesh::COBBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride) : CColliderWithMesh(pd3dDevice, pd3dCommandList, pVertices, nVertices)
 {
-	MakeCollider(pd3dDevice, pd3dCommandList, pVertices, nVertices);
+	MakeCollider(pd3dDevice, pd3dCommandList, pVertices, nVertices, nStride);
 }
 
 COBBColliderWithMesh::~COBBColliderWithMesh()
@@ -183,7 +183,7 @@ COBBColliderWithMesh::~COBBColliderWithMesh()
 	if (m_pOBBCollider) delete m_pOBBCollider;
 }
 
-void COBBColliderWithMesh::MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices)
+void COBBColliderWithMesh::MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride)
 {
 	if (m_pVertices) { // 이미 OBB가 있다면 지우고 다시 만든다.
 		delete[] m_pVertices;
@@ -212,8 +212,12 @@ void COBBColliderWithMesh::MakeCollider(ID3D12Device* pd3dDevice, ID3D12Graphics
 		min_z = FLT_MAX, max_z = FLT_MIN;
 
 	XMFLOAT3 vertex;
+	char* bytePointer = reinterpret_cast<char*>(pVertices);
+	int pointerIncrement = m_nStride;
+	if (nStride == sizeof(CVertex_Skining))
+		pointerIncrement = nStride;
 	for (int i = 0; i < nVertices; ++i) {
-		vertex = pVertices[i].m_xmf3Vertex;
+		vertex = ((CVertex*)bytePointer + pointerIncrement)->m_xmf3Vertex;
 		if (vertex.x < min_x) min_x = vertex.x;
 		if (vertex.y < min_y) min_y = vertex.y;
 		if (vertex.z < min_z) min_z = vertex.z;

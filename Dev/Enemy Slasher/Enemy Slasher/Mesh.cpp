@@ -117,7 +117,7 @@ void CMesh::CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 {
 	if (m_pVertices) {
 		if (m_pCollider) delete m_pCollider;
-		m_pCollider = new COBBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices);
+		m_pCollider = new COBBColliderWithMesh(pd3dDevice, pd3dCommandList, m_pVertices, m_nVertices, m_nStride);
 	}
 }
 

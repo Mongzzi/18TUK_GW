@@ -42,7 +42,7 @@ protected:
 	int m_nBaseVertex = 0;  // 인덱스 버퍼의 인덱스에 더해질 인덱스
 
 public:
-	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices) = 0;
+	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride) = 0;
 	virtual void RenderCollider(ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
@@ -50,7 +50,7 @@ class CAABBColliderWithMesh : public CColliderWithMesh
 {
 public:
 	CAABBColliderWithMesh();
-	CAABBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
+	CAABBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride);
 	virtual ~CAABBColliderWithMesh();
 
 protected:
@@ -59,7 +59,7 @@ protected:
 public:
 	CAABBCollider* GetCollider() { return m_pAABBColider; }
 
-	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
+	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride);
 
 	void UpdateColliderWithAABB(CAABBColliderWithMesh* pOtherCollider, XMFLOAT4X4& xmf4x4WorldMat);
 	void UpdateColliderWithAABB(CAABBCollider* pOtherCollider, XMFLOAT4X4& xmf4x4WorldMat);
@@ -72,7 +72,7 @@ class COBBColliderWithMesh : public CColliderWithMesh
 {
 public:
 	COBBColliderWithMesh();
-	COBBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
+	COBBColliderWithMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride);
 	virtual ~COBBColliderWithMesh();
 
 protected:
@@ -81,7 +81,7 @@ protected:
 public:
 	COBBCollider* GetCollider() { return m_pOBBCollider; }
 
-	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices);
+	virtual void MakeCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CVertex* pVertices, UINT nVertices, UINT nStride);
 
 	void UpdateColliderWithOBB(COBBColliderWithMesh* pOtherCollider, XMFLOAT4X4& xmf4x4WorldMat);
 	void UpdateColliderWithOBB(COBBCollider* pOtherCollider, XMFLOAT4X4& xmf4x4WorldMat);
