@@ -17,33 +17,56 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 	std::string fName(filePath + fileName + ".fbx");
 	CFBXObject* newGameObject = nullptr;
 
+	// 현재 parent가 childe의 정보를 수정하므로 오브젝트의 instance화가 불가능하다.
+	//if (m_mLoadedFBXObjectMap.end() == m_mLoadedFBXObjectMap.find(fName)) {
+	//	newGameObject = LoadFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pFBXLoader->LoadFbx(filePath, fileName));
+	//}
+	//else {
+	//	newGameObject = m_mLoadedFBXObjectMap[fName];
+	//}
+
+
+	CFbx_V3::CFbxData* newFbxData = nullptr;
 	if (m_mLoadedFBXDataMap.end() == m_mLoadedFBXDataMap.find(fName)) {
-		newGameObject = LoadFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pFBXLoader->LoadFbx(filePath, fileName));
+		newFbxData = m_pFBXLoader->LoadFbx(filePath, fileName);
 	}
 	else {
-		newGameObject = m_mLoadedFBXDataMap[fName];
+		newFbxData = m_mLoadedFBXDataMap[fName];
 	}
-
-	return newGameObject;
+	return LoadFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pFBXLoader->LoadFbx(filePath, fileName));
 }
 
 CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::CFbxData* pFbxData)
 {
-	if (m_mLoadedFBXDataMap.end() == m_mLoadedFBXDataMap.find(pFbxData->m_sFileName)) {
-		CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
-		pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		if (pFbxData->m_nTextureCount > 0)
-			pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
+	// 현재 parent가 childe의 정보를 수정하므로 오브젝트의 instance화가 불가능하다.
+//	if (m_mLoadedFBXObjectMap.end() == m_mLoadedFBXObjectMap.find(pFbxData->m_sFileName)) {
+//		CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
+//		pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+//		if (pFbxData->m_nTextureCount > 0)
+//			pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
+//
+//#ifdef _DEBUG
+//		std::cout << "Loaded DataCount : " << pFbxData->m_nDataCount << '\n';
+//		std::cout << "Loaded TextureCount : " << pFbxData->m_nTextureCount << '\n';
+//#endif
+//
+//		CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
+//		m_mLoadedFBXObjectMap[pFbxData->m_sFileName] = newGameObject;
+//	}
+//	return m_mLoadedFBXObjectMap[pFbxData->m_sFileName];
+
+	CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
+	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	if (pFbxData->m_nTextureCount > 0)
+		pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
 
 #ifdef _DEBUG
-		std::cout << "Loaded DataCount : " << pFbxData->m_nDataCount << '\n';
-		std::cout << "Loaded TextureCount : " << pFbxData->m_nTextureCount << '\n';
+	std::cout << "Loaded DataCount : " << pFbxData->m_nDataCount << '\n';
+	std::cout << "Loaded TextureCount : " << pFbxData->m_nTextureCount << '\n';
 #endif
 
-		CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
-		m_mLoadedFBXDataMap[pFbxData->m_sFileName] = newGameObject;
-	}
-	return m_mLoadedFBXDataMap[pFbxData->m_sFileName];
+	CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
+	return newGameObject;
 }
 
 CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData, CShader* pShader)
