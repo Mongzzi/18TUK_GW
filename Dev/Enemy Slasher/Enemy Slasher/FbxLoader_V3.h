@@ -113,6 +113,8 @@ namespace CFbx_V3 {
 	struct CFbxData {
 		ObjectData* m_pRootObjectData;
 
+		std::string m_sFileName;
+
 		int m_nDataCount = 0; // Count Mesh
 		int m_nTextureCount = 0; // Count Texture
 

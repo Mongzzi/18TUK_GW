@@ -48,6 +48,7 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbx(const std::string& filePath, const std
 	if (lRootNode)
 	{
 		loadData = new CFbx_V3::CFbxData;
+		loadData->m_sFileName = fileFullName;
 
 		CFbx_V3::ObjectData* pRootObject;
 		pRootObject = ProgressNodes(lRootNode, lScene, fileName);
@@ -144,6 +145,7 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbxScene(const std::string& filePath, cons
 	if (lRootNode)
 	{
 		loadData = new CFbx_V3::CFbxData;
+		loadData->m_sFileName = fileFullName;
 
 
 		// Make return object
