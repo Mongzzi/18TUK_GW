@@ -43,7 +43,8 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
 	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
+	if (pFbxData->m_nTextureCount > 0)
+		pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
 
 #ifdef _DEBUG
 	std::cout << "Loaded DataCount : " << pFbxData->m_nDataCount << '\n';
