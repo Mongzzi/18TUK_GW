@@ -286,9 +286,8 @@ bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CGameObject* obj, flo
 			tmin = tmin_value;
 			tmax = tmax_value;
 
+			return true;
 		}
-
-		return true;
 	}
 	if (obj->GetChild())
 		if (CollisionCheck_RayWithAABB(ray, obj->GetChild(), tmin, tmax))
@@ -299,6 +298,71 @@ bool CObjectManager::CollisionCheck_RayWithAABB(CRay* ray, CGameObject* obj, flo
 
 	return false;
 }
+
+bool CObjectManager::CollisionCheck_RayWithOBB(CRay* ray, CGameObject* obj, float& tmin, float& tmax)
+{
+	COBBCollider* objCollider = dynamic_cast<COBBCollider*>(obj->GetCollider());
+	XMFLOAT4X4 objWorldMat = obj->GetWorldMat();
+
+	bool isCollied = true;
+	if (objCollider) {
+		XMFLOAT3 obbCenter = objCollider->GetOBBCenter();
+		XMFLOAT3 obbHalfExtents = objCollider->GetOBBHalfExtents();
+		XMFLOAT3* obbOrientation = objCollider->GetOBBOrientation();
+
+		XMVECTOR center = XMLoadFloat3(&obbCenter);
+		XMVECTOR halfExtents = XMLoadFloat3(&obbHalfExtents);
+		XMVECTOR orientationX = XMLoadFloat3(&obbOrientation[0]);
+		XMVECTOR orientationY = XMLoadFloat3(&obbOrientation[1]);
+		XMVECTOR orientationZ = XMLoadFloat3(&obbOrientation[2]);
+
+		center = XMVector3TransformCoord(center, XMLoadFloat4x4(&objWorldMat));
+		orientationX = XMVector3TransformNormal(orientationX, XMLoadFloat4x4(&objWorldMat));
+		orientationY = XMVector3TransformNormal(orientationY, XMLoadFloat4x4(&objWorldMat));
+		orientationZ = XMVector3TransformNormal(orientationZ, XMLoadFloat4x4(&objWorldMat));
+
+		XMFLOAT3 rayDir = ray->GetDir();
+		XMFLOAT3 rayOrigin = ray->GetOriginal();
+		XMVECTOR rayDirection = XMLoadFloat3(&rayDir);
+		XMVECTOR rayOriginVec = XMLoadFloat3(&rayOrigin);
+
+		XMVECTOR p = center - rayOriginVec;
+		float e, f, t1, t2;
+		tmin = 0.0f;
+		tmax = FLT_MAX;
+
+		for (int i = 0; i < 3; i++) {
+			XMVECTOR axis = (i == 0) ? orientationX : (i == 1) ? orientationY : orientationZ;
+			e = XMVectorGetX(XMVector3Dot(axis, p));
+			f = XMVectorGetX(XMVector3Dot(axis, rayDirection));
+
+			if (fabs(f) > 0.001f) {
+				t1 = (e + XMVectorGetByIndex(halfExtents, i)) / f;
+				t2 = (e - XMVectorGetByIndex(halfExtents, i)) / f;
+				if (t1 > t2) std::swap(t1, t2);
+				if (t1 > tmin) tmin = t1;
+				if (t2 < tmax) tmax = t2;
+				if (tmin > tmax) isCollied = false;
+				if (tmax < 0) isCollied = false;
+			}
+			else if (-e - XMVectorGetByIndex(halfExtents, i) > 0 || -e + XMVectorGetByIndex(halfExtents, i) < 0) {
+				isCollied = false;
+			}
+		}
+
+		if(isCollied)
+			return true;
+	}
+	if (obj->GetChild())
+		if (CollisionCheck_RayWithOBB(ray, obj->GetChild(), tmin, tmax))
+			return true;
+	if (obj->GetSibling())
+		if (CollisionCheck_RayWithOBB(ray, obj->GetSibling(), tmin, tmax))
+			return true;
+
+	return false;
+}
+
 
 void CObjectManager::ScreenBasedObjectMove(CGameObject* obj, CCamera* pCamera, float cxDelta, float cyDelta, float fSensitivity)
 {
