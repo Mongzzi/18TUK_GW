@@ -943,7 +943,7 @@ void CCharacterObject::Reset()
 
 void CCharacterObject::TakeDamage(float atk) 
 {
-	m_fCurHp - atk;
+	m_fCurHp -= atk;
 };
 void CCharacterObject::Heal(float ratio)
 {
