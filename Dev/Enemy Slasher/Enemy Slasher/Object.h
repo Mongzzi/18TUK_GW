@@ -158,7 +158,7 @@ public:
 class CGameObject
 {
 public:
-	CGameObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::NON, int nMeshes = 1);
+	CGameObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::NON, int nMeshes = 0);
 	virtual ~CGameObject();
 
 private:

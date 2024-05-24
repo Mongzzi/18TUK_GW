@@ -1087,7 +1087,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 					continue;
 
 				float tmin, tmax;
-				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, obj, tmin, tmax)) {
+				if (true == m_pObjectManager->CollisionCheck_RayWithOBB(&r, obj, tmin, tmax)) {
 					pCoveredUI = obj;
 #ifdef _DEBUG
 					//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
@@ -2007,11 +2007,11 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;
-		float zPosition = 500;
-		float fHeight = 0;
+		float zPosition = 0;
+		float fHeight = -50;
 		pNewObject->SetPosition(xPosition, fHeight, zPosition);
-		pNewObject->Rotate(0.0f, 180.0f, 0.0f);
-		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
+		pNewObject->Rotate(0.0f, 45.0f, 0.0f);
+		//pNewObject->SetScale(0.5f, 0.5f, 0.5f);
 
 		if(false) {
 			CTexture* pNewTextures;
@@ -2042,6 +2042,29 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
 	}
 
+}
+
+void CTestScene_Animation::AnimateObjects(float fTotalTime, float fTimeElapsed)
+{
+	std::vector<CGameObject*> obData = m_pObjectManager->GetObjectList(ObjectLayer::ObjectNormal);
+	std::vector<CGameObject*> rData = m_pObjectManager->GetObjectList(ObjectLayer::Ray);
+	CRay r;
+	r.SetDir(((CRayObject*)rData[0])->GetRayDir());
+	r.SetOrigin(((CRayObject*)rData[0])->GetRayOrigin());
+	//std::cout << r.GetOriginal().x << ", " << r.GetOriginal().y << ", " << r.GetOriginal().z << "\t\t";
+	//std::cout << r.GetDir().x << ", " << r.GetDir().y << ", " << r.GetDir().z << "\t";
+	for (auto& a : obData) {
+		//r.SetDir(XMFLOAT3(-1.f, 0.f, 0.f));
+		//r.SetOrigin(XMFLOAT3(100.f, 0.f, 0.f));
+		float tmin, tmax;
+		if (m_pObjectManager->CollisionCheck_RayWithOBB(&r, a, tmin, tmax)) {
+			std::cout << tmin << ", " << tmax << '\t';
+			std::cout << "Collision!\n";
+		}
+		else {
+			std::cout << "\n";
+		}
+	}
 }
 
 void CTestScene_Animation::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)

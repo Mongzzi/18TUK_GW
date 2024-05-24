@@ -79,5 +79,6 @@ public:
 	// Utility
 	bool CollisionCheck_RayWithAABB(CRay* ray, CGameObject* obj, float& tmin, float& tmax);
 	bool CollisionCheck_RayWithOBB(CRay* ray, CGameObject* obj, float& tmin, float& tmax);
+	bool __CollisionCheck_RayWithOBB_Recursive(CRay* ray, COBBCollider* obb, XMFLOAT4X4* objWorldMat, float& tmin, float& tmax);
 	void ScreenBasedObjectMove(CGameObject* obj, CCamera* pCamera, float cxDelta, float cyDelta, float fSensitivity = 1.0f);
 };

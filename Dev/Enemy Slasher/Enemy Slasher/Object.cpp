@@ -775,7 +775,8 @@ void CGameObject::MakeCollider()
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, 1)
+CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 

@@ -15,6 +15,9 @@ public:
 	bool IntersectsAABB(CAABB& aabb);
 	XMFLOAT3 GetOriginal() { return m_vOriginal; };
 	XMFLOAT3 GetDir() { return m_xmf3Dir; };
+
+	void SetOrigin(XMFLOAT3 xmf3Origin) { m_vOriginal = xmf3Origin; }
+	void SetDir(XMFLOAT3 xmf3Dir) { m_xmf3Dir = xmf3Dir; }
 private:
 
 protected:

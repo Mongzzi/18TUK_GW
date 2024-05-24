@@ -63,7 +63,7 @@ public:
 	UINT GetNumVertices() { return m_nVertices; }
 	UINT GetNumIndices() { return m_nIndices; }
 
-	virtual COBBCollider* GetCollider() { return m_pCollider->GetCollider(); };
+	virtual COBBCollider* GetCollider() { if (m_pCollider) { return m_pCollider->GetCollider(); } return NULL; };
 
 public:
 	virtual void CreateCollider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

@@ -267,6 +267,8 @@ public:
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager);
 
+	virtual void AnimateObjects(float fTotalTime, float fTimeElapsed);
+
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
 
 	CTextShader* m_pTextShader = NULL;
