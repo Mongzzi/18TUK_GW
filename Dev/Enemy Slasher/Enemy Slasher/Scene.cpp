@@ -1982,17 +1982,17 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	pFBXObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 
-	//// animaition Test Charactor
-	//{
+	// animaition Test Charactor
+	if(false) {
 	//	//fLoader.LoadFbx("fbxsdk/", "box");
 	//	//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Test_Walking");
 	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "Tree_temp_climate_003");
 	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "peasant_1");
 
-	//	CFbx_V3::CFbxData* pFbxData;
-	//	CFBXObject* pNewChildObject;
+		CFbx_V3::CFbxData* pFbxData;
+		CFBXObject* pNewChildObject;
 
-	//	CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
+		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
 	//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
 	//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
 
@@ -2007,8 +2007,8 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
 	//	//pNewObject->SetChild(pNewChildObject);
 
-	//	pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
-	//	pNewObject->SetChild(pNewChildObject);
+		pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
+		pNewObject->SetChild(pNewChildObject);
 
 		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;
@@ -2018,27 +2018,8 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		pNewObject->Rotate(0.0f, 180.0f, 0.0f);
 		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
 
-	//	if(false) {
-	//		CTexture* pNewTextures;
-	//		pNewTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//		pNewTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
-	//		CMaterial* pNewMaterial = pNewObject->GetMaterial();
-
-	//		if (pNewMaterial) {
-	//			if (pNewMaterial->m_pShader) {
-	//				pNewMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-	//				pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
-	//				pNewMaterial->SetTexture(pNewTextures);
-	//			}
-	//		}
-	//		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
-	//	}
-
-	//	//pNewChildObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
-
-	//	//m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
-	//	m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
-	//}
+		m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
+	}
 
 	{
 		CRayObject* pRayObject = NULL;

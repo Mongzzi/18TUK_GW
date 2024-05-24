@@ -81,11 +81,13 @@ CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID
 		CMaterial* pNewMaterial = newGameObject->GetMaterial();
 		pNewMaterial->m_xmf4Albedo = pInputMaterial->DiffuseAlbedo;
 		if (pInputMaterial->Name != "") {
-			std::string filePath = "Image/" + pInputMaterial->Name;
-			if (std::filesystem::exists(filePath)) {
-				std::cout << "Exists : " << filePath << '\n';
-				CTexture* pNewTextures = nullptr;
-				if (m_mLoadedTextureMap.contains(pInputMaterial->Name) == false) {
+			CTexture* pNewTextures = nullptr;
+			if (m_mLoadedTextureMap.contains(pInputMaterial->Name) == false) {
+				std::string filePath = "Image/" + pInputMaterial->Name;
+				if (std::filesystem::exists(filePath)) {
+#ifdef _DEBUG
+					std::cout << "Exists and Load : " << filePath << '\n';
+#endif // _DEBUG
 					int bufferSize = MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, NULL, 0);
 					std::wstring wideFileFullPath(bufferSize, 0);
 					MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, &wideFileFullPath[0], bufferSize);
@@ -95,15 +97,18 @@ CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID
 					pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
 					m_mLoadedTextureMap[pInputMaterial->Name] = pNewTextures;
 				}
-				pNewTextures = m_mLoadedTextureMap[pInputMaterial->Name];
-				if (pNewTextures) {
-					pNewMaterial->SetTexture(pNewTextures);
+#ifdef _DEBUG
+				else {
+					std::cout << "Error - File Not Found : " << filePath << '\n';
 				}
+#endif // _DEBUG
 			}
-			else {
-				std::cout << "Non : " << filePath << '\n';
+			pNewTextures = m_mLoadedTextureMap[pInputMaterial->Name];
+			if (pNewTextures) {
+				pNewMaterial->SetTexture(pNewTextures);
 			}
 		}
+
 	}
 
 	for (int i = 0; i < pObjectData->m_vChildObjects.size(); ++i) {
