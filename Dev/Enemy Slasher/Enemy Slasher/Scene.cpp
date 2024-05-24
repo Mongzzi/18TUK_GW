@@ -1963,11 +1963,11 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+		m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		m_pPlayer->SetMaxVelocityXZ(50.0f);
-		m_pPlayer->SetMaxVelocityY(30.0f);
+		m_pPlayer->SetMaxVelocityXZ(1150.0f);
+		m_pPlayer->SetMaxVelocityY(1130.0f);
 		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 	}
 
@@ -1977,63 +1977,68 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//
 
-	// animaition Test Charactor
-	{
-		//fLoader.LoadFbx("fbxsdk/", "box");
-		//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Test_Walking");
-		//pFbxData = fLoader.LoadFbx("fbxsdk/", "Tree_temp_climate_003");
-		//pFbxData = fLoader.LoadFbx("fbxsdk/", "peasant_1");
+	CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pFBXObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	pFBXObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 
-		CFbx_V3::CFbxData* pFbxData;
-		CFBXObject* pNewChildObject;
+	//// animaition Test Charactor
+	//{
+	//	//fLoader.LoadFbx("fbxsdk/", "box");
+	//	//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Test_Walking");
+	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "Tree_temp_climate_003");
+	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "peasant_1");
 
-		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
-		//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
-		//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
+	//	CFbx_V3::CFbxData* pFbxData;
+	//	CFBXObject* pNewChildObject;
 
-		//pFbxData = fLoader.LoadFbxScene("fbxsdk/", "citymap");
-		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
-		//pNewObject->SetChild(pNewChildObject);
+	//	CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
+	//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
+	//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
 
-		//pFbxData = fLoader.LoadFbx("fbxsdk/", "Test_Walking");
-		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
-		//pNewObject->SetChild(pNewChildObject);
-		
-		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
-		//pNewObject->SetChild(pNewChildObject);
+	//	//pFbxData = fLoader.LoadFbxScene("fbxsdk/", "citymap");
+	//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+	//	//pNewObject->SetChild(pNewChildObject);
 
-		pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
-		pNewObject->SetChild(pNewChildObject);
+	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "Test_Walking");
+	//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+	//	//pNewObject->SetChild(pNewChildObject);
+	//	
+	//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
+	//	//pNewObject->SetChild(pNewChildObject);
 
-		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
-		float xPosition = 0;
-		float zPosition = 500;
-		float fHeight = 0;
-		pNewObject->SetPosition(xPosition, fHeight, zPosition);
-		pNewObject->Rotate(0.0f, 180.0f, 0.0f);
-		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
+	//	pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
+	//	pNewObject->SetChild(pNewChildObject);
 
-		if(false) {
-			CTexture* pNewTextures;
-			pNewTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-			pNewTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
-			CMaterial* pNewMaterial = pNewObject->GetMaterial();
+	//	//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
+	//	float xPosition = 0;
+	//	float zPosition = 500;
+	//	float fHeight = 0;
+	//	pNewObject->SetPosition(xPosition, fHeight, zPosition);
+	//	pNewObject->Rotate(0.0f, 180.0f, 0.0f);
+	//	pNewObject->SetScale(0.5f, 0.5f, 0.5f);
 
-			if (pNewMaterial) {
-				if (pNewMaterial->m_pShader) {
-					pNewMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-					pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
-					pNewMaterial->SetTexture(pNewTextures);
-				}
-			}
-			pNewObject->SetScale(0.5f, 0.5f, 0.5f);
-		}
+	//	if(false) {
+	//		CTexture* pNewTextures;
+	//		pNewTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//		pNewTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
+	//		CMaterial* pNewMaterial = pNewObject->GetMaterial();
 
-		//pNewChildObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
+	//		if (pNewMaterial) {
+	//			if (pNewMaterial->m_pShader) {
+	//				pNewMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//				pNewMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pNewTextures, 0, 4);
+	//				pNewMaterial->SetTexture(pNewTextures);
+	//			}
+	//		}
+	//		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
+	//	}
 
-		//m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
-		m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
-	}
+	//	//pNewChildObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
+
+	//	//m_pObjectManager->AddObj(pAnimObject, ObjectLayer::ObjectNormal);
+	//	m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
+	//}
 
 	{
 		CRayObject* pRayObject = NULL;
