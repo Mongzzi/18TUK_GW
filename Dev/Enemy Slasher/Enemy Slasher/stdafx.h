@@ -67,8 +67,8 @@ using Microsoft::WRL::ComPtr;
 #define SPOT_LIGHT 2
 #define DIRECTIONAL_LIGHT 3
 
-#define FRAME_BUFFER_WIDTH		640
-#define FRAME_BUFFER_HEIGHT		480
+#define FRAME_BUFFER_WIDTH		1280
+#define FRAME_BUFFER_HEIGHT		960
 
 
 #define CHASE_DISTANCE 1000.0f
