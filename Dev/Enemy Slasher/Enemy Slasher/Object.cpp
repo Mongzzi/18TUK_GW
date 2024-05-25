@@ -546,6 +546,13 @@ void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		SetShader(pObjectsShader);
 		break;
 	}
+	case ShaderType::CTitleShader:
+	{
+		CTitleShader* pObjectsShader = new CTitleShader();
+		pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		SetShader(pObjectsShader);
+		break;
+	}
 	}
 }
 
@@ -1861,4 +1868,27 @@ void CButtonObject::ReleaseShaderVariables()
 		m_pd3dcb2DGameObject->Release();
 	}
 	CGameObject::ReleaseShaderVariables();
+}
+
+CTitleObject::CTitleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+	CTexture* ppTextures[1];
+
+	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/title.png", RESOURCE_TEXTURE2D, 0);
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+			m_pMaterial->SetTexture(ppTextures[0]);
+		}
+	}
+
+	SetMesh(0, new C2DTextureMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f));	// 스크린좌표 -1 ~ 1 따라서 길이 2
+}
+
+CTitleObject::~CTitleObject()
+{
 }

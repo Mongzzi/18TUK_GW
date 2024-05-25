@@ -21,6 +21,7 @@ enum class ShaderType : int { // enum class는 int형으로 암시적 변환을 불허함으로
 	CSkyBoxShader,
 	CBillBoardInstanceShader,
 	CAnimationObjectShader,
+	CTitleShader,
 	C2DObjectShader
 };
 
@@ -541,6 +542,13 @@ class CHpbarObject : public CGameObject
 public:
 	CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
 	virtual ~CHpbarObject();
+};
+
+class CTitleObject : public CGameObject
+{
+public:
+	CTitleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes = 1);
+	virtual ~CTitleObject();
 };
 
 class CAttackRangeObject : public CGameObject
