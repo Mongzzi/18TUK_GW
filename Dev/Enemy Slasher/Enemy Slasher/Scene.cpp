@@ -157,9 +157,9 @@ bool CBasicScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 	//return(true);
 }
 
-void CBasicScene::AnimateObjects(float fTimeTotal ,float fTimeElapsed)
+void CBasicScene::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 {
-	m_pObjectManager->AnimateObjects(fTimeTotal , fTimeElapsed);
+	m_pObjectManager->AnimateObjects(fTimeTotal, fTimeElapsed);
 }
 
 void CBasicScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
@@ -615,7 +615,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			}
 		}
 	}
-		break;
+	break;
 
 	case WM_LBUTTONUP:
 	{
@@ -666,7 +666,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		}
 		break;
 
-	
+
 
 	default:
 		break;
@@ -693,7 +693,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
 		case 'Z':
-		case 'z': 
+		case 'z':
 			drawnCard = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->Draw(dre);
 			// 오브젝트레이어의 카드 정보를 핸드의 정보로 바꿔줘야함.
 			if (drawnCard != -1)
@@ -754,13 +754,14 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+	m_pPlayer->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Player1"));
 	//CFBXTestMesh* pPlayerMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(PEASANT_1_FBX));
 	//m_pPlayer->SetMesh(0, pPlayerMesh);
 
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340));
-	//m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pPlayer->SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
+	//m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340));
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -777,88 +778,41 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// -------------------------------      스카이 박스 끝    _____________________________________
 
-	// ------------------------------------       터레인      -------------------------------
-	//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다. 
-	XMFLOAT3 xmf3Scale(240.0f, 60.0f, 240.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.0f, 0.0f, 0.0f);
-
-	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다. 
-	CHeightMapTerrain* pTerrain;
-#ifdef _WITH_TERRAIN_PARTITION
-	/*하나의 격자 메쉬의 크기는 가로x세로(17x17)이다. 지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메쉬를 가진다. 지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.*/
-	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
-
-#else
-	//지형을 하나의 격자 메쉬(257x257)로 생성한다. 
-	pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("a.raw"), 257, 257, 13, 13, xmf3Scale, xmf4Color, ShaderType::CTerrainShader);
-	pTerrain->GetMaterial()->SetReflection(0);
-#endif
-	m_pObjectManager->AddObj(pTerrain, ObjectLayer::Terrain);
-
-	// --------------------------------      터레인 끝     _____________________________________
 
 
+	// -------------------------------   맵 추가 ----------------------------------------------
 
-	{
-		// 플레이어 위치 테레인 위로 이동
-		XMFLOAT3 xmfPlayerPos = m_pPlayer->GetPosition();
-		xmfPlayerPos.y = pTerrain->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
-		m_pPlayer->SetPosition(xmfPlayerPos);
-	}
+	CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
+
+
 	// ----------------- 버튼 오브젝트 ------------------
 	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 320.0f, 240.f, 100.0f, 100.0f, ShaderType::C2DObjectShader);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
+	//m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 
 	// --------------------------------- 빌보드 인스턴스 오브젝트 ------------------------------
 
 
-	CBillBoardInstanceObject* pBillBoardObjects = new CBillBoardInstanceObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pTerrain, ShaderType::CBillBoardInstanceShader);
-	m_pObjectManager->AddObj(pBillBoardObjects, ObjectLayer::BillBoardObject);
+	//CBillBoardInstanceObject* pBillBoardObjects = new CBillBoardInstanceObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pTerrain, ShaderType::CBillBoardInstanceShader);
+	//m_pObjectManager->AddObj(pBillBoardObjects, ObjectLayer::BillBoardObject);
 
 	// ------------------------------ 적 몬스터 오브젝트 --------------------------------------
 
 
-	//Stone_lit_003
-
-	CTexture* ppTextures[1];
-	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/diffuso.tif", RESOURCE_TEXTURE2D, 0);
-
-	float xPosition = 0.0f;
-	float zPosition = 0.0f;
-
-	float terrain_width = pTerrain->GetWidth();
-	float terrain_length = pTerrain->GetLength();
-
-	std::random_device rd;
-	std::default_random_engine dre(rd());
-	std::uniform_real_distribution <float> urd_width(0, terrain_width);
-	std::uniform_real_distribution <float> urd_length(0, terrain_length);
 
 	// monster
 	{
 		for (int i = 0; i < 1; i++) {
-			CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, pTerrain, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Stonefbx"));
+			CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie1"));
 			//pMonsterObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stonefbx.fbx"));
-			pMonsterObject->SetScale(50.0f, 50.0f, 50.0f);
-			pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
 
-			CMaterial* pTreeMaterial = pMonsterObject->GetMaterial();
-			if (pTreeMaterial) {
-				if (pTreeMaterial->m_pShader) {
-					pTreeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-					pTreeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
-					pTreeMaterial->SetTexture(ppTextures[0]);
-				}
-			}
-
-			xPosition = 3000.0f;
-			zPosition = 3000.0f;
-
-			float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-			pMonsterObject->SetPosition(xPosition, fHeight, zPosition);
+			pMonsterObject->SetPosition(300.0f, 0.0f, 300.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 			Engage(pMonsterObject);
@@ -867,44 +821,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 
 
-	// tree
-	{
-		CTexture* pTreeTextures;
-		pTreeTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-		pTreeTextures->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/tree_texture.png", RESOURCE_TEXTURE2D, 0);
-
-		float xpitch = 257.0f * 24.0f / 10.0f;
-		float zpitch = 257.0f * 24.0f / 7.0f;
-
-		CFBXObject* pTreeObject;// = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-		CFBXMesh* pTreeMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFbx("fbxsdk/", "Tree_temp_climate_003")->m_pRootObjectData->m_vpMeshs[0]);
-		for (int x = 0; x <5; x++)
-		{
-			for (int z = 0; z < 5; z++)
-			{
-				pTreeObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-				pTreeObject->SetMesh(0, pTreeMesh);
-				CMaterial* pTreeMaterial = pTreeObject->GetMaterial();
-
-				if (pTreeMaterial) {
-					if (pTreeMaterial->m_pShader) {
-						pTreeMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-						pTreeMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, pTreeTextures, 0, 4);
-						pTreeMaterial->SetTexture(pTreeTextures);
-					}
-				}
-
-				float xPosition = x * xpitch;
-				float zPosition = z * zpitch;
-				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				pTreeObject->SetPosition(xPosition, fHeight, zPosition);
-				pTreeObject->Rotate(-90.0f, 0.0f, 0.0f);
-				m_pObjectManager->AddObj(pTreeObject, ObjectLayer::TextureObject);
-
-
-			}
-		}
-	}
 
 	//// UI
 	{
@@ -915,7 +831,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		CCardUIObject* pCardUIObject;
 
-		for (int i = 0;i < iMaxHandCount;i++)
+		for (int i = 0; i < iMaxHandCount; i++)
 		{
 			pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 0, ShaderType::CUITextureShader);
 			pCardUIObject->SetPositionUI(100, 100);
@@ -927,7 +843,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	//turn 턴 관련 초기화
 	Engage(m_pPlayer);
-
 	m_iTurnFlag = 0;
 
 
@@ -1193,13 +1108,13 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			}
 		}
 	}
-	
+
 
 
 	return(true);
 }
 
-void CTestScene::AnimateObjects(float fTotalTime ,float fTimeElapsed)
+void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 {
 	m_pObjectManager->AnimateObjects(fTotalTime, fTimeElapsed);
 
@@ -1983,29 +1898,29 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 
 	// animaition Test Charactor
-	if(false) {
-	//	//fLoader.LoadFbx("fbxsdk/", "box");
-	//	//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Test_Walking");
-	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "Tree_temp_climate_003");
-	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "peasant_1");
+	if (false) {
+		//	//fLoader.LoadFbx("fbxsdk/", "box");
+		//	//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Test_Walking");
+		//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "Tree_temp_climate_003");
+		//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "peasant_1");
 
 		CFbx_V3::CFbxData* pFbxData;
 		CFBXObject* pNewChildObject;
 
 		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
-	//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
-	//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
+		//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
+		//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
 
-	//	//pFbxData = fLoader.LoadFbxScene("fbxsdk/", "citymap");
-	//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
-	//	//pNewObject->SetChild(pNewChildObject);
+		//	//pFbxData = fLoader.LoadFbxScene("fbxsdk/", "citymap");
+		//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+		//	//pNewObject->SetChild(pNewChildObject);
 
-	//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "Test_Walking");
-	//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
-	//	//pNewObject->SetChild(pNewChildObject);
-	//	
-	//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
-	//	//pNewObject->SetChild(pNewChildObject);
+		//	//pFbxData = fLoader.LoadFbx("fbxsdk/", "Test_Walking");
+		//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+		//	//pNewObject->SetChild(pNewChildObject);
+		//	
+		//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
+		//	//pNewObject->SetChild(pNewChildObject);
 
 		pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
 		pNewObject->SetChild(pNewChildObject);

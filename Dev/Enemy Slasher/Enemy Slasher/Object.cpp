@@ -1563,13 +1563,11 @@ CAttackRangeObject::~CAttackRangeObject()
 
 
 
-CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
-	ShaderType stype)
+CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer,ShaderType stype)
 	:CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_Monster_State = MonsterState::Default_State;
 	m_pTestPlayer = ptestplayer;
-	m_pTerrain = pterrain;
 	m_HpObject = new CHpbarObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 	m_AttackRangeObject = new CAttackRangeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 }
@@ -1587,7 +1585,6 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 	XMFLOAT3 player_position = m_pTestPlayer->GetPosition();
 	XMFLOAT3 monster_position = GetPosition();
-	XMFLOAT3 end_position = { 0.0f,0.0f,0.0f };
 
 	float distance = sqrt(
 		pow(monster_position.x - player_position.x, 2) +
@@ -1627,11 +1624,6 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
-
-			end_position.x = GetPosition().x;
-			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
-			end_position.z = GetPosition().z;
-			SetPosition(end_position);
 		}
 
 		else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
@@ -1675,11 +1667,6 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
-
-			end_position.x = GetPosition().x;
-			end_position.y = m_pTerrain->GetHeight(GetPosition().x, GetPosition().z);
-			end_position.z = GetPosition().z;
-			SetPosition(end_position);
 		}
 		else if (distance < BATTLE_DISTANCE) {
 			SetState(MonsterState::Battle_State);
@@ -1719,23 +1706,6 @@ void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	}
 
 }
-
-
-bool CMonsterObject::Check_Inner_Terrain(XMFLOAT3 position)
-{
-	if (m_pTerrain) {
-
-		float x = position.x;
-		float z = position.z;
-		float terrain_x = m_pTerrain->GetWidth();
-		float terrain_z = m_pTerrain->GetLength();
-
-		return (x >= 0 && x < terrain_x && z >= 0 && z < terrain_z);
-
-	}
-}
-
-
 
 
 CHpbarObject::CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)

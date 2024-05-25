@@ -554,8 +554,7 @@ public:
 class CMonsterObject : public CCharacterObject
 {
 public:
-	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, CHeightMapTerrain* pterrain,
-		ShaderType stype = ShaderType::CObjectsShader);
+	CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, ShaderType stype = ShaderType::CObjectsShader);
 
 
 	virtual ~CMonsterObject();
@@ -568,12 +567,8 @@ public:
 	void SetSpeed(float speed) { m_speed = speed; };
 
 	MonsterState GetState() { return m_Monster_State; };
-	bool Check_Inner_Terrain(XMFLOAT3 position);
-
-
 
 private:
-	CHeightMapTerrain* m_pTerrain;
 	CPlayer* m_pTestPlayer;
 	MonsterState m_Monster_State;
 

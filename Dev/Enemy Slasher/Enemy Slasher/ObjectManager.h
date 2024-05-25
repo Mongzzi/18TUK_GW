@@ -9,6 +9,7 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	BackGround,				// 배경 오브젝트
 	SkyBox,
 	Terrain,				// 터레인 오브젝트
+	Map,
 	LightObject,			// 조명 오브젝트
 	InteractiveObject,		// 상호작용가능 오브젝트 (ex 문, 버튼)
 	Object,					// 중립 오브젝트
