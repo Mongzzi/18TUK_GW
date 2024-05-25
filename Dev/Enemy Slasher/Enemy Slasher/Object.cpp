@@ -1327,12 +1327,12 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	CTexture* pSkyBoxTexture = new CTexture(6, RESOURCE_TEXTURE2D, 0, 1);
 
-	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Front_0.dds", RESOURCE_TEXTURE2D, 0);
-	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Back_0.dds", RESOURCE_TEXTURE2D, 1);
-	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Left_0.dds", RESOURCE_TEXTURE2D, 2);
-	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Right_0.dds", RESOURCE_TEXTURE2D, 3);
-	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Top_0.dds", RESOURCE_TEXTURE2D, 4);
-	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/SkyBox_Bottom_0.dds", RESOURCE_TEXTURE2D, 5);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/pz.jpg", RESOURCE_TEXTURE2D, 0);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/nz.jpg", RESOURCE_TEXTURE2D, 1);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/nx.jpg", RESOURCE_TEXTURE2D, 2);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/px.jpg", RESOURCE_TEXTURE2D, 3);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/py.jpg", RESOURCE_TEXTURE2D, 4);
+	pSkyBoxTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/ny.jpg", RESOURCE_TEXTURE2D, 5);
 
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {
