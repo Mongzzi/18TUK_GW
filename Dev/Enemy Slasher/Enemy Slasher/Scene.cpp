@@ -805,18 +805,29 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// monster
 	{
-		for (int i = 0; i < 1; i++) {
-			CMonsterObject* pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			CMonsterObject* pMonsterObject;
+
+			//---------------------------  좀비 1 -------------------------------------------
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie1"));
-			//pMonsterObject->SetFbxData(pd3dDevice, pd3dCommandList, fLoader.LoadFBX("fbxsdk/Stonefbx.fbx"));
 			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
 			//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-
 			pMonsterObject->SetPosition(300.0f, 0.0f, 300.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 			Engage(pMonsterObject);
-		}
+
+			//---------------------------  좀비 2 -------------------------------------------
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie2"));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			pMonsterObject->SetPosition(600.0f, 0.0f, 300.0f);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			Engage(pMonsterObject);
+
+
 	}
 
 

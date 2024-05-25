@@ -1611,7 +1611,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		SetSpeed(1.0);	// µ¨Å¸Å¸ÀÓ °öÇØ¾ßÇÒÁö °í¹ÎÁß
 
 		if (distance > CHASE_DISTANCE) {
-			if ((int)fTimeTotal % 2 == 0)
+			if ((int)(fTimeTotal / 2.0f) > (int)((fTimeTotal - fTimeElapsed) / 2.0f))
 			{
 				m_dir.x = urd(dre), m_dir.z = urd(dre);
 				SetLook(m_dir);
