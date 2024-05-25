@@ -334,6 +334,7 @@ bool CObjectManager::CollisionCheck_RayWithOBB(CRay* ray, CGameObject* obj, floa
 bool CObjectManager::__CollisionCheck_RayWithOBB_Recursive(CRay* ray, COBBCollider* obb, XMFLOAT4X4* objWorldMat, float& tmin, float& tmax)
 {
 	bool isCollied = true;
+	XMMATRIX obbWorldMat = XMLoadFloat4x4(objWorldMat);
 
 	XMFLOAT3 obbCenter = obb->GetOBBCenter();
 	XMFLOAT3 obbHalfExtents = obb->GetOBBHalfExtents();
@@ -344,10 +345,25 @@ bool CObjectManager::__CollisionCheck_RayWithOBB_Recursive(CRay* ray, COBBCollid
 	XMVECTOR orientationY = XMLoadFloat3(&obbOrientation[1]);
 	XMVECTOR orientationZ = XMLoadFloat3(&obbOrientation[2]);
 
-	center = XMVector3TransformCoord(center, XMLoadFloat4x4(objWorldMat));
-	orientationX = XMVector3TransformNormal(orientationX, XMLoadFloat4x4(objWorldMat));
-	orientationY = XMVector3TransformNormal(orientationY, XMLoadFloat4x4(objWorldMat));
-	orientationZ = XMVector3TransformNormal(orientationZ, XMLoadFloat4x4(objWorldMat));
+	// 중심점으로 부터 반경도 scale에 영향을 받아야한다.
+	XMFLOAT3 xmf3originPos(0.f, 0.f, 0.f);
+	XMVECTOR halfExtents = XMLoadFloat3(&obbHalfExtents);
+	XMVECTOR oriVec = XMLoadFloat3(&xmf3originPos);
+	oriVec = XMVector3TransformCoord(oriVec, obbWorldMat);
+	halfExtents = oriVec - XMVector3TransformCoord(halfExtents, obbWorldMat);
+	XMStoreFloat3(&obbHalfExtents, halfExtents);
+
+	center = XMVector3TransformCoord(center, obbWorldMat);
+
+	// 축에 scale이 적용될 시 축이 짧아지면 충돌범위가 늘어나고 축이 길어지면 충돌범위가 작아진다.
+	// scale의 정 반대로 크기가 조절되므로 축에는 scale을 적용하지 말자.
+	XMFLOAT4X4 nonScaleMat(*objWorldMat);
+	nonScaleMat._11 = 1; nonScaleMat._22 = 1; nonScaleMat._33 = 1;
+	XMMATRIX obbNonScaleMat = XMLoadFloat4x4(&nonScaleMat);
+
+	orientationX = XMVector3TransformNormal(orientationX, obbNonScaleMat);
+	orientationY = XMVector3TransformNormal(orientationY, obbNonScaleMat);
+	orientationZ = XMVector3TransformNormal(orientationZ, obbNonScaleMat);
 
 	XMFLOAT3 rayDir = ray->GetDir();
 	XMFLOAT3 rayOrigin = ray->GetOriginal();
