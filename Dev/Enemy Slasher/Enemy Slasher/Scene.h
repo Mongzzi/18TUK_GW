@@ -61,6 +61,7 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+	virtual void BuildLightsAndMaterials();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager);
 	virtual void ReleaseObjects();
@@ -94,6 +95,16 @@ private:
 protected:
 	float m_CurrentTime;
 	float m_ElapsedTime;
+
+	LIGHTS* m_pLights = NULL;
+	ID3D12Resource* m_pd3dcbLights = NULL;
+	LIGHTS* m_pcbMappedLights = NULL;
+
+	MATERIALS* m_pMaterials = NULL;
+	ID3D12Resource* m_pd3dcbMaterials = NULL;
+	MATERIAL* m_pcbMappedMaterials = NULL;
+	ID3D12Resource* m_pd3dcbTimeInfo = NULL;
+	CB_TIME_INFO* m_pcbMappedTimeInfo = NULL;
 };
 
 class CTitleScene : public CBasicScene
@@ -104,6 +115,7 @@ public:
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager);
 
@@ -113,6 +125,9 @@ public:
 	virtual void Enter();
 	virtual void Exit();
 
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
 
 private:
 	CUIObject* pCoveredUI = NULL;
@@ -141,8 +156,6 @@ public:
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager);
-	void BuildLightsAndMaterials();
-
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -174,18 +187,7 @@ private:
 public:
 	void Engage(CCharacterObject* obj);
 	void IncreaseTurnFlag();
-protected:
 
-	LIGHTS* m_pLights = NULL;
-	ID3D12Resource* m_pd3dcbLights = NULL;
-	LIGHTS* m_pcbMappedLights = NULL;
-
-	MATERIALS* m_pMaterials = NULL;
-	ID3D12Resource* m_pd3dcbMaterials = NULL;
-	MATERIAL* m_pcbMappedMaterials = NULL;
-
-	ID3D12Resource* m_pd3dcbTimeInfo = NULL;
-	CB_TIME_INFO* m_pcbMappedTimeInfo = NULL;
 };
 
 class CTestScene_Slice : public CBasicScene
