@@ -43,6 +43,20 @@ namespace CFbx_V3 {
 	struct MeshData {
 		std::vector<VertexData> m_vVertices;
 		std::vector<int> m_nIndices;
+
+		bool operator == (const MeshData& rhs) const {
+			if (m_vVertices.size() != rhs.m_vVertices.size()) return false;
+			if (m_nIndices.size() != rhs.m_nIndices.size()) return false;
+
+			for (int i = 0; i < m_vVertices.size(); ++i) {
+				if (m_vVertices[i] != rhs.m_vVertices[i]) return false;
+			}
+			for (int i = 0; i < m_nIndices.size(); ++i) {
+				if (m_nIndices[i] != rhs.m_nIndices[i]) return false;
+			}
+
+			return true;
+		}
 	};
 
 	struct KeyFrame {
@@ -82,7 +96,9 @@ namespace CFbx_V3 {
 		ObjectData() {};
 		~ObjectData() {
 			for (auto& a : m_vpMeshs) delete a;
+			for (auto& a : m_vpMaterials)delete a;
 			for (auto& a : m_vChildObjects) delete a;
+			if (m_pSkeleton) delete m_pSkeleton;
 		};
 
 		XMFLOAT3 m_xmf3Translate{ 0.f, 0.f, 0.f };
@@ -118,6 +134,9 @@ namespace CFbx_V3 {
 		int m_nDataCount = 0; // Count Mesh
 		int m_nTextureCount = 0; // Count Texture
 
+		~CFbxData() {
+			if (m_pRootObjectData) delete m_pRootObjectData;
+		}
 
 		void RecursiveCountMeshs(ObjectData* pObject) {
 
