@@ -112,12 +112,33 @@ VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_POSITION_TEXCOORD(VS_TEXTURED_INPUT_TWO_ELEMEN
 	return (output);
 }
 
+
+// ------------ 타이틀 2D 메시 오브젝트 ---------------	 // 카메라계산 x
+VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_TITLE_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
+{
+	VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
+
+	output.position = float4(input.position, 1.0f);
+	output.uv = input.uv;
+
+	return (output);
+}
+
+float4 PS_2D_TITLE_OBJECT(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
+{
+	float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
+	return (cColor);
+}
+
+
+
 float4 PS_POSITION_TEXCOORD(VS_TEXTURED_OUTPUT_TWO_ELEMENT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
 {
 	float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
 
 	return (cColor);
 }
+
 
 // ------ 2D 버튼 오브젝트 ---------------
 VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
