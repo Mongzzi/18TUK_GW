@@ -95,9 +95,8 @@ namespace CFbx_V3 {
 	struct ObjectData {
 		ObjectData() {};
 		~ObjectData() {
-			for (auto& a : m_vpMeshs) delete a;
-			for (auto& a : m_vpMaterials)delete a;
-			for (auto& a : m_vChildObjects) delete a;
+			for (auto& a : m_vpMaterials) { if (a) delete a; }
+			for (auto& a : m_vChildObjects) { if (a) delete a; }
 			if (m_pSkeleton) delete m_pSkeleton;
 		};
 
@@ -105,7 +104,7 @@ namespace CFbx_V3 {
 		XMFLOAT3 m_xmf3Rotate{ 0.f, 0.f, 0.f };
 		XMFLOAT3 m_xmf3Scale{ 1.f, 1.f, 1.f };
 
-		std::vector<MeshData*> m_vpMeshs;
+		std::vector<int> m_vnMeshIndices;
 		std::vector<Material*> m_vpMaterials;
 		Skeleton* m_pSkeleton = nullptr;
 
@@ -134,13 +133,17 @@ namespace CFbx_V3 {
 		int m_nDataCount = 0; // Count Mesh
 		int m_nTextureCount = 0; // Count Texture
 
+		std::vector<MeshData*> m_vpMeshs; // Store All Mesh Pointer
+
 		~CFbxData() {
 			if (m_pRootObjectData) delete m_pRootObjectData;
+
+			for (auto& a : m_vpMeshs) { if (a) delete a; }
 		}
 
 		void RecursiveCountMeshs(ObjectData* pObject) {
 
-			m_nDataCount += pObject->m_vpMeshs.size();
+			m_nDataCount += pObject->m_vnMeshIndices.size();
 
 			for (int i = 0; i < pObject->m_vChildObjects.size(); ++i) {
 				RecursiveCountMeshs(pObject->m_vChildObjects[i]);
@@ -239,4 +242,7 @@ private:
 
 	// Material
 	std::vector<CFbx_V3::Material*> m_vpMaterials;
+
+	// Store All Mesh Data Vector, Mesh Instaciate
+	std::vector<CFbx_V3::MeshData*> m_vpAllMeshs;
 };

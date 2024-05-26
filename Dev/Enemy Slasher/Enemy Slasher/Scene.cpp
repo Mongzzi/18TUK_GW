@@ -1266,7 +1266,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	{
 		//카드 UI 테스트용 오브젝트.
 		//CCubeMeshTextured* pCardMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
-		CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFbx("fbxsdk/", "Card")->m_pRootObjectData->m_vpMeshs[0]);
+		CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFbx("fbxsdk/", "Card")->m_vpMeshs[0]);
 		//CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(CARD_FBX)->m_pvMeshs[0]);
 
 		CCardUIObject* pCardUIObject;
@@ -2301,8 +2301,8 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		float zPosition = 500;
 		float fHeight = 0;
 		pNewObject->SetPosition(xPosition, fHeight, zPosition);
-		pNewObject->Rotate(0.0f, 180.0f, 0.0f);
-		pNewObject->SetScale(0.5f, 0.5f, 0.5f);
+		pNewObject->Rotate(0.0f, 45.0f, 0.0f);
+		pNewObject->SetScale(0.3f, 0.3f, 0.3f);
 
 		m_pObjectManager->AddObj(pNewObject, ObjectLayer::ObjectNormal);
 	}
@@ -2329,13 +2329,13 @@ void CTestScene_Animation::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		//r.SetDir(XMFLOAT3(-1.f, 0.f, 0.f));
 		//r.SetOrigin(XMFLOAT3(100.f, 0.f, 0.f));
 		float tmin, tmax;
-		if (m_pObjectManager->CollisionCheck_RayWithOBB(&r, a, tmin, tmax)) {
-			std::cout << tmin << ", " << tmax << '\t';
-			std::cout << "Collision!\n";
-		}
-		else {
-			std::cout << "\n";
-		}
+		//if (m_pObjectManager->CollisionCheck_RayWithOBB(&r, a, tmin, tmax)) {
+		//	std::cout << tmin << ", " << tmax << '\t';
+		//	std::cout << "Collision!\n";
+		//}
+		//else {
+		//	std::cout << "\n";
+		//}
 	}
 }
 

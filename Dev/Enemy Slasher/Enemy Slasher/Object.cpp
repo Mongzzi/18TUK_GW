@@ -797,11 +797,6 @@ CFBXObject::~CFBXObject()
 
 void CFBXObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbx_V3::ObjectData* pObjectData)
 {
-	for (int i = 0; i < pObjectData->m_vpMeshs.size(); ++i) {
-		CFBXMesh* pAnimMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, pObjectData->m_vpMeshs[i]);
-		SetMesh(i, pAnimMesh);
-	}
-
 	SetPosition(pObjectData->m_xmf3Translate);
 	Rotate(pObjectData->m_xmf3Rotate.x, pObjectData->m_xmf3Rotate.y, pObjectData->m_xmf3Rotate.z);
 	SetScale(pObjectData->m_xmf3Scale);

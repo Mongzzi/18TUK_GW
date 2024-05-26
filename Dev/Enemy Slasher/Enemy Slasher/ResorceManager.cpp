@@ -61,11 +61,30 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 		pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
 
 #ifdef _DEBUG
-	std::cout << "Loaded DataCount : " << pFbxData->m_nDataCount << '\n';
+	std::cout << "Loaded AllDataCount : " << pFbxData->m_nDataCount << '\n';
+	std::cout << "Loaded DataInstanceCount : " << pFbxData->m_vpMeshs.size() << '\n';
 	std::cout << "Loaded TextureCount : " << pFbxData->m_nTextureCount << '\n';
 #endif
 
+	if (m_mLoadedMeshsMap.contains(pFbxData->m_sFileName) == false) {
+		bool isDifferent = true;
+		CFBXMesh* pNewMesh;
+		std::vector<CFBXMesh*>* pNewMeshVector = new std::vector<CFBXMesh*>;
+		for (int i = 0; i < pFbxData->m_vpMeshs.size(); ++i) {
+			pNewMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, pFbxData->m_vpMeshs[i]);
+			pNewMeshVector->emplace_back(pNewMesh);
+
+			delete pFbxData->m_vpMeshs[i];
+		}
+		m_mLoadedMeshsMap[pFbxData->m_sFileName] = pNewMeshVector;
+
+		pFbxData->m_vpMeshs.clear();
+	}
+
+	m_vpCurrFileMeshs = m_mLoadedMeshsMap[pFbxData->m_sFileName];
+
 	CFBXObject* newGameObject = LoadFBXObjectRecursive(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
+
 	return newGameObject;
 }
 
@@ -73,6 +92,9 @@ CFBXObject* CResorceManager::LoadFBXObjectRecursive(ID3D12Device* pd3dDevice, ID
 {
 	CFBXObject* newGameObject;
 	newGameObject = new CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::NON);
+	for (int i = 0; i < pObjectData->m_vnMeshIndices.size(); ++i) {
+		newGameObject->SetMesh(i, (*m_vpCurrFileMeshs)[pObjectData->m_vnMeshIndices[i]]);
+	}
 	newGameObject->SetFbxData(pd3dDevice, pd3dCommandList, pObjectData);
 	newGameObject->SetShader(pShader);
 
