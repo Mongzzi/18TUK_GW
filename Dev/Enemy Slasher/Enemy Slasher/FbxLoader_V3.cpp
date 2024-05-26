@@ -1,5 +1,7 @@
 #include "FbxLoader_V3.h"
 #include <filesystem>
+#include <stack>
+#include <fstream>
 
 CFbxLoader_V3::CFbxLoader_V3()
 {
@@ -12,52 +14,58 @@ CFbxLoader_V3::~CFbxLoader_V3()
 CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbx(const std::string& filePath, const std::string& fileName)
 {
 	CFbx_V3::CFbxData* loadData = nullptr;
+	loadData = FileLoadFBXData(fileName);
 
-	if (m_plSdkManager == nullptr) {
-		m_plSdkManager = FbxManager::Create();
+	if (loadData == nullptr) {
 
-		FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
-		m_plSdkManager->SetIOSettings(ios);
-	}
+		if (m_plSdkManager == nullptr) {
+			m_plSdkManager = FbxManager::Create();
+
+			FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
+			m_plSdkManager->SetIOSettings(ios);
+		}
 
 
-	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
-	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
-	std::string fileFullName = filePath + fileName + ".fbx";
-	bool res = pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
+		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+		std::string fileFullName = filePath + fileName + ".fbx";
+		bool res = pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
 
-	if (res == false) {
-		// Convert std::string to std::wstring using MultiByteToWideChar
-		int bufferSize = MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, NULL, 0);
+		if (res == false) {
+			// Convert std::string to std::wstring using MultiByteToWideChar
+			int bufferSize = MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, NULL, 0);
 
-		std::wstring wideFileFullName(bufferSize, 0);
-		MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, &wideFileFullName[0], bufferSize);
+			std::wstring wideFileFullName(bufferSize, 0);
+			MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, &wideFileFullName[0], bufferSize);
 
-		// Display the message box with the file name
-		std::wstring message = L"File not found: " + wideFileFullName;
-		MessageBox(0, message.c_str(), L"Error", 0);
-	}
+			// Display the message box with the file name
+			std::wstring message = L"File not found: " + wideFileFullName;
+			MessageBox(0, message.c_str(), L"Error", 0);
+		}
 
-	pFbxImporter->Import(lScene);
-	pFbxImporter->Destroy();
+		pFbxImporter->Import(lScene);
+		pFbxImporter->Destroy();
 
-	FbxGeometryConverter geometryConverter(m_plSdkManager);
-	geometryConverter.Triangulate(lScene, true);
+		FbxGeometryConverter geometryConverter(m_plSdkManager);
+		geometryConverter.Triangulate(lScene, true);
 
-	FbxNode* lRootNode = lScene->GetRootNode();
-	if (lRootNode)
-	{
-		loadData = new CFbx_V3::CFbxData;
-		loadData->m_sFileName = fileFullName;
+		FbxNode* lRootNode = lScene->GetRootNode();
+		if (lRootNode)
+		{
+			loadData = new CFbx_V3::CFbxData;
+			loadData->m_sFileName = fileName;
 
-		CFbx_V3::ObjectData* pRootObject;
-		pRootObject = ProgressNodes(lRootNode, lScene, fileName);
-		loadData->m_pRootObjectData = pRootObject;
+			CFbx_V3::ObjectData* pRootObject;
+			pRootObject = ProgressNodes(lRootNode, lScene, fileName);
+			loadData->m_pRootObjectData = pRootObject;
 
-		loadData->RecursiveCountAll(loadData->m_pRootObjectData);
+			loadData->RecursiveCountAll(loadData->m_pRootObjectData);
 
-		loadData->m_vpMeshs = m_vpAllMeshs;
-		m_vpAllMeshs.clear();
+			loadData->m_vpMeshs = m_vpAllMeshs;
+			m_vpAllMeshs.clear();
+		}
+
+		ExportFBXData(loadData, fileName);
 	}
 
 	return loadData;
@@ -112,87 +120,90 @@ void CFbxLoader_V3::LoadAnim(CFbx_V3::Skeleton* pTargetSkeleton, const std::stri
 CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbxScene(const std::string& filePath, const std::string& fileName)
 {
 	CFbx_V3::CFbxData* loadData = nullptr;
+	loadData = FileLoadFBXData(fileName);
 
-	if (m_plSdkManager == nullptr) {
-		m_plSdkManager = FbxManager::Create();
+	if (loadData == nullptr) {
+		if (m_plSdkManager == nullptr) {
+			m_plSdkManager = FbxManager::Create();
 
-		FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
-		m_plSdkManager->SetIOSettings(ios);
-	}
-
-
-	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
-	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
-	std::string fileFullName = filePath + fileName + ".fbx";
-	bool res = pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
-
-	if (res == false) {
-		// Convert std::string to std::wstring using MultiByteToWideChar
-		int bufferSize = MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, NULL, 0);
-
-		std::wstring wideFileFullName(bufferSize, 0);
-		MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, &wideFileFullName[0], bufferSize);
-
-		// Display the message box with the file name
-		std::wstring message = L"File not found: " + wideFileFullName;
-		MessageBox(0, message.c_str(), L"Error", 0);
-	}
-
-	pFbxImporter->Import(lScene);
-	pFbxImporter->Destroy();
-
-	FbxGeometryConverter geometryConverter(m_plSdkManager);
-	geometryConverter.Triangulate(lScene, true);
-
-	FbxNode* lRootNode = lScene->GetRootNode();
-	if (lRootNode)
-	{
-		loadData = new CFbx_V3::CFbxData;
-		loadData->m_sFileName = fileFullName;
+			FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
+			m_plSdkManager->SetIOSettings(ios);
+		}
 
 
-		// Make return object
-		CFbx_V3::ObjectData* pRootObject = new CFbx_V3::ObjectData();
+		FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+		FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+		std::string fileFullName = filePath + fileName + ".fbx";
+		bool res = pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
 
-		// input translate data
+		if (res == false) {
+			// Convert std::string to std::wstring using MultiByteToWideChar
+			int bufferSize = MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, NULL, 0);
+
+			std::wstring wideFileFullName(bufferSize, 0);
+			MultiByteToWideChar(CP_UTF8, 0, fileFullName.c_str(), -1, &wideFileFullName[0], bufferSize);
+
+			// Display the message box with the file name
+			std::wstring message = L"File not found: " + wideFileFullName;
+			MessageBox(0, message.c_str(), L"Error", 0);
+		}
+
+		pFbxImporter->Import(lScene);
+		pFbxImporter->Destroy();
+
+		FbxGeometryConverter geometryConverter(m_plSdkManager);
+		geometryConverter.Triangulate(lScene, true);
+
+		FbxNode* lRootNode = lScene->GetRootNode();
+		if (lRootNode)
 		{
-			FbxDouble3 translation = lRootNode->LclTranslation.Get();
-			FbxDouble3 rotation = lRootNode->LclRotation.Get();
-			FbxDouble3 scaling = lRootNode->LclScaling.Get();
-			pRootObject->m_xmf3Translate.x = static_cast<float>(translation.mData[0]);
-			pRootObject->m_xmf3Translate.y = static_cast<float>(translation.mData[1]);
-			pRootObject->m_xmf3Translate.z = static_cast<float>(translation.mData[2]);
-			pRootObject->m_xmf3Rotate.x = static_cast<float>(rotation.mData[0]);
-			pRootObject->m_xmf3Rotate.y = static_cast<float>(rotation.mData[1]);
-			pRootObject->m_xmf3Rotate.z = static_cast<float>(rotation.mData[2]);
-			pRootObject->m_xmf3Scale.x = static_cast<float>(scaling.mData[0]);
-			pRootObject->m_xmf3Scale.y = static_cast<float>(scaling.mData[1]);
-			pRootObject->m_xmf3Scale.z = static_cast<float>(scaling.mData[2]);
-		}
+			loadData = new CFbx_V3::CFbxData;
+			loadData->m_sFileName = fileName;
 
-		// loop for all childs and make object Hierarch
-		for (int i = 0; i < lRootNode->GetChildCount(); ++i) {
-			FbxNode* pChildNode = lRootNode->GetChild(i);
-			if (pChildNode->GetNodeAttribute() == NULL) {
-				CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
-				pRootObject->m_vChildObjects.push_back(pNewChildObject);
-				continue;
+
+			// Make return object
+			CFbx_V3::ObjectData* pRootObject = new CFbx_V3::ObjectData();
+
+			// input translate data
+			{
+				FbxDouble3 translation = lRootNode->LclTranslation.Get();
+				FbxDouble3 rotation = lRootNode->LclRotation.Get();
+				FbxDouble3 scaling = lRootNode->LclScaling.Get();
+				pRootObject->m_xmf3Translate.x = static_cast<float>(translation.mData[0]);
+				pRootObject->m_xmf3Translate.y = static_cast<float>(translation.mData[1]);
+				pRootObject->m_xmf3Translate.z = static_cast<float>(translation.mData[2]);
+				pRootObject->m_xmf3Rotate.x = static_cast<float>(rotation.mData[0]);
+				pRootObject->m_xmf3Rotate.y = static_cast<float>(rotation.mData[1]);
+				pRootObject->m_xmf3Rotate.z = static_cast<float>(rotation.mData[2]);
+				pRootObject->m_xmf3Scale.x = static_cast<float>(scaling.mData[0]);
+				pRootObject->m_xmf3Scale.y = static_cast<float>(scaling.mData[1]);
+				pRootObject->m_xmf3Scale.z = static_cast<float>(scaling.mData[2]);
 			}
-			FbxNodeAttribute::EType AttributeType = pChildNode->GetNodeAttribute()->GetAttributeType();
-			if (AttributeType != FbxNodeAttribute::eSkeleton) {
-				CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
-				pRootObject->m_vChildObjects.push_back(pNewChildObject);
+
+			// loop for all childs and make object Hierarch
+			for (int i = 0; i < lRootNode->GetChildCount(); ++i) {
+				FbxNode* pChildNode = lRootNode->GetChild(i);
+				if (pChildNode->GetNodeAttribute() == NULL) {
+					CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
+					pRootObject->m_vChildObjects.push_back(pNewChildObject);
+					continue;
+				}
+				FbxNodeAttribute::EType AttributeType = pChildNode->GetNodeAttribute()->GetAttributeType();
+				if (AttributeType != FbxNodeAttribute::eSkeleton) {
+					CFbx_V3::ObjectData* pNewChildObject = ProgressNodes_LoadOnlyMesh(lRootNode->GetChild(i));
+					pRootObject->m_vChildObjects.push_back(pNewChildObject);
+				}
 			}
+
+			loadData->m_pRootObjectData = pRootObject;
+
+			loadData->RecursiveCountAll(loadData->m_pRootObjectData);
+
+			loadData->m_vpMeshs = m_vpAllMeshs;
+			m_vpAllMeshs.clear();
 		}
-
-		loadData->m_pRootObjectData = pRootObject;
-
-		loadData->RecursiveCountAll(loadData->m_pRootObjectData);
-
-		loadData->m_vpMeshs = m_vpAllMeshs;
-		m_vpAllMeshs.clear();
+		ExportFBXData(loadData, fileName);
 	}
-
 	return loadData;
 }
 
@@ -549,9 +560,9 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 	FbxMesh* pMesh = inNode->GetMesh();
 	FbxAMatrix geometryTransform = GetGeometryTransformation(inNode);
 
-	CFbx_V3::AnimationClip animData;
+	CFbx_V3::AnimationClip* animData = new CFbx_V3::AnimationClip();
 
-	animData.m_vBoneAnimations.resize(m_pSkeleton->m_vsBoneNames.size());
+	animData->m_vBoneAnimations.resize(m_pSkeleton->m_vsBoneNames.size());
 
 	bool isAlreadyLoaded = m_pSkeleton->m_mAnimations.contains(clipName);
 
@@ -638,7 +649,7 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 
 						boneAnim.m_vKeyFrames.push_back(currAnim);
 					}
-					animData.m_vBoneAnimations[currJointIndex] = boneAnim;
+					animData->m_vBoneAnimations[currJointIndex] = boneAnim;
 				}
 			}
 		}
@@ -658,8 +669,8 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 	}
 
 	if (isAlreadyLoaded == false &&
-		animData.m_vBoneAnimations.size() > 0 &&
-		animData.m_vBoneAnimations[0].m_vKeyFrames.size() > 0) {
+		animData->m_vBoneAnimations.size() > 0 &&
+		animData->m_vBoneAnimations[0].m_vKeyFrames.size() > 0) {
 		m_pSkeleton->m_vAnimationNames.push_back(clipName);
 		m_pSkeleton->m_mAnimations[clipName] = animData;
 	}
@@ -806,6 +817,355 @@ void CFbxLoader_V3::LoadMaterialTexture(FbxSurfaceMaterial* pMaterial, CFbx_V3::
 	}
 }
 
+void CFbxLoader_V3::ExportFBXData(CFbx_V3::CFbxData* loadData, const std::string& fileName)
+{
+	std::ofstream fileOut("Resource/obData/" + fileName + ".obData", ios_base::out | ios_base::binary);
+	if (loadData->m_nDataCount == 0) return;
+
+	if (fileOut.is_open() == true) {
+		fileOut.write(reinterpret_cast<const char*>(&loadData->m_nDataCount), sizeof(loadData->m_nDataCount));
+		fileOut.write(reinterpret_cast<const char*>(&loadData->m_nTextureCount), sizeof(loadData->m_nTextureCount));
+		ExportObjectData(loadData->m_pRootObjectData, &fileOut);
+
+		size_t meshsCount = loadData->m_vpMeshs.size();
+		fileOut.write(reinterpret_cast<const char*>(&meshsCount), sizeof(meshsCount));
+		for (const auto& mesh : loadData->m_vpMeshs) {
+			ExportMeshData(mesh, &fileOut);
+		}
+
+
+		fileOut.close();
+	}
+}
+
+void CFbxLoader_V3::ExportMeshData(CFbx_V3::MeshData* pMeshData, std::ofstream* fileOut)
+{
+	using namespace CFbx_V3;
+
+	size_t verticesCount = pMeshData->m_vVertices.size();
+	fileOut->write(reinterpret_cast<const char*>(&verticesCount), sizeof(verticesCount));
+	int counter = 0;
+	for (const auto& vertex : pMeshData->m_vVertices) {
+		fileOut->write(reinterpret_cast<const char*>(&vertex.m_xmf3Position), sizeof(vertex.m_xmf3Position));
+		fileOut->write(reinterpret_cast<const char*>(&vertex.m_xmf3Normal), sizeof(vertex.m_xmf3Normal));
+		fileOut->write(reinterpret_cast<const char*>(&vertex.m_xmf2UV), sizeof(vertex.m_xmf2UV));
+
+		fileOut->write(reinterpret_cast<const char*>(vertex.m_flBlendingWeight), sizeof(vertex.m_flBlendingWeight));
+		fileOut->write(reinterpret_cast<const char*>(vertex.m_nlBlendingIndex), sizeof(vertex.m_nlBlendingIndex));
+	}
+
+	size_t indicesCount = pMeshData->m_nIndices.size();
+	fileOut->write(reinterpret_cast<const char*>(&indicesCount), sizeof(indicesCount));
+	if (indicesCount > 0) {
+		fileOut->write(reinterpret_cast<const char*>(pMeshData->m_nIndices.data()), indicesCount * sizeof(int));
+	}
+}
+
+void CFbxLoader_V3::ExportObjectData(CFbx_V3::ObjectData* rootObject, std::ofstream* fileOut)
+{
+	using namespace CFbx_V3;
+
+	std::stack<const ObjectData*> stack;
+	stack.push(rootObject);
+
+	while (!stack.empty()) {
+		const ObjectData* currentObject = stack.top();
+		stack.pop();
+
+		// Save current object data
+		fileOut->write(reinterpret_cast<const char*>(&currentObject->m_xmf3Translate), sizeof(currentObject->m_xmf3Translate));
+		fileOut->write(reinterpret_cast<const char*>(&currentObject->m_xmf3Rotate), sizeof(currentObject->m_xmf3Rotate));
+		fileOut->write(reinterpret_cast<const char*>(&currentObject->m_xmf3Scale), sizeof(currentObject->m_xmf3Scale));
+
+		// Save mesh indices
+		size_t meshIndicesCount = currentObject->m_vnMeshIndices.size();
+		fileOut->write(reinterpret_cast<const char*>(&meshIndicesCount), sizeof(meshIndicesCount));
+		if (meshIndicesCount > 0) {
+			fileOut->write(reinterpret_cast<const char*>(currentObject->m_vnMeshIndices.data()), meshIndicesCount * sizeof(int));
+		}
+
+		// Save materials
+		size_t materialsCount = currentObject->m_vpMaterials.size();
+		fileOut->write(reinterpret_cast<const char*>(&materialsCount), sizeof(materialsCount));
+		for (const auto& material : currentObject->m_vpMaterials) {
+			size_t nameLength = material->Name.size();
+			fileOut->write(reinterpret_cast<const char*>(&nameLength), sizeof(nameLength));
+			fileOut->write(material->Name.data(), nameLength);
+			fileOut->write(reinterpret_cast<const char*>(&material->Ambient), sizeof(material->Ambient));
+			fileOut->write(reinterpret_cast<const char*>(&material->DiffuseAlbedo), sizeof(material->DiffuseAlbedo));
+		}
+
+		// Save skeleton presence flag
+		bool hasSkeleton = (currentObject->m_pSkeleton != nullptr && false);
+		fileOut->write(reinterpret_cast<const char*>(&hasSkeleton), sizeof(hasSkeleton));
+		if (hasSkeleton == true) {
+			ExportSkeletonData(currentObject->m_pSkeleton, fileOut);
+		}
+
+		// Save child objects
+		size_t childCount = currentObject->m_vChildObjects.size();
+		fileOut->write(reinterpret_cast<const char*>(&childCount), sizeof(childCount));
+		for (const auto& child : currentObject->m_vChildObjects) {
+			stack.push(child);
+		}
+	}
+}
+
+void CFbxLoader_V3::ExportSkeletonData(CFbx_V3::Skeleton* pSkeleton, std::ofstream* fileOut)
+{
+	using namespace CFbx_V3;
+
+	size_t boneNameCount = pSkeleton->m_vsBoneNames.size();
+	fileOut->write(reinterpret_cast<const char*>(&boneNameCount), sizeof(boneNameCount));
+	for (const auto& boneName : pSkeleton->m_vsBoneNames) {
+		size_t nameLength = boneName.size();
+		fileOut->write(reinterpret_cast<const char*>(&nameLength), sizeof(nameLength));
+		fileOut->write(boneName.data(), nameLength);
+	}
+
+	size_t boneHierarchCount = pSkeleton->m_vnBoneHierarcht.size();
+	fileOut->write(reinterpret_cast<const char*>(&boneHierarchCount), sizeof(boneHierarchCount));
+	if (boneHierarchCount > 0) {
+		fileOut->write(reinterpret_cast<const char*>(pSkeleton->m_vnBoneHierarcht.data()), boneHierarchCount * sizeof(int));
+	}
+
+	size_t boneOffsetMatCount = pSkeleton->m_vxmf4x4BoneOffsetMat.size();
+	fileOut->write(reinterpret_cast<const char*>(&boneOffsetMatCount), sizeof(boneOffsetMatCount));
+	if (boneOffsetMatCount > 0) {
+		fileOut->write(reinterpret_cast<const char*>(pSkeleton->m_vxmf4x4BoneOffsetMat.data()), boneOffsetMatCount * sizeof(XMFLOAT4X4));
+	}
+
+	size_t animationNameCount = pSkeleton->m_vAnimationNames.size();
+	fileOut->write(reinterpret_cast<const char*>(&animationNameCount), sizeof(animationNameCount));
+	if (animationNameCount > 0) {
+		for (size_t i = 0; i < animationNameCount; ++i) {
+			size_t nameLength = pSkeleton->m_vAnimationNames[i].size();
+			fileOut->write(reinterpret_cast<const char*>(&nameLength), sizeof(nameLength));
+			fileOut->write(pSkeleton->m_vAnimationNames[i].data(), nameLength);
+
+			ExportAnimationClip(pSkeleton->m_mAnimations[pSkeleton->m_vAnimationNames[i]], pSkeleton->m_vAnimationNames[i]);
+		}
+	}
+}
+
+void CFbxLoader_V3::ExportAnimationClip(CFbx_V3::AnimationClip* pAnimClip, const std::string& clipName)
+{
+	std::ofstream fileOut("Resource/obData/" + clipName + ".animClip", ios_base::out | ios_base::binary);
+
+	if (fileOut.is_open() == true) {
+		size_t boneAnimCount = pAnimClip->m_vBoneAnimations.size();
+		fileOut.write(reinterpret_cast<const char*>(&boneAnimCount), sizeof(boneAnimCount));
+		for (const auto& boneAnim : pAnimClip->m_vBoneAnimations) {
+			size_t keyframeCount = boneAnim.m_vKeyFrames.size();
+			fileOut.write(reinterpret_cast<const char*>(&keyframeCount), sizeof(keyframeCount));
+			for (const auto& keyframe : boneAnim.m_vKeyFrames) {
+				fileOut.write(reinterpret_cast<const char*>(&keyframe.m_nFrameNum), sizeof(keyframe.m_nFrameNum));
+				fileOut.write(reinterpret_cast<const char*>(&keyframe.m_xmf4x4AnimMat), sizeof(keyframe.m_xmf4x4AnimMat));
+			}
+		}
+
+		fileOut.close();
+	}
+}
+
+CFbx_V3::CFbxData* CFbxLoader_V3::FileLoadFBXData(const std::string& fileName)
+{
+	std::ifstream fileIn("Resource/obData/" + fileName + ".obData", ios_base::in | ios_base::binary);
+
+	if (fileIn.is_open() == true) {
+		CFbx_V3::CFbxData* loadData = new CFbx_V3::CFbxData();
+		loadData->m_sFileName = fileName;
+
+		fileIn.read(reinterpret_cast<char*>(&loadData->m_nDataCount), sizeof(loadData->m_nDataCount));
+		fileIn.read(reinterpret_cast<char*>(&loadData->m_nTextureCount), sizeof(loadData->m_nTextureCount));
+		loadData->m_pRootObjectData = FileLoadObjectData(&fileIn);
+
+		size_t meshsCount;
+		fileIn.read(reinterpret_cast<char*>(&meshsCount), sizeof(meshsCount));
+		loadData->m_vpMeshs.resize(meshsCount);
+		for (size_t i = 0; i < meshsCount; ++i) {
+			loadData->m_vpMeshs[i] = FileLoadMeshData(&fileIn);
+		}
+
+
+		fileIn.close();
+		return loadData;
+	}
+
+	return nullptr;
+}
+
+CFbx_V3::MeshData* CFbxLoader_V3::FileLoadMeshData(std::ifstream* fileIn)
+{
+	using namespace CFbx_V3;
+
+	MeshData* pMeshData = new MeshData();
+
+	size_t meshVerticesCount;
+	fileIn->read(reinterpret_cast<char*>(&meshVerticesCount), sizeof(meshVerticesCount));
+	pMeshData->m_vVertices.resize(meshVerticesCount);
+	VertexData* pVertex = nullptr;
+	for (size_t i = 0; i < meshVerticesCount; ++i) {
+		pVertex = &pMeshData->m_vVertices[i];
+		fileIn->read(reinterpret_cast<char*>(&(pVertex->m_xmf3Position)), sizeof(pVertex->m_xmf3Position));
+		fileIn->read(reinterpret_cast<char*>(&(pVertex->m_xmf3Normal)), sizeof(pVertex->m_xmf3Normal));
+		fileIn->read(reinterpret_cast<char*>(&(pVertex->m_xmf2UV)), sizeof(pVertex->m_xmf2UV));
+
+		fileIn->read(reinterpret_cast<char*>(pVertex->m_flBlendingWeight), sizeof(pVertex->m_flBlendingWeight));
+		fileIn->read(reinterpret_cast<char*>(pVertex->m_nlBlendingIndex), sizeof(pVertex->m_nlBlendingIndex));
+	}
+
+	size_t meshIndicesCount;
+	fileIn->read(reinterpret_cast<char*>(&meshIndicesCount), sizeof(meshIndicesCount));
+	pMeshData->m_nIndices.resize(meshIndicesCount);
+	if (meshIndicesCount > 0) {
+		fileIn->read(reinterpret_cast<char*>(pMeshData->m_nIndices.data()), meshIndicesCount * sizeof(int));
+	}
+
+	return pMeshData;
+}
+
+CFbx_V3::ObjectData* CFbxLoader_V3::FileLoadObjectData(std::ifstream* fileIn)
+{
+	using namespace CFbx_V3;
+
+	std::stack<ObjectData*> stack;
+	ObjectData* rootObject = new ObjectData();
+	stack.push(rootObject);
+
+	while (!stack.empty()) {
+		ObjectData* currentObject = stack.top();
+		stack.pop();
+
+		// Read current object data
+		fileIn->read(reinterpret_cast<char*>(&currentObject->m_xmf3Translate), sizeof(currentObject->m_xmf3Translate));
+		fileIn->read(reinterpret_cast<char*>(&currentObject->m_xmf3Rotate), sizeof(currentObject->m_xmf3Rotate));
+		fileIn->read(reinterpret_cast<char*>(&currentObject->m_xmf3Scale), sizeof(currentObject->m_xmf3Scale));
+
+		// Read mesh indices
+		size_t meshIndicesCount;
+		fileIn->read(reinterpret_cast<char*>(&meshIndicesCount), sizeof(meshIndicesCount));
+		currentObject->m_vnMeshIndices.resize(meshIndicesCount);
+		if (meshIndicesCount > 0) {
+			fileIn->read(reinterpret_cast<char*>(currentObject->m_vnMeshIndices.data()), meshIndicesCount * sizeof(int));
+		}
+
+		// Read materials
+		size_t materialsCount;
+		fileIn->read(reinterpret_cast<char*>(&materialsCount), sizeof(materialsCount));
+		currentObject->m_vpMaterials.resize(materialsCount);
+		for (size_t i = 0; i < materialsCount; ++i) {
+			Material* material = new Material();
+			size_t nameLength;
+			fileIn->read(reinterpret_cast<char*>(&nameLength), sizeof(nameLength));
+			material->Name.resize(nameLength);
+			fileIn->read(&material->Name[0], nameLength);
+			fileIn->read(reinterpret_cast<char*>(&material->Ambient), sizeof(material->Ambient));
+			fileIn->read(reinterpret_cast<char*>(&material->DiffuseAlbedo), sizeof(material->DiffuseAlbedo));
+			currentObject->m_vpMaterials[i] = material;
+		}
+
+		// Read skeleton presence flag
+		bool hasSkeleton;
+		fileIn->read(reinterpret_cast<char*>(&hasSkeleton), sizeof(hasSkeleton));
+		if (hasSkeleton == true) {
+			currentObject->m_pSkeleton = FileLoadSkeletonData(fileIn);
+		}
+
+		// Read child objects
+		size_t childCount;
+		fileIn->read(reinterpret_cast<char*>(&childCount), sizeof(childCount));
+		currentObject->m_vChildObjects.resize(childCount);
+		for (size_t i = 0; i < childCount; ++i) {
+			ObjectData* childObject = new ObjectData();
+			currentObject->m_vChildObjects[i] = childObject;
+			stack.push(childObject);
+		}
+	}
+
+	return rootObject;
+}
+
+CFbx_V3::Skeleton* CFbxLoader_V3::FileLoadSkeletonData(std::ifstream* fileIn)
+{
+	using namespace CFbx_V3;
+
+	Skeleton* pSkeleton = new Skeleton();
+
+	size_t boneNameCount;
+	fileIn->read(reinterpret_cast<char*>(&boneNameCount), sizeof(boneNameCount));
+	pSkeleton->m_vsBoneNames.resize(boneNameCount);
+	for (size_t i = 0; i < boneNameCount; ++i) {
+		size_t nameLegth;
+		fileIn->read(reinterpret_cast<char*>(&nameLegth), sizeof(nameLegth));
+		pSkeleton->m_vsBoneNames[i].resize(nameLegth);
+		fileIn->read(&pSkeleton->m_vsBoneNames[i][0], nameLegth);
+	}
+
+	size_t boneHierarchCount;
+	fileIn->read(reinterpret_cast<char*>(&boneHierarchCount), sizeof(boneHierarchCount));
+	pSkeleton->m_vnBoneHierarcht.resize(boneHierarchCount);
+	if (boneHierarchCount > 0) {
+		fileIn->read(reinterpret_cast<char*>(pSkeleton->m_vnBoneHierarcht.data()), boneHierarchCount * sizeof(int));
+	}
+
+	size_t boneOffsetMatCount;
+	fileIn->read(reinterpret_cast<char*>(&boneOffsetMatCount), sizeof(boneOffsetMatCount));
+	pSkeleton->m_vxmf4x4BoneOffsetMat.resize(boneOffsetMatCount);
+	if (boneOffsetMatCount > 0) {
+		fileIn->read(reinterpret_cast<char*>(pSkeleton->m_vxmf4x4BoneOffsetMat.data()), boneHierarchCount * sizeof(int));
+	}
+
+	size_t animationNameCount;
+	fileIn->read(reinterpret_cast<char*>(&animationNameCount), sizeof(animationNameCount));
+	pSkeleton->m_vAnimationNames.resize(animationNameCount);
+	if (animationNameCount > 0) {
+		for (size_t i = 0; i < animationNameCount; ++i) {
+			size_t nameLegth;
+			fileIn->read(reinterpret_cast<char*>(&nameLegth), sizeof(nameLegth));
+			pSkeleton->m_vAnimationNames[i].resize(nameLegth);
+			fileIn->read(&pSkeleton->m_vAnimationNames[i][0], nameLegth);
+
+			pSkeleton->m_mAnimations[pSkeleton->m_vAnimationNames[i]] = FlieLoadAnimationClip(pSkeleton->m_vAnimationNames[i]);
+		}
+	}
+
+	return pSkeleton;
+}
+
+CFbx_V3::AnimationClip* CFbxLoader_V3::FlieLoadAnimationClip(const std::string& clipName)
+{
+	using namespace CFbx_V3;
+	std::ifstream fileIn("Resource/obData/" + clipName + ".animClip", ios_base::in | ios_base::binary);
+
+	if (fileIn.is_open() == true) {
+		AnimationClip* pNewAnimClip = new AnimationClip();
+		BoneAnimation* pNewBoneAnim;
+		KeyFrame* pNewKeyFrame;
+
+		size_t boneAnimCount;
+		fileIn.read(reinterpret_cast<char*>(&boneAnimCount), sizeof(boneAnimCount));
+		pNewAnimClip->m_vBoneAnimations.resize(boneAnimCount);
+		for (size_t i = 0; i < boneAnimCount; ++i) {
+			pNewBoneAnim = &pNewAnimClip->m_vBoneAnimations[i];
+
+			size_t keyframeCount;
+			fileIn.read(reinterpret_cast<char*>(&keyframeCount), sizeof(keyframeCount));
+			pNewBoneAnim->m_vKeyFrames.resize(keyframeCount);
+			for (size_t j = 0; j < keyframeCount; ++j) {
+				pNewKeyFrame = &pNewBoneAnim->m_vKeyFrames[j];
+				
+				fileIn.read(reinterpret_cast<char*>(&pNewKeyFrame->m_nFrameNum), sizeof(pNewKeyFrame->m_nFrameNum));
+				fileIn.read(reinterpret_cast<char*>(&pNewKeyFrame->m_xmf4x4AnimMat), sizeof(pNewKeyFrame->m_xmf4x4AnimMat));
+			}
+		}
+
+		fileIn.close();
+		return pNewAnimClip;
+	}
+
+	return nullptr;
+}
 
 FbxAMatrix CFbxLoader_V3::GetGeometryTransformation(FbxNode* inNode)
 {

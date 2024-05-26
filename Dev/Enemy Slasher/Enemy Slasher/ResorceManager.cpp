@@ -15,7 +15,7 @@ CResorceManager::~CResorceManager()
 
 CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const string& filePath, const string& fileName)
 {
-	std::string fName(filePath + fileName + ".fbx");
+	//std::string fName(filePath + fileName + ".fbx");
 	CFBXObject* newGameObject = nullptr;
 
 	// 현재 parent가 childe의 정보를 수정하므로 오브젝트의 instance화가 불가능하다.
@@ -28,13 +28,13 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 
 
 	CFbx_V3::CFbxData* newFbxData = nullptr;
-	if (m_mLoadedFBXDataMap.end() == m_mLoadedFBXDataMap.find(fName)) {
+	if (m_mLoadedFBXDataMap.end() == m_mLoadedFBXDataMap.find(fileName)) {
 		newFbxData = m_pFBXLoader->LoadFbx(filePath, fileName);
 	}
 	else {
-		newFbxData = m_mLoadedFBXDataMap[fName];
+		newFbxData = m_mLoadedFBXDataMap[fileName];
 	}
-	return LoadFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pFBXLoader->LoadFbx(filePath, fileName));
+	return LoadFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, newFbxData);
 }
 
 CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::CFbxData* pFbxData)

@@ -21,8 +21,8 @@ namespace CFbx_V3 {
 		XMFLOAT3 m_xmf3Normal;
 		XMFLOAT2 m_xmf2UV;
 
-		int m_nlBlendingIndex[4];
-		float m_flBlendingWeight[4];
+		int m_nlBlendingIndex[4]{ 0 };
+		float m_flBlendingWeight[4]{ 0 };
 
 		bool operator == (const VertexData& rhs) const {
 			if (m_xmf3Position.x != rhs.m_xmf3Position.x ||
@@ -82,7 +82,11 @@ namespace CFbx_V3 {
 
 		// animation datas
 		std::vector<std::string> m_vAnimationNames;
-		std::unordered_map<std::string, AnimationClip> m_mAnimations;
+		std::unordered_map<std::string, AnimationClip*> m_mAnimations;
+
+		~Skeleton() {
+			for (auto& a : m_mAnimations) { if (a.second) delete a.second; }
+		}
 	};
 
 	struct Material {
@@ -220,6 +224,23 @@ private:
 	void LoadMaterials(FbxNode* inNode);
 	void LoadMaterialAttribute(FbxSurfaceMaterial* pMaterial, CFbx_V3::Material& outMaterial);
 	void LoadMaterialTexture(FbxSurfaceMaterial* pMaterial, CFbx_V3::Material& outMaterial);
+
+private:
+	void ExportFBXData(CFbx_V3::CFbxData* loadData, const std::string& fileName);
+	void ExportMeshData(CFbx_V3::MeshData* pMeshData, std::ofstream* fileOut);
+	void ExportObjectData(CFbx_V3::ObjectData* rootObject, std::ofstream* fileOut);
+	void ExportSkeletonData(CFbx_V3::Skeleton* pSkeleton, std::ofstream* fileOut);
+
+	void ExportAnimationClip(CFbx_V3::AnimationClip* pAnimClip, const std::string& clipName);
+
+private:
+	CFbx_V3::CFbxData* FileLoadFBXData(const std::string& fileName);
+	CFbx_V3::MeshData* FileLoadMeshData(std::ifstream* fileIn);
+	CFbx_V3::ObjectData* FileLoadObjectData(std::ifstream* fileIn);
+	CFbx_V3::Skeleton* FileLoadSkeletonData(std::ifstream* fileIn);
+
+	CFbx_V3::AnimationClip* FlieLoadAnimationClip(const std::string& clipName);
+
 private:
 	FbxAMatrix GetGeometryTransformation(FbxNode* inNode);
 	int FindJointIndexUsingName(std::string JointName);
