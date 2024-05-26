@@ -55,6 +55,9 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbx(const std::string& filePath, const std
 		loadData->m_pRootObjectData = pRootObject;
 
 		loadData->RecursiveCountAll(loadData->m_pRootObjectData);
+
+		loadData->m_vpMeshs = m_vpAllMeshs;
+		m_vpAllMeshs.clear();
 	}
 
 	return loadData;
@@ -185,6 +188,9 @@ CFbx_V3::CFbxData* CFbxLoader_V3::LoadFbxScene(const std::string& filePath, cons
 		loadData->m_pRootObjectData = pRootObject;
 
 		loadData->RecursiveCountAll(loadData->m_pRootObjectData);
+
+		loadData->m_vpMeshs = m_vpAllMeshs;
+		m_vpAllMeshs.clear();
 	}
 
 	return loadData;
@@ -837,7 +843,23 @@ void CFbxLoader_V3::storeObjectData(CFbx_V3::ObjectData* pObject)
 {
 	if(m_pSkeleton)
 		pObject->m_pSkeleton = m_pSkeleton;
-	pObject->m_vpMeshs = m_vpMeshs;
+
+	bool isDifferent = true;
+	for (int i = 0; i < m_vpMeshs.size(); ++i) {
+		isDifferent = true;
+		for (int j = 0; j < m_vpAllMeshs.size(); ++j) {
+			if (*(m_vpMeshs[i]) == *(m_vpAllMeshs[j])) {
+				isDifferent = false;
+				pObject->m_vnMeshIndices.push_back(j);
+				break;
+			}
+		}
+		if (isDifferent) {
+			pObject->m_vnMeshIndices.push_back(m_vpAllMeshs.size());
+			m_vpAllMeshs.push_back(m_vpMeshs[i]);
+		}
+	}
+	
 	pObject->m_vpMaterials = m_vpMaterials;
 
 	m_pSkeleton = nullptr;
