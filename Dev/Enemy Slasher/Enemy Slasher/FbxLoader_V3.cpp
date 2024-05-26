@@ -76,43 +76,53 @@ void CFbxLoader_V3::LoadAnim(CFbx_V3::Skeleton* pTargetSkeleton, const std::stri
 	// Load data to this Skeleton pointer
 	m_pSkeleton = pTargetSkeleton;
 
-	if (m_plSdkManager == nullptr) {
-		m_plSdkManager = FbxManager::Create();
+	// 동일한 이름의 애니메이션이 없다면 로드
+	if (m_pSkeleton->m_mAnimations.end() == m_pSkeleton->m_mAnimations.find(fileName)) {
+		CFbx_V3::AnimationClip* pAnimClip = FlieLoadAnimationClip(fileName);
 
-		FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
-		m_plSdkManager->SetIOSettings(ios);
-	}
+		if (pAnimClip != nullptr) {
+			m_pSkeleton->m_vAnimationNames.push_back(fileName);
+			m_pSkeleton->m_mAnimations[fileName] = pAnimClip;
+		}
+		else {
+			if (m_plSdkManager == nullptr) {
+				m_plSdkManager = FbxManager::Create();
 
-
-	FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
-	FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
-	std::string fileFullName = filePath + fileName + ".fbx";
-	pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
-
-	pFbxImporter->Import(lScene);
-	pFbxImporter->Destroy();
-
-	FbxGeometryConverter geometryConverter(m_plSdkManager);
-	geometryConverter.Triangulate(lScene, true);
-
-	FbxNode* lRootNode = lScene->GetRootNode();
-	if (lRootNode)
-	{
-		// Animation Data
-		for (int i = 0; i < lRootNode->GetChildCount(); i++)
-		{
-			FbxNode* pFbxChildNode = lRootNode->GetChild(i);
-			FbxMesh* pMesh = (FbxMesh*)pFbxChildNode->GetNodeAttribute();
-			FbxNodeAttribute::EType AttributeType = pMesh->GetAttributeType();
-			if (!pMesh || !AttributeType) { continue; }
-
-			if (AttributeType == FbxNodeAttribute::eMesh)
-			{
-				// Get Animation Clip
-				// 동일한 이름의 애니메이션이 없다면 로드
-				if (m_pSkeleton->m_mAnimations.end() == m_pSkeleton->m_mAnimations.find(fileName))
-					LoadAnimation(pFbxChildNode, lScene, fileName, true);
+				FbxIOSettings* ios = FbxIOSettings::Create(m_plSdkManager, IOSROOT);
+				m_plSdkManager->SetIOSettings(ios);
 			}
+
+
+			FbxScene* lScene = FbxScene::Create(m_plSdkManager, "myScene");
+			FbxImporter* pFbxImporter = FbxImporter::Create(m_plSdkManager, "");
+			std::string fileFullName = filePath + fileName + ".fbx";
+			pFbxImporter->Initialize(fileFullName.c_str(), -1, m_plSdkManager->GetIOSettings());
+
+			pFbxImporter->Import(lScene);
+			pFbxImporter->Destroy();
+
+			FbxGeometryConverter geometryConverter(m_plSdkManager);
+			geometryConverter.Triangulate(lScene, true);
+
+			FbxNode* lRootNode = lScene->GetRootNode();
+			if (lRootNode)
+			{
+				// Animation Data
+				for (int i = 0; i < lRootNode->GetChildCount(); i++)
+				{
+					FbxNode* pFbxChildNode = lRootNode->GetChild(i);
+					FbxMesh* pMesh = (FbxMesh*)pFbxChildNode->GetNodeAttribute();
+					FbxNodeAttribute::EType AttributeType = pMesh->GetAttributeType();
+					if (!pMesh || !AttributeType) { continue; }
+
+					if (AttributeType == FbxNodeAttribute::eMesh)
+					{
+						// Get Animation Clip
+						LoadAnimation(pFbxChildNode, lScene, fileName, true);
+					}
+				}
+			}
+			ExportAnimationClip(m_pSkeleton->m_mAnimations[fileName], fileName);
 		}
 	}
 }
