@@ -955,6 +955,13 @@ void CCharacterObject::Reset()
 	m_pDeck->InitializeDeck();
 }
 
+void CCharacterObject::StartTurn()
+{
+	m_iKarma = 0;
+	// 패를 전부 버린다.
+	m_pDeck->SendHandToUsedAll();
+}
+
 void CCharacterObject::TakeDamage(float atk) 
 {
 	m_fCurHp -= atk;

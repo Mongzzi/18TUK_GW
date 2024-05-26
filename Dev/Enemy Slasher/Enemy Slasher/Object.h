@@ -346,8 +346,12 @@ private:
 	// 체력
 	float m_fCurHp;
 	float m_fMaxHp;
+
 	float m_fAtk;
+
 	int m_iTeamId;
+
+	int m_iKarma;
 	// 이름?
 	// 등등
 public:
@@ -356,7 +360,8 @@ public:
 	float GetAtk() { return m_fAtk; };
 	float GetCurHp() { return m_fCurHp; };
 	int GetTeamId() { return m_iTeamId; };
-	void Reset();
+	void Reset(); // 전투가 끝나거나 시작될때 불릴 함수
+	void StartTurn();// 턴 시작시 불릴 함수
 	void SetTeamId(int teamId) { m_iTeamId = teamId; };
 
 	void TakeDamage(float atk);

@@ -945,32 +945,32 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_RBUTTONDOWN:
 		if (pCoveredUI)
 		{
-			pSelectedUI = pCoveredUI;
-			pSelectedUI->ButtenDown();
+			m_pSelectedUI = pCoveredUI;
+			m_pSelectedUI->ButtenDown();
 		}
 		break;
 
 	case WM_RBUTTONUP:
-		if (pSelectedUI)
+		if (m_pSelectedUI)
 		{
 			// 현재 카드UI 전용코드가 올라가있음.
 			// 아래 내용을 CCardUIObject.ButtenUp()에 넣어야함.
-			pSelectedUI->ButtenUp();
+			m_pSelectedUI->ButtenUp();
 			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 			{
 				// 원위치로 돌아감.
-				pSelectedUI->SetPositionUI(pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
+				m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
 
 			}
 			else
 			{
 				// 카드 사용
-				CCardUIObject* pcUI = dynamic_cast<CCardUIObject*>(pSelectedUI);
+				CCardUIObject* pcUI = dynamic_cast<CCardUIObject*>(m_pSelectedUI);
 				pcUI->CallFunc(m_pvEngagedObjects[m_iTurnFlag], m_pvEngagedObjects);
 				m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->SendHandToUsedByNum(pcUI->GetUiNum());
 				bCardUpdateFlag = true;
 			}
-			pSelectedUI = NULL;
+			m_pSelectedUI = NULL;
 		}
 		break;
 
@@ -984,9 +984,13 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 
 bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	int drawnCard;
+	//int drawnCard;
+	int tmp;
 	std::vector<int> intVector;
-	std::default_random_engine dre(0);
+	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
+	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
+
+	//std::default_random_engine dre(0);
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
@@ -1001,19 +1005,20 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
 		case 'Z':
-		case 'z':
-			drawnCard = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->Draw(dre);
-			// 오브젝트레이어의 카드 정보를 핸드의 정보로 바꿔줘야함.
-			if (drawnCard != -1)
-			{
-				std::cout << drawnCard << " 드로우" << endl;
-				bCardUpdateFlag = true;
-			}
-			else
-				std::cout << " 드로우 실패. 이미 5장이거나 덱이 없음." << endl;
+		case 'z': 
+			//drawnCard = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->Draw(dre);
+			//// 오브젝트레이어의 카드 정보를 핸드의 정보로 바꿔줘야함.
+			//if (drawnCard != -1)
+			//{
+			//	std::cout << drawnCard << " 드로우" << endl;
+			//	bCardUpdateFlag = true;
+			//}
+			//else
+			//	std::cout << " 드로우 실패. 이미 5장이거나 덱이 없음." << endl;
 			break;
 		case 'X':
 		case 'x':
+			//std::cout << "m_currentPhase : " << (int)m_currentPhase << std::endl;
 			/*intVector = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand();
 			std::cout << "hand : ";
 			for (int card : intVector)
@@ -1034,7 +1039,23 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			break;
 		case 'C':
 		case 'c':
-			IncreaseTurnFlag();
+			if(m_currentPhase == TurnPhase::PlayPhase)
+				IncreaseTurnFlag();
+			break;
+
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+			tmp = wParam - 0x30 - 1;
+			if (m_currentPhase == TurnPhase::PlayPhase)
+			{
+				if (pInteractiveUIObj->size() > 0) {
+					if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
+						m_pSelectedUI = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp];
+				}
+			}
 			break;
 		default:
 			break;
@@ -1091,10 +1112,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// -------------------------------   맵 추가 ----------------------------------------------
 
-	CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
-	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
-	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
+	//CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+	//pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	//pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
+	//m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
 
 	// ----------------- 버튼 오브젝트 ------------------
@@ -1125,7 +1146,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(12765.0f, 0.0f, 3186.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 2 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie2"));
@@ -1134,7 +1154,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(14593.0f, 0.0f, -432.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 3 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie3"));
@@ -1143,7 +1162,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(16566.0f, 0.0f, -1952.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 4 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie4"));
@@ -1152,7 +1170,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(14859.0f, 0.0f, 4636.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 
 		}
 
@@ -1166,7 +1183,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(27650.0f, 0.0f, 9271.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 2 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie2"));
@@ -1175,7 +1191,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(28928.0f, 0.0f, 8129.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 3 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie3"));
@@ -1184,7 +1199,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(25602.0f, 0.0f, 4795.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 		}
 		// ---------------- C 섹터 ---------------------
 		{
@@ -1196,7 +1210,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(26856.0f, 0.0f, -5531.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 2 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie2"));
@@ -1205,7 +1218,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(24037.0f, 0.0f, -8650.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 3 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie3"));
@@ -1214,7 +1226,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(25858.0f, 0.0f, -14250.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 		}
 		// ---------------- D 섹터 ---------------------
 		{
@@ -1226,7 +1237,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(30818.0f, 0.0f, -2297.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 2 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie2"));
@@ -1235,7 +1245,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(38175.0f, 0.0f, -2542.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 3 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie3"));
@@ -1244,7 +1253,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(41804.0f, 0.0f, -3246.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 		}
 		// ---------------- E 섹터 ---------------------
 		{
@@ -1256,7 +1264,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(41104.0f, 0.0f, 7827.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 2 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie2"));
@@ -1265,7 +1272,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(44483.0f, 0.0f, 7231.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 3 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie3"));
@@ -1274,7 +1280,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(44051.0f, 0.0f, 4317.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 		}
 		// ---------------- F 섹터 ---------------------
 		{
@@ -1286,7 +1291,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(36135.0f, 0.0f, -13805.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 			//---------------------------  좀비 2 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie2"));
@@ -1295,7 +1299,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(42683.0f, 0.0f, -13215.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 		}
 		// ---------------- G 섹터 ---------------------
 		{
@@ -1306,7 +1309,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject->SetPosition(51383.0f, 0.0f, -3133.0f);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			Engage(pMonsterObject);
 		}
 
 	}
@@ -1321,7 +1323,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		CCardUIObject* pCardUIObject;
 
-		for (int i = 0; i < iMaxHandCount; i++)
+		for (int i = 0;i < m_iMaxHandCount;i++)
 		{
 			pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 0, ShaderType::CUITextureShader);
 			pCardUIObject->SetPositionUI(100, 100);
@@ -1332,9 +1334,11 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 
 	//turn 턴 관련 초기화
-	Engage(m_pPlayer);
-	m_iTurnFlag = 0;
 
+	m_iTurnFlag = 0;
+	//m_currentPhase = TurnPhase::NON;
+	m_currentPhase = TurnPhase::StartPhase; // 테스트용
+	Engage(m_pPlayer);
 
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());
 
@@ -1471,9 +1475,9 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
 				// 선택 카드 드래그.
-				if (pSelectedUI)
+				if (m_pSelectedUI)
 				{
-					pSelectedUI->SetPositionUI(ptCursorPos);
+					m_pSelectedUI->SetPositionUI(ptCursorPos);
 				}
 			}
 			//
@@ -1503,7 +1507,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			for (int i = 0; i < handSize; i++)
 			{
 				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
-				if (obj != pSelectedUI)
+				if (obj != m_pSelectedUI)
 				{
 					obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)handSize / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
 					if (bCardUpdateFlag)
@@ -1512,19 +1516,19 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			}
 			bCardUpdateFlag = false; // 지금은 여기 있지만 다이나믹 쉐이핑 함수를 활성화 하면 거기 마지막으로 가면 됨.
 			// 손에 없는 카드 위치
-			for (int i = handSize; i < iMaxHandCount; i++)
+			for (int i = handSize; i < m_iMaxHandCount; i++)
 			{
 				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
-				if (obj != pSelectedUI)
+				if (obj != m_pSelectedUI)
 					obj->SetPositionUI(clientWidth * 1.2, (float)clientHeight / 10 * 9);
 			}
 		}
 		else
 		{
-			for (int i = 0; i < iMaxHandCount; i++)
+			for (int i = 0; i < m_iMaxHandCount; i++)
 			{
 				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
-				if (obj != pSelectedUI)
+				if (obj != m_pSelectedUI)
 					obj->SetPositionUI(clientWidth * 1.2, (float)clientHeight / 10 * 9);
 			}
 		}
@@ -1580,6 +1584,41 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 
 		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
+	}
+
+	// 전투 관련
+	std::default_random_engine dre(0);
+	CCharacterObject* turnObj = m_pvEngagedObjects[m_iTurnFlag];
+
+	if (m_currentPhase == TurnPhase::StartPhase)
+	{
+		turnObj->StartTurn();
+
+		for (int i = 0;i < m_iMaxHandCount;i++)
+			turnObj->GetDeckData()->Draw(dre);
+		// 손패에 변경사항이 있을 경우 true로 바꿔줘야함.
+		bCardUpdateFlag = true;
+
+		m_currentPhase = TurnPhase::PlayPhase;
+	}
+	else if (m_currentPhase == TurnPhase::PlayPhase)
+	{
+		// 카드를 뽑는다는 효과를 지닌 카드가 있을경우 여기서 처리.
+
+		// IncreaseTurnFlag() 함수를 통해 EndPhase로 넘어감.
+		// 벡터에 객체가 하나만 남으면 EndBattle로 넘어감.
+	}
+	else if (m_currentPhase == TurnPhase::EndPhase)
+	{
+		// 처리할것을 다 처리하면 StartPhase로 변경.
+		m_currentPhase = TurnPhase::StartPhase;
+	}
+	else if (m_currentPhase == TurnPhase::EndBattle)
+	{
+		// 처리할것을 다 처리하면 NON으로 변경.
+		m_iCurrentTurnCount = 0;
+		m_iTurnFlag = 0;
+		m_currentPhase = TurnPhase::NON;
 	}
 }
 
@@ -1726,8 +1765,25 @@ void CTestScene::Engage(CCharacterObject* obj)
 	// 객체가 벡터에 없으면 추가
 	if (it == m_pvEngagedObjects.end()) {
 		m_pvEngagedObjects.push_back(obj);
-	}
 
+		if (m_pvEngagedObjects.size() >= 2)
+		{
+			if (m_currentPhase == TurnPhase::NON)// 이 조건을 밖으로 빼는것도 ㄱㅊ을지도?
+			{
+
+				m_currentPhase = TurnPhase::StartPhase;
+			}
+			else //TurnPhase::PlayPhase;TurnPhase::StartPhase;TurnPhase::EndPhase;
+				;// m_currentPhase = TurnPhase::Engage;
+		}
+
+		// 객체 전투 준비.
+		obj->GetDeckData()->InitializeDeck();
+	}
+	else
+		;
+	
+	cout << m_pvEngagedObjects.size() << endl;
 	//// 속도 순서로 정렬
 	//std::sort(m_pvEngagedObjects.begin(), m_pvEngagedObjects.end(), [](CCharacterObject* a, CCharacterObject* b) {
 	//	return a->GetSpeed() > b->GetSpeed(); // 내림차순 정렬
@@ -1742,6 +1798,9 @@ void CTestScene::IncreaseTurnFlag()
 	if (m_iTurnFlag >= m_pvEngagedObjects.size())
 		m_iTurnFlag = 0;
 	std::cout << m_iTurnFlag << std::endl;
+
+	// 턴 종료 버튼을 눌렀다는 신호 
+	m_currentPhase = TurnPhase::EndPhase;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
