@@ -652,7 +652,7 @@ private:
 class CButtonObject : public CGameObject
 {
 public:
-	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
+	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pszFileName,float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
 	~CButtonObject();
 
 private:
@@ -666,8 +666,10 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+	void SetIsButton(bool IsButton) { m_IsButton = IsButton; };
 
 public:
+	bool m_IsButton;
 	bool m_IsClicked;
 	bool IsPointInside(float x, float y);
 
