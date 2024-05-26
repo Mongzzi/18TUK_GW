@@ -8,7 +8,6 @@ CDeckData::CDeckData()
             m_InitialDeck.push_back(j);
         }
     }
-    InitializeDeck();// 여기 말고 다른곳에서 해야함.
 }
 
 CDeckData::~CDeckData()
@@ -72,6 +71,19 @@ void CDeckData::SendHandToUsedByNum(int num)
     }
     else
         ;
+}
+
+void CDeckData::SendHandToUsedAll()
+{
+    m_Used.reserve(m_Used.size() + m_Hand.size());
+    std::move(m_Hand.begin(), m_Hand.end(), std::back_inserter(m_Used));
+    m_Hand.clear();
+
+    /*for (int card : m_Hand)
+    {
+        m_Used.push_back(card);
+    }
+    m_Hand.clear();*/
 }
 
 int CDeckData::GetMaxDeckSize()
