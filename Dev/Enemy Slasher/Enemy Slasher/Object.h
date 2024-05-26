@@ -652,12 +652,15 @@ private:
 class CButtonObject : public CGameObject
 {
 public:
-	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pszFileName,float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
+	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pszFileName, float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
 	~CButtonObject();
 
 private:
 	float m_x, m_y;				// 오브젝트의 화면 좌표 (x, y)
 	float m_width, m_height;	// 오브젝트의 가로길이 , 세로길이
+
+	// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
+	int m_type;
 
 	ID3D12Resource* m_pd3dcb2DGameObject = NULL;
 	CB_2D_GAMEOBJECT_INFO* m_pcbMapped2DGameObject = NULL;
@@ -667,10 +670,13 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 	void SetIsButton(bool IsButton) { m_IsButton = IsButton; };
+	void SetType(int n) { m_type = n; };
+	int GetType() { return m_type; };
 
 public:
 	bool m_IsButton;
 	bool m_IsClicked;
+	bool m_IsAbove;
 	bool IsPointInside(float x, float y);
 
 };

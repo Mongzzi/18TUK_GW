@@ -314,15 +314,67 @@ CTitleScene::~CTitleScene()
 
 bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	POINT ptCursorPos{ 0,0 };
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int clientWidth = clientRect.right - clientRect.left;
+	int clientHeight = clientRect.bottom - clientRect.top;
+
+	// 프레임 버퍼 크기를 기준으로 마우스 좌표 변환
+	float mouseX = static_cast<float>(ptCursorPos.x) / (clientWidth)*FRAME_BUFFER_WIDTH;
+	float mouseY = static_cast<float>(ptCursorPos.y) / (clientHeight)*FRAME_BUFFER_HEIGHT;
+
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+	{
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			if (pButton && pButton->IsPointInside(mouseX, mouseY))
+			{
+				if (pButton->GetType() == 2) {
+				std::cout << "게임시작" << std::endl;
+					
+				}
+				else if (pButton->GetType() == 3) {
+					std::cout << "게임종료" << std::endl;
+				}
+
+				pButton->m_IsClicked = true;
+			}
+		}
+	}
 		break;
 	case WM_LBUTTONUP:
+	{
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			if (pButton && pButton->m_IsClicked)
+			{
+				if (pButton->IsPointInside(mouseX, mouseY))
+				{
+					pButton->m_IsClicked = false;
+				}
+			}
+		}
+	}
 		break;
 	case WM_RBUTTONDOWN:
+	{
+
+	}
 		break;
 	case WM_RBUTTONUP:
+	{
+
+	}
 		break;
 	default:
 		break;
@@ -522,18 +574,21 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/llogo.png",
 		FRAME_BUFFER_WIDTH *2/3, FRAME_BUFFER_HEIGHT / 7, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 9, ShaderType::C2DObjectShader);
 	pButtonObject->SetIsButton(false);
+	pButtonObject->SetType(1);	// 타이틀로고버튼
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	
 	// 게임시작 버튼 오브젝트 생성------------------------------------
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gamestart.png",
 		FRAME_BUFFER_WIDTH * 4 / 5, FRAME_BUFFER_HEIGHT * 5 / 8, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 11, ShaderType::C2DObjectShader);
+	pButtonObject->SetType(2);	//게임시작버튼
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	
 	// 게임종료 버튼 오브젝트 생성
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameexit.png",
 		FRAME_BUFFER_WIDTH * 4 / 5, FRAME_BUFFER_HEIGHT * 6.5 / 8, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 11, ShaderType::C2DObjectShader);
+	pButtonObject->SetType(3);	//게임종료버튼
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 
