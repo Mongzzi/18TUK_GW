@@ -196,6 +196,7 @@ public:
 
 	void Engage(CCharacterObject* obj);
 	void IncreaseTurnFlag();
+	void UseSelectedCard();
 
 };
 
