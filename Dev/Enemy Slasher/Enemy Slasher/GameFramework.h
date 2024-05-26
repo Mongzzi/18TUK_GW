@@ -31,12 +31,14 @@ public:
 	void BuildObjects();
 	void ReleaseObjects();
 
+	// 0 = 타이틀 , 1 = 로비 , 2 = 메인
+	void SwitchScene(int nSceneIndex);
+
 	void ProcessInput();
 	void AnimateObjects();
 	void FrameAdvance();
 	void DynamicShaping();
 	void UpdateTimer();
-
 
 	void Render2D();
 

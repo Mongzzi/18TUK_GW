@@ -486,12 +486,12 @@ void CGameFramework::BuildObjects()
 	{
 		// m_pvScenelist 에 여러 씬 등록 및 각 씬의 플레이어 생성
 
-		m_pvScenelist.push_back(new CTitleScene);
-		m_pvScenelist.push_back(new CLobbyScene);
-		//m_pvScenelist.push_back(new CTestScene);
-		//m_pvScenelist.push_back(new CTestScene_Slice);
-		//m_pvScenelist.push_back(new CTestScene_PhysX);
-		//m_pvScenelist.push_back(new CTestScene_Animation);
+		m_pvScenelist.push_back(new CTitleScene(this));
+		m_pvScenelist.push_back(new CLobbyScene(this));
+		//m_pvScenelist.push_back(new CTestScene(this));
+		//m_pvScenelist.push_back(new CTestScene_Slice(this));
+		//m_pvScenelist.push_back(new CTestScene_PhysX(this));
+		//m_pvScenelist.push_back(new CTestScene_Animation(this));
 
 		for (auto scene : m_pvScenelist)
 			scene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, m_pFBXDataManager);
@@ -537,6 +537,24 @@ void CGameFramework::ReleaseObjects()
 
 	if (m_pScene) m_pScene->ReleaseObjects();
 	if (m_pScene) delete m_pScene;
+}
+
+void CGameFramework::SwitchScene(int nSceneIndex)
+{
+	if (nSceneIndex >= 0 && nSceneIndex < m_pvScenelist.size())
+	{
+		if (m_pScene)
+		{
+			m_pScene->ReleaseUploadBuffers();
+			m_pScene->m_pPlayer->ReleaseUploadBuffers();
+			if (m_pScene) m_pScene->ReleaseObjects();
+			if (m_pScene) delete m_pScene;
+		}
+
+		m_pScene = m_pvScenelist[nSceneIndex];
+		m_pPlayer = m_pScene->m_pPlayer;
+		m_pCamera = m_pPlayer->GetCamera();
+	}
 }
 
 void CGameFramework::ProcessInput()

@@ -1,17 +1,18 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "ObjectManager.h"
-//#include "ShaderManager.h"
 #include "PhysXManager.h"
 #include "Ray.h"
 #include "FbxLoader_V3.h"
 #include "ResorceManager.h"
+#include "GameFramework.h"
 
-CBasicScene::CBasicScene()
+CBasicScene::CBasicScene(CGameFramework* GameFramwork)
 {
 	m_pObjectManager = new CObjectManager;
 	m_CurrentTime = 0.0f;
 	m_ElapsedTime = 0.0f;
+	m_pGameFramework = GameFramwork;
 	//m_pShaderManager = new CShaderManager;
 }
 
@@ -304,7 +305,7 @@ void CBasicScene::Exit()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CTitleScene::CTitleScene()
+CTitleScene::CTitleScene(CGameFramework* GameFramwork) :CBasicScene(GameFramwork)
 {
 }
 
@@ -337,12 +338,17 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
 			if (pButton && pButton->IsPointInside(mouseX, mouseY))
 			{
+				// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
 				if (pButton->GetType() == 2) {
 					std::cout << "게임시작" << std::endl;
-
+					
+					// 0 = 타이틀씬 , 1 = 로비씬 , 2 = 메인씬
+					m_pGameFramework->SwitchScene(1);
+					return true;
 				}
 				else if (pButton->GetType() == 3) {
 					std::cout << "게임종료" << std::endl;
+					exit(1);
 				}
 
 				pButton->m_IsClicked = true;
@@ -732,7 +738,7 @@ void CTitleScene::ReleaseShaderVariables()
 
 
 
-CTestScene::CTestScene()
+CTestScene::CTestScene(CGameFramework* GameFramwork) :CBasicScene(GameFramwork)
 {
 }
 
@@ -1819,7 +1825,7 @@ void CTestScene::UseSelectedCard()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-CTestScene_Slice::CTestScene_Slice()
+CTestScene_Slice::CTestScene_Slice(CGameFramework* GameFramwork) :CBasicScene(GameFramwork)
 {
 }
 
@@ -2243,7 +2249,7 @@ void CTestScene_Slice::Exit()
 {
 }
 
-CTestScene_PhysX::CTestScene_PhysX()
+CTestScene_PhysX::CTestScene_PhysX(CGameFramework* GameFramwork):CBasicScene(GameFramwork)
 {
 	m_pPhysXManager = new CPhysXManager;
 	m_pObjectManager->SetPhysXManager(m_pPhysXManager);
@@ -2345,7 +2351,7 @@ void CTestScene_PhysX::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 
 
-CTestScene_Animation::CTestScene_Animation()
+CTestScene_Animation::CTestScene_Animation(CGameFramework* GameFramwork) : CTestScene(GameFramwork)
 {
 
 }
@@ -2497,6 +2503,10 @@ void CTestScene_Animation::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
+}
+
+CLobbyScene::CLobbyScene(CGameFramework* GameFramwork) :CTestScene(GameFramwork)
+{
 }
 
 bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
