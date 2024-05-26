@@ -1050,10 +1050,8 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 					if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
 					{
 						if (m_pSelectedUI == (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp])
-						{
 							UseSelectedCard();
-						}
-						else 
+						else
 							m_pSelectedUI = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp];
 					}
 				}
