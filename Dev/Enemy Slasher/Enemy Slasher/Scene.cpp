@@ -338,8 +338,8 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			if (pButton && pButton->IsPointInside(mouseX, mouseY))
 			{
 				if (pButton->GetType() == 2) {
-				std::cout << "게임시작" << std::endl;
-					
+					std::cout << "게임시작" << std::endl;
+
 				}
 				else if (pButton->GetType() == 3) {
 					std::cout << "게임종료" << std::endl;
@@ -349,7 +349,7 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			}
 		}
 	}
-		break;
+	break;
 	case WM_LBUTTONUP:
 	{
 		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
@@ -365,17 +365,17 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			}
 		}
 	}
-		break;
+	break;
 	case WM_RBUTTONDOWN:
 	{
 
 	}
-		break;
+	break;
 	case WM_RBUTTONUP:
 	{
 
 	}
-		break;
+	break;
 	default:
 		break;
 	}
@@ -572,19 +572,19 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	// 타이틀 로고 오브젝트 생성 ------------------------------------
 	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/llogo.png",
-		FRAME_BUFFER_WIDTH *2/3, FRAME_BUFFER_HEIGHT / 7, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 9, ShaderType::C2DObjectShader);
+		FRAME_BUFFER_WIDTH * 2 / 3, FRAME_BUFFER_HEIGHT / 7, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 9, ShaderType::C2DObjectShader);
 	pButtonObject->SetIsButton(false);
 	pButtonObject->SetType(1);	// 타이틀로고버튼
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
-	
+
 	// 게임시작 버튼 오브젝트 생성------------------------------------
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gamestart.png",
 		FRAME_BUFFER_WIDTH * 4 / 5, FRAME_BUFFER_HEIGHT * 5 / 8, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 11, ShaderType::C2DObjectShader);
 	pButtonObject->SetType(2);	//게임시작버튼
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
-	
+
 	// 게임종료 버튼 오브젝트 생성
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameexit.png",
 		FRAME_BUFFER_WIDTH * 4 / 5, FRAME_BUFFER_HEIGHT * 6.5 / 8, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 11, ShaderType::C2DObjectShader);
@@ -1005,7 +1005,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
 		case 'Z':
-		case 'z': 
+		case 'z':
 			//drawnCard = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->Draw(dre);
 			//// 오브젝트레이어의 카드 정보를 핸드의 정보로 바꿔줘야함.
 			//if (drawnCard != -1)
@@ -1039,7 +1039,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			break;
 		case 'C':
 		case 'c':
-			if(m_currentPhase == TurnPhase::PlayPhase)
+			if (m_currentPhase == TurnPhase::PlayPhase)
 				IncreaseTurnFlag();
 			break;
 
@@ -1323,7 +1323,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		CCardUIObject* pCardUIObject;
 
-		for (int i = 0;i < m_iMaxHandCount;i++)
+		for (int i = 0; i < m_iMaxHandCount; i++)
 		{
 			pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 0, ShaderType::CUITextureShader);
 			pCardUIObject->SetPositionUI(100, 100);
@@ -1594,7 +1594,7 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	{
 		turnObj->StartTurn();
 
-		for (int i = 0;i < m_iMaxHandCount;i++)
+		for (int i = 0; i < m_iMaxHandCount; i++)
 			turnObj->GetDeckData()->Draw(dre);
 		// 손패에 변경사항이 있을 경우 true로 바꿔줘야함.
 		bCardUpdateFlag = true;
@@ -1782,7 +1782,7 @@ void CTestScene::Engage(CCharacterObject* obj)
 	}
 	else
 		;
-	
+
 	cout << m_pvEngagedObjects.size() << endl;
 	//// 속도 순서로 정렬
 	//std::sort(m_pvEngagedObjects.begin(), m_pvEngagedObjects.end(), [](CCharacterObject* a, CCharacterObject* b) {
@@ -2484,3 +2484,142 @@ void CTestScene_Animation::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, 
 	pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
+
+bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	POINT ptCursorPos{ 0,0 };
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int clientWidth = clientRect.right - clientRect.left;
+	int clientHeight = clientRect.bottom - clientRect.top;
+
+	// 프레임 버퍼 크기를 기준으로 마우스 좌표 변환
+	float mouseX = static_cast<float>(ptCursorPos.x) / (clientWidth)*FRAME_BUFFER_WIDTH;
+	float mouseY = static_cast<float>(ptCursorPos.y) / (clientHeight)*FRAME_BUFFER_HEIGHT;
+
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+	{
+	}
+	break;
+	case WM_LBUTTONUP:
+	{
+	}
+	break;
+	case WM_RBUTTONDOWN:
+	{
+	}
+	break;
+	case WM_RBUTTONUP:
+	{
+	}
+	break;
+	default:
+		break;
+	}
+	return false;
+}
+
+bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case 'Q': m_pPlayer->Move(DIR_UP, 5000.0f, true); break;
+		case 'E': m_pPlayer->Move(DIR_DOWN, 5000.0f, true); break;
+		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
+		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return(false);
+}
+
+bool CLobbyScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
+{
+	DWORD dwDirection = 0;
+	if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
+	if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
+	if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
+	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
+
+	if ((dwDirection != 0))
+	{
+		if (dwDirection) m_pPlayer->Move(dwDirection, 100.0f, true);
+	}
+
+	return(true);
+}
+
+void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
+{
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+	CFbxLoader_V3 fLoader;
+
+	m_pTextShader = new CTextShader();
+	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	// Collider Shader 등록
+	CObjectsShader* pColliderShader = new CObjectsShader();
+	pColliderShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pObjectManager->SetColliderShader(pColliderShader);
+
+	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+	m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, -100.0f));
+	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+
+	BuildLightsAndMaterials();
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	//CSkyBox* pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CSkyBoxShader, 6);
+	//m_pObjectManager->AddObj(pSkyBox, ObjectLayer::SkyBox);
+
+
+	CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "GameObject"));
+	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
+
+
+	//CMonsterObject* pMonsterObject;
+	////---------------------------  좀비 1 -------------------------------------------
+	//pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+	//pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie1"));
+	//pMonsterObject->SetScale(1.0f, 1.0f, 1.0f);
+	//pMonsterObject->SetPosition(0.0f, 0.0f, 0.0f);
+	//pMonsterObject->SetTeamId(1);
+	//m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+}
+
+void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
+{
+}
+
+void CLobbyScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
+{
+}
+
+void CLobbyScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	m_pObjectManager->Render(pd3dCommandList, pCamera);
+}
+

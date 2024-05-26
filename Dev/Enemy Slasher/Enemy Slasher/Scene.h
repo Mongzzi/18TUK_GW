@@ -286,3 +286,24 @@ public:
 
 protected:
 };
+
+class CLobbyScene : public CTestScene
+{
+public:
+	CLobbyScene(){};
+	~CLobbyScene(){};
+
+	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual bool ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos);
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager);
+	virtual void AnimateObjects(float fTotalTime, float fTimeElapsed);
+	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+
+
+private:
+	std::vector<CTextObject*> m_textObjects;
+	CTextShader* m_pTextShader = NULL;
+};
