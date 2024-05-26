@@ -513,39 +513,34 @@ void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	BuildLightsAndMaterials();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	{
-		CTitleObject* pBackGround = new CTitleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTitleShader);
-		pBackGround->SetPosition(0.0f, 0.0f, 0.0f);
-		m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
-	}
+	// 타이틀 객체 생성
+	CTitleObject* pBackGround = new CTitleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTitleShader);
+	pBackGround->SetPosition(0.0f, 0.0f, 0.0f);
+	m_pObjectManager->AddObj(pBackGround, ObjectLayer::BackGround);
 
-	{
-		CBoxMesh* pBox = new CBoxMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, 100, 100, 1000);
-		CCardUIObject* pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUIObjectsShader);
-		pCardUIObject->SetMesh(0, pBox);
-		pCardUIObject->SetPositionUI(480, 300);
-		pCardUIObject->SetScale(1, 1, 1);
-		//pCardUIObject->SetShaderType(ShaderType::CUIObjectsShader);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	// 타이틀 로고 오브젝트 생성 ------------------------------------
+	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/llogo.png",
+		FRAME_BUFFER_WIDTH *2/3, FRAME_BUFFER_HEIGHT / 7, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 9, ShaderType::C2DObjectShader);
+	pButtonObject->SetIsButton(false);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
-		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUIObjectsShader);
-		pCardUIObject->SetMesh(0, pBox);
-		pCardUIObject->SetPositionUI(480, 420);
-		pCardUIObject->SetScale(1, 1, 1);
-		//pCardUIObject->SetShaderType(ShaderType::CUIObjectsShader);
-		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
-	}
+	
+	// 게임시작 버튼 오브젝트 생성------------------------------------
+	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gamestart.png",
+		FRAME_BUFFER_WIDTH * 4 / 5, FRAME_BUFFER_HEIGHT * 5 / 8, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 11, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
-	{
-		//CRayObject* pRayObject = NULL;
-		//pRayObject = new CRayObject();
-		//pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
-		//m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
-	}
+	
+	// 게임종료 버튼 오브젝트 생성
+	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameexit.png",
+		FRAME_BUFFER_WIDTH * 4 / 5, FRAME_BUFFER_HEIGHT * 6.5 / 8, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 11, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
-	m_textObjects.push_back(new CTextObject(L"Enemy Slasher", D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 2), L"Verdana", 60.0f, D2D1::ColorF::RosyBrown));
-	m_textObjects.push_back(new CTextObject(L"게임 시작", D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 4 * 3), L"Verdana", 40.0f, D2D1::ColorF::RosyBrown));
-	m_textObjects.push_back(new CTextObject(L"게임 종료", D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 4 * 3, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), L"Verdana", 40.0f, D2D1::ColorF::RosyBrown));
+
+
+	//m_textObjects.push_back(new CTextObject(L"Enemy Slasher", D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 2), L"Verdana", 60.0f, D2D1::ColorF::RosyBrown));
+	//m_textObjects.push_back(new CTextObject(L"게임 시작", D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT / 4 * 3), L"Verdana", 40.0f, D2D1::ColorF::RosyBrown));
+	//m_textObjects.push_back(new CTextObject(L"게임 종료", D2D1::RectF(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 4 * 3, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT), L"Verdana", 40.0f, D2D1::ColorF::RosyBrown));
 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1069,7 +1064,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 
 	// ----------------- 버튼 오브젝트 ------------------
-	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 320.0f, 240.f, 100.0f, 100.0f, ShaderType::C2DObjectShader);
+	//CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 320.0f, 240.f, 100.0f, 100.0f, ShaderType::C2DObjectShader);
 	//m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 
@@ -1254,7 +1249,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		{
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "ZombieBoss"));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetScale(7.0f, 7.0f, 7.0f);
 			//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
 			pMonsterObject->SetPosition(51383.0f, 0.0f, -3133.0f);
 			pMonsterObject->SetTeamId(1);
