@@ -950,6 +950,13 @@ void CCharacterObject::Reset()
 	m_pDeck->InitializeDeck();
 }
 
+void CCharacterObject::StartTurn()
+{
+	m_iKarma = 0;
+	// 패를 전부 버린다.
+	m_pDeck->SendHandToUsedAll();
+}
+
 void CCharacterObject::TakeDamage(float atk) 
 {
 	m_fCurHp -= atk;
@@ -1792,20 +1799,20 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3
 }
 
 
-CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float width, float height, ShaderType stype, int nMeshes)
+CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pszFileName, float x, float y, float width, float height, ShaderType stype, int nMeshes)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
 	m_x = x;
 	m_y = y;    
 	m_width = width;
 	m_height = height;
+	m_IsButton = true;
 	m_IsClicked = false;
-
 
 	CTexture* ppTextures[1];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/img.jpg", RESOURCE_TEXTURE2D, 0);
+	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, pszFileName, RESOURCE_TEXTURE2D, 0);
 
 	if (m_pMaterial) {
 		if (m_pMaterial->m_pShader) {

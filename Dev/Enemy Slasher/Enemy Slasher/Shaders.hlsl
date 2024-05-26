@@ -1,4 +1,5 @@
-
+#define FRAME_BUFFER_WIDTH		1280
+#define FRAME_BUFFER_HEIGHT		960
 
 cbuffer cbCameraInfo : register(b0)
 {
@@ -152,7 +153,7 @@ VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
 		screenPos += float2(2.0f, -2.0f); 
 	}
 
-	screenPos = screenPos / float2(640.0f, 480.0f) * 2.0f - 1.0f; // 현재 콘솔창 크기 640 * 480
+	screenPos = screenPos / float2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT) * 2.0f - 1.0f;
 	screenPos.y = -screenPos.y;
 
 	output.position = float4(screenPos, 0.0f, 1.0f);

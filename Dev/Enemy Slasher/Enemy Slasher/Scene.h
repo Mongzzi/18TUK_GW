@@ -173,20 +173,30 @@ public:
 
 	CTextShader* m_pTextShader = NULL;
 
-
+	enum class TurnPhase : int {
+		NON = -1,
+		StartPhase = 0,
+		PlayPhase,
+		EndPhase,
+		Engage = 100,
+		EndBattle
+	};
 private:
 	CUIObject* pCoveredUI = NULL;
-	CUIObject* pSelectedUI = NULL;
+	CUIObject* m_pSelectedUI = NULL;
 	bool bCardUpdateFlag = false;
-	int iMaxHandCount = 5;
+	int m_iMaxHandCount = 5;
 
 
 	std::vector<CCharacterObject*> m_pvEngagedObjects;
-	int m_iCurrentTurnCount;
-	int m_iTurnFlag;		//m_pvEngagedObjects의 m_iTurnFlag번째 원소의 턴임.
+	int m_iCurrentTurnCount; // 전투 시작 후 몇번째 턴인지
+	int m_iTurnFlag;		//m_pvEngagedObjects의 m_iTurnFlag번째 원소의 턴임. flag가 어울리지 않을지도
+	TurnPhase m_currentPhase;		//현제의 페이즈를 나타내는 변수.
 public:
+
 	void Engage(CCharacterObject* obj);
 	void IncreaseTurnFlag();
+	void UseSelectedCard();
 
 };
 

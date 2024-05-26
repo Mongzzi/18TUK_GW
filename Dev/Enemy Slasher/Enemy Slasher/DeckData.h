@@ -34,6 +34,7 @@ public:
 	// 패 버리기
 	void SendHandToUsedByIndex(int index);
 	void SendHandToUsedByNum(int num);
+	void SendHandToUsedAll();
 	// 특정카드 검색?
 	// void SearchCard();
 	// 덱 최대 크기

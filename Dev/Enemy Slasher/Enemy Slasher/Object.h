@@ -346,8 +346,12 @@ private:
 	// 체력
 	float m_fCurHp;
 	float m_fMaxHp;
+
 	float m_fAtk;
+
 	int m_iTeamId;
+
+	int m_iKarma;
 	// 이름?
 	// 등등
 public:
@@ -356,7 +360,8 @@ public:
 	float GetAtk() { return m_fAtk; };
 	float GetCurHp() { return m_fCurHp; };
 	int GetTeamId() { return m_iTeamId; };
-	void Reset();
+	void Reset(); // 전투가 끝나거나 시작될때 불릴 함수
+	void StartTurn();// 턴 시작시 불릴 함수
 	void SetTeamId(int teamId) { m_iTeamId = teamId; };
 
 	void TakeDamage(float atk);
@@ -652,12 +657,15 @@ private:
 class CButtonObject : public CGameObject
 {
 public:
-	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
+	CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, wchar_t* pszFileName, float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
 	~CButtonObject();
 
 private:
 	float m_x, m_y;				// 오브젝트의 화면 좌표 (x, y)
 	float m_width, m_height;	// 오브젝트의 가로길이 , 세로길이
+
+	// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
+	int m_type;
 
 	ID3D12Resource* m_pd3dcb2DGameObject = NULL;
 	CB_2D_GAMEOBJECT_INFO* m_pcbMapped2DGameObject = NULL;
@@ -666,9 +674,14 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+	void SetIsButton(bool IsButton) { m_IsButton = IsButton; };
+	void SetType(int n) { m_type = n; };
+	int GetType() { return m_type; };
 
 public:
+	bool m_IsButton;
 	bool m_IsClicked;
+	bool m_IsAbove;
 	bool IsPointInside(float x, float y);
 
 };
