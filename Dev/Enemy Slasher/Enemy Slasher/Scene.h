@@ -179,7 +179,8 @@ public:
 		StartPhase = 0,
 		PlayPhase,
 		EndPhase,
-		Engage = 100,
+		StartBattle = 100,
+		Engage,
 		EndBattle
 	};
 private:
@@ -188,11 +189,15 @@ private:
 	bool bCardUpdateFlag = false;
 	int m_iMaxHandCount = 5;
 
+	std::default_random_engine dre;
 
 	std::vector<CCharacterObject*> m_pvEngagedObjects;
 	int m_iCurrentTurnCount; // 전투 시작 후 몇번째 턴인지
 	int m_iTurnFlag;		//m_pvEngagedObjects의 m_iTurnFlag번째 원소의 턴임. flag가 어울리지 않을지도
 	TurnPhase m_currentPhase;		//현제의 페이즈를 나타내는 변수.
+
+	TurnPhase m_lastPhase;			//Engage전의 페이즈를 나타내는 변수.
+	CCharacterObject* m_pEngageObj; //Engage되는 객체.
 public:
 
 	void Engage(CCharacterObject* obj);

@@ -1602,7 +1602,6 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	}
 
 	// 전투 관련
-	std::default_random_engine dre(0);
 	CCharacterObject* turnObj = m_pvEngagedObjects[m_iTurnFlag];
 	std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::TextureObject];
 
@@ -1664,12 +1663,27 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		m_iTurnFlag = 0;
 		m_currentPhase = TurnPhase::NON;
 	}
+	else if (m_currentPhase == TurnPhase::Engage)
+	{
+		m_pEngageObj->GetDeckData()->ShuffleDeck(dre);
+		m_currentPhase = m_lastPhase;
+		m_pEngageObj = nullptr;
+	}
+	else if (m_currentPhase == TurnPhase::StartBattle)
+	{
+		dre.seed(0);
+		for (CCharacterObject* cobj : m_pvEngagedObjects)
+		{
+			cobj->BeforeEngage();
+			cobj->GetDeckData()->ShuffleDeck(dre);
+		}
+		m_currentPhase = TurnPhase::StartPhase;
+	}
 }
 
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
-
 	// 카드패 관련
 	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
 	if (pInteractiveUIObj->size() > 0)
@@ -1687,6 +1701,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 				dynamic_cast<CCardUIObject*> (obj)->UpdateData(hand[i]);
 				dynamic_cast<CCardUIObject*> (obj)->UpdateTexture(pd3dDevice, hand[i]);
+				//dynamic_cast<CCardUIObject*> (obj)->UpdateTexture(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, hand[i]);
 			}
 			bCardUpdateFlag = false;
 		}
@@ -1838,19 +1853,21 @@ void CTestScene::Engage(CCharacterObject* obj)
 		{
 			if (m_currentPhase == TurnPhase::NON)// 이 조건을 밖으로 빼는것도 ㄱㅊ을지도?
 			{
-
-				m_currentPhase = TurnPhase::StartPhase;
+				m_currentPhase = TurnPhase::StartBattle;
 			}
 			else //TurnPhase::PlayPhase;TurnPhase::StartPhase;TurnPhase::EndPhase;
-				;// m_currentPhase = TurnPhase::Engage;
+			{
+				m_lastPhase = m_currentPhase;
+				m_currentPhase = TurnPhase::Engage;
+			}
 		}
 
 		// 객체 전투 준비.
-		obj->BeforeEngage();
 		//cout << obj->GetName() << " Engage" << endl;
 	}
 	else
 		;
+	m_pEngageObj = obj;
 	//// 속도 순서로 정렬
 	//std::sort(m_pvEngagedObjects.begin(), m_pvEngagedObjects.end(), [](CCharacterObject* a, CCharacterObject* b) {
 	//	return a->GetSpeed() > b->GetSpeed(); // 내림차순 정렬

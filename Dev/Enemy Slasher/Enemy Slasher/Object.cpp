@@ -558,12 +558,16 @@ void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CGameObject::ChangeTexture(ID3D12Device* pd3dDevice, CTexture* a)
 {
-	if (m_pMaterial) {
-		if (m_pMaterial->m_pShader) {
-			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, a, 0, 4);
-			m_pMaterial->SetTexture(a);
+	if (m_pMaterial && m_pMaterial->m_pShader && a)
+	{
+		if (m_pMaterial->m_pTexture)
+		{
+			m_pMaterial->m_pTexture->Release();
+			m_pMaterial->m_pTexture = nullptr;
 		}
+		m_pMaterial->SetTexture(a);
+		m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+		m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, a, 0, 4);
 	}
 }
 
@@ -1366,7 +1370,7 @@ void CCardUIObject::InitializeMaterial(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CMaterial* cardMaterial = m_pChild->GetMaterial();
 	if (cardMaterial) {
 		if (cardMaterial->m_pShader) {
-			cardMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//cardMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			cardMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 			cardMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardTexture, 0, 4);
 			cardMaterial->SetTexture(m_ppCardTexture);
@@ -1377,7 +1381,7 @@ void CCardUIObject::InitializeMaterial(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	cardMaterial = m_pChild->GetSibling()->GetMaterial();
 	if (cardMaterial) {
 		if (cardMaterial->m_pShader) {
-			cardMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			//cardMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			cardMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 			cardMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardFaceTextures[0], 0, 4);
 			cardMaterial->SetTexture(m_ppCardFaceTextures[0]);
@@ -1412,11 +1416,15 @@ void CCardUIObject::UpdateTexture(ID3D12Device* pd3dDevice, int num)
 	case 2: 
 	case 3: 
 	case 4: 
-		if (cardMaterial) {
-			if (cardMaterial->m_pShader) {
-				cardMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardFaceTextures[num], 0, 4);
-				cardMaterial->SetTexture(m_ppCardFaceTextures[num]);
+		if (cardMaterial && cardMaterial->m_pShader)
+		{
+			if (cardMaterial->m_pTexture)
+			{
+				cardMaterial->m_pTexture = nullptr;
 			}
+			cardMaterial->SetTexture(m_ppCardFaceTextures[num]);
+			cardMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			cardMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardFaceTextures[num], 0, 4);
 		}
 		break;
 	default:
