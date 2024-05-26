@@ -841,7 +841,7 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 				animVal++;
 				counter = 0;
 				if (animVal >= currAnim->m_vBoneAnimations[0].m_vKeyFrames.size()) animVal = 0;
-				cout << "Skeleton - AnimVal : " << animVal << "\n";
+				//cout << "Skeleton - AnimVal : " << animVal << "\n";
 			}
 			counter++;
 		}
@@ -934,8 +934,9 @@ CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDeck = new CDeckData();
 	m_iTurnSpeed = 5.;
 	m_fMaxHp = m_fCurHp = 100;
-	m_fAtk = 10.f;
+	m_fAtk = 110.f;
 	m_iTeamId = 0;
+	m_sName = "Unknown";
 }
 
 CCharacterObject::~CCharacterObject()
@@ -957,10 +958,16 @@ void CCharacterObject::StartTurn()
 	m_pDeck->SendHandToUsedAll();
 }
 
+void CCharacterObject::BeforeEngage()
+{
+	m_pDeck->InitializeDeck();
+};
+
 void CCharacterObject::TakeDamage(float atk) 
 {
 	m_fCurHp -= atk;
 };
+
 void CCharacterObject::Heal(float ratio)
 {
 	m_fCurHp += m_fMaxHp * ratio;
@@ -1063,9 +1070,9 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	XMStoreFloat3(&position, rayW);
 
 	SetPosition(position);
+	Rotate(0, 180, 0);
 
-
-	// 회전은 항상 카메라를 향해야함.
+	// 회전은 항상 카메라를 향해야함. == ???
 
 
 }
@@ -1169,6 +1176,9 @@ void Callback_4(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "Callback_4" << endl;
 }
 
+CTexture* CCardUIObject::m_ppCardTexture = nullptr;
+CTexture* CCardUIObject::m_ppCardFaceTextures[5] = { nullptr };
+
 CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype)
 	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, stype)
 {
@@ -1179,48 +1189,48 @@ CCardUIObject::CCardUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	: CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pCamera, stype)
 {
 	m_Card_Ui_Num = UInum;
-	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	////CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	// 이거 계속 새로 만드는거 아님?
-	CTexture* ppTextures[5];
+	//// 이거 계속 새로 만드는거 아님?
+	//CTexture* ppTextures[5];
 
-	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/card_UV2.jpg", RESOURCE_TEXTURE2D, 0);
+	//ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//ppTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/card_UV2.jpg", RESOURCE_TEXTURE2D, 0);
 
-	ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack2.jpg", RESOURCE_TEXTURE2D, 0);
-
-
-	ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack3.jpg", RESOURCE_TEXTURE2D, 0);
-
-	ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack4.jpg", RESOURCE_TEXTURE2D, 0);
-
-	ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
-	//
-	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	//ppTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//ppTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack2.jpg", RESOURCE_TEXTURE2D, 0);
 
 
-	if (m_pMaterial) {
-		if (m_pMaterial->m_pShader) {
-			m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
-			//m_pMaterial->m_pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ncbElementBytes);
-			if (m_Card_Ui_Num <= 4 && m_Card_Ui_Num >= 0)
-			{
-				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[m_Card_Ui_Num], 0, 4);
-				m_pMaterial->SetTexture(ppTextures[m_Card_Ui_Num]);
-			}
-			else
-			{
-				m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
-				m_pMaterial->SetTexture(ppTextures[0]);
-			}
-			//SetCbvGPUDescriptorHandle(m_pMaterial->m_pShader->GetGPUCbvDescriptorStartHandle());
-		}
-	}
+	//ppTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//ppTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack3.jpg", RESOURCE_TEXTURE2D, 0);
+
+	//ppTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//ppTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack4.jpg", RESOURCE_TEXTURE2D, 0);
+
+	//ppTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//ppTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
+	////
+	//UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+
+
+	//if (m_pMaterial) {
+	//	if (m_pMaterial->m_pShader) {
+	//		m_pMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//		m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//		//m_pMaterial->m_pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ncbElementBytes);
+	//		if (m_Card_Ui_Num <= 4 && m_Card_Ui_Num >= 0)
+	//		{
+	//			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[m_Card_Ui_Num], 0, 4);
+	//			m_pMaterial->SetTexture(ppTextures[m_Card_Ui_Num]);
+	//		}
+	//		else
+	//		{
+	//			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, ppTextures[0], 0, 4);
+	//			m_pMaterial->SetTexture(ppTextures[0]);
+	//		}
+	//		//SetCbvGPUDescriptorHandle(m_pMaterial->m_pShader->GetGPUCbvDescriptorStartHandle());
+	//	}
+	//}
 
 }
 
@@ -1302,6 +1312,68 @@ void CCardUIObject::CallFunc(CGameObject* self, std::vector<CCharacterObject*>& 
 		cout << "콜백없음" << endl;
 }
 
+void CCardUIObject::InitializeTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//Card
+	if (m_ppCardTexture == nullptr)
+	{
+		m_ppCardTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardTexture->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/card_UV2.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+
+	//CardFace
+	if (m_ppCardFaceTextures[0] == nullptr)
+	{
+		m_ppCardFaceTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[1] == nullptr)
+	{
+		m_ppCardFaceTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack2.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[2] == nullptr)
+	{
+		m_ppCardFaceTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack3.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[3] == nullptr)
+	{
+		m_ppCardFaceTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack4.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[4] == nullptr)
+	{
+		m_ppCardFaceTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+}
+
+void CCardUIObject::InitializeMaterial(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	//Card
+	CMaterial* cardMaterial = m_pChild->GetMaterial();
+	if (cardMaterial) {
+		if (cardMaterial->m_pShader) {
+			cardMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			cardMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			cardMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardTexture, 0, 4);
+			cardMaterial->SetTexture(m_ppCardTexture);
+		}
+	}
+
+	//CardFace
+	cardMaterial = m_pChild->GetSibling()->GetMaterial();
+	if (cardMaterial) {
+		if (cardMaterial->m_pShader) {
+			cardMaterial->m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			cardMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			cardMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardFaceTextures[0], 0, 4);
+			cardMaterial->SetTexture(m_ppCardFaceTextures[0]);
+		}
+	}
+}
+
 void CCardUIObject::UpdateData(int num)
 {
 	m_Card_Ui_Num = num;
@@ -1313,6 +1385,29 @@ void CCardUIObject::UpdateData(int num)
 	case 2: m_callbackFunc = Callback_2; break;
 	case 3: m_callbackFunc = Callback_3; break;
 	case 4: m_callbackFunc = Callback_4; break;
+	default:
+		break;
+	}
+}
+
+void CCardUIObject::UpdateTexture(ID3D12Device* pd3dDevice, int num)
+{
+	m_Card_Ui_Num = num;
+	// 임시코드
+	CMaterial* cardMaterial = m_pChild->GetSibling()->GetMaterial();
+	switch (num) {
+	case 0: 
+	case 1: 
+	case 2: 
+	case 3: 
+	case 4: 
+		if (cardMaterial) {
+			if (cardMaterial->m_pShader) {
+				cardMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardFaceTextures[num], 0, 4);
+				cardMaterial->SetTexture(m_ppCardFaceTextures[num]);
+			}
+		}
+		break;
 	default:
 		break;
 	}

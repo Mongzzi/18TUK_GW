@@ -1013,7 +1013,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			break;
 		case 'X':
 		case 'x':
-			//std::cout << "m_currentPhase : " << (int)m_currentPhase << std::endl;
+			std::cout << "m_currentPhase : " << (int)m_currentPhase << std::endl;
 			/*intVector = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand();
 			std::cout << "hand : ";
 			for (int card : intVector)
@@ -1036,6 +1036,7 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'c':
 			if (m_currentPhase == TurnPhase::PlayPhase)
 				IncreaseTurnFlag();
+			cout << m_pvEngagedObjects.size() << endl;
 			break;
 
 		case '1':
@@ -1092,6 +1093,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pPlayer->SetMaxVelocityXZ(1500.0f);
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pPlayer->SetName("Player");
 
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -1145,6 +1147,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
 			pMonsterObject->SetPosition(12765.0f, 0.0f, 3186.0f);
 			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie1");
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 			//---------------------------  좀비 2 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
@@ -1153,6 +1156,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
 			pMonsterObject->SetPosition(14593.0f, 0.0f, -432.0f);
 			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie2");
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 			////---------------------------  좀비 3 -------------------------------------------
 			//pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
@@ -1318,17 +1322,21 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	{
 		//카드 UI 테스트용 오브젝트.
 		//CCubeMeshTextured* pCardMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
-		CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFbx("fbxsdk/", "Card")->m_vpMeshs[0]);
+		//CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFbx("fbxsdk/", "Card")->m_vpMeshs[0]);
 		//CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(CARD_FBX)->m_pvMeshs[0]);
 
 		CCardUIObject* pCardUIObject;
-
+		CCardUIObject::InitializeTexture(pd3dDevice, pd3dCommandList);
 		for (int i = 0; i < m_iMaxHandCount; i++)
 		{
-			pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), 0, ShaderType::CUITextureShader);
+			pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUITextureShader);
 			pCardUIObject->SetPositionUI(100, 100);
-			pCardUIObject->SetMesh(0, pCardMesh, true);
-			pCardUIObject->SetScale(2, 2, 1);
+			// 순서 중요
+			pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card"));	
+			pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "CardFace"));
+			pCardUIObject->InitializeMaterial(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+			//
+			pCardUIObject->SetScale(4, 4, 2);
 			m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
 		}
 	}
@@ -1336,8 +1344,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//turn 턴 관련 초기화
 
 	m_iTurnFlag = 0;
-	//m_currentPhase = TurnPhase::NON;
-	m_currentPhase = TurnPhase::StartPhase; // 테스트용
+	m_currentPhase = TurnPhase::NON;
+	//m_currentPhase = TurnPhase::StartPhase; // 테스트용
 	Engage(m_pPlayer);
 
 	CRay r = r.RayAtWorldSpace(0, 0, m_pPlayer->GetCamera());
@@ -1500,7 +1508,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	// 이 레이어가 비어있을 수 있기 떄문에 먼저 포인터를 받아 검사
 	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
 	if (pInteractiveUIObj->size() > 0) {
-		if (m_pvEngagedObjects.size() != 0)
+		if (m_pvEngagedObjects.size() >= 2)
 		{
 			CCharacterObject* turnedObj = m_pvEngagedObjects[m_iTurnFlag];
 
@@ -1514,11 +1522,8 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				if (obj != m_pSelectedUI)
 				{
 					obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)handSize / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
-					if (bCardUpdateFlag)
-						dynamic_cast<CCardUIObject*> (obj)->UpdateData(hand[i]);
 				}
 			}
-			bCardUpdateFlag = false; // 지금은 여기 있지만 다이나믹 쉐이핑 함수를 활성화 하면 거기 마지막으로 가면 됨.
 			// 손에 없는 카드 위치
 			for (int i = handSize; i < m_iMaxHandCount; i++)
 			{
@@ -1593,6 +1598,35 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	// 전투 관련
 	std::default_random_engine dre(0);
 	CCharacterObject* turnObj = m_pvEngagedObjects[m_iTurnFlag];
+	std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::TextureObject];
+
+	//몬스터의 state가 Battle_State이면 추가.
+	for (CGameObject* obj : TextureObjectLayer)
+	{
+		CMonsterObject* monsterObj = dynamic_cast<CMonsterObject*>(obj);
+
+		if (monsterObj) {
+			if (monsterObj->GetState() == MonsterState::Battle_State)
+				Engage((CCharacterObject*)obj);
+		}
+		else;
+	}
+
+	if (m_currentPhase != TurnPhase::NON)
+	{
+		// 체력이 적은 오브젝트 벡터에서 제거.
+		for (CCharacterObject* cobj : m_pvEngagedObjects)
+		{
+			if (cobj->GetCurHp() <= 0)
+			{
+				m_pvEngagedObjects.erase(std::remove(m_pvEngagedObjects.begin(), m_pvEngagedObjects.end(), cobj), m_pvEngagedObjects.end());
+			}
+		}
+		// 제거 후 초기화? 초기화도 여기서 해야하나?
+		if (m_pvEngagedObjects.size() < 2)
+			m_currentPhase = TurnPhase::NON;
+		// 이걸 여기서 해야하는가?
+	}
 
 	if (m_currentPhase == TurnPhase::StartPhase)
 	{
@@ -1628,6 +1662,30 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 
 void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
+	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
+
+	// 카드패 관련
+	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
+	if (pInteractiveUIObj->size() > 0)
+	{
+		CCharacterObject* turnedObj = m_pvEngagedObjects[m_iTurnFlag];
+
+		vector hand = turnedObj->GetDeckData()->GetHand();
+		int handSize = turnedObj->GetDeckData()->GetCurrentHandSize();
+
+		if (bCardUpdateFlag)
+		{
+			for (int i = 0; i < handSize; i++)
+			{
+				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+
+				dynamic_cast<CCardUIObject*> (obj)->UpdateData(hand[i]);
+				dynamic_cast<CCardUIObject*> (obj)->UpdateTexture(pd3dDevice, hand[i]);
+			}
+			bCardUpdateFlag = false;
+		}
+	}
+	
 	//if (SelectedUInum != -1) {
 	//	float fBoxSize = 200.0f;
 	//
@@ -1782,12 +1840,11 @@ void CTestScene::Engage(CCharacterObject* obj)
 		}
 
 		// 객체 전투 준비.
-		obj->GetDeckData()->InitializeDeck();
+		obj->BeforeEngage();
+		//cout << obj->GetName() << " Engage" << endl;
 	}
 	else
 		;
-
-	cout << m_pvEngagedObjects.size() << endl;
 	//// 속도 순서로 정렬
 	//std::sort(m_pvEngagedObjects.begin(), m_pvEngagedObjects.end(), [](CCharacterObject* a, CCharacterObject* b) {
 	//	return a->GetSpeed() > b->GetSpeed(); // 내림차순 정렬

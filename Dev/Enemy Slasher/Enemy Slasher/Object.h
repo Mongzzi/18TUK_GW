@@ -353,6 +353,7 @@ private:
 
 	int m_iKarma;
 	// 이름?
+	string m_sName;
 	// 등등
 public:
 	CDeckData* GetDeckData() { return m_pDeck; };
@@ -360,9 +361,14 @@ public:
 	float GetAtk() { return m_fAtk; };
 	float GetCurHp() { return m_fCurHp; };
 	int GetTeamId() { return m_iTeamId; };
+	string GetName() { return m_sName; };
 	void Reset(); // 전투가 끝나거나 시작될때 불릴 함수
 	void StartTurn();// 턴 시작시 불릴 함수
+
 	void SetTeamId(int teamId) { m_iTeamId = teamId; };
+	void SetName(string newName) { m_sName = newName; };
+
+	void BeforeEngage();
 
 	void TakeDamage(float atk);
 	void Heal(float ratio = 0.2);
@@ -465,6 +471,10 @@ private:
 	int m_Card_Ui_Num;	// 카드 목록중 카드의 번호
 	CardCallbackFunction m_callbackFunc = NULL;
 
+	// 모든 CCardUIObject가 죽을때까지 살아있어야함.
+	static CTexture* m_ppCardTexture;
+	static CTexture* m_ppCardFaceTextures[5];	
+	//
 public:
 	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
@@ -480,7 +490,10 @@ public:
 
 	int GetUiNum() { return m_Card_Ui_Num; };
 
+	static void InitializeTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void InitializeMaterial(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void UpdateData(int num);
+	void UpdateTexture(ID3D12Device* pd3dDevice, int num);
 };
 
 
