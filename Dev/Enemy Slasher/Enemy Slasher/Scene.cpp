@@ -1,17 +1,18 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "ObjectManager.h"
-//#include "ShaderManager.h"
 #include "PhysXManager.h"
 #include "Ray.h"
 #include "FbxLoader_V3.h"
 #include "ResorceManager.h"
+#include "GameFramework.h"
 
-CBasicScene::CBasicScene()
+CBasicScene::CBasicScene(CGameFramework* GameFramwork)
 {
 	m_pObjectManager = new CObjectManager;
 	m_CurrentTime = 0.0f;
 	m_ElapsedTime = 0.0f;
+	m_pGameFramework = GameFramwork;
 	//m_pShaderManager = new CShaderManager;
 }
 
@@ -304,7 +305,7 @@ void CBasicScene::Exit()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CTitleScene::CTitleScene()
+CTitleScene::CTitleScene(CGameFramework* GameFramwork) :CBasicScene(GameFramwork)
 {
 }
 
@@ -337,12 +338,17 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
 			if (pButton && pButton->IsPointInside(mouseX, mouseY))
 			{
+				// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
 				if (pButton->GetType() == 2) {
 					std::cout << "게임시작" << std::endl;
-
+					
+					// 0 = 타이틀씬 , 1 = 로비씬 , 2 = 메인씬
+					m_pGameFramework->SwitchScene(1);
+					return true;
 				}
 				else if (pButton->GetType() == 3) {
 					std::cout << "게임종료" << std::endl;
+					exit(1);
 				}
 
 				pButton->m_IsClicked = true;
@@ -732,7 +738,7 @@ void CTitleScene::ReleaseShaderVariables()
 
 
 
-CTestScene::CTestScene()
+CTestScene::CTestScene(CGameFramework* GameFramwork) :CBasicScene(GameFramwork)
 {
 }
 
@@ -1876,7 +1882,7 @@ void CTestScene::UseSelectedCard()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-CTestScene_Slice::CTestScene_Slice()
+CTestScene_Slice::CTestScene_Slice(CGameFramework* GameFramwork) :CBasicScene(GameFramwork)
 {
 }
 
@@ -2300,7 +2306,7 @@ void CTestScene_Slice::Exit()
 {
 }
 
-CTestScene_PhysX::CTestScene_PhysX()
+CTestScene_PhysX::CTestScene_PhysX(CGameFramework* GameFramwork):CBasicScene(GameFramwork)
 {
 	m_pPhysXManager = new CPhysXManager;
 	m_pObjectManager->SetPhysXManager(m_pPhysXManager);
@@ -2402,7 +2408,7 @@ void CTestScene_PhysX::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 
 
-CTestScene_Animation::CTestScene_Animation()
+CTestScene_Animation::CTestScene_Animation(CGameFramework* GameFramwork) : CTestScene(GameFramwork)
 {
 
 }
@@ -2556,6 +2562,10 @@ void CTestScene_Animation::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, 
 	pd2dDeviceContext->DrawText(text, _countof(text) - 1, mDWriteTextFormat.Get(), &textRect, mSolidColorBrush.Get());
 }
 
+CLobbyScene::CLobbyScene(CGameFramework* GameFramwork) :CTestScene(GameFramwork)
+{
+}
+
 bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	POINT ptCursorPos{ 0,0 };
@@ -2624,11 +2634,34 @@ bool CLobbyScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorP
 	if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
 	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 
-	if ((dwDirection != 0))
+	float cxDelta = 0.0f, cyDelta = 0.0f;
+	int xDelta = 0, yDelta = 0;
+	POINT ptCursorPos{ 0,0 }; //초기화를 하지 않을 시 낮은 확률로 아래의 if문에 진입하지 못하여 초기화되지 않은 값을 사용하게 된다.
+	if (GetCapture() == hWnd)
 	{
-		if (dwDirection) m_pPlayer->Move(dwDirection, 100.0f, true);
+		GetCursorPos(&ptCursorPos);
+		xDelta = ptCursorPos.x - ptOldCursorPos.x;
+		yDelta = ptCursorPos.y - ptOldCursorPos.y;
+		cxDelta = (float)(xDelta) / 3.0f;
+		cyDelta = (float)(yDelta) / 3.0f;
 	}
 
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
+		if (cxDelta || cyDelta)
+		{
+			if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+			{
+				SetCursor(NULL);
+				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
+
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			}
+		}
+		if (dwDirection) m_pPlayer->Move(dwDirection, 100.0f, true);
+	}
 	return(true);
 }
 
@@ -2647,14 +2680,15 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
-	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, -100.0f));
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 1000.0f, 0.0f));
+	m_pPlayer->SetMaxVelocityXZ(1000.0f);
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
 	BuildLightsAndMaterials();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	//CSkyBox* pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CSkyBoxShader, 6);
-	//m_pObjectManager->AddObj(pSkyBox, ObjectLayer::SkyBox);
+	CSkyBox* pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CSkyBoxShader, 6);
+	m_pObjectManager->AddObj(pSkyBox, ObjectLayer::SkyBox);
 
 
 	CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);

@@ -5,7 +5,7 @@
 class CObjectManager;
 class CPhysXManager;
 class CResorceManager;
-
+class CGameFramework;
 
 struct CB_TIME_INFO
 {
@@ -52,7 +52,7 @@ struct MATERIALS
 class CBasicScene
 {
 public:
-	CBasicScene();
+	CBasicScene(CGameFramework* GameFramwork);
 	virtual ~CBasicScene();
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -93,6 +93,7 @@ private:
 
 
 protected:
+	CGameFramework* m_pGameFramework;
 	float m_CurrentTime;
 	float m_ElapsedTime;
 
@@ -110,7 +111,7 @@ protected:
 class CTitleScene : public CBasicScene
 {
 public:
-	CTitleScene();
+	CTitleScene(CGameFramework* GameFramwork);
 	~CTitleScene();
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -145,7 +146,7 @@ class CLoadingScene : public CBasicScene
 class CTestScene : public CBasicScene
 {
 public:
-	CTestScene();
+	CTestScene(CGameFramework* GameFramwork);
 	~CTestScene();
 
 
@@ -203,7 +204,7 @@ public:
 class CTestScene_Slice : public CBasicScene
 {
 public:
-	CTestScene_Slice();
+	CTestScene_Slice(CGameFramework* GameFramwork);
 	~CTestScene_Slice();
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -246,7 +247,7 @@ namespace physx {
 class CTestScene_PhysX : public CBasicScene
 {
 public:
-	CTestScene_PhysX();
+	CTestScene_PhysX(CGameFramework* GameFramwork);
 	~CTestScene_PhysX();
 
 	//virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -273,7 +274,7 @@ protected:
 class CTestScene_Animation : public CTestScene
 {
 public:
-	CTestScene_Animation();
+	CTestScene_Animation(CGameFramework* GameFramwork);
 	~CTestScene_Animation();
 
 
@@ -291,7 +292,7 @@ protected:
 class CLobbyScene : public CTestScene
 {
 public:
-	CLobbyScene(){};
+	CLobbyScene(CGameFramework* GameFramwork);
 	~CLobbyScene(){};
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);

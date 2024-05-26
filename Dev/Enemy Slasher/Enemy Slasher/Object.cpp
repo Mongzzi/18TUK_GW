@@ -556,6 +556,17 @@ void CGameObject::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 }
 
+void CGameObject::ChangeTexture(ID3D12Device* pd3dDevice, CTexture* a)
+{
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, a, 0, 4);
+			m_pMaterial->SetTexture(a);
+		}
+	}
+}
+
 
 void CGameObject::SetPosition(float x, float y, float z)
 {
