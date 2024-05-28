@@ -2635,8 +2635,10 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	for (auto& pObject : UIList) {
 		CLobbyUI1Object* pUI = dynamic_cast<CLobbyUI1Object*>(pObject);
 		int case_num = pUI->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-		if (case_num == 2)m_pGameFramework->SwitchScene(2);
-		return true;
+		if (case_num == 2) {
+			m_pGameFramework->SwitchScene(0);
+			return true;
+		}
 	}
 
 	switch (nMessageID)
