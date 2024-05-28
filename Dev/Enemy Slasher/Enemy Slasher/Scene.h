@@ -249,7 +249,7 @@ protected:
 namespace physx {
 	class PxActor;
 }
-class CTestScene_PhysX : public CBasicScene
+class CTestScene_PhysX : public CTestScene
 {
 public:
 	CTestScene_PhysX(CGameFramework* GameFramwork);
@@ -292,6 +292,7 @@ public:
 	CTextShader* m_pTextShader = NULL;
 
 protected:
+	CPhysXManager* m_pPhysXManager = nullptr;
 };
 
 class CLobbyScene : public CTestScene

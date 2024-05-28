@@ -906,7 +906,7 @@ void CFbxLoader_V3::ExportObjectData(CFbx_V3::ObjectData* rootObject, std::ofstr
 		}
 
 		// Save skeleton presence flag
-		bool hasSkeleton = (currentObject->m_pSkeleton != nullptr && false);
+		bool hasSkeleton = (currentObject->m_pSkeleton != nullptr);
 		fileOut->write(reinterpret_cast<const char*>(&hasSkeleton), sizeof(hasSkeleton));
 		if (hasSkeleton == true) {
 			ExportSkeletonData(currentObject->m_pSkeleton, fileOut);
@@ -941,8 +941,8 @@ void CFbxLoader_V3::ExportSkeletonData(CFbx_V3::Skeleton* pSkeleton, std::ofstre
 
 	size_t boneOffsetMatCount = pSkeleton->m_vxmf4x4BoneOffsetMat.size();
 	fileOut->write(reinterpret_cast<const char*>(&boneOffsetMatCount), sizeof(boneOffsetMatCount));
-	if (boneOffsetMatCount > 0) {
-		fileOut->write(reinterpret_cast<const char*>(pSkeleton->m_vxmf4x4BoneOffsetMat.data()), boneOffsetMatCount * sizeof(XMFLOAT4X4));
+	for (size_t i = 0; i < boneOffsetMatCount; ++i) {
+		fileOut->write(reinterpret_cast<const char*>(&pSkeleton->m_vxmf4x4BoneOffsetMat[i]), sizeof(XMFLOAT4X4));
 	}
 
 	size_t animationNameCount = pSkeleton->m_vAnimationNames.size();
@@ -960,7 +960,7 @@ void CFbxLoader_V3::ExportSkeletonData(CFbx_V3::Skeleton* pSkeleton, std::ofstre
 
 void CFbxLoader_V3::ExportAnimationClip(CFbx_V3::AnimationClip* pAnimClip, const std::string& clipName)
 {
-	std::ofstream fileOut("Resource/obData/" + clipName + ".animClip", ios_base::out | ios_base::binary);
+	std::ofstream fileOut("Resource/animClip/" + clipName + ".animClip", ios_base::out | ios_base::binary);
 
 	if (fileOut.is_open() == true) {
 		size_t boneAnimCount = pAnimClip->m_vBoneAnimations.size();
@@ -1122,8 +1122,8 @@ CFbx_V3::Skeleton* CFbxLoader_V3::FileLoadSkeletonData(std::ifstream* fileIn)
 	size_t boneOffsetMatCount;
 	fileIn->read(reinterpret_cast<char*>(&boneOffsetMatCount), sizeof(boneOffsetMatCount));
 	pSkeleton->m_vxmf4x4BoneOffsetMat.resize(boneOffsetMatCount);
-	if (boneOffsetMatCount > 0) {
-		fileIn->read(reinterpret_cast<char*>(pSkeleton->m_vxmf4x4BoneOffsetMat.data()), boneHierarchCount * sizeof(int));
+	for (size_t i = 0; i < boneOffsetMatCount; ++i) {
+		fileIn->read(reinterpret_cast<char*>(&pSkeleton->m_vxmf4x4BoneOffsetMat[i]), sizeof(XMFLOAT4X4));
 	}
 
 	size_t animationNameCount;
@@ -1146,7 +1146,7 @@ CFbx_V3::Skeleton* CFbxLoader_V3::FileLoadSkeletonData(std::ifstream* fileIn)
 CFbx_V3::AnimationClip* CFbxLoader_V3::FlieLoadAnimationClip(const std::string& clipName)
 {
 	using namespace CFbx_V3;
-	std::ifstream fileIn("Resource/obData/" + clipName + ".animClip", ios_base::in | ios_base::binary);
+	std::ifstream fileIn("Resource/animClip/" + clipName + ".animClip", ios_base::in | ios_base::binary);
 
 	if (fileIn.is_open() == true) {
 		AnimationClip* pNewAnimClip = new AnimationClip();

@@ -844,10 +844,12 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 {
 	static int animVal = 0;
 	static int counter = 0;
-	if (m_pSkeletonData && m_pSkeletonData->m_vAnimationNames.size() > 0 && true) {
+	if (m_pSkeletonData && m_pSkeletonData->m_vAnimationNames.size() > 0) {
 		m_pcbMappedSkinningObject->m_bIsAvailable = true;
 		if (m_pSkeletonData->m_mAnimations.size() > 0) {
-			CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[0]];
+			CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[0 /*현재 애니메이션 상태 번호*/]];
+			//CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations["Player_Idle"/*현재 애니메이션 상태 이름*/];
+			// m_pSkeletonData->m_vAnimationNames; // <- 이 string vector에 자신이 가지고 있는 모든 애니메이션 상태 이름이 저장되어있다.
 			for (int i = 0; i < currAnim->m_vBoneAnimations.size(); ++i) {
 				XMFLOAT4X4 mMat = Matrix4x4::Multiply(m_pSkeletonData->m_vxmf4x4BoneOffsetMat[i], currAnim->m_vBoneAnimations[i].m_vKeyFrames[animVal].m_xmf4x4AnimMat);
 				XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(&mMat)));
