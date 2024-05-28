@@ -43,6 +43,7 @@ struct CB_2D_GAMEOBJECT_INFO
 {
 	XMFLOAT2 m_xmf2Position; // 오브젝트의 화면 좌표 (x, y)
 	XMFLOAT2 m_xmfSize;		// 오브젝트의 가로 세로길이  // 절반아님
+	bool m_IsButton;		// 버튼 오브젝트인지
 	bool m_IsClicked;		//	클릭 되었는지
 };
 
@@ -701,3 +702,4 @@ public:
 	bool IsPointInside(float x, float y);
 
 };
+

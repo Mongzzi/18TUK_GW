@@ -381,7 +381,7 @@ void CGameObject::RenderColliderMesh(ID3D12GraphicsCommandList* pd3dCommandList,
 			if (m_ppMeshes[i]) m_ppMeshes[i]->RenderCollider(pd3dCommandList);
 		}
 	}
-	
+
 	if (m_pSibling) m_pSibling->RenderColliderMesh(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->RenderColliderMesh(pd3dCommandList, pCamera);
 }
@@ -982,7 +982,7 @@ void CCharacterObject::BeforeEngage()
 	m_pDeck->InitializeDeck();
 };
 
-void CCharacterObject::TakeDamage(float atk) 
+void CCharacterObject::TakeDamage(float atk)
 {
 	m_fCurHp -= atk;
 };
@@ -1415,11 +1415,11 @@ void CCardUIObject::UpdateTexture(ID3D12Device* pd3dDevice, int num)
 	// 임시코드
 	CMaterial* cardMaterial = m_pChild->GetSibling()->GetMaterial();
 	switch (num) {
-	case 0: 
-	case 1: 
-	case 2: 
-	case 3: 
-	case 4: 
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+	case 4:
 		if (cardMaterial && cardMaterial->m_pShader)
 		{
 			if (cardMaterial->m_pTexture)
@@ -1680,7 +1680,7 @@ CAttackRangeObject::CAttackRangeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		}
 	}
 
-	SetMesh(0, new AttackRangeMesh(pd3dDevice, pd3dCommandList, CHASE_DISTANCE-10.0f, CHASE_DISTANCE, 40));
+	SetMesh(0, new AttackRangeMesh(pd3dDevice, pd3dCommandList, CHASE_DISTANCE - 10.0f, CHASE_DISTANCE, 40));
 	//SetMesh(0, new AttackRangeCircleMesh(pd3dDevice, pd3dCommandList,CHASE_DISTANCE, 40));
 }
 
@@ -1690,7 +1690,7 @@ CAttackRangeObject::~CAttackRangeObject()
 
 
 
-CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer,ShaderType stype)
+CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, ShaderType stype)
 	:CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	m_Monster_State = MonsterState::Default_State;
@@ -1860,7 +1860,7 @@ CHpbarObject:: ~CHpbarObject()
 }
 
 CTextObject::CTextObject(const WCHAR* text, const D2D1_RECT_F& rect, const WCHAR* fontName, float fontSize, D2D1::ColorF::Enum color)
-: m_text(text), m_rect(rect), m_fontName(fontName), m_fontSize(fontSize), m_color(color)
+	: m_text(text), m_rect(rect), m_fontName(fontName), m_fontSize(fontSize), m_color(color)
 {
 }
 
@@ -1890,7 +1890,7 @@ void CTextObject::SetColor(D2D1::ColorF::Enum color)
 }
 
 void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory)
-{ 
+{
 	if (!m_solidColorBrush)
 	{
 		DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(m_color), m_solidColorBrush.GetAddressOf()));
@@ -1921,7 +1921,7 @@ CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
 {
 	m_x = x;
-	m_y = y;    
+	m_y = y;
 	m_width = width;
 	m_height = height;
 	m_IsButton = true;
@@ -1959,6 +1959,7 @@ void CButtonObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 {
 	m_pcbMapped2DGameObject->m_xmf2Position = XMFLOAT2(m_x, m_y);
 	m_pcbMapped2DGameObject->m_xmfSize = XMFLOAT2(m_width, m_height);
+	m_pcbMapped2DGameObject->m_IsButton = m_IsButton;
 	m_pcbMapped2DGameObject->m_IsClicked = m_IsClicked;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcb2DGameObject->GetGPUVirtualAddress();
@@ -2012,3 +2013,4 @@ CTitleObject::CTitleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 CTitleObject::~CTitleObject()
 {
 }
+

@@ -2734,7 +2734,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
-	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 1000.0f, 0.0f));
+	m_pPlayer->SetPosition(XMFLOAT3 (200.0f, 1000.0f, -8900.0f));
 	m_pPlayer->SetMaxVelocityXZ(1000.0f);
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -2751,6 +2751,8 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
 
+
+
 	//CMonsterObject* pMonsterObject;
 	////---------------------------  Á»ºñ 1 -------------------------------------------
 	//pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
@@ -2764,6 +2766,17 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 {
+	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gamestart.png",
+		640.0f, 250.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
+
+	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameexit.png",
+		640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
+
+	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/black.png",
+		640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
 }
 
 void CLobbyScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)

@@ -486,9 +486,9 @@ void CGameFramework::BuildObjects()
 	{
 		// m_pvScenelist 에 여러 씬 등록 및 각 씬의 플레이어 생성
 
-		m_pvScenelist.push_back(new CTitleScene(this));
-		//m_pvScenelist.push_back(new CLobbyScene(this));
-		m_pvScenelist.push_back(new CTestScene(this));
+		//m_pvScenelist.push_back(new CTitleScene(this));
+		m_pvScenelist.push_back(new CLobbyScene(this));
+		//m_pvScenelist.push_back(new CTestScene(this));
 		//m_pvScenelist.push_back(new CTestScene_Slice(this));
 		//m_pvScenelist.push_back(new CTestScene_PhysX(this));
 		//m_pvScenelist.push_back(new CTestScene_Animation(this));
