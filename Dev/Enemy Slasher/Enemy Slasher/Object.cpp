@@ -845,9 +845,11 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 	static int animVal = 0;
 	static int counter = 0;
 	if (m_pSkeletonData && m_pSkeletonData->m_vAnimationNames.size() > 0) {
+		int nowAnimNum = 0;
+		//nowAnimNum = m_pSkeletonData->m_vAnimationNames.size() - 1;
 		m_pcbMappedSkinningObject->m_bIsAvailable = true;
 		if (m_pSkeletonData->m_mAnimations.size() > 0) {
-			CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[0 /*현재 애니메이션 상태 번호*/]];
+			CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[nowAnimNum /*현재 애니메이션 상태 번호*/]];
 			//CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations["Player_Idle"/*현재 애니메이션 상태 이름*/];
 			// m_pSkeletonData->m_vAnimationNames; // <- 이 string vector에 자신이 가지고 있는 모든 애니메이션 상태 이름이 저장되어있다.
 			for (int i = 0; i < currAnim->m_vBoneAnimations.size(); ++i) {

@@ -1126,6 +1126,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
 	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
@@ -2479,12 +2483,12 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	{
 		m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+		m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
 		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetMaxVelocityXZ(550.0f);
 		m_pPlayer->SetMaxVelocityY(100.0f);
-		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
+		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::ObjectNormal);
 	}
 
 	//--------------------------------- 조명, 재질 생성 ----------------------------------------
@@ -2508,6 +2512,10 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		CFbx_V3::CFbxData* pFbxData;
 		CFBXObject* pNewChildObject;
 
+		pFbxData = fLoader.LoadFbx("fbxsdk/", "Player1");
+		fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Idle");
+		fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Running");
+
 		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
 		//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
 		//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Tree_temp_climate_003");
@@ -2523,7 +2531,8 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
 		//	//pNewObject->SetChild(pNewChildObject);
 
-		pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Player1");
+		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Player1");
+		pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
 		pNewObject->SetChild(pNewChildObject);
 
 		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));

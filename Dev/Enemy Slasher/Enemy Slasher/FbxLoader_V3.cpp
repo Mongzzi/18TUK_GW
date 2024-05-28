@@ -678,6 +678,29 @@ void CFbxLoader_V3::LoadAnimation(FbxNode* inNode, FbxScene* lScene, const std::
 		}
 	}
 
+	// it can be some bone has no keyframes
+	// so input identity matrix for using after load file
+	// Error1 - this not apply offsetmatrix so using this matrix. object move to pivot
+	if (animData->m_vBoneAnimations.size() > 0) {
+		int maxKeyframeCount = 0;
+
+		// count MaxKeyframe num
+		for (auto& boneAnim : animData->m_vBoneAnimations) {
+			if (boneAnim.m_vKeyFrames.size() > maxKeyframeCount) maxKeyframeCount = boneAnim.m_vKeyFrames.size();
+		}
+
+		// input identity matrix
+		for (auto& boneAnim : animData->m_vBoneAnimations) {
+			for (int i = boneAnim.m_vKeyFrames.size(); i < maxKeyframeCount; ++i) {
+				CFbx_V3::KeyFrame keyframe;
+				keyframe.m_nFrameNum = i;
+				keyframe.m_xmf4x4AnimMat = Matrix4x4::Identity();
+
+				boneAnim.m_vKeyFrames.push_back(keyframe);
+			}
+		}
+	}
+
 	if (isAlreadyLoaded == false &&
 		animData->m_vBoneAnimations.size() > 0 &&
 		animData->m_vBoneAnimations[0].m_vKeyFrames.size() > 0) {
