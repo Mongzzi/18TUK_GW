@@ -36,7 +36,12 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 
 	if (layer == ObjectLayer::ObjectPhysX && m_pPhysXManager != nullptr)
 	{
-		physx::PxActor* actor = m_pPhysXManager->AddCustomGeometry(object);
+		physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
+		//m_vPhysxPairs.emplace_back(object, actor);
+	}
+	if (layer == ObjectLayer::Player && m_pPhysXManager != nullptr)
+	{
+		physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
 		m_vPhysxPairs.emplace_back(object, actor);
 	}
 
@@ -90,11 +95,11 @@ void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 	{
 		if (m_pPhysXManager != nullptr) {
 			// PhysX 에 의한 물리연산 적용
-			m_pPhysXManager->stepPhysics(true);
+			m_pPhysXManager->stepPhysics(true, fTimeElapsed);
 			for (auto& p : m_vPhysxPairs) {
 				physx::PxTransform transform = static_cast<physx::PxRigidActor*>(p.second)->getGlobalPose();
 				physx::PxVec3 position = transform.p;
-				p.first->SetPosition(XMFLOAT3(position.x, position.y, position.z));
+				((CPlayer*)p.first)->SetPosition(XMFLOAT3(position.x, position.y, position.z));
 			}
 		}
 	}
