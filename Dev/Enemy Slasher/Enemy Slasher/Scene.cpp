@@ -2759,7 +2759,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
 
-	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/black.png",
+	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/ppap.png",
 		640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
 
