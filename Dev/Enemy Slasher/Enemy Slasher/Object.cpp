@@ -1044,7 +1044,7 @@ void CRayObject::Reset(CRay ray)
 	//std::cout << "m_xmf3Dir: " << ray.GetDir().x << ", " << ray.GetDir().y << ", " << ray.GetDir().z << std::endl;
 	//std::cout << "m_vOriginal: " << ray.GetOriginal().x << ", " << ray.GetOriginal().y << ", " << ray.GetOriginal().z << std::endl;
 #endif // _DEBUG
-	}
+}
 
 CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype)
 	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
@@ -2017,3 +2017,119 @@ CTitleObject::~CTitleObject()
 {
 }
 
+CLobbyUI1Object::CLobbyUI1Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+	m_nButtons = 3;
+	m_ppButtonObjects = new CButtonObject * [m_nButtons];
+
+	m_ppButtonObjects[0] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/gamestart.png", 640.0f, 250.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[0]->SetType(2);
+	//m_ppButtonObjects[0]->SetDrawingOn(false);
+
+	m_ppButtonObjects[1] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/gameexit.png", 640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[1]->SetType(3);
+	//m_ppButtonObjects[1]->SetDrawingOn(false);
+
+	m_ppButtonObjects[2] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/ppap.png", 640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
+	//m_ppButtonObjects[2]->SetDrawingOn(false);
+}
+
+CLobbyUI1Object::~CLobbyUI1Object()
+{
+	for (int i = 0; i < m_nButtons; ++i)
+	{
+		delete m_ppButtonObjects[i];
+	}
+	delete[] m_ppButtonObjects;
+}
+
+int CLobbyUI1Object::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	POINT ptCursorPos{ 0, 0 };
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int clientWidth = clientRect.right - clientRect.left;
+	int clientHeight = clientRect.bottom - clientRect.top;
+
+	float mouseX = static_cast<float>(ptCursorPos.x) / clientWidth * FRAME_BUFFER_WIDTH;
+	float mouseY = static_cast<float>(ptCursorPos.y) / clientHeight * FRAME_BUFFER_HEIGHT;
+
+	if (m_DrawingOn)
+	{
+		switch (nMessageID)
+		{
+		case WM_LBUTTONDOWN:
+			for (int i = 0; i < m_nButtons; ++i)
+			{
+				CButtonObject* pButton = m_ppButtonObjects[i];
+				if (pButton->GetDrawingOn())
+				{
+					pButton->m_IsClicked = true;
+					if (pButton->IsPointInside(mouseX, mouseY))
+					{
+						if (pButton->GetType() == 2)
+						{
+							std::cout << "게임스타또~~~" << std::endl;
+							//m_pGameFramework->SwitchScene(2);
+							return 2;		// 2번씬으로 이동
+						}
+						else if (pButton->GetType() == 3)
+						{
+							std::cout << "게임종료" << std::endl;
+							exit(1);
+						}
+					}
+				}
+			}
+			break;
+		case WM_LBUTTONUP:
+			for (int i = 0; i < m_nButtons; ++i)
+			{
+				CButtonObject* pButton = m_ppButtonObjects[i];
+				if (pButton->m_IsClicked)
+				{
+					if (pButton->IsPointInside(mouseX, mouseY))
+					{
+						pButton->m_IsClicked = false;
+					}
+				}
+			}
+			break;
+		case WM_RBUTTONDOWN:
+			break;
+		case WM_RBUTTONUP:
+			break;
+		default:
+			break;
+		}
+		return 0;
+	}
+	return false;
+}
+
+void CLobbyUI1Object::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
+{
+	for (int i = 0; i < m_nButtons; ++i)
+	{
+		if (m_ppButtonObjects[i])
+		{
+			m_ppButtonObjects[i]->Render(pd3dCommandList, pCamera, pRenderOption);
+		}
+	}
+}
+
+void CLobbyUI1Object::SetDrawingOn(bool a)
+{
+	m_DrawingOn = a;
+	for (int i = 0; i < m_nButtons; ++i)
+	{
+		if (m_ppButtonObjects[i])
+		{
+			m_ppButtonObjects[i]->SetDrawingOn(a);
+		}
+	}
+}

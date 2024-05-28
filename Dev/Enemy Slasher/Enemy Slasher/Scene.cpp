@@ -2635,61 +2635,30 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	float mouseX = static_cast<float>(ptCursorPos.x) / (clientWidth)*FRAME_BUFFER_WIDTH;
 	float mouseY = static_cast<float>(ptCursorPos.y) / (clientHeight)*FRAME_BUFFER_HEIGHT;
 
+	auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject1);
+	for (auto& pObject : UIList) {
+		CLobbyUI1Object* pUI = dynamic_cast<CLobbyUI1Object*>(pObject);
+		int case_num = pUI->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		if (case_num == 2)m_pGameFramework->SwitchScene(2);
+		return true;
+	}
+
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		for (auto& pObject : buttonList)
-		{
-			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-			if (pButton->GetDrawingOn())
-			{
-				pButton->m_IsClicked = true;
-				if (pButton && pButton->IsPointInside(mouseX, mouseY))
-				{
-					// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
-					if (pButton->GetType() == 2) {
-						std::cout << "게임스타또~~~" << std::endl;
-
-						// 0 = 타이틀씬 , 1 = 로비씬 , 2 = 메인씬
-						m_pGameFramework->SwitchScene(2);
-						return true;
-					}
-					else if (pButton->GetType() == 3) {
-						std::cout << "게임종료" << std::endl;
-						exit(1);
-					}
-
-				}
-			}
-		}
 	}
 	break;
 	case WM_LBUTTONUP:
 	{
-		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		for (auto& pObject : buttonList)
-		{
-			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-			if (pButton && pButton->m_IsClicked)
-			{
-				if (pButton->IsPointInside(mouseX, mouseY))
-				{
-					pButton->m_IsClicked = false;
-				}
-			}
-		}
 	}
 	break;
 	case WM_RBUTTONDOWN:
 	{
-
 	}
 	break;
 	case WM_RBUTTONUP:
 	{
-
 	}
 	break;
 	default:
@@ -2790,22 +2759,10 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
 
-	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gamestart.png",
-		640.0f, 250.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
-	pButtonObject->SetType(2);
-	pButtonObject->SetDrawingOn(false);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
+	CLobbyUI1Object* pUiObject1 = new CLobbyUI1Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pUiObject1->SetDrawingOn(false);
+	m_pObjectManager->AddObj(pUiObject1, ObjectLayer::LobbyButtonObject1);
 
-	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameexit.png",
-		640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
-	pButtonObject->SetType(3);
-	pButtonObject->SetDrawingOn(false);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
-
-	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/ppap.png",
-		640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
-	pButtonObject->SetDrawingOn(false);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	//CMonsterObject* pMonsterObject;
 	////---------------------------  좀비 1 -------------------------------------------
@@ -2823,21 +2780,19 @@ void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	float xpos = m_pPlayer->GetPosition().x;
 	float zpos = m_pPlayer->GetPosition().z;
 
-	if (-2500.0f < xpos && xpos < 2500.0f && -17000.0f < zpos && zpos < -14800.0f) {
-		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		for (auto& pObject : buttonList)
-		{
-			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-			pButton->SetDrawingOn(true);
+	if (-2500.0f < xpos && xpos < 2500.0f && -17000.0f < zpos && zpos < -14000.0f) {
+		auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject1);
+		for (auto& pObject : UIList) {
+			CLobbyUI1Object* pUI = dynamic_cast<CLobbyUI1Object*>(pObject);
+			pUI->SetDrawingOn(true);
 		}
 	}
 
 	else {
-		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		for (auto& pObject : buttonList)
-		{
-			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-			pButton->SetDrawingOn(false);
+		auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject1);
+		for (auto& pObject : UIList) {
+			CLobbyUI1Object* pUI = dynamic_cast<CLobbyUI1Object*>(pObject);
+			pUI->SetDrawingOn(false);
 		}
 	}
 
