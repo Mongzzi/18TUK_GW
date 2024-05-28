@@ -217,7 +217,7 @@ CGameObject::CGameObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_xmf4x4InitialRotate = Matrix4x4::Identity();
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
-
+	m_DrawingOn = true;
 	if (m_nMeshes > 0)
 	{
 		m_ppMeshes = new CMesh * [m_nMeshes];
@@ -337,36 +337,40 @@ void CGameObject::OnPrepareRender()
 
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
 {
-	OnPrepareRender();
-
-	//객체의 정보를 셰이더 변수(상수 버퍼)로 복사한다. 
-	UpdateShaderVariables(pd3dCommandList);
-
-	if (m_pMaterial)
+	if (m_DrawingOn)
 	{
-		if (m_pMaterial->m_pShader)
+
+		OnPrepareRender();
+
+		//객체의 정보를 셰이더 변수(상수 버퍼)로 복사한다. 
+		UpdateShaderVariables(pd3dCommandList);
+
+		if (m_pMaterial)
 		{
-			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+			if (m_pMaterial->m_pShader)
+			{
+				m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+			}
+
+			if (m_pMaterial->m_pTexture)
+			{
+				m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+			}
+
+		}
+		// 서술자힙 연결할지말지 작성 고민...
+
+		if (m_ppMeshes)
+		{
+			for (int i = 0; i < m_nMeshes; i++)
+			{
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, pRenderOption);
+			}
 		}
 
-		if (m_pMaterial->m_pTexture)
-		{
-			m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-		}
-
+		if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+		if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 	}
-	// 서술자힙 연결할지말지 작성 고민...
-
-	if (m_ppMeshes)
-	{
-		for (int i = 0; i < m_nMeshes; i++)
-		{
-			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, pRenderOption);
-		}
-	}
-
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
 void CGameObject::RenderColliderMesh(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -1040,7 +1044,7 @@ void CRayObject::Reset(CRay ray)
 	//std::cout << "m_xmf3Dir: " << ray.GetDir().x << ", " << ray.GetDir().y << ", " << ray.GetDir().z << std::endl;
 	//std::cout << "m_vOriginal: " << ray.GetOriginal().x << ", " << ray.GetOriginal().y << ", " << ray.GetOriginal().z << std::endl;
 #endif // _DEBUG
-}
+	}
 
 CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CCamera* pCamera, ShaderType stype)
 	: CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
@@ -1476,24 +1480,25 @@ CSkyBox::~CSkyBox()
 
 void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
 {
-
-	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
-	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
-
-	OnPrepareRender();
-	UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World);
-
-	if (m_pMaterial && m_pMaterial->m_pShader) m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
-
-	if (m_ppMeshes)
+	if (m_DrawingOn)
 	{
-		for (int i = 0; i < m_nMeshes; i++)
+		XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+		SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
+
+		OnPrepareRender();
+		UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World);
+
+		if (m_pMaterial && m_pMaterial->m_pShader) m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
+
+		if (m_ppMeshes)
 		{
-			if (m_pMaterial && m_pMaterial->m_pTexture) m_pMaterial->m_pTexture->UpdateShaderVariable(pd3dCommandList, 0, i);
-			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+			for (int i = 0; i < m_nMeshes; i++)
+			{
+				if (m_pMaterial && m_pMaterial->m_pTexture) m_pMaterial->m_pTexture->UpdateShaderVariable(pd3dCommandList, 0, i);
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+			}
 		}
 	}
-
 }
 
 CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype) : CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
@@ -1959,12 +1964,10 @@ void CButtonObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 {
 	m_pcbMapped2DGameObject->m_xmf2Position = XMFLOAT2(m_x, m_y);
 	m_pcbMapped2DGameObject->m_xmfSize = XMFLOAT2(m_width, m_height);
-	m_pcbMapped2DGameObject->m_IsButton = m_IsButton;
 	m_pcbMapped2DGameObject->m_IsClicked = m_IsClicked;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcb2DGameObject->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dcbGameObjectGpuVirtualAddress);
-
 }
 
 bool CButtonObject::IsPointInside(float x, float y)

@@ -31,7 +31,6 @@ cbuffer cb2DGameObjectInfo : register(b6)
 {
 	float2 position; // 오브젝트의 화면 좌표 (x, y)
 	float2 size;	// 오브젝트의 가로 세로길이 // 절반 길이아님
-    bool IsButton;
 	bool IsClicked;
 }
 
@@ -150,7 +149,7 @@ VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
 	float2 screenPos = position + input.position.xy;
 
 	// 눌림 상태에서 버튼을 약간 이동시킴
-	if (IsClicked&&IsButton) {
+	if (IsClicked) {
 		screenPos += float2(2.0f, -2.0f); 
 	}
 
@@ -167,7 +166,7 @@ float4 PS_2D_OBJECT(VS_TEXTURED_OUTPUT_TWO_ELEMENT input) : SV_TARGET
 	float4 cColor;
 	cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
 
-	if (IsClicked&&IsButton) {
+	if (IsClicked) {
 		// 색상을 어둡게 하여 눌림 효과를 줌
 		cColor.rgb *= 0.8f;
 	}

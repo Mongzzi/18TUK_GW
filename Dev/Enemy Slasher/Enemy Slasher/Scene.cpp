@@ -338,10 +338,11 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
 			if (pButton && pButton->IsPointInside(mouseX, mouseY))
 			{
+				pButton->m_IsClicked = true;
 				// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
 				if (pButton->GetType() == 2) {
 					std::cout << "게임시작" << std::endl;
-					
+
 					// 0 = 타이틀씬 , 1 = 로비씬 , 2 = 메인씬
 					m_pGameFramework->SwitchScene(1);
 					return true;
@@ -351,7 +352,6 @@ bool CTitleScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 					exit(1);
 				}
 
-				pButton->m_IsClicked = true;
 			}
 		}
 	}
@@ -1358,7 +1358,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUITextureShader);
 			pCardUIObject->SetPositionUI(100, 100);
 			// 순서 중요
-			pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card"));	
+			pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card"));
 			pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "CardFace"));
 			pCardUIObject->InitializeMaterial(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 			//
@@ -1726,7 +1726,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 			bCardUpdateFlag = false;
 		}
 	}
-	
+
 	//if (SelectedUInum != -1) {
 	//	float fBoxSize = 200.0f;
 	//
@@ -2343,7 +2343,7 @@ void CTestScene_Slice::Exit()
 {
 }
 
-CTestScene_PhysX::CTestScene_PhysX(CGameFramework* GameFramwork):CTestScene(GameFramwork)
+CTestScene_PhysX::CTestScene_PhysX(CGameFramework* GameFramwork) :CTestScene(GameFramwork)
 {
 	m_pPhysXManager = new CPhysXManager;
 	m_pObjectManager->SetPhysXManager(m_pPhysXManager);
@@ -2643,22 +2643,25 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 		for (auto& pObject : buttonList)
 		{
 			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-			if (pButton && pButton->IsPointInside(mouseX, mouseY))
+			if (pButton->GetDrawingOn())
 			{
-				// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
-				if (pButton->GetType() == 2) {
-					std::cout << "게임스타또~~~" << std::endl;
-
-					// 0 = 타이틀씬 , 1 = 로비씬 , 2 = 메인씬
-					m_pGameFramework->SwitchScene(2);
-					return true;
-				}
-				else if (pButton->GetType() == 3) {
-					std::cout << "게임종료" << std::endl;
-					exit(1);
-				}
-
 				pButton->m_IsClicked = true;
+				if (pButton && pButton->IsPointInside(mouseX, mouseY))
+				{
+					// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
+					if (pButton->GetType() == 2) {
+						std::cout << "게임스타또~~~" << std::endl;
+
+						// 0 = 타이틀씬 , 1 = 로비씬 , 2 = 메인씬
+						m_pGameFramework->SwitchScene(2);
+						return true;
+					}
+					else if (pButton->GetType() == 3) {
+						std::cout << "게임종료" << std::endl;
+						exit(1);
+					}
+
+				}
 			}
 		}
 	}
@@ -2770,7 +2773,7 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
 	m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, 0.0f);
-	m_pPlayer->SetPosition(XMFLOAT3 (200.0f, 1000.0f, -8900.0f));
+	m_pPlayer->SetPosition(XMFLOAT3(200.0f, 1000.0f, -8900.0f));
 	m_pPlayer->SetMaxVelocityXZ(1000.0f);
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
@@ -2790,15 +2793,18 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gamestart.png",
 		640.0f, 250.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
 	pButtonObject->SetType(2);
+	pButtonObject->SetDrawingOn(false);
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameexit.png",
 		640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
 	pButtonObject->SetType(3);
+	pButtonObject->SetDrawingOn(false);
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/ppap.png",
 		640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
+	pButtonObject->SetDrawingOn(false);
 	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	//CMonsterObject* pMonsterObject;
@@ -2814,6 +2820,27 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 {
+	float xpos = m_pPlayer->GetPosition().x;
+	float zpos = m_pPlayer->GetPosition().z;
+
+	if (-2500.0f < xpos && xpos < 2500.0f && -17000.0f < zpos && zpos < -14800.0f) {
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			pButton->SetDrawingOn(true);
+		}
+	}
+
+	else {
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			pButton->SetDrawingOn(false);
+		}
+	}
+
 
 }
 

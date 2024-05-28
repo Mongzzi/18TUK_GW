@@ -22,6 +22,7 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	BillBoardObject,		// 빌보드 오브젝트들 ( 인스턴스 되어있어 여러개가 한번에 그려짐 )
 	TextureObject,
 	ButtonObject,
+	LobbyButtonObject1,
 	Map,
 	BackGround,				// 배경 오브젝트
 	// ------------------------이 아래는 depth/stancil 무시

@@ -43,7 +43,6 @@ struct CB_2D_GAMEOBJECT_INFO
 {
 	XMFLOAT2 m_xmf2Position; // 오브젝트의 화면 좌표 (x, y)
 	XMFLOAT2 m_xmfSize;		// 오브젝트의 가로 세로길이  // 절반아님
-	bool m_IsButton;		// 버튼 오브젝트인지
 	bool m_IsClicked;		//	클릭 되었는지
 };
 
@@ -183,6 +182,7 @@ protected:
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 
+	bool m_DrawingOn = true;
 	int								m_nMeshes = 0;
 	CMesh** m_ppMeshes = NULL;
 
@@ -243,7 +243,7 @@ public:
 	void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype);
 	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
 	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
-	void ChangeTexture(ID3D12Device* pd3dDevice,CTexture* a);
+	void ChangeTexture(ID3D12Device* pd3dDevice, CTexture* a);
 
 
 	D3D12_GPU_DESCRIPTOR_HANDLE GetCbvGPUDescriptorHandle() { return(m_d3dCbvGPUDescriptorHandle); }
@@ -254,6 +254,9 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
+
+	void SetDrawingOn(bool a) { m_DrawingOn = a; };
+	bool GetDrawingOn() { return m_DrawingOn; };
 
 	void SetLook(float x, float y, float z);
 	void SetLook(XMFLOAT3 xmf3Position);
@@ -477,7 +480,7 @@ private:
 
 	// 모든 CCardUIObject가 죽을때까지 살아있어야함.
 	static CTexture* m_ppCardTexture;
-	static CTexture* m_ppCardFaceTextures[5];	
+	static CTexture* m_ppCardFaceTextures[5];
 	//
 public:
 	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
