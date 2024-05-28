@@ -488,7 +488,7 @@ void CGameFramework::BuildObjects()
 
 		m_pvScenelist.push_back(new CTitleScene(this));
 		m_pvScenelist.push_back(new CLobbyScene(this));
-		m_pvScenelist.push_back(new CTestScene(this));
+		//m_pvScenelist.push_back(new CTestScene(this));
 		//m_pvScenelist.push_back(new CTestScene_Slice(this));
 		//m_pvScenelist.push_back(new CTestScene_PhysX(this));
 		//m_pvScenelist.push_back(new CTestScene_Animation(this));
