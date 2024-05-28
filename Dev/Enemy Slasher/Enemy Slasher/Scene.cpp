@@ -2639,18 +2639,54 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 	{
 	case WM_LBUTTONDOWN:
 	{
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			if (pButton && pButton->IsPointInside(mouseX, mouseY))
+			{
+				// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
+				if (pButton->GetType() == 2) {
+					std::cout << "게임스타또~~~" << std::endl;
+
+					// 0 = 타이틀씬 , 1 = 로비씬 , 2 = 메인씬
+					m_pGameFramework->SwitchScene(2);
+					return true;
+				}
+				else if (pButton->GetType() == 3) {
+					std::cout << "게임종료" << std::endl;
+					exit(1);
+				}
+
+				pButton->m_IsClicked = true;
+			}
+		}
 	}
 	break;
 	case WM_LBUTTONUP:
 	{
+		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		for (auto& pObject : buttonList)
+		{
+			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+			if (pButton && pButton->m_IsClicked)
+			{
+				if (pButton->IsPointInside(mouseX, mouseY))
+				{
+					pButton->m_IsClicked = false;
+				}
+			}
+		}
 	}
 	break;
 	case WM_RBUTTONDOWN:
 	{
+
 	}
 	break;
 	case WM_RBUTTONUP:
 	{
+
 	}
 	break;
 	default:
@@ -2753,15 +2789,17 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gamestart.png",
 		640.0f, 250.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
+	pButtonObject->SetType(2);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameexit.png",
 		640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
+	pButtonObject->SetType(3);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/ppap.png",
 		640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
-	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::UIObject);
+	m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 
 	//CMonsterObject* pMonsterObject;
 	////---------------------------  좀비 1 -------------------------------------------
