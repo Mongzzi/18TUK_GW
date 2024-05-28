@@ -28,7 +28,12 @@ public:
     void updateActors(physx::PxRigidActor** actors, const physx::PxU32 numActors);
 
 public:
+    physx::PxActor* AddCapshulDynamic(CGameObject* object);
+
     physx::PxActor* AddCustomGeometry(CGameObject* object);
+    physx::PxActor* AddStaticCustomGeometry(CGameObject* object);
+
+    physx::PxRigidStatic* AddStaticMapObject(CGameObject* object) {};
 
     physx::PxTriangleMesh* createMesh(physx::PxCookingParams& params, const physx::PxArray<physx::PxVec3>& triVerts, const physx::PxArray<physx::PxU32>& triIndices, physx::PxReal sdfSpacing,
         physx::PxU32 sdfSubgridSize = 6, physx::PxSdfBitsPerSubgridPixel::Enum bitsPerSdfSubgridPixel = physx::PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL);
@@ -45,6 +50,7 @@ private:
     physx::PxDefaultCpuDispatcher*  gDispatcher = nullptr;
     physx::PxScene*                 gScene = nullptr;
     physx::PxMaterial*              gMaterial = nullptr;
+    physx::PxPvd*                   gPvd = nullptr;
 
     //Gravitational acceleration
     const physx::PxVec3 gGravity = physx::PxVec3(0.0f, -9.81f, 0.0f);

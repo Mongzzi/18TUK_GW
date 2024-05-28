@@ -1126,10 +1126,6 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
 	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
-	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
-	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
-	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
-	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
@@ -2488,7 +2484,7 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetMaxVelocityXZ(550.0f);
 		m_pPlayer->SetMaxVelocityY(100.0f);
-		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::ObjectNormal);
+		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 	}
 
 	//--------------------------------- 조명, 재질 생성 ----------------------------------------

@@ -6,6 +6,8 @@
 
 //using namespace physx;
 
+#define PVD_HOST "127.0.0.1"
+
 CPhysXManager::CPhysXManager()
 {
     using namespace physx;
@@ -13,36 +15,30 @@ CPhysXManager::CPhysXManager()
     PxU32 P_Version = 0x05030000; //PX_PHYSICS_VERSION;
     gFoundation = PxCreateFoundation(P_Version, gAllocator, gErrorCallback);
 
-    //PxCudaContextManagerDesc cudaContextManagerDesc;
-    //gCudaContextManager = PxCreateCudaContextManager(*gFoundation, cudaContextManagerDesc, PxGetProfilerCallback());
-    //if (gCudaContextManager && !gCudaContextManager->contextIsValid())
-    //{
-    //    gCudaContextManager->release();
-    //    gCudaContextManager = NULL;
-    //}
+    gPvd = PxCreatePvd(*gFoundation);
+    PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+    gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
-    gPhysics = PxCreatePhysics(P_Version, *gFoundation, PxTolerancesScale());
+    gPhysics = PxCreatePhysics(P_Version, *gFoundation, PxTolerancesScale(), true, gPvd);
 
     PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
     sceneDesc.gravity = gGravity;
-    //if (!sceneDesc.cudaContextManager)
-    //    sceneDesc.cudaContextManager = gCudaContextManager;
 
-    //sceneDesc.flags |= PxSceneFlag::eENABLE_GPU_DYNAMICS;
-    //sceneDesc.flags |= PxSceneFlag::eENABLE_PCM;
-
-    //PxU32 numCores = PxThread::getNbPhysicalCores();
-    //gDispatcher = PxDefaultCpuDispatcherCreate(numCores == 0 ? 0 : numCores - 1);
     gDispatcher = PxDefaultCpuDispatcherCreate(2);
     sceneDesc.cpuDispatcher = gDispatcher;
     sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 
-    //sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
-    //sceneDesc.gpuMaxNumPartitions = 8;
-
-    //sceneDesc.solverType = PxSolverType::eTGS;
-
     gScene = gPhysics->createScene(sceneDesc);
+    gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
+    gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+
+    PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+    if (pvdClient)
+    {
+        pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+        pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+        pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+    }
 
     gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
@@ -78,12 +74,12 @@ void CPhysXManager::cleanupPhysics(bool)
     PX_RELEASE(gScene);
     PX_RELEASE(gDispatcher);
     PX_RELEASE(gPhysics);
-    //if (gPvd)
-    //{
-    //    PxPvdTransport* transport = gPvd->getTransport();
-    //    gPvd->release();	gPvd = NULL;
-    //    PX_RELEASE(transport);
-    //}
+    if (gPvd)
+    {
+        physx::PxPvdTransport* transport = gPvd->getTransport();
+        gPvd->release();	gPvd = NULL;
+        PX_RELEASE(transport);
+    }
     PX_RELEASE(gFoundation);
 }
 
@@ -149,6 +145,37 @@ void CPhysXManager::updateActors(physx::PxRigidActor** actors, const physx::PxU3
             //renderGeometry(geom);
         }
     }
+}
+
+physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
+{
+    using namespace physx;
+
+    XMFLOAT3 xmfPos = object->GetPosition();
+    PxTransform transform(xmfPos.x, xmfPos.y, xmfPos.z); // 위치 지정
+
+    PxRigidDynamic* aCapsuleActor = gPhysics->createRigidDynamic(PxTransform(transform));
+
+    PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0, 0, 1)));
+
+
+    PxShape* aCapsuleShape = PxRigidActorExt::createExclusiveShape(*aCapsuleActor,
+        PxCapsuleGeometry(100.f, 200.f), *gMaterial);
+    aCapsuleShape->setLocalPose(relativePose);
+    PxRigidBodyExt::updateMassAndInertia(*aCapsuleActor, 100.f);
+    gScene->addActor(*aCapsuleActor);
+
+    //aCapsuleActor->addForce(PxVec3(0.f, 0.f, 10000.f));
+    aCapsuleActor->setLinearVelocity(PxVec3(0.f, 0.f, 100.f));
+
+    //PxRigidDynamic* ball = createDynamic(transform, PxSphereGeometry(5), PxVec3(0, -25, -100));
+    //PxRigidBodyExt::updateMassAndInertia(*ball, 1000.f);
+
+    PxTransform newPos = aCapsuleActor->getGlobalPose();
+    newPos.p = PxVec3(1000.f, 0.f, 500.f);
+    aCapsuleActor->setGlobalPose(newPos);
+
+    return aCapsuleActor;
 }
 
 physx::PxActor* CPhysXManager::AddCustomGeometry(CGameObject* object)
@@ -270,6 +297,81 @@ physx::PxActor* CPhysXManager::AddCustomGeometry(CGameObject* object)
 
     gScene->addActor(*dynamicActor);
     return dynamicActor;
+}
+
+physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
+{
+    using namespace physx;
+
+    CMesh** ppMeshs = object->GetMeshes();
+    int nMeshs = object->GetNumMeshes();
+    XMFLOAT3 xmfPos = object->GetPosition();
+
+    PxTransform transform(xmfPos.x, xmfPos.y, xmfPos.z); // 위치 지정
+    PxRigidStatic* staticActor = gPhysics->createRigidStatic(transform);
+    for (int i = 0; i < nMeshs; ++i) {
+        CMesh* pMesh = ppMeshs[i];
+        CVertex* gOriginVertices = pMesh->GetVertices();
+        UINT* gOriginIndices = pMesh->GetIndices();
+        UINT gVertexCount = pMesh->GetNumVertices();
+        UINT gIndexCount = pMesh->GetNumIndices();
+
+        PxArray<PxVec3> gVertices;
+        PxArray<PxU32> gIndices;
+
+        // Vertex 좌표만 추출한 배열 생성
+        // Index 자료형 변환
+        {
+            gVertices.resize(gVertexCount);
+            for (int j = 0; j < gVertexCount; ++j) {
+                XMFLOAT3 oriVertex = gOriginVertices->GetVertex();
+                gVertices[j] = PxVec3(oriVertex.x, oriVertex.y, oriVertex.z);
+            }
+            gIndices.resize(gIndexCount);
+            for (int j = 0; j < gIndexCount; ++j) {
+                gIndices[j] = PxU32(gOriginIndices[j]);
+            }
+        }
+
+        // PhysX Mesh를 생성.
+        PxTriangleMeshDesc meshDesc;
+        meshDesc.points.count = gVertexCount;
+        meshDesc.points.stride = sizeof(PxVec3);
+        meshDesc.points.data = reinterpret_cast<const void*>(&gVertices);
+
+        meshDesc.triangles.count = gIndexCount / 3;
+        meshDesc.triangles.stride = 3 * sizeof(PxU32);
+        meshDesc.triangles.data = reinterpret_cast<const void*>(&gIndices);
+
+        PxTolerancesScale scale;
+        PxCookingParams params(scale);
+
+        PxDefaultMemoryOutputStream writeBuffer;
+        PxTriangleMeshCookingResult::Enum result;
+        bool status = PxCookTriangleMesh(params, meshDesc, writeBuffer, &result);
+        if (!status)
+            return NULL;
+
+        PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+        PxTriangleMesh* gTriangleMesh = gPhysics->createTriangleMesh(readBuffer);
+
+        // Shape를 생성.
+        PxShapeFlags shapeFlags = PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE;
+        PxTriangleMeshGeometry meshGeometry;
+        meshGeometry.triangleMesh = gTriangleMesh;
+        meshGeometry.scale = PxVec3(1.f, 1.f, 1.f);
+        PxShape* shape = PxRigidActorExt::createExclusiveShape(*staticActor, meshGeometry, *gMaterial);
+        shape->setContactOffset(0.05f);
+        shape->setRestOffset(0.0f);
+
+        // 물리 시뮬레이션에 오브젝트로 추가.
+        staticActor->attachShape(*shape);
+
+        shape->release();
+    }
+
+    gScene->addActor(*staticActor);
+    return staticActor;
 }
 
 physx::PxTriangleMesh* CPhysXManager::createMesh(physx::PxCookingParams& params, const physx::PxArray<physx::PxVec3>& triVerts, const physx::PxArray<physx::PxU32>& triIndices, physx::PxReal sdfSpacing,
