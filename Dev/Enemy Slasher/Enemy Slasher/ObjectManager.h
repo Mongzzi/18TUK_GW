@@ -23,6 +23,7 @@ enum class ObjectLayer : int { // enum class는 int형으로 암시적 변환을 불허함으�
 	TextureObject,
 	ButtonObject,
 	LobbyButtonObject1,
+	LobbyButtonObject2,
 	Map,
 	BackGround,				// 배경 오브젝트
 	// ------------------------이 아래는 depth/stancil 무시

@@ -310,8 +310,10 @@ public:
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
-
+	
 private:
 	std::vector<CTextObject*> m_textObjects;
 	CTextShader* m_pTextShader = NULL;
+	bool m_Drawing_Trigger = false;
+
 };

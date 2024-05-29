@@ -1913,7 +1913,7 @@ void CTextObject::Render(ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3
 			L"en-us",
 			m_dWriteTextFormat.GetAddressOf()));
 
-		m_dWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+		m_dWriteTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 		m_dWriteTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 

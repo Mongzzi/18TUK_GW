@@ -2676,6 +2676,16 @@ bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 		case 'E': m_pPlayer->Move(DIR_DOWN, 5000.0f, true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
+		case 'P':
+		{
+			m_Drawing_Trigger = !m_Drawing_Trigger;
+			auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject2);
+			for (auto& pObject : UIList) {
+				CButtonObject* pUI = dynamic_cast<CButtonObject*>(pObject);
+				pUI->SetDrawingOn(m_Drawing_Trigger);
+			}
+		}
+		break;
 		default:
 			break;
 		}
@@ -2761,6 +2771,23 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pUiObject1->SetDrawingOn(false);
 	m_pObjectManager->AddObj(pUiObject1, ObjectLayer::LobbyButtonObject1);
 
+	CButtonObject* a = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/ppap.png", 640, 480, 800, 600, ShaderType::C2DObjectShader);
+	a->SetDrawingOn(false);
+	m_pObjectManager->AddObj(a, ObjectLayer::LobbyButtonObject2);
+
+
+	//std::wstring name = L"플레이어1 이름";
+	//m_textObjects.push_back(new CTextObject((L"파티모집 - " + name).c_str(), D2D1::RectF(0.0f, 310.0f, 1280.0f, 310.0f), L"Impact", 60.0f, D2D1::ColorF::DarkRed));
+
+	m_textObjects.push_back(new CTextObject(L"Enemy Slasher", D2D1::RectF(470.0f, 250.0f, 1280.0f, 250.0f), L"Impact", 60.0f, D2D1::ColorF::DarkRed));
+	m_textObjects.push_back(new CTextObject(L"파티모집", D2D1::RectF(580.0f, 310.0f, 1280.0f, 310.0f), L"Impact", 25.0f, D2D1::ColorF::DarkRed));
+	m_textObjects.push_back(new CTextObject(L"* Player1 - ", D2D1::RectF(400.0f, 370.0f, 800.0f, 370.0f), L"Impact", 25.0f, D2D1::ColorF::White));
+	m_textObjects.push_back(new CTextObject(L"* Player2 - ", D2D1::RectF(400.0f, 420.0f, 800.0f, 420.0f), L"Impact", 25.0f, D2D1::ColorF::White));
+	m_textObjects.push_back(new CTextObject(L"* Player3 - ", D2D1::RectF(400.0f, 470.0f, 800.0f, 470.0f), L"Impact", 25.0f, D2D1::ColorF::White));
+
+
+
+
 
 	//CMonsterObject* pMonsterObject;
 	////---------------------------  좀비 1 -------------------------------------------
@@ -2799,6 +2826,30 @@ void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 
 void CLobbyScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
 {
+
+	bool drawing = false;
+	auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject2);
+	for (auto& pObject : UIList) {
+		CButtonObject* pUI = dynamic_cast<CButtonObject*>(pObject);
+		drawing = pUI->GetDrawingOn();
+	}
+
+	if (drawing)
+	{
+		if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		pCamera->UpdateShaderVariables(pd3dCommandList);
+
+		UpdateShaderVariables(pd3dCommandList);
+
+		m_pTextShader->Render(pd3dCommandList, pCamera);
+
+		for (auto textObject : m_textObjects)
+		{
+			textObject->Render(pd2dDeviceContext, pdWriteFactory);
+		}
+	}
 }
 
 void CLobbyScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
