@@ -2841,7 +2841,7 @@ void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 
 void CLobbyScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)
 {
-
+	// 파티 초대 UI 텍스트 렌더
 	bool drawing = false;
 	auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject2);
 	for (auto& pObject : UIList) {
