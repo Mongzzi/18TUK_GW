@@ -2464,6 +2464,7 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	CFbxLoader_V3 fLoader;
+	m_pObjectManager->SetPhysXManager(pFBXDataManager->GetPhysXManager());
 
 	// Collider Shader µî·Ï
 	CObjectsShader* pColliderShader = new CObjectsShader();

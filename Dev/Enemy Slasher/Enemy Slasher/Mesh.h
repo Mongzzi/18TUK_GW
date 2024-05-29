@@ -63,6 +63,8 @@ public:
 	UINT GetNumVertices() { return m_nVertices; }
 	UINT GetNumIndices() { return m_nIndices; }
 
+	UINT GetStride() { return m_nStride; }
+
 	virtual COBBCollider* GetCollider() { if (m_pCollider) { return m_pCollider->GetCollider(); } return NULL; };
 
 public:
@@ -180,11 +182,11 @@ public:
 	virtual ~CRayMesh();
 };
 
-// ------------------------------- FBX V2 -----------------------------------
+// ------------------------------- FBX V3 -----------------------------------
 class CFBXMesh : public CDynamicShapeMesh
 {
 public:
-	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbx_V3::MeshData* pMeshData);
+	CFBXMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CFbx_V3::MeshData* pMeshData, UINT nStride = sizeof(CVertex_Skining));
 	virtual ~CFBXMesh();
 };
 

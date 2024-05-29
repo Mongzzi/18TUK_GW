@@ -804,9 +804,9 @@ void CGameObject::MakeCollider()
 CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	m_pcbMappedSkinningObject->m_bIsAvailable = false;
+	//m_pcbMappedSkinningObject->m_bIsAvailable = false;
 }
 
 CFBXObject::~CFBXObject()
@@ -828,9 +828,12 @@ void CFBXObject::SetFbxData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 void CFBXObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(CB_SKINNINGOBJECT_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbSkinningObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	m_pd3dcbSkinningObject->Map(0, NULL, (void**)&m_pcbMappedSkinningObject);
+	if (m_pSkeletonData) {
+		UINT ncbElementBytes = ((sizeof(CB_SKINNINGOBJECT_INFO) + 255) & ~255); //256의 배수
+		m_pd3dcbSkinningObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+		m_pd3dcbSkinningObject->Map(0, NULL, (void**)&m_pcbMappedSkinningObject);
+		m_pcbMappedSkinningObject->m_bIsAvailable = true;
+	}
 }
 
 void CFBXObject::ReleaseShaderVariables()
@@ -868,10 +871,10 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 			}
 			counter++;
 		}
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcbSkinningObject->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(10, d3dcbGameObjectGpuVirtualAddress);
 	}
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcbSkinningObject->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(10, d3dcbGameObjectGpuVirtualAddress);
 
 	CGameObject::UpdateShaderVariables(pd3dCommandList);
 }

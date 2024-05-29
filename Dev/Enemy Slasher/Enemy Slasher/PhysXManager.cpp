@@ -208,7 +208,7 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
     PxRigidStatic* staticActor = gPhysics->createRigidStatic(transform);
     for (int i = 0; i < nMeshs; ++i) {
         CMesh* pMesh = ppMeshs[i];
-        CVertex_Skining* gOriginVertices = static_cast<CVertex_Skining*>(pMesh->GetVertices());
+        UINT nStride = pMesh->GetStride();
         UINT* gOriginIndices = pMesh->GetIndices();
         UINT gVertexCount = pMesh->GetNumVertices();
         UINT gIndexCount = pMesh->GetNumIndices(); 
@@ -217,13 +217,24 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
         std::vector<PxU32> gIndices;
 
         // Vertex 좌표만 추출한 배열 생성
+        {
+            if (nStride == sizeof(CVertex)) {
+                CVertex* gOriginVertices = static_cast<CVertex*>(pMesh->GetVertices());
+                for (UINT j = 0; j < gVertexCount; ++j) {
+                    XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
+                    gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
+                }
+            }
+            else if (nStride == sizeof(CVertex_Skining)) {
+                CVertex_Skining* gOriginVertices = static_cast<CVertex_Skining*>(pMesh->GetVertices());
+                for (UINT j = 0; j < gVertexCount; ++j) {
+                    XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
+                    gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
+                }
+            }
+        }
         // Index 자료형 변환
         {
-            for (UINT j = 0; j < gVertexCount; ++j) {
-                XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
-                gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
-            }
-
             for (UINT j = 0; j < gIndexCount; ++j) {
                 gIndices.push_back(gOriginIndices[j]);
             }
@@ -268,4 +279,10 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
 
     gScene->addActor(*staticActor);
     return staticActor;
+}
+
+physx::PxTriangleMesh* CPhysXManager::CreateCustomTriangleMeshCollider(CMesh* pMesh)
+{
+
+    return nullptr;
 }

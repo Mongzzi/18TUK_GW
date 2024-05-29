@@ -34,7 +34,12 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	// 현재 parent가 childe의 정보를 수정하므로 오브젝트의 instance화가 불가능하다.
 
-	CAniamtionObjectsShader* pShader = new CAniamtionObjectsShader();
+	CShader* pShader;
+	if (pFbxData->m_pRootObjectData->m_pSkeleton)
+		pShader = new CAniamtionObjectsShader();
+	else
+		pShader = new CTextureShader();
+
 	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	if (pFbxData->m_nTextureCount > 0)
 		pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, pFbxData->m_nTextureCount);
@@ -87,6 +92,7 @@ CFBXObject* CResorceManager::LoadFBXObjectIterative(ID3D12Device* pd3dDevice, ID
 		}
 		currentObject->SetFbxData(pd3dDevice, pd3dCommandList, currentObjectData);
 		currentObject->SetShader(pShader);
+		currentObject->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 		// Set materials if any
 		if (!currentObjectData->m_vpMaterials.empty()) {
