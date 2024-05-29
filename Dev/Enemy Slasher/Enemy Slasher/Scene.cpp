@@ -2772,8 +2772,19 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pObjectManager->AddObj(pUiObject1, ObjectLayer::LobbyButtonObject1);
 
 	CButtonObject* a = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/ppap.png", 640, 480, 800, 600, ShaderType::C2DObjectShader);
-	a->SetDrawingOn(false);
+	a->SetDrawingOn(true);
 	m_pObjectManager->AddObj(a, ObjectLayer::LobbyButtonObject2);
+
+	a = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/party_invitation.png", 640, 480, 344, 43.5, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(a, ObjectLayer::ButtonObject);
+
+	a = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/party_kick.png", 640, 580, 223, 43.5, ShaderType::C2DObjectShader);
+	m_pObjectManager->AddObj(a, ObjectLayer::ButtonObject);
+
+
+	//a = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/party_kick.png", 640, 480, 800, 600, ShaderType::C2DObjectShader);
+	//m_pObjectManager->AddObj(a, ObjectLayer::LobbyButtonObject2);
+
 
 
 	//std::wstring name = L"플레이어1 이름";
