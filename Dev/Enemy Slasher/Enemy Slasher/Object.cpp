@@ -2065,7 +2065,7 @@ int CLobbyUI1Object::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			for (int i = 0; i < m_nButtons; ++i)
 			{
 				CButtonObject* pButton = m_ppButtonObjects[i];
-				if (pButton->GetDrawingOn()&&pButton->GetType()!=0)
+				if (pButton->GetDrawingOn() && pButton->GetType() != 0)
 				{
 					pButton->m_IsClicked = true;
 					if (pButton->IsPointInside(mouseX, mouseY))
@@ -2146,19 +2146,19 @@ CLobbyUI2Object::CLobbyUI2Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_ppButtonObjects[0]->SetType(6);
 	m_ppButtonObjects[1] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_invitation.png", 730, 540, 258, 32.625, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[1]->SetType(5);
-	
+
 	//3번플레이어 초대 추방 버튼
 	m_ppButtonObjects[2] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_kick.png", 730, 490, 167.25, 32.625, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[2]->SetType(4);
 	m_ppButtonObjects[3] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_invitation.png", 730, 450, 258, 32.625, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[3]->SetType(3);
-	
+
 	//2번플레이어 초대 추방 버튼
 	m_ppButtonObjects[4] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_kick.png", 730, 400, 167.25, 32.625, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[4]->SetType(2);
 	m_ppButtonObjects[5] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_invitation.png", 730, 360, 258, 32.625, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[5]->SetType(1);
-	
+
 	m_ppButtonObjects[6] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/ppap.png", 640, 480, 900, 600, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[6]->SetType(0);
 
@@ -2192,13 +2192,13 @@ int CLobbyUI2Object::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				CButtonObject* pButton = m_ppButtonObjects[i];
 				if (pButton->GetDrawingOn() && pButton->GetType() != 0)
 				{
-					pButton->m_IsClicked = true;
 					if (pButton->IsPointInside(mouseX, mouseY))
 					{
+						pButton->m_IsClicked = true;
 						if (pButton->GetType() == 1)
 						{
 							std::cout << "1번 플레이어 파티초대" << std::endl;
-							return 1;		
+							return 1;
 						}
 						else if (pButton->GetType() == 2)
 						{
