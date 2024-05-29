@@ -314,6 +314,6 @@ public:
 private:
 	std::vector<CTextObject*> m_textObjects;
 	CTextShader* m_pTextShader = NULL;
-	bool m_Drawing_Trigger = false;
+	bool m_Drawing_Trigger = true;
 
 };
