@@ -2453,13 +2453,10 @@ void CTestScene_PhysX::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 CTestScene_Animation::CTestScene_Animation(CGameFramework* GameFramwork) : CTestScene(GameFramwork)
 {
-	m_pPhysXManager = new CPhysXManager;
-	m_pObjectManager->SetPhysXManager(m_pPhysXManager);
 }
 
 CTestScene_Animation::~CTestScene_Animation()
 {
-	if (m_pPhysXManager) delete m_pPhysXManager;
 }
 
 void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager)
@@ -2508,9 +2505,9 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		CFbx_V3::CFbxData* pFbxData;
 		CFBXObject* pNewChildObject;
 
-		pFbxData = fLoader.LoadFbx("fbxsdk/", "Player1");
-		fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Idle");
-		fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Running");
+		//pFbxData = fLoader.LoadFbx("fbxsdk/", "Player1");
+		//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Idle");
+		//fLoader.LoadAnim(pFbxData->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Running");
 
 		CFBXObject* pNewObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CAnimationObjectShader);
 		//	//CFBXObject* pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, "fbxsdk/Test_Walking.fbx");
@@ -2527,9 +2524,10 @@ void CTestScene_Animation::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		//	//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "peasant_1");
 		//	//pNewObject->SetChild(pNewChildObject);
 
-		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Player1");
-		pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
-		pNewObject->SetChild(pNewChildObject);
+		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
+		pNewObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card");
+		//pNewChildObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFbxData);
+		//pNewObject->SetChild(pNewChildObject);
 
 		//pNewObject->SetAnimData(pFBXDataManager->LoadAnimDataFromFBX("fbxsdk/Test_Walking.fbx"));
 		float xPosition = 0;

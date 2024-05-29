@@ -290,9 +290,6 @@ public:
 	virtual void Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera = NULL);
 
 	CTextShader* m_pTextShader = NULL;
-
-protected:
-	CPhysXManager* m_pPhysXManager = nullptr;
 };
 
 class CLobbyScene : public CTestScene

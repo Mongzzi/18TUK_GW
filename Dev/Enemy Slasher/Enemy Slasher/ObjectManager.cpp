@@ -99,7 +99,7 @@ void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 			for (auto& p : m_vPhysxPairs) {
 				physx::PxTransform transform = static_cast<physx::PxRigidActor*>(p.second)->getGlobalPose();
 				physx::PxVec3 position = transform.p;
-				((CPlayer*)p.first)->SetPosition(XMFLOAT3(position.x, position.y, position.z));
+				//((CPlayer*)p.first)->SetPosition(XMFLOAT3(position.x, position.y, position.z));
 			}
 		}
 	}

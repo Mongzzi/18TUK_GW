@@ -19,6 +19,8 @@ public:
 
     void cleanupPhysics(bool /*interactive*/);
 
+    physx::PxScene* createScene();
+
     physx::PxRigidDynamic* createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
 
     void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
@@ -29,17 +31,9 @@ public:
 
 public:
     physx::PxActor* AddCapshulDynamic(CGameObject* object);
-
-    physx::PxActor* AddCustomGeometry(CGameObject* object);
     physx::PxActor* AddStaticCustomGeometry(CGameObject* object);
 
     physx::PxRigidStatic* AddStaticMapObject(CGameObject* object) {};
-
-    physx::PxTriangleMesh* createMesh(physx::PxCookingParams& params, const physx::PxArray<physx::PxVec3>& triVerts, const physx::PxArray<physx::PxU32>& triIndices, physx::PxReal sdfSpacing,
-        physx::PxU32 sdfSubgridSize = 6, physx::PxSdfBitsPerSubgridPixel::Enum bitsPerSdfSubgridPixel = physx::PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL);
-    void CPhysXManager::setupCommonCookingParams(physx::PxCookingParams& params, bool skipMeshCleanup, bool skipEdgeData);
-    physx::PxTriangleMesh* CPhysXManager::createBV34TriangleMesh(physx::PxU32 numVertices, const physx::PxVec3* vertices, physx::PxU32 numTriangles, const physx::PxU32* indices,
-        bool skipMeshCleanup, bool skipEdgeData, bool inserted, const physx::PxU32 numTrisPerLeaf);
 
 private:
     physx::PxDefaultAllocator		gAllocator;
