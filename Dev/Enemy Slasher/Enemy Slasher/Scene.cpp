@@ -2634,8 +2634,27 @@ bool CLobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 		CLobbyUI1Object* pUI = dynamic_cast<CLobbyUI1Object*>(pObject);
 		int case_num = pUI->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 		if (case_num == 2) {
-			m_pGameFramework->SwitchScene(0);
+			m_pGameFramework->SwitchScene(2);
 			return true;
+		}
+	}
+
+	auto UIList2 = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject2);
+	for (auto& pObject : UIList2) {
+		CLobbyUI1Object* pUI = dynamic_cast<CLobbyUI2Object*>(pObject);
+		int case_num = pUI->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		// case_num 1= 파티원2 초대 //  2= 파티원2 추방 // 3= 파티원3 초대 //4= 파티원3 추방 //5= 파티원4 초대 // 6= 파티원4 추방
+		if (case_num == 1) {
+		}
+		else if (case_num == 2) {
+		}
+		else if (case_num == 3) {
+		}
+		else if (case_num == 4) {
+		}
+		else if (case_num == 5) {
+		}
+		else if (case_num == 6) {
 		}
 	}
 
@@ -2679,7 +2698,7 @@ bool CLobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_Drawing_Trigger = !m_Drawing_Trigger;
 			auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject2);
 			for (auto& pObject : UIList) {
-				CButtonObject* pUI = dynamic_cast<CButtonObject*>(pObject);
+				CLobbyUI2Object* pUI = dynamic_cast<CLobbyUI2Object*>(pObject);
 				pUI->SetDrawingOn(m_Drawing_Trigger);
 			}
 		}
@@ -2769,9 +2788,8 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pUiObject1->SetDrawingOn(false);
 	m_pObjectManager->AddObj(pUiObject1, ObjectLayer::LobbyButtonObject1);
 
-	CButtonObject* a = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/ppap.png", 640, 480, 800, 600, ShaderType::C2DObjectShader);
-	a->SetDrawingOn(false);
-	m_pObjectManager->AddObj(a, ObjectLayer::LobbyButtonObject2);
+	CLobbyUI2Object* pUiObject2 = new CLobbyUI2Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pObjectManager->AddObj(pUiObject2, ObjectLayer::LobbyButtonObject2);
 
 
 	//std::wstring name = L"플레이어1 이름";
@@ -2779,12 +2797,9 @@ void CLobbyScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_textObjects.push_back(new CTextObject(L"Enemy Slasher", D2D1::RectF(470.0f, 250.0f, 1280.0f, 250.0f), L"Impact", 60.0f, D2D1::ColorF::DarkRed));
 	m_textObjects.push_back(new CTextObject(L"파티모집", D2D1::RectF(580.0f, 310.0f, 1280.0f, 310.0f), L"Impact", 25.0f, D2D1::ColorF::DarkRed));
-	m_textObjects.push_back(new CTextObject(L"* Player1 - ", D2D1::RectF(400.0f, 370.0f, 800.0f, 370.0f), L"Impact", 25.0f, D2D1::ColorF::White));
-	m_textObjects.push_back(new CTextObject(L"* Player2 - ", D2D1::RectF(400.0f, 420.0f, 800.0f, 420.0f), L"Impact", 25.0f, D2D1::ColorF::White));
-	m_textObjects.push_back(new CTextObject(L"* Player3 - ", D2D1::RectF(400.0f, 470.0f, 800.0f, 470.0f), L"Impact", 25.0f, D2D1::ColorF::White));
-
-
-
+	m_textObjects.push_back(new CTextObject(L"* Player2 - ", D2D1::RectF(370.0f, 370.0f, 800.0f, 370.0f), L"Impact", 25.0f, D2D1::ColorF::White));
+	m_textObjects.push_back(new CTextObject(L"* Player3 - ", D2D1::RectF(370.0f, 460.0f, 800.0f, 460.0f), L"Impact", 25.0f, D2D1::ColorF::White));
+	m_textObjects.push_back(new CTextObject(L"* Player4 - ", D2D1::RectF(370.0f, 550.0f, 800.0f, 550.0f), L"Impact", 25.0f, D2D1::ColorF::White));
 
 
 	//CMonsterObject* pMonsterObject;
@@ -2803,6 +2818,7 @@ void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	float xpos = m_pPlayer->GetPosition().x;
 	float zpos = m_pPlayer->GetPosition().z;
 
+	// 문 앞에 위치하면 게임시작 창 렌더
 	if (-2500.0f < xpos && xpos < 2500.0f && -17000.0f < zpos && zpos < -14000.0f) {
 		auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject1);
 		for (auto& pObject : UIList) {
@@ -2811,6 +2827,7 @@ void CLobbyScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		}
 	}
 
+	// 문앞에서 멀어지면 게임시작 창 렌더 x
 	else {
 		auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject1);
 		for (auto& pObject : UIList) {
@@ -2828,8 +2845,12 @@ void CLobbyScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devi
 	bool drawing = false;
 	auto UIList = m_pObjectManager->GetObjectList(ObjectLayer::LobbyButtonObject2);
 	for (auto& pObject : UIList) {
-		CButtonObject* pUI = dynamic_cast<CButtonObject*>(pObject);
-		drawing = pUI->GetDrawingOn();
+		CLobbyUI2Object* pUI = dynamic_cast<CLobbyUI2Object*>(pObject);
+		//	파티 모집 UI가 존재하고 해당 UI가 렌더 가능한 상태면 렌더
+		if (pUI) {
+			drawing = pUI->GetDrawingOn();
+		}
+		else std::cout << "pUI 존재 x" << std::endl;
 	}
 
 	if (drawing)
