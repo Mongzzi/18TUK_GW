@@ -1934,6 +1934,7 @@ CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_height = height;
 	m_IsButton = true;
 	m_IsClicked = false;
+	m_type = 0;
 
 	CTexture* ppTextures[1];
 
@@ -2028,14 +2029,12 @@ CLobbyUI1Object::CLobbyUI1Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_ppButtonObjects[0] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/gamestart.png", 640.0f, 250.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[0]->SetType(2);
-	//m_ppButtonObjects[0]->SetDrawingOn(false);
 
 	m_ppButtonObjects[1] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/gameexit.png", 640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[1]->SetType(3);
-	//m_ppButtonObjects[1]->SetDrawingOn(false);
 
 	m_ppButtonObjects[2] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/ppap.png", 640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
-	//m_ppButtonObjects[2]->SetDrawingOn(false);
+	m_ppButtonObjects[2]->SetType(0);
 }
 
 CLobbyUI1Object::~CLobbyUI1Object()
@@ -2069,7 +2068,7 @@ int CLobbyUI1Object::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			for (int i = 0; i < m_nButtons; ++i)
 			{
 				CButtonObject* pButton = m_ppButtonObjects[i];
-				if (pButton->GetDrawingOn())
+				if (pButton->GetDrawingOn() && pButton->GetType() != 0)
 				{
 					pButton->m_IsClicked = true;
 					if (pButton->IsPointInside(mouseX, mouseY))
@@ -2135,4 +2134,124 @@ void CLobbyUI1Object::SetDrawingOn(bool a)
 			m_ppButtonObjects[i]->SetDrawingOn(a);
 		}
 	}
+}
+
+CLobbyUI2Object::CLobbyUI2Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
+	: CLobbyUI1Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+
+	m_nButtons = 7;
+
+	m_ppButtonObjects = new CButtonObject * [m_nButtons];
+
+	//4번플레이어 초대 추방 버튼
+	m_ppButtonObjects[0] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_kick.png", 730, 580, 167.25, 32.625, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[0]->SetType(6);
+	m_ppButtonObjects[1] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_invitation.png", 730, 540, 258, 32.625, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[1]->SetType(5);
+
+	//3번플레이어 초대 추방 버튼
+	m_ppButtonObjects[2] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_kick.png", 730, 490, 167.25, 32.625, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[2]->SetType(4);
+	m_ppButtonObjects[3] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_invitation.png", 730, 450, 258, 32.625, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[3]->SetType(3);
+
+	//2번플레이어 초대 추방 버튼
+	m_ppButtonObjects[4] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_kick.png", 730, 400, 167.25, 32.625, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[4]->SetType(2);
+	m_ppButtonObjects[5] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/party_invitation.png", 730, 360, 258, 32.625, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[5]->SetType(1);
+
+	m_ppButtonObjects[6] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/ppap.png", 640, 480, 900, 600, ShaderType::C2DObjectShader);
+	m_ppButtonObjects[6]->SetType(0);
+
+}
+
+CLobbyUI2Object::~CLobbyUI2Object()
+{
+}
+
+int CLobbyUI2Object::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	POINT ptCursorPos{ 0, 0 };
+	GetCursorPos(&ptCursorPos);
+	ScreenToClient(hWnd, &ptCursorPos);
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int clientWidth = clientRect.right - clientRect.left;
+	int clientHeight = clientRect.bottom - clientRect.top;
+
+	float mouseX = static_cast<float>(ptCursorPos.x) / clientWidth * FRAME_BUFFER_WIDTH;
+	float mouseY = static_cast<float>(ptCursorPos.y) / clientHeight * FRAME_BUFFER_HEIGHT;
+
+	if (m_DrawingOn)
+	{
+		switch (nMessageID)
+		{
+		case WM_LBUTTONDOWN:
+			for (int i = 0; i < m_nButtons; ++i)
+			{
+				CButtonObject* pButton = m_ppButtonObjects[i];
+				if (pButton->GetDrawingOn() && pButton->GetType() != 0)
+				{
+					if (pButton->IsPointInside(mouseX, mouseY))
+					{
+						pButton->m_IsClicked = true;
+						if (pButton->GetType() == 1)
+						{
+							std::cout << "1번 플레이어 파티초대" << std::endl;
+							return 1;
+						}
+						else if (pButton->GetType() == 2)
+						{
+							std::cout << "1번 플레이어 파티추방" << std::endl;
+							return 2;
+						}
+						else if (pButton->GetType() == 3)
+						{
+							std::cout << "2번 플레이어 파티초대" << std::endl;
+							return 3;
+						}
+						else if (pButton->GetType() == 4)
+						{
+							std::cout << "2번 플레이어 파티추방" << std::endl;
+							return 4;
+						}
+						else if (pButton->GetType() == 5)
+						{
+							std::cout << "3번 플레이어 파티초대" << std::endl;
+							return 5;
+						}
+						else if (pButton->GetType() == 6)
+						{
+							std::cout << "3번 플레이어 파티추방" << std::endl;
+							return 6;
+						}
+					}
+				}
+			}
+			break;
+
+
+		case WM_LBUTTONUP:
+			for (int i = 0; i < m_nButtons; ++i)
+			{
+				CButtonObject* pButton = m_ppButtonObjects[i];
+				if (pButton->m_IsClicked)
+				{
+					if (pButton->IsPointInside(mouseX, mouseY))
+					{
+						pButton->m_IsClicked = false;
+					}
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+		return 0;
+	}
+	return false;
 }

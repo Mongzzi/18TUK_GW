@@ -712,13 +712,22 @@ public:
 	CLobbyUI1Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::NON, int nMeshes = 0);
 	~CLobbyUI1Object();
 
-private:
+protected:
 	CButtonObject** m_ppButtonObjects;
 	int m_nButtons;
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 	virtual void SetDrawingOn(bool a);
-	int OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual int OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+};
+
+class CLobbyUI2Object : public CLobbyUI1Object
+{
+public:
+	CLobbyUI2Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype = ShaderType::NON, int nMeshes = 0);
+	~CLobbyUI2Object();
+	virtual int OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 };
