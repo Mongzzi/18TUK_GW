@@ -132,15 +132,15 @@ void CBasicScene::BuildLightsAndMaterials()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = POINT_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 400.0f;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(5.0f, 5.0f, 5.0f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights->m_pLights[0].m_fRange = 900.0f;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(20.0f, 20.0f, 20.0f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(20.0f, 20.0f, 20.0f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(2160.0f, 2700.0f, 2340.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 
-	m_pLights->m_pLights[1].m_bEnable = true;
+	m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 700.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -1610,10 +1610,21 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	}
 	if (m_pLights)
 	{
-		m_pLights->m_pLights[0].m_xmf3Position = m_pPlayer->GetPosition();
+		float px = m_pPlayer->GetPosition().x;
+		float py = m_pPlayer->GetPosition().y+500.0f;
+		float pz = m_pPlayer->GetPosition().z;
+		
+		float lx = m_pPlayer->GetLookVector().x;
+		float ly = m_pPlayer->GetLookVector().y;
+		float lz = m_pPlayer->GetLookVector().z;
+		
+		float falloff = 500.0f;
+		XMFLOAT3 end_position = XMFLOAT3(px + lx * falloff, py + ly * falloff, pz + lz * falloff);
+
+		m_pLights->m_pLights[0].m_xmf3Position = end_position;
 		m_pLights->m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
 
-		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
+		m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(px, py, pz);
 		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 
