@@ -1123,29 +1123,28 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 	else if (random_number == 1) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map2"));
-		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 300.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 100.0f, 0.0f));
 	}
 	else if (random_number == 2) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map2"));
-		m_pPlayer->SetPosition(XMFLOAT3(15300.0f, 300.0f, -1600.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(11000.0f, 100.0f, -2200.0f));
 	}
 	else if (random_number == 3) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map2"));
-		m_pPlayer->SetPosition(XMFLOAT3(-15000.0f, 300.0f, -17800.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(-15000.0f, 100.0f, -17800.0f));
 	}
 	else if (random_number == 4) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map3"));
-		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 300.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 100.0f, 0.0f));
 	}
 	else if (random_number == 5) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map3"));
-		m_pPlayer->SetPosition(XMFLOAT3(-30300.0f, 300.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(-30300.0f, 100.0f, 0.0f));
 	}
 	else if (random_number == 6) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map3"));
-		m_pPlayer->SetPosition(XMFLOAT3(-17000.0f, 300.0f, -9000.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(-17000.0f, 100.0f, -9000.0f));
 	}
-
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
@@ -1357,7 +1356,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 			}
 		}
-		else if (random_number == 1|| random_number == 2|| random_number == 3)
+		else if (random_number == 1 || random_number == 2 || random_number == 3)
 		{
 			//---------------------------  좀비 1 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
@@ -1402,7 +1401,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
 			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-16200, 100,-6600);
+			pMonsterObject->SetPosition(-16200, 100, -6600);
 			pMonsterObject->SetTeamId(1);
 			pMonsterObject->SetName("Zombie2");
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
@@ -1443,10 +1442,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
 			pMonsterObject->SetScale(6.0f, 6.0f, 6.0f);
-			pMonsterObject->SetPosition(16000, 100, -18100);
+			pMonsterObject->SetPosition(10600, 100, -17844);
 			pMonsterObject->SetTeamId(1);
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			
+
 			//---------------------------  좀비 1 -------------------------------------------
 			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
 			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
@@ -1496,7 +1495,120 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
 		}
+		else
+		{
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(0, 100, -6100);
+			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie1");
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-1000, 100, -9100);
+			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie2");
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-500, 100, -12100);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-300, 100, -20200);
+			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie1");
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-500, 100, -23200);
+			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie2");
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-800, 100, -24200);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-7900, 100, -26100);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-14800, 100, -18400);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-23400, 100, -15600);
+			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie2");
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-27400, 100, -16000);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
+			pMonsterObject->SetScale(6.0f, 6.0f, 6.0f);
+			pMonsterObject->SetPosition(-24000, 100, -26300);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-30500, 100, -10200);
+			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie2");
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-30500, 100, -13200);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-18200, 100, -2000);
+			pMonsterObject->SetTeamId(1);
+			pMonsterObject->SetName("Zombie2");
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+
+			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			pMonsterObject->SetPosition(-18200, 100, -4000);
+			pMonsterObject->SetTeamId(1);
+			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		}
 	}
 
 
@@ -2325,7 +2437,7 @@ void CTestScene_Slice::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		}
 	}
 #endif // DEBUG
-}
+		}
 
 void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
