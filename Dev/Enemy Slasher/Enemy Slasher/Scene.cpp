@@ -1118,33 +1118,32 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::default_random_engine dre(rd());
 	std::uniform_int_distribution <> urd(0, 6);
 	int random_number = urd(dre);
-
 	if (random_number == 0) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
 	}
 	else if (random_number == 1) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map2"));
-		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 100.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 300.0f, 0.0f));
 	}
 	else if (random_number == 2) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map2"));
-		m_pPlayer->SetPosition(XMFLOAT3(15300.0f, 100.0f, -1600.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(15300.0f, 300.0f, -1600.0f));
 	}
 	else if (random_number == 3) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map2"));
-		m_pPlayer->SetPosition(XMFLOAT3(-15000.0f, 100.0f, -17800.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(-15000.0f, 300.0f, -17800.0f));
 	}
 	else if (random_number == 4) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map3"));
-		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 100.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 300.0f, 0.0f));
 	}
 	else if (random_number == 5) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map3"));
-		m_pPlayer->SetPosition(XMFLOAT3(30300.0f, 0.0f, 0.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(-30300.0f, 300.0f, 0.0f));
 	}
 	else if (random_number == 6) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map3"));
-		m_pPlayer->SetPosition(XMFLOAT3(17000.0f, 0, -9000.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(-17000.0f, 300.0f, -9000.0f));
 	}
 
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
@@ -1357,6 +1356,10 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				pMonsterObject->SetTeamId(1);
 				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 			}
+		}
+		else if (random_number == 1)
+		{
+
 		}
 	}
 
