@@ -1113,7 +1113,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// -------------------------------   ¸Ê Ãß°¡ ----------------------------------------------
 
 	CFBXObject* pMapObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
-	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
+	pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map33"));
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
