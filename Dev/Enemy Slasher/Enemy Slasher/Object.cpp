@@ -863,12 +863,14 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 				XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(&mMat)));
 			}
 			// 초당 24 프레임 올라가게 해야함.
-			animVal+= m_fTimeElapsed * 24;
+			animVal += m_fTimeElapsed * 24;
+			//animVal = (m_fTimeLast - m_fTimeAnimStart) * 24;
 			if (animVal >= currAnim->m_vBoneAnimations[0].m_vKeyFrames.size())
 			{
 				if (m_bIsCurAnimLoof)
 				{
 					animVal = 0;
+					//m_fTimeAnimStart = m_fTimeLast;
 				}
 				else
 				{
@@ -1112,8 +1114,12 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 		default:
 			break;
 		}
-		if(eraseFlag)
+		if (eraseFlag)
+		{
 			m_vTargets.erase(m_vTargets.begin());
+			if (!m_bIsCurAnimLoof)
+				m_bIsCurAnimFinish = false;
+		}
 	}
 
 	
