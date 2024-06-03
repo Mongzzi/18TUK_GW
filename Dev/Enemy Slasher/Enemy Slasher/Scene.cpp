@@ -1904,7 +1904,8 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 
 	// 전투 관련
 	CCharacterObject* turnObj = m_pvEngagedObjects[m_iTurnFlag];
-	std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::TextureObject];
+	std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::Enemy];
+	//std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::TextureObject];
 
 	//몬스터의 state가 Battle_State이면 추가.
 	for (CGameObject* obj : TextureObjectLayer)
