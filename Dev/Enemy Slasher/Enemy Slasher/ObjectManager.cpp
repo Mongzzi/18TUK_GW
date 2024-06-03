@@ -28,21 +28,27 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	// 일단 쉐이더 매니저는 항상 모든 쉐이더를 가지고 있음
 
 
-	if (layer == ObjectLayer::Object)
-	{
-		((CDynamicShapeMesh*)((((CGameObject*)object)->GetMeshes()[0])))->SetCuttable(true);
-		(object)->SetCuttable(true);
-	}
+	//if (layer == ObjectLayer::Object)
+	//{
+	//	((CDynamicShapeMesh*)((((CGameObject*)object)->GetMeshes()[0])))->SetCuttable(true);
+	//	(object)->SetCuttable(true);
+	//}
 
-	if (layer == ObjectLayer::ObjectPhysX && m_pPhysXManager != nullptr)
-	{
-		physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
-		//m_vPhysxPairs.emplace_back(object, actor);
-	}
-	if (layer == ObjectLayer::Player && m_pPhysXManager != nullptr)
+	//if (layer == ObjectLayer::ObjectPhysX && m_pPhysXManager != nullptr)
+	//{
+	//	physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
+	//	//m_vPhysxPairs.emplace_back(object, actor);
+	//}
+	if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy) && m_pPhysXManager != nullptr)
 	{
 		physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
 		m_vPhysxPairs.emplace_back(object, actor);
+	}
+
+	if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject) && m_pPhysXManager != nullptr)
+	{
+		physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
+		//m_vPhysxPairs.emplace_back(object, actor);
 	}
 
 	m_pvObjectManager[(int)(layer)].push_back(object);

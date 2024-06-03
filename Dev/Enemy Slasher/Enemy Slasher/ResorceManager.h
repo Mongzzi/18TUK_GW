@@ -29,15 +29,18 @@ public:
 	CFBXObject* LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::CFbxData* pFbxData);
 
 private:
-	CFBXObject* LoadFBXObjectIterative(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData, CShader* pShader);
+	CFBXObject* LoadFBXObjectIterative(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::CFbxData* pFbxData, CShader* pShader);
 
 
 private:
 	// PhysX
 	CPhysXManager* m_pPhysXManager = nullptr;
+	std::unordered_map<std::string, std::vector<physx::PxTriangleMesh*>*> m_mPhysXTriangleMeshMap;
+	std::vector<physx::PxTriangleMesh*>* m_vpCurrPhysXTriangleMeshs = nullptr;
 
 public:
 	CPhysXManager* GetPhysXManager() { return m_pPhysXManager; }
+	physx::PxTriangleMesh* GetPhysXTriangleMesh(std::string& fileName, int meshNum);
 
 };
 

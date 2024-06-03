@@ -51,6 +51,8 @@ using namespace std;
 
 #include <Mmsystem.h>
 
+#include "PxPhysicsAPI.h" // physx
+
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
