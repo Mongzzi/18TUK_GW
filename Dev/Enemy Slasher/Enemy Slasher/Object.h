@@ -373,8 +373,8 @@ enum class CharacterState : int {
 	IdleState = 1,
 	AttackState,
 	MoveState,
-	BuffState,
 	DieState,
+	BuffState,
 	ImpactState,
 	SpawnState,
 };

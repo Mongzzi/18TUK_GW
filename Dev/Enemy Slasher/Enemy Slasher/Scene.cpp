@@ -1177,15 +1177,24 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		CMonsterObject* pMonsterObject;
 		CFbx_V3::CFbxData* zombie[5];
 		zombie[0] = fLoader.LoadFbx("fbxsdk/", "Zombie1");
+		fLoader.LoadAnim(zombie[0]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Zombie1Idle");
+		fLoader.LoadAnim(zombie[0]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Zombie1Attack");
+		fLoader.LoadAnim(zombie[0]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Zombie1Move");
+		fLoader.LoadAnim(zombie[0]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Zombie1Die");
 		zombie[1] = fLoader.LoadFbx("fbxsdk/", "Zombie2");
 		zombie[2] = fLoader.LoadFbx("fbxsdk/", "Zombie3");
 		zombie[3] = fLoader.LoadFbx("fbxsdk/", "Zombie4");
 		zombie[4] = fLoader.LoadFbx("fbxsdk/", "ZombieBoss");
 
-		for (int i = 0; i < 5; ++i) {
-			//fLoader.LoadAnim(zombie[i]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Idle");
-			//fLoader.LoadAnim(zombie[i]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Running");
-		}
+		//for (int i = 0; i < 1; ++i) {
+		//	string name = "Zombie" + i + 1;
+		//	if (i == 4)
+		//		name = "ZombieBoss";
+		//	fLoader.LoadAnim(zombie[i]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", name + "Idle");
+		//	fLoader.LoadAnim(zombie[i]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", name + "Attack");
+		//	fLoader.LoadAnim(zombie[i]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", name + "Move");
+		//	fLoader.LoadAnim(zombie[i]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", name + "Die");
+		//}
 		if (random_number == 0)
 		{
 			// ---------------- A ºΩ≈Õ --------------------- 
