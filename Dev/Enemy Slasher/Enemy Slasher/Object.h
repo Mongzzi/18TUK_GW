@@ -342,6 +342,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 
+	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 private:
 
 	CFbx_V3::Skeleton* m_pSkeletonData = NULL;
@@ -352,9 +353,17 @@ private:
 	std::string m_sPhysXDataVectorName;
 	std::vector<int> m_vPhysXMeshRegistNum;
 protected:
-	int animVal;
-	int counter;
+	float animVal;
 	int nowAnimNum;
+
+	float m_fTimeLast;
+	float m_fTimeElapsed;
+	float m_fTimeAnimStart;
+
+	bool m_bIsCurAnimLoof;
+	bool m_bIsCurAnimFinish;
+	void SetCuranimLoof(bool flag); // 위에서 아래로만
+	void SetCuranimFinish(bool flag); // 아래에서 위로만
 public:
 	void SetAnimNum(int num);
 	int GetAnimNum() { return nowAnimNum; };
@@ -362,10 +371,12 @@ public:
 
 enum class CharacterState : int {
 	IdleState = 1,
-	MoveState,
-	DieState,
-	SpawnState,
 	AttackState,
+	MoveState,
+	BuffState,
+	DieState,
+	ImpactState,
+	SpawnState,
 };
 
 class CCharacterObject : public CFBXObject
@@ -396,6 +407,9 @@ private:
 	vector<CCharacterObject*> m_vTargets;
 	// 할 행동
 	CharacterState m_CurrentState;
+	//// 애니메이션 관련 변수
+	//bool m_bIsLoof;
+	//bool m_bIsCurAnimFinish;
 	//typedef std::pair<CharacterState, std::vector<CCharacterObject*>> CharacterPair;
 	//queue<CharacterPair> m_vStateQueue; //
 	// 이름?

@@ -805,7 +805,6 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
 	animVal = 0;
-	counter = 0;
 	nowAnimNum = 0;
 
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -860,16 +859,24 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 			//CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations["Player_Idle"/*현재 애니메이션 상태 이름*/];
 			// m_pSkeletonData->m_vAnimationNames; // <- 이 string vector에 자신이 가지고 있는 모든 애니메이션 상태 이름이 저장되어있다.
 			for (int i = 0; i < currAnim->m_vBoneAnimations.size(); ++i) {
-				XMFLOAT4X4 mMat = Matrix4x4::Multiply(m_pSkeletonData->m_vxmf4x4BoneOffsetMat[i], currAnim->m_vBoneAnimations[i].m_vKeyFrames[animVal].m_xmf4x4AnimMat);
+				XMFLOAT4X4 mMat = Matrix4x4::Multiply(m_pSkeletonData->m_vxmf4x4BoneOffsetMat[i], currAnim->m_vBoneAnimations[i].m_vKeyFrames[(int)animVal].m_xmf4x4AnimMat);
 				XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(&mMat)));
 			}
-			if (counter >= 30) {
-				animVal++;
-				counter = 0;
-				if (animVal >= currAnim->m_vBoneAnimations[0].m_vKeyFrames.size()) animVal = 0;
-				//cout << "Skeleton - AnimVal : " << animVal << "\n";
+			// 초당 24 프레임 올라가게 해야함.
+			animVal+= m_fTimeElapsed * 24;
+			if (animVal >= currAnim->m_vBoneAnimations[0].m_vKeyFrames.size())
+			{
+				if (m_bIsCurAnimLoof)
+				{
+					animVal = 0;
+				}
+				else
+				{
+					SetCuranimFinish(true);
+					animVal -= 1;
+				}
 			}
-			counter++;
+			//cout << "Skeleton - AnimVal : " << animVal << "\n";
 		}
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcbSkinningObject->GetGPUVirtualAddress();
 		pd3dCommandList->SetGraphicsRootConstantBufferView(10, d3dcbGameObjectGpuVirtualAddress);
@@ -883,15 +890,51 @@ void CFBXObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
 }
 
+void CFBXObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_fTimeLast = fTimeTotal;
+	m_fTimeElapsed = fTimeElapsed;
+	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+}
+
+void CFBXObject::SetCuranimLoof(bool flag)
+{
+	m_bIsCurAnimLoof = flag;
+	if (m_pChild)
+	{
+		CFBXObject* fo = dynamic_cast<CFBXObject*>(m_pChild);
+		if (fo)
+			fo->SetCuranimLoof(flag);
+	}
+	if (m_pSibling)
+	{
+		CFBXObject* fo = dynamic_cast<CFBXObject*>(m_pSibling);
+		if (fo)
+			fo->SetCuranimLoof(flag);
+	}
+}
+
+void CFBXObject::SetCuranimFinish(bool flag)
+{
+	m_bIsCurAnimFinish = flag;
+	if (m_pParent)
+	{
+		CFBXObject* fo = dynamic_cast<CFBXObject*>(m_pParent);
+		if (fo)
+			fo->SetCuranimFinish(flag);
+	}
+}
+
 void CFBXObject::SetAnimNum(int num) {
 	if (nowAnimNum == num)
 		return;
 	if(m_pSkeletonData)
 		if (m_pSkeletonData->m_vAnimationNames.size() > num)
 		{
+			m_bIsCurAnimFinish = false;
 			animVal = 0;
-			counter = 0;
 			nowAnimNum = num;
+			m_fTimeAnimStart = m_fTimeLast;	// 계층구조를 타고 내려가면서 오차 생길 수 있음.
 		}
 	if (m_pChild)
 	{
@@ -998,14 +1041,23 @@ CCharacterObject::~CCharacterObject()
 
 void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	SetAnimNum(static_cast<int>(m_CurrentState));
 	// queue의 형태이면 queue를 확인한다.
 	if (m_vTargets.size() == 0)
 	{
 		m_CurrentState = CharacterState::IdleState;
+		SetCuranimLoof(true);
+		if (m_fCurHp < 0)
+		{
+			m_CurrentState = CharacterState::DieState;
+			SetCuranimLoof(false);
+		}
+
 	}
 	else
 	{
 		CCharacterObject* curTarget = m_vTargets[0];
+
 
 		XMFLOAT3 targetPosition = curTarget->GetPosition();
 
@@ -1019,15 +1071,25 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 
 		// 단위벡터로 변환 과정 
 		float length = sqrt(positionDifference.x * positionDifference.x + positionDifference.y * positionDifference.y + positionDifference.z * positionDifference.z);
-		m_dir.x = positionDifference.x / length;
-		m_dir.y = positionDifference.y / length;
-		m_dir.z = positionDifference.z / length;
+		float epsilon = 1e-6;
+		if (length > epsilon)
+		{
+			m_dir.x = positionDifference.x / length;
+			m_dir.y = positionDifference.y / length;
+			m_dir.z = positionDifference.z / length;
 
-		SetLook(m_dir);
-
+			SetLook(m_dir);
+		}
+		bool eraseFlag = false;
+		SetCuranimLoof(false);
 		switch (m_CurrentState)
 		{
 		case CharacterState::IdleState:
+			break;
+		case CharacterState::AttackState:
+			// 애니메이션에 따라서 일정 딜레이 후 데미지를 입힌다.
+			// 애니메이션이 끝나면 타겟 추출.
+			eraseFlag = m_bIsCurAnimFinish;
 			break;
 		case CharacterState::MoveState:
 			// target에게 다가간다.
@@ -1035,25 +1097,27 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
 			// 일정 거리 안으로 다가가면 타겟 추출.
-			if(length <100.f)
-				m_vTargets.erase(m_vTargets.begin());
+			eraseFlag = length < 100.f;
+			SetCuranimLoof(true);
+			break;
+		case CharacterState::BuffState:
+			// 애니메이션이 끝나면 타겟 추출
+			eraseFlag = m_bIsCurAnimFinish;
 			break;
 		case CharacterState::DieState:
 			break;
 		case CharacterState::SpawnState:
-			break;
-		case CharacterState::AttackState:
-			// 애니메이션에 따라서 일정 딜레이 후 데미지를 입힌다.
-			// 애니메이션이 끝나면 타겟 추출.
+			eraseFlag = m_bIsCurAnimFinish;
 			break;
 		default:
 			break;
 		}
+		if(eraseFlag)
+			m_vTargets.erase(m_vTargets.begin());
 	}
 
 	
-	SetAnimNum(static_cast<int>(m_CurrentState));
-	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+	CFBXObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }
 
 
@@ -1246,9 +1310,8 @@ void Callback_0(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "Callback_0 : atk 1" << endl;
 	CCharacterObject* selfObj = static_cast<CCharacterObject*>(self); //dynamic_cast 고려
 
-
 	// 애니메이션 테스트
-	selfObj->SetAnimNum(2);
+	selfObj->SetAnimNum(3);
 
 	// 만약 이 카드가 제자리에서 공격이라면 
 	// 1. self의 공격력을 가져와 
@@ -1264,8 +1327,11 @@ void Callback_0(CGameObject* self, std::vector<CCharacterObject*>& target) {
 			cout << "targetObj HP : " << targetObj->GetCurHp() << " -> ";
 			targetObj->TakeDamage(atk);
 			cout << targetObj->GetCurHp() << endl;
+			selfObj->CCharacterObject::AddTarget(targetObj);
+			break;
 		}
 	}
+	selfObj->CCharacterObject::SetState(CharacterState::AttackState);
 }
 
 void Callback_1(CGameObject* self, std::vector<CCharacterObject*>& target) {
@@ -1287,6 +1353,9 @@ void Callback_2(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "self HP : " << selfObj->GetCurHp() << " -> ";
 	selfObj->Heal();
 	cout << selfObj->GetCurHp() << endl;
+
+	selfObj->CCharacterObject::SetState(CharacterState::BuffState);
+	selfObj->CCharacterObject::AddTarget(selfObj);
 }
 
 void Callback_3(CGameObject* self, std::vector<CCharacterObject*>& target) {
@@ -1405,7 +1474,7 @@ void CCardUIObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* px
 				m_fCurrntScale = m_fTargetScale;
 		}
 	}
-	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+	CFBXObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }
 
 void CCardUIObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
