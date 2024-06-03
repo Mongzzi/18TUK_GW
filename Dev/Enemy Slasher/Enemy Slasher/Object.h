@@ -330,11 +330,26 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 
 private:
-	CFbx_V3::Skeleton* m_pSkeletonData = NULL;
 
+	CFbx_V3::Skeleton* m_pSkeletonData = NULL;
 	ID3D12Resource* m_pd3dcbSkinningObject = NULL;
 	CB_SKINNINGOBJECT_INFO* m_pcbMappedSkinningObject = NULL;
 
+protected:
+	int animVal;
+	int counter;
+	int nowAnimNum;
+public:
+	void SetAnimNum(int num);
+	int GetAnimNum() { return nowAnimNum; };
+};
+
+enum class CharacterState : int {
+	IdleState = 1,
+	MoveState,
+	DieState,
+	SpawnState,
+	AttackState,
 };
 
 class CCharacterObject : public CFBXObject
@@ -342,6 +357,8 @@ class CCharacterObject : public CFBXObject
 public:
 	CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType);
 	~CCharacterObject();
+
+	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 private:
 	CDeckData* m_pDeck;
 	float m_iTurnSpeed; // 속도 관련 기능을 서머너즈워처럼 바꿀것.
@@ -359,6 +376,12 @@ private:
 	int m_iTeamId;
 
 	int m_iKarma;
+	// 어떤 행동의 대상
+	vector<CCharacterObject*> m_vTargets;
+	// 할 행동
+	CharacterState m_CurrentState;
+	//typedef std::pair<CharacterState, std::vector<CCharacterObject*>> CharacterPair;
+	//queue<CharacterPair> m_vStateQueue; //
 	// 이름?
 	string m_sName;
 	// 등등
@@ -379,6 +402,9 @@ public:
 
 	void TakeDamage(float atk);
 	void Heal(float ratio = 0.2);
+
+	void AddTarget(CCharacterObject* target) { m_vTargets.push_back(target); };
+	void SetState(CharacterState state) { m_CurrentState = state; };
 };
 
 class CRayObject : public CGameObject

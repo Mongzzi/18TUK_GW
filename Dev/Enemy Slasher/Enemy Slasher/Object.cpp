@@ -804,6 +804,10 @@ void CGameObject::MakeCollider()
 CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
 {
+	animVal = 0;
+	counter = 0;
+	nowAnimNum = 0;
+
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//m_pcbMappedSkinningObject->m_bIsAvailable = false;
@@ -849,14 +853,10 @@ void CFBXObject::ReleaseShaderVariables()
 
 void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	static int animVal = 0;
-	static int counter = 0;
 	if (m_pSkeletonData && m_pSkeletonData->m_vAnimationNames.size() > 0) {
-		int nowAnimNum = 0;
-		//nowAnimNum = m_pSkeletonData->m_vAnimationNames.size() - 1;
 		m_pcbMappedSkinningObject->m_bIsAvailable = true;
 		if (m_pSkeletonData->m_mAnimations.size() > 0) {
-			CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[nowAnimNum /*현재 애니메이션 상태 번호*/]];
+			CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations[m_pSkeletonData->m_vAnimationNames[nowAnimNum]];/*현재 애니메이션 상태 번호*/
 			//CFbx_V3::AnimationClip* currAnim = m_pSkeletonData->m_mAnimations["Player_Idle"/*현재 애니메이션 상태 이름*/];
 			// m_pSkeletonData->m_vAnimationNames; // <- 이 string vector에 자신이 가지고 있는 모든 애니메이션 상태 이름이 저장되어있다.
 			for (int i = 0; i < currAnim->m_vBoneAnimations.size(); ++i) {
@@ -882,6 +882,30 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 void CFBXObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption) {
 	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
 }
+
+void CFBXObject::SetAnimNum(int num) {
+	if (nowAnimNum == num)
+		return;
+	if(m_pSkeletonData)
+		if (m_pSkeletonData->m_vAnimationNames.size() > num)
+		{
+			animVal = 0;
+			counter = 0;
+			nowAnimNum = num;
+		}
+	if (m_pChild)
+	{
+		CFBXObject* fo = dynamic_cast<CFBXObject*>(m_pChild);
+		if(fo)
+			fo->SetAnimNum(num);
+	}
+	if (m_pSibling)
+	{
+		CFBXObject* fo = dynamic_cast<CFBXObject*>(m_pSibling);
+		if (fo)
+			fo->SetAnimNum(num);
+	}
+};
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -962,6 +986,7 @@ CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_fMaxHp = m_fCurHp = 100;
 	m_fAtk = 110.f;
 	m_iTeamId = 0;
+	m_CurrentState = CharacterState::IdleState;
 	m_sName = "Unknown";
 }
 
@@ -970,6 +995,67 @@ CCharacterObject::~CCharacterObject()
 	if (m_pDeck)
 		delete m_pDeck;
 }
+
+void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	// queue의 형태이면 queue를 확인한다.
+	if (m_vTargets.size() == 0)
+	{
+		m_CurrentState = CharacterState::IdleState;
+	}
+	else
+	{
+		CCharacterObject* curTarget = m_vTargets[0];
+
+		XMFLOAT3 targetPosition = curTarget->GetPosition();
+
+		XMFLOAT3 m_dir = { 0.0f,0.0f,1.0f };
+
+		// 방향벡터 몬스터에서 플레이어로
+		XMFLOAT3 positionDifference;
+		positionDifference.x = targetPosition.x - GetPosition().x;
+		positionDifference.y = targetPosition.y - GetPosition().y;
+		positionDifference.z = targetPosition.z - GetPosition().z;
+
+		// 단위벡터로 변환 과정 
+		float length = sqrt(positionDifference.x * positionDifference.x + positionDifference.y * positionDifference.y + positionDifference.z * positionDifference.z);
+		m_dir.x = positionDifference.x / length;
+		m_dir.y = positionDifference.y / length;
+		m_dir.z = positionDifference.z / length;
+
+		SetLook(m_dir);
+
+		switch (m_CurrentState)
+		{
+		case CharacterState::IdleState:
+			break;
+		case CharacterState::MoveState:
+			// target에게 다가간다.
+			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), 1.0f);
+			XMStoreFloat3(&m_dir, vResult);
+			MovePosition(m_dir);
+			// 일정 거리 안으로 다가가면 타겟 추출.
+			if(length <100.f)
+				m_vTargets.erase(m_vTargets.begin());
+			break;
+		case CharacterState::DieState:
+			break;
+		case CharacterState::SpawnState:
+			break;
+		case CharacterState::AttackState:
+			// 애니메이션에 따라서 일정 딜레이 후 데미지를 입힌다.
+			// 애니메이션이 끝나면 타겟 추출.
+			break;
+		default:
+			break;
+		}
+	}
+
+	
+	SetAnimNum(static_cast<int>(m_CurrentState));
+	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+}
+
 
 void CCharacterObject::Reset()
 {
@@ -1088,7 +1174,7 @@ void CUIObject::ScreenSpaceToWorldSpace()
 	XMStoreFloat4x4(&m_xmf4x4Transform, XMLoadFloat4x4(&viewInv));
 
 	// 스케일 적용.
-	SetScale(m_xmfScale);
+	CUIObject::SetScale(m_xmfScale);
 
 	// 카메라를 바라보게 만드는것도 좋을지도
 
@@ -1152,9 +1238,18 @@ void CUIObject::SetScale(XMFLOAT3 scale)
 	CGameObject::SetScale(Vector3::ScalarProduct(m_xmfScale, m_fCurrntScale, false));
 }
 
+// 어떤 애니메이션이 나와야하는지
+// 언제까지 해당 애니메이션이 나와야 하는지.
+// 그래서 뭘 하는지.
+
 void Callback_0(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "Callback_0 : atk 1" << endl;
 	CCharacterObject* selfObj = static_cast<CCharacterObject*>(self); //dynamic_cast 고려
+
+
+	// 애니메이션 테스트
+	selfObj->SetAnimNum(2);
+
 	// 만약 이 카드가 제자리에서 공격이라면 
 	// 1. self의 공격력을 가져와 
 	int selfTeamId = selfObj->GetTeamId();
@@ -1195,7 +1290,34 @@ void Callback_2(CGameObject* self, std::vector<CCharacterObject*>& target) {
 }
 
 void Callback_3(CGameObject* self, std::vector<CCharacterObject*>& target) {
-	cout << "Callback_3" << endl;
+	cout << "Callback_3 : move" << endl;
+	CCharacterObject* selfObj = static_cast<CCharacterObject*>(self);
+	XMFLOAT3 selfPos = selfObj->GetPosition();
+
+	int selfTeamId = selfObj->GetTeamId();
+
+	CCharacterObject* closestTarget = nullptr;
+	float closestDistance = (std::numeric_limits<float>::max)();
+
+	for (CCharacterObject* targetObj : target)
+	{
+		if (targetObj->GetTeamId() != selfTeamId)
+		{
+			XMFLOAT3 targetPos = targetObj->GetPosition();
+
+			XMVECTOR selfVector = XMLoadFloat3(&selfPos);
+			XMVECTOR targetVector = XMLoadFloat3(&targetPos);
+			XMVECTOR distanceVector = XMVectorSubtract(selfVector, targetVector);
+			float distance = XMVectorGetX(XMVector3Length(distanceVector));
+
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestTarget = targetObj;
+			}
+		}
+	}
+	selfObj->CCharacterObject::SetState(CharacterState::MoveState);
+	selfObj->CCharacterObject::AddTarget(closestTarget);
 }
 
 void Callback_4(CGameObject* self, std::vector<CCharacterObject*>& target) {
@@ -1703,7 +1825,7 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_Monster_State = MonsterState::Default_State;
 	m_pTestPlayer = ptestplayer;
-	m_HpObject = new CHpbarObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
+	//m_HpObject = new CHpbarObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 	m_AttackRangeObject = new CAttackRangeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 }
 
@@ -1810,11 +1932,12 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 
 	else if (m_Monster_State == MonsterState::Battle_State) {
+		// 전투가 끝날때까지 변경되지 않는다.
 		if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
-			SetState(MonsterState::Chase_State);
+			//SetState(MonsterState::Chase_State);
 		}
 		else if (distance > CHASE_DISTANCE) {
-			SetState(MonsterState::Default_State);
+			//SetState(MonsterState::Default_State);
 		}
 		else if (distance < BATTLE_DISTANCE) {
 			// 플레이어 시점 변경
@@ -1823,7 +1946,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		}
 	}
 
-	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+	CCharacterObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }
 
 
@@ -1833,7 +1956,7 @@ void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
 
 	if (m_HpObject) {
-		m_HpObject->Render(pd3dCommandList, pCamera, pRenderOption);
+		//m_HpObject->Render(pd3dCommandList, pCamera, pRenderOption);
 	}
 
 	if (m_AttackRangeObject) {

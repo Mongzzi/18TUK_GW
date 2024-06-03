@@ -1092,7 +1092,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pPlayer->SetMaxVelocityXZ(1500.0f);
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pPlayer->SetName("Player");
-
+	m_pPlayer->SetAnimNum(1);
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
 	//--------------------------------- 조명, 재질 생성 ----------------------------------------
@@ -1117,8 +1117,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::random_device rd;
 	std::default_random_engine dre(rd());
 	std::uniform_int_distribution <> urd(0, 6);
-	int random_number = urd(dre);
-	if (random_number == 0) {
+	int random_number = 0;
+	//int random_number = urd(dre);
+	/*if (random_number == 0) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
 	}
 	else if (random_number == 1) {
@@ -1146,7 +1147,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_pPlayer->SetPosition(XMFLOAT3(-17000.0f, 100.0f, -9000.0f));
 	}
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
-	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
+	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);*/
 
 
 	// ----------------- 버튼 오브젝트 ------------------
@@ -1200,414 +1201,414 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				pMonsterObject->SetTeamId(1);
 				pMonsterObject->SetName("Zombie2");
 				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 3 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(16566.0f, 0.0f, -1952.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 4 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(14859.0f, 0.0f, 4636.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 3 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(16566.0f, 0.0f, -1952.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 4 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(14859.0f, 0.0f, 4636.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			}
-			// ---------------- B 섹터 ---------------------
-			{
-				//---------------------------  좀비 1 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(27650.0f, 0.0f, 9271.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 2 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(28928.0f, 0.0f, 8129.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 3 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(25602.0f, 0.0f, 4795.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			}
-			// ---------------- C 섹터 ---------------------
-			{
-				//---------------------------  좀비 1 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(26856.0f, 0.0f, -5531.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 2 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(24037.0f, 0.0f, -8650.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 3 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(25858.0f, 0.0f, -14250.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			}
-			// ---------------- D 섹터 ---------------------
-			{
-				//---------------------------  좀비 1 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(30818.0f, 0.0f, -2297.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 2 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(38175.0f, 0.0f, -2542.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 3 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(41804.0f, 0.0f, -3246.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			}
-			// ---------------- E 섹터 ---------------------
-			{
-				//---------------------------  좀비 1 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(41104.0f, 0.0f, 7827.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 2 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(44483.0f, 0.0f, 7231.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 3 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(44051.0f, 0.0f, 4317.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			}
-			// ---------------- F 섹터 ---------------------
-			{
-				//---------------------------  좀비 1 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(36135.0f, 0.0f, -13805.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-				//---------------------------  좀비 2 -------------------------------------------
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-				pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(42683.0f, 0.0f, -13215.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			}
-			// ---------------- G 섹터 ---------------------
-			{
-				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-				pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
-				pMonsterObject->SetScale(7.0f, 7.0f, 7.0f);
-				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
-				pMonsterObject->SetPosition(51383.0f, 0.0f, -3133.0f);
-				pMonsterObject->SetTeamId(1);
-				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			}
+			//}
+			//// ---------------- B 섹터 ---------------------
+			//{
+			//	//---------------------------  좀비 1 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(27650.0f, 0.0f, 9271.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 2 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(28928.0f, 0.0f, 8129.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 3 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(25602.0f, 0.0f, 4795.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//}
+			//// ---------------- C 섹터 ---------------------
+			//{
+			//	//---------------------------  좀비 1 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(26856.0f, 0.0f, -5531.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 2 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(24037.0f, 0.0f, -8650.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 3 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(25858.0f, 0.0f, -14250.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//}
+			//// ---------------- D 섹터 ---------------------
+			//{
+			//	//---------------------------  좀비 1 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(30818.0f, 0.0f, -2297.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 2 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(38175.0f, 0.0f, -2542.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 3 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(41804.0f, 0.0f, -3246.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//}
+			//// ---------------- E 섹터 ---------------------
+			//{
+			//	//---------------------------  좀비 1 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(41104.0f, 0.0f, 7827.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 2 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(44483.0f, 0.0f, 7231.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 3 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(44051.0f, 0.0f, 4317.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//}
+			//// ---------------- F 섹터 ---------------------
+			//{
+			//	//---------------------------  좀비 1 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(36135.0f, 0.0f, -13805.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//	//---------------------------  좀비 2 -------------------------------------------
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+			//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(42683.0f, 0.0f, -13215.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//}
+			//// ---------------- G 섹터 ---------------------
+			//{
+			//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+			//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
+			//	pMonsterObject->SetScale(7.0f, 7.0f, 7.0f);
+			//	//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
+			//	pMonsterObject->SetPosition(51383.0f, 0.0f, -3133.0f);
+			//	pMonsterObject->SetTeamId(1);
+			//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+			//}
 		}
-		else if (random_number == 1 || random_number == 2 || random_number == 3)
-		{
-			//---------------------------  좀비 1 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-5900, 100, -2500);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie1");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 2 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-7500, 100, -3900);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 3 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-3100, 100, -1700);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 4 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-6350, 100, -4600);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//else if (random_number == 1 || random_number == 2 || random_number == 3)
+		//{
+		//	//---------------------------  좀비 1 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-5900, 100, -2500);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie1");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 2 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-7500, 100, -3900);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 3 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-3100, 100, -1700);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 4 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-6350, 100, -4600);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			//---------------------------  좀비 1 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-14200, 100, -2600);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie1");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 2 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-16200, 100, -6600);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 3 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-14000, 100, -4600);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 1 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-14200, 100, -2600);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie1");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 2 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-16200, 100, -6600);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 3 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-14000, 100, -4600);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
 
-			//---------------------------  좀비 4 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-7000, 100, -18200);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie1");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 2 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-5000, 100, -16400);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 3 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-9000, 100, -19000);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 4 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-7000, 100, -18200);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie1");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 2 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-5000, 100, -16400);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 3 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-9000, 100, -19000);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			//--------------------------보스------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
-			pMonsterObject->SetScale(6.0f, 6.0f, 6.0f);
-			pMonsterObject->SetPosition(10600, 100, -17844);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//--------------------------보스------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
+		//	pMonsterObject->SetScale(6.0f, 6.0f, 6.0f);
+		//	pMonsterObject->SetPosition(10600, 100, -17844);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			//---------------------------  좀비 1 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(300, 100, -6100);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie1");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 2 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(0, 100, -8100);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 3 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(1500, 100, -4100);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 1 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(300, 100, -6100);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie1");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 2 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(0, 100, -8100);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 3 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(1500, 100, -4100);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			//---------------------------  좀비 4 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(15300, 100, -10000);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie1");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 2 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(17300, 100, -8000);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
-			//---------------------------  좀비 3 -------------------------------------------
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(14300, 100, -6000);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 4 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(15300, 100, -10000);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie1");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 2 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(17300, 100, -8000);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	//---------------------------  좀비 3 -------------------------------------------
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(14300, 100, -6000);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-		}
-		else
-		{
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(0, 100, -6100);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie1");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//}
+		//else
+		//{
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(0, 100, -6100);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie1");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-1000, 100, -9100);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-1000, 100, -9100);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-500, 100, -12100);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-500, 100, -12100);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-300, 100, -20200);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie1");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[0]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-300, 100, -20200);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie1");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-500, 100, -23200);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-500, 100, -23200);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-800, 100, -24200);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-800, 100, -24200);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-7900, 100, -26100);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[3]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-7900, 100, -26100);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-14800, 100, -18400);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-14800, 100, -18400);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-23400, 100, -15600);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-23400, 100, -15600);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-27400, 100, -16000);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-27400, 100, -16000);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
-			pMonsterObject->SetScale(6.0f, 6.0f, 6.0f);
-			pMonsterObject->SetPosition(-24000, 100, -26300);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[4]));
+		//	pMonsterObject->SetScale(6.0f, 6.0f, 6.0f);
+		//	pMonsterObject->SetPosition(-24000, 100, -26300);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-30500, 100, -10200);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-30500, 100, -10200);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-30500, 100, -13200);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-30500, 100, -13200);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-18200, 100, -2000);
-			pMonsterObject->SetTeamId(1);
-			pMonsterObject->SetName("Zombie2");
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[1]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-18200, 100, -2000);
+		//	pMonsterObject->SetTeamId(1);
+		//	pMonsterObject->SetName("Zombie2");
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 
-			pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
-			pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
-			pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
-			pMonsterObject->SetPosition(-18200, 100, -4000);
-			pMonsterObject->SetTeamId(1);
-			m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
+		//	pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
+		//	pMonsterObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, zombie[2]));
+		//	pMonsterObject->SetScale(3.0f, 3.0f, 3.0f);
+		//	pMonsterObject->SetPosition(-18200, 100, -4000);
+		//	pMonsterObject->SetTeamId(1);
+		//	m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::TextureObject);
 		}
 	}
 
@@ -1910,25 +1911,33 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		CMonsterObject* monsterObj = dynamic_cast<CMonsterObject*>(obj);
 
 		if (monsterObj) {
-			if (monsterObj->GetState() == MonsterState::Battle_State)
-				Engage((CCharacterObject*)obj);
+			if (monsterObj->CMonsterObject::GetState() == MonsterState::Battle_State)
+				if (monsterObj->GetCurHp() > 0)
+					Engage((CCharacterObject*)obj);
 		}
 		else;
 	}
 
 	if (m_currentPhase != TurnPhase::NON)
 	{
-		// 체력이 적은 오브젝트 벡터에서 제거.
-		for (CCharacterObject* cobj : m_pvEngagedObjects)
+		// 체력이 적은 오브젝트 벡터에서 제거. 이렇게 하면 안되지 않나
+		for (int i = 0; i < m_pvEngagedObjects.size();)
 		{
+			CCharacterObject* cobj = m_pvEngagedObjects[i];
 			if (cobj->GetCurHp() <= 0)
 			{
-				m_pvEngagedObjects.erase(std::remove(m_pvEngagedObjects.begin(), m_pvEngagedObjects.end(), cobj), m_pvEngagedObjects.end());
+				m_pvEngagedObjects.erase(m_pvEngagedObjects.begin() + i);
+				if (m_iTurnFlag > i)
+					m_iTurnFlag--;
+			}
+			else
+			{
+				i++; // Only increment if element is not removed
 			}
 		}
 		// 제거 후 초기화? 초기화도 여기서 해야하나?
-		if (m_pvEngagedObjects.size() < 2)
-			m_currentPhase = TurnPhase::NON;
+		//if (m_pvEngagedObjects.size() < 2)
+		//	m_currentPhase = TurnPhase::NON;
 		// 이걸 여기서 해야하는가?
 	}
 
@@ -1949,6 +1958,8 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 
 		// IncreaseTurnFlag() 함수를 통해 EndPhase로 넘어감.
 		// 벡터에 객체가 하나만 남으면 EndBattle로 넘어감.
+		if (m_pvEngagedObjects.size() < 2)
+			m_currentPhase = TurnPhase::EndBattle;
 	}
 	else if (m_currentPhase == TurnPhase::EndPhase)
 	{
@@ -1964,6 +1975,7 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	}
 	else if (m_currentPhase == TurnPhase::Engage)
 	{
+		m_pEngageObj->BeforeEngage();
 		m_pEngageObj->GetDeckData()->ShuffleDeck(dre);
 		m_currentPhase = m_lastPhase;
 		m_pEngageObj = nullptr;

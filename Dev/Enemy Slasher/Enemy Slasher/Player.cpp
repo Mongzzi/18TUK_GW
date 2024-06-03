@@ -275,7 +275,7 @@ void TestPlayer::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4
 	if (m_pSibling) m_pSibling->Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 	if (m_pChild) m_pChild->Animate(fTimeTotal,fTimeElapsed, &m_xmf4x4World);
 
-	CFBXObject::Animate(fTimeTotal,fTimeElapsed, pxmf4x4Parent);
+	CCharacterObject::Animate(fTimeTotal,fTimeElapsed, pxmf4x4Parent);
 }
 
 CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
