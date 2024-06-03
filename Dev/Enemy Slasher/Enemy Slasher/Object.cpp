@@ -1031,6 +1031,7 @@ CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_fMaxHp = m_fCurHp = 100;
 	m_fAtk = 30.f;
 	m_iTeamId = 0;
+	m_fMoveSpeed = 100;
 	m_CurrentState = CharacterState::IdleState;
 	m_sName = "Unknown";
 }
@@ -1090,6 +1091,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 			break;
 		case CharacterState::AttackState:
 			// 애니메이션에 따라서 일정 딜레이 후 데미지를 입힌다.
+			// 사정거리 개념이 있어야 이동에 의미가 생긴다.
 			// 애니메이션이 끝나면 타겟 추출.
 			eraseFlag = m_bIsCurAnimFinish;
 			break;
@@ -1126,6 +1128,64 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 	CFBXObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }
 
+
+void CCharacterObject::SetCharacterByName(string name)
+{
+	if (m_pDeck)
+		delete m_pDeck;
+	if (name == "SwordAndShield") {
+		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 2, 2, 2, 3, 3, 3});
+		m_fMaxHp = m_fCurHp = 100;
+		m_fAtk = 30.f;
+		m_fMoveSpeed = 100;
+		m_iTeamId = 0;
+	}
+	else if (name == "Zombie1") {
+		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
+		m_fMaxHp = m_fCurHp = 40;
+		m_fAtk = 10.f;
+		m_fMoveSpeed = 50;
+		m_iTeamId = 1;
+	}
+	else if (name == "Zombie2") {
+		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 2, 3});
+		m_fMaxHp = m_fCurHp = 60;
+		m_fAtk = 20.f;
+		m_fMoveSpeed = 70;
+		m_iTeamId = 1;
+	}
+	else if (name == "Zombie3") {
+		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
+		m_fMaxHp = m_fCurHp = 40;
+		m_fAtk = 30.f;
+		m_fMoveSpeed = 120;
+		m_iTeamId = 1;
+	}
+	else if (name == "Zombie4") {
+		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
+		m_fMaxHp = m_fCurHp = 50;
+		m_fAtk = 15.f;
+		m_fMoveSpeed = 50;
+		m_iTeamId = 1;
+	}
+	else if (name == "ZombieBoss") {
+		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 3, 3, 3});
+		m_fMaxHp = m_fCurHp = 100;
+		m_fAtk = 50.f;
+		m_fMoveSpeed = 60;
+		m_iTeamId = 1;
+	}
+	else if (name == "Unknown") {
+		m_pDeck = new CDeckData();
+		m_fMaxHp = m_fCurHp = 100;
+		m_fAtk = 30.f;
+		m_fMoveSpeed = 100;
+		m_iTeamId = 1;
+	}
+	m_iTurnSpeed = 5.;
+	m_CurrentState = CharacterState::IdleState;
+	m_sName = name;
+}
 
 void CCharacterObject::Reset()
 {

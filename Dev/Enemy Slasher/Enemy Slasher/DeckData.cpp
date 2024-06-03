@@ -5,9 +5,16 @@ CDeckData::CDeckData()
     // 일단 덱을 0~4로 2장씩 채움.
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 5; ++j) {
+            if (j == 1 || j == 4)
+                continue;
             m_InitialDeck.push_back(j);
         }
     }
+}
+
+CDeckData::CDeckData(std::vector<int> vNewDeck)
+{
+    m_InitialDeck = vNewDeck;
 }
 
 CDeckData::~CDeckData()

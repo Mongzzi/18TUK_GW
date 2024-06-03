@@ -12,6 +12,7 @@ class CDeckData
 {
 public:
 	CDeckData();
+	CDeckData(std::vector<int> vNewDeck);
 	~CDeckData();
 private:
 	std::vector<int> m_InitialDeck;	// 덱을 구성하는 원본

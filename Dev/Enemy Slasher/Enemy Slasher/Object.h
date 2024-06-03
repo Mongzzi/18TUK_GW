@@ -402,6 +402,8 @@ private:
 
 	int m_iTeamId;
 
+	float m_fMoveSpeed;
+
 	int m_iKarma;
 	// 어떤 행동의 대상
 	vector<CCharacterObject*> m_vTargets;
@@ -417,11 +419,13 @@ private:
 	// 등등
 public:
 	CDeckData* GetDeckData() { return m_pDeck; };
-	float GetSpeed() { return m_iTurnSpeed; };
+	float GetTurnSpeed() { return m_iTurnSpeed; };
 	float GetAtk() { return m_fAtk; };
 	float GetCurHp() { return m_fCurHp; };
 	int GetTeamId() { return m_iTeamId; };
 	string GetName() { return m_sName; };
+	void SetCharacterByName(string name = "Unknown");
+
 	void Reset(); // 전투가 끝나거나 시작될때 불릴 함수
 	void StartTurn();// 턴 시작시 불릴 함수
 

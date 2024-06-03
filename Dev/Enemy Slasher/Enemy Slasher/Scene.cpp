@@ -1174,6 +1174,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// monster
 	{
+		// 아마 좀비끼리는 섞어쓸 수 있을?지도
 		CMonsterObject* pMonsterObject;
 		CFbx_V3::CFbxData* zombie[5];
 		zombie[0] = fLoader.LoadFbx("fbxsdk/", "Zombie1");
@@ -1225,7 +1226,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
 				pMonsterObject->SetPosition(12765.0f, 0.0f, 3186.0f);
 				pMonsterObject->SetTeamId(1);
-				pMonsterObject->SetName("Zombie1");
+				pMonsterObject->SetCharacterByName("Zombie1");
 				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::Enemy);
 				//---------------------------  좀비 2 -------------------------------------------
 				pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
@@ -1234,7 +1235,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				//pMonsterObject->SetInitialRotate(-90.0f, 180.0f, 0.0f);
 				pMonsterObject->SetPosition(14593.0f, 0.0f, -432.0f);
 				pMonsterObject->SetTeamId(1);
-				pMonsterObject->SetName("Zombie2");
+				pMonsterObject->SetCharacterByName("Zombie2");
 				m_pObjectManager->AddObj(pMonsterObject, ObjectLayer::Enemy);
 		//		//---------------------------  좀비 3 -------------------------------------------
 		//		pMonsterObject = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (TestPlayer*)m_pPlayer, ShaderType::CTextureShader);
