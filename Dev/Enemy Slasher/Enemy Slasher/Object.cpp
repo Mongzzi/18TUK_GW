@@ -1027,7 +1027,7 @@ CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pDeck = new CDeckData();
 	m_iTurnSpeed = 5.;
 	m_fMaxHp = m_fCurHp = 100;
-	m_fAtk = 110.f;
+	m_fAtk = 30.f;
 	m_iTeamId = 0;
 	m_CurrentState = CharacterState::IdleState;
 	m_sName = "Unknown";
