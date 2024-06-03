@@ -1185,6 +1185,11 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		zombie[2] = fLoader.LoadFbx("fbxsdk/", "Zombie3");
 		zombie[3] = fLoader.LoadFbx("fbxsdk/", "Zombie4");
 		zombie[4] = fLoader.LoadFbx("fbxsdk/", "ZombieBoss");
+		fLoader.LoadAnim(zombie[4]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "ZombieBossIdle");
+		fLoader.LoadAnim(zombie[4]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "ZombieBossAttack");
+		fLoader.LoadAnim(zombie[4]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "ZombieBossMove");
+		fLoader.LoadAnim(zombie[4]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "ZombieBossDie");
+		fLoader.LoadAnim(zombie[4]->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "ZombieBossBuff");
 
 		//for (int i = 0; i < 1; ++i) {
 		//	string name = "Zombie" + i + 1;
