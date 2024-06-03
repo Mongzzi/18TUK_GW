@@ -62,6 +62,18 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 		}
 		m_mLoadedMeshsMap[pFbxData->m_sFileName] = pNewMeshVector;
 
+
+		// physx Mesh
+		{
+			physx::PxTriangleMesh* pNewPhysXMesh;
+			std::vector<physx::PxTriangleMesh*>* pNewPhysXMeshVector = new std::vector<physx::PxTriangleMesh*>;
+			for (int i = 0; i < pNewMeshVector->size(); ++i) {
+				pNewPhysXMesh = m_pPhysXManager->CreateCustomTriangleMeshCollider((*pNewMeshVector)[i]);
+				pNewPhysXMeshVector->emplace_back(pNewPhysXMesh);
+			}
+			m_mPhysXTriangleMeshMap[pFbxData->m_sFileName] = pNewPhysXMeshVector;
+		}
+
 		pFbxData->m_vpMeshs.clear();
 	}
 #ifdef _DEBUG
@@ -71,16 +83,17 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 #endif
 
 	m_vpCurrFileMeshs = m_mLoadedMeshsMap[pFbxData->m_sFileName];
+	m_vpCurrPhysXTriangleMeshs = m_mPhysXTriangleMeshMap[pFbxData->m_sFileName];
 
-	CFBXObject* newGameObject = LoadFBXObjectIterative(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData->m_pRootObjectData, pShader);
+	CFBXObject* newGameObject = LoadFBXObjectIterative(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFbxData, pShader);
 
 	return newGameObject;
 }
 
-CFBXObject* CResorceManager::LoadFBXObjectIterative(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::ObjectData* pObjectData, CShader* pShader) {
+CFBXObject* CResorceManager::LoadFBXObjectIterative(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CFbx_V3::CFbxData* pFbxData, CShader* pShader) {
 	std::stack<std::pair<CFBXObject*, CFbx_V3::ObjectData*>> stack;
 	CFBXObject* rootObject = new CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::NON);
-	stack.push({ rootObject, pObjectData });
+	stack.push({ rootObject, pFbxData->m_pRootObjectData });
 
 	while (!stack.empty()) {
 		auto [currentObject, currentObjectData] = stack.top();
@@ -93,6 +106,11 @@ CFBXObject* CResorceManager::LoadFBXObjectIterative(ID3D12Device* pd3dDevice, ID
 		currentObject->SetFbxData(pd3dDevice, pd3dCommandList, currentObjectData);
 		currentObject->SetShader(pShader);
 		currentObject->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+		// Set PhysX Actor Information
+		for (int i = 0; i < currentObjectData->m_vnMeshIndices.size(); ++i) {
+			currentObject->m_vpPhysXMesh.push_back((*m_vpCurrPhysXTriangleMeshs)[currentObjectData->m_vnMeshIndices[i]]);
+		}
 
 		// Set materials if any
 		if (!currentObjectData->m_vpMaterials.empty()) {
@@ -139,4 +157,13 @@ CFBXObject* CResorceManager::LoadFBXObjectIterative(ID3D12Device* pd3dDevice, ID
 	}
 
 	return rootObject;
+}
+
+physx::PxTriangleMesh* CResorceManager::GetPhysXTriangleMesh(std::string& fileName, int meshNum)
+{
+	if (m_mPhysXTriangleMeshMap.contains(fileName)) {
+		auto meshVector = m_mPhysXTriangleMeshMap[fileName];
+		return (*meshVector)[meshNum];
+	}
+	return nullptr;
 }

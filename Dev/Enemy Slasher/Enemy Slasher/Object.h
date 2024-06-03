@@ -156,6 +156,12 @@ public:
 	void ReleaseUploadBuffers();
 };
 
+enum class PhysXActorType {
+	Dynamic,
+	Static,
+	Kinematic
+};
+
 class CGameObject
 {
 public:
@@ -198,6 +204,13 @@ protected:
 
 	bool							m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
 	bool							m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
+
+public:
+	physx::PxActor* m_pPhysXActor = nullptr; // physx 충돌체
+	PhysXActorType m_PhysXActorType; // physx actor type
+
+	// physx actor를 만들기 위한 정보
+	std::vector<physx::PxTriangleMesh*> m_vpPhysXMesh;
 
 public:
 	void SetChild(CGameObject* pChild);
@@ -335,6 +348,9 @@ private:
 	ID3D12Resource* m_pd3dcbSkinningObject = NULL;
 	CB_SKINNINGOBJECT_INFO* m_pcbMappedSkinningObject = NULL;
 
+private:
+	std::string m_sPhysXDataVectorName;
+	std::vector<int> m_vPhysXMeshRegistNum;
 };
 
 class CCharacterObject : public CFBXObject

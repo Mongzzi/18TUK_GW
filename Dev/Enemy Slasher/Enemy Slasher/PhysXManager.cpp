@@ -8,6 +8,17 @@ using namespace physx;
 
 #define PVD_HOST "127.0.0.1"
 
+static void DecomposeTransform(const XMFLOAT4X4& transformMatrix, XMFLOAT3& scale, XMFLOAT4& rotation, XMFLOAT3& position) {
+    XMMATRIX matrix = XMLoadFloat4x4(&transformMatrix);
+    XMVECTOR xmvScale, xmvRotate, xmvPos;
+
+    XMMatrixDecompose(&xmvScale, &xmvRotate, &xmvPos, matrix);
+
+    XMStoreFloat3(&scale, xmvScale);
+    XMStoreFloat4(&rotation, xmvRotate);
+    XMStoreFloat3(&position, xmvPos);
+}
+
 CPhysXManager::CPhysXManager()
 {
     using namespace physx;
@@ -169,8 +180,11 @@ physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
 {
     using namespace physx;
 
-    XMFLOAT3 xmfPos = object->GetPosition();
-    PxTransform transform(xmfPos.x, xmfPos.y, xmfPos.z); // 위치 지정
+    XMFLOAT3 xmf3Scale, xmf3Position;
+    XMFLOAT4 xmf4Rotation;
+    DecomposeTransform(object->GetWorldMat(), xmf3Scale, xmf4Rotation, xmf3Position);
+
+    PxTransform transform(xmf3Position.x, xmf3Position.y, xmf3Position.z, PxQuat(xmf4Rotation.x, xmf4Rotation.y, xmf4Rotation.z, xmf4Rotation.w)); // 위치 지정
 
     PxRigidDynamic* aCapsuleActor = gPhysics->createRigidDynamic(PxTransform(transform));
 
@@ -181,17 +195,18 @@ physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
         PxCapsuleGeometry(100.f, 200.f), *gMaterial);
     aCapsuleShape->setLocalPose(relativePose);
     PxRigidBodyExt::updateMassAndInertia(*aCapsuleActor, 100.f);
+    aCapsuleActor->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
     gScene->addActor(*aCapsuleActor);
 
     //aCapsuleActor->addForce(PxVec3(0.f, 0.f, 10000.f));
-    aCapsuleActor->setLinearVelocity(PxVec3(0.f, 0.f, 100.f));
+    //aCapsuleActor->setLinearVelocity(PxVec3(0.f, 0.f, 100.f));
 
     //PxRigidDynamic* ball = createDynamic(transform, PxSphereGeometry(5), PxVec3(0, -25, -100));
     //PxRigidBodyExt::updateMassAndInertia(*ball, 1000.f);
 
-    PxTransform newPos = aCapsuleActor->getGlobalPose();
-    newPos.p = PxVec3(1000.f, 0.f, 500.f);
-    aCapsuleActor->setGlobalPose(newPos);
+    //PxTransform newPos = aCapsuleActor->getGlobalPose();
+    //newPos.p = PxVec3(1000.f, 0.f, 500.f);
+    //aCapsuleActor->setGlobalPose(newPos);
 
     return aCapsuleActor;
 }
@@ -202,87 +217,106 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
 
     CMesh** ppMeshs = object->GetMeshes();
     int nMeshs = object->GetNumMeshes();
-    XMFLOAT3 xmfPos = object->GetPosition();
 
-    PxTransform transform(xmfPos.x, xmfPos.y, xmfPos.z); // 위치 지정
+    XMFLOAT3 xmf3Scale, xmf3Position;
+    XMFLOAT4 xmf4Rotation;
+    DecomposeTransform(object->GetWorldMat(), xmf3Scale, xmf4Rotation, xmf3Position);
+
+    PxTransform transform(xmf3Position.x, xmf3Position.y, xmf3Position.z, PxQuat(xmf4Rotation.x, xmf4Rotation.y, xmf4Rotation.z, xmf4Rotation.w)); // 위치 지정
     PxRigidStatic* staticActor = gPhysics->createRigidStatic(transform);
     for (int i = 0; i < nMeshs; ++i) {
         CMesh* pMesh = ppMeshs[i];
-        UINT nStride = pMesh->GetStride();
-        UINT* gOriginIndices = pMesh->GetIndices();
-        UINT gVertexCount = pMesh->GetNumVertices();
-        UINT gIndexCount = pMesh->GetNumIndices(); 
+        PxTriangleMesh* gTriangleMesh;
 
-        std::vector<PxVec3> gVertices;
-        std::vector<PxU32> gIndices;
-
-        // Vertex 좌표만 추출한 배열 생성
-        {
-            if (nStride == sizeof(CVertex)) {
-                CVertex* gOriginVertices = static_cast<CVertex*>(pMesh->GetVertices());
-                for (UINT j = 0; j < gVertexCount; ++j) {
-                    XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
-                    gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
-                }
-            }
-            else if (nStride == sizeof(CVertex_Skining)) {
-                CVertex_Skining* gOriginVertices = static_cast<CVertex_Skining*>(pMesh->GetVertices());
-                for (UINT j = 0; j < gVertexCount; ++j) {
-                    XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
-                    gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
-                }
-            }
-        }
-        // Index 자료형 변환
-        {
-            for (UINT j = 0; j < gIndexCount; ++j) {
-                gIndices.push_back(gOriginIndices[j]);
-            }
-        }
-
-        // PhysX Mesh를 생성.
-        PxTriangleMeshDesc meshDesc;
-        meshDesc.points.count = static_cast<PxU32>(gVertices.size());
-        meshDesc.points.stride = sizeof(PxVec3);
-        meshDesc.points.data = gVertices.data();
-
-        meshDesc.triangles.count = static_cast<PxU32>(gIndices.size() / 3);
-        meshDesc.triangles.stride = 3 * sizeof(PxU32);
-        meshDesc.triangles.data = gIndices.data();
-
-        PxTolerancesScale scale;
-        PxCookingParams params(scale);
-
-        PxDefaultMemoryOutputStream writeBuffer;
-        PxTriangleMeshCookingResult::Enum result;
-        bool status = PxCookTriangleMesh(params, meshDesc, writeBuffer, &result);
-        if (!status)
-            return NULL;
-
-        PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
-        PxTriangleMesh* gTriangleMesh = gPhysics->createTriangleMesh(readBuffer);
+        if (object->m_vpPhysXMesh.size() > i)
+            gTriangleMesh = object->m_vpPhysXMesh[i];
+        else
+            gTriangleMesh = CreateCustomTriangleMeshCollider(pMesh);
 
         // Shape를 생성.
-        PxShapeFlags shapeFlags = PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE;
+        //PxShapeFlags shapeFlags = PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE;
         PxTriangleMeshGeometry meshGeometry;
         meshGeometry.triangleMesh = gTriangleMesh;
-        meshGeometry.scale = PxVec3(1.f, 1.f, 1.f);
-        PxShape* shape = PxRigidActorExt::createExclusiveShape(*staticActor, meshGeometry, *gMaterial);
-        shape->setContactOffset(0.05f);
-        shape->setRestOffset(0.0f);
+        meshGeometry.scale = PxVec3(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+        //PxShape* shape = PxRigidActorExt::createExclusiveShape(*staticActor, meshGeometry, *gMaterial);
+        PxShape* shape = gPhysics->createShape(meshGeometry, *gMaterial);
+        if (shape) {
+            shape->setContactOffset(0.05f);
+            shape->setRestOffset(0.0f);
 
-        // 물리 시뮬레이션에 오브젝트로 추가.
-        staticActor->attachShape(*shape);
+            // 물리 시뮬레이션에 오브젝트로 추가.
+            staticActor->attachShape(*shape);
 
-        shape->release();
+            //shape->release();
+        }
     }
 
     gScene->addActor(*staticActor);
+    
+    object->m_pPhysXActor = staticActor;
+    object->m_PhysXActorType = PhysXActorType::Static;
+
+    if (object->GetChild()) AddStaticCustomGeometry(object->GetChild());
+    if (object->GetSibling()) AddStaticCustomGeometry(object->GetSibling());
+
     return staticActor;
 }
 
 physx::PxTriangleMesh* CPhysXManager::CreateCustomTriangleMeshCollider(CMesh* pMesh)
 {
+    UINT nStride = pMesh->GetStride();
+    UINT* gOriginIndices = pMesh->GetIndices();
+    UINT gVertexCount = pMesh->GetNumVertices();
+    UINT gIndexCount = pMesh->GetNumIndices();
 
-    return nullptr;
+    std::vector<PxVec3> gVertices;
+    std::vector<PxU32> gIndices;
+
+    // Vertex 좌표만 추출한 배열 생성
+    {
+        if (nStride == sizeof(CVertex)) {
+            CVertex* gOriginVertices = static_cast<CVertex*>(pMesh->GetVertices());
+            for (UINT j = 0; j < gVertexCount; ++j) {
+                XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
+                gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
+            }
+        }
+        else if (nStride == sizeof(CVertex_Skining)) {
+            CVertex_Skining* gOriginVertices = static_cast<CVertex_Skining*>(pMesh->GetVertices());
+            for (UINT j = 0; j < gVertexCount; ++j) {
+                XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
+                gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
+            }
+        }
+    }
+    // Index 자료형 변환
+    {
+        for (UINT j = 0; j < gIndexCount; ++j) {
+            gIndices.push_back(gOriginIndices[j]);
+        }
+    }
+
+    // PhysX Mesh를 생성.
+    PxTriangleMeshDesc meshDesc;
+    meshDesc.points.count = static_cast<PxU32>(gVertices.size());
+    meshDesc.points.stride = sizeof(PxVec3);
+    meshDesc.points.data = gVertices.data();
+
+    meshDesc.triangles.count = static_cast<PxU32>(gIndices.size() / 3);
+    meshDesc.triangles.stride = 3 * sizeof(PxU32);
+    meshDesc.triangles.data = gIndices.data();
+
+    PxTolerancesScale scale;
+    PxCookingParams params(scale);
+
+    PxDefaultMemoryOutputStream writeBuffer;
+    PxTriangleMeshCookingResult::Enum result;
+    bool status = PxCookTriangleMesh(params, meshDesc, writeBuffer, &result);
+    if (!status)
+        return NULL;
+
+    PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+    PxTriangleMesh* gTriangleMesh = gPhysics->createTriangleMesh(readBuffer);
+
+    return gTriangleMesh;
 }
