@@ -1155,7 +1155,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_iTeamId = 1;
 	}
 	else if (name == "Zombie3") {
-		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
+		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 0, 2, 3});
 		m_fMaxHp = m_fCurHp = 40;
 		m_fAtk = 30.f;
 		m_fMoveSpeed = 120;
