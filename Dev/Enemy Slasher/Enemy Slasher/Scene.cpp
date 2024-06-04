@@ -1083,8 +1083,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "SwordAndShieldIdle");
 	fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "SwordAndShieldAttack");
 	fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "SwordAndShieldMove");
-	fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "SwordAndShieldBuff");
 	fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "SwordAndShieldDie");
+	fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "SwordAndShieldBuff");
 	
 	//fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Idle");
 	//fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Running");
