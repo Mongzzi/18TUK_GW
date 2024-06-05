@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "Object.h"
 #include "Player.h"
+#include "PhysXManager.h"
 
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters)
 {
@@ -1217,6 +1218,21 @@ void CCharacterObject::Heal(float ratio)
 		m_fCurHp = m_fMaxHp;
 }
 
+void CCharacterObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	if (m_pPhysXActor && m_PhysXActorType == PhysXActorType::Dynamic) {
+		XMFLOAT3 xmfPos = GetPosition();
+		physx::PxVec3 targetPosition = physx::PxVec3(xmfPos.x, xmfPos.y+ PHYSX_CAPSUL_HEIGHT, xmfPos.z);
+		physx::PxVec3 currentPosition = static_cast<physx::PxRigidDynamic*>(m_pPhysXActor)->getGlobalPose().p;
+		physx::PxVec3 direction = (targetPosition - currentPosition).getNormalized();
+		physx::PxVec3 velocity = direction * m_fMoveSpeed;
+
+		static_cast<physx::PxRigidDynamic*>(m_pPhysXActor)->setLinearVelocity(velocity);
+	}
+
+	CGameObject::UpdateTransform(pxmf4x4Parent);
+}
+
 
 CRayObject::CRayObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
@@ -2000,7 +2016,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	}
 
 	if (m_Monster_State == MonsterState::Default_State) {
-		SetSpeed(1.0);	// 델타타임 곱해야할지 고민중
+		SetSpeed(10.0);	// 델타타임 곱해야할지 고민중
 
 		if (distance > CHASE_DISTANCE) {
 			if ((int)(fTimeTotal / 2.0f) > (int)((fTimeTotal - fTimeElapsed) / 2.0f))
@@ -2037,7 +2053,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
 			m_CurHp -= 0.005f;
 
-			SetSpeed(3.0f);
+			SetSpeed(30.0f);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
 			position_difference.x = player_position.x - monster_position.x;
@@ -2080,6 +2096,9 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 		}
 	}
+
+	// position update를 위해 이동 벡터 없이 해당 함수 호출 (PhysX 연동 관리)
+	MovePosition(0.f, 0.f, 0.f);
 
 	CCharacterObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 }

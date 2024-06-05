@@ -43,7 +43,6 @@ private:
 	std::vector<CGameObject*> m_pvObjectManager[int(ObjectLayer::Count)];
 
 	CPhysXManager* m_pPhysXManager = nullptr;
-	vector<pair<CGameObject*, physx::PxActor*>> m_vPhysxPairs;
 
 private:
 	CShader* m_pColliderShader = nullptr;
