@@ -387,6 +387,7 @@ public:
 
 	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 private:
+protected:
 	CDeckData* m_pDeck;
 	float m_iTurnSpeed; // 속도 관련 기능을 서머너즈워처럼 바꿀것.
 	// 속도 게이지가 있어서 m_iTurnSpeed만큼 오르는데 이 게이지가 꽉 차면 행동 가능.
@@ -661,6 +662,7 @@ public:
 
 	MonsterState GetState() { return m_Monster_State; };
 
+	int TurnPlay(default_random_engine& dre);
 private:
 	CPlayer* m_pTestPlayer;
 	MonsterState m_Monster_State;
@@ -673,6 +675,8 @@ private:
 
 	XMFLOAT3 m_dir = { 0.0f,0.0f,1.0f };
 	float m_speed = 100.0f;
+
+	float m_fLastPlayTime = 0;
 };
 
 

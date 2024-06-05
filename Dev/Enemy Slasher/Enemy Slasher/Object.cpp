@@ -2100,6 +2100,24 @@ void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 
 }
 
+int CMonsterObject::TurnPlay(default_random_engine& dre)
+{
+	// 애니메이션이 끝나지 않았다면 불리지 않아야함.
+	if (m_CurrentState != CharacterState::IdleState)
+		return -1;
+	if (m_fLastPlayTime + 1 < m_fTimeLast)
+	{
+		m_fLastPlayTime = m_fTimeLast;
+		int handSize = m_pDeck->GetCurrentHandSize();
+		if (handSize < 3) // 기본 패는 5장이므로 3장 사용하고 종료할것.
+			return -2;
+		std::uniform_int_distribution<int> distr(0, handSize - 1);
+		int random_number = distr(dre);
+		return random_number;
+	}
+	return -1;
+}
+
 
 CHpbarObject::CHpbarObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType stype, int nMeshes)
 	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)

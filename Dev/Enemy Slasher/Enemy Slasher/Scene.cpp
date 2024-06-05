@@ -899,68 +899,73 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	float mouseX = static_cast<float>(ptCursorPos.x) / (clientWidth)*FRAME_BUFFER_WIDTH;
 	float mouseY = static_cast<float>(ptCursorPos.y) / (clientHeight)*FRAME_BUFFER_HEIGHT;
 
+	// 현재 차례인 오브젝트의 팀
+	int teamID = m_pvEngagedObjects[m_iTurnFlag]->GetTeamId();
+
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		std::cout << "마우스눌림" << std::endl;
-
-		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		for (auto& pObject : buttonList)
-		{
-			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-			if (pButton && pButton->IsPointInside(mouseX, mouseY))
-			{
-				std::cout << "쿼카눌림" << std::endl;
-
-				pButton->m_IsClicked = true;
-			}
-		}
+		//std::cout << "마우스눌림" << std::endl;
+		//
+		//auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		//for (auto& pObject : buttonList)
+		//{
+		//	CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+		//	if (pButton && pButton->IsPointInside(mouseX, mouseY))
+		//	{
+		//		std::cout << "쿼카눌림" << std::endl;
+		//
+		//		pButton->m_IsClicked = true;
+		//	}
+		//}
 	}
 	break;
 
 	case WM_LBUTTONUP:
 	{
-		auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		for (auto& pObject : buttonList)
-		{
-			CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-			if (pButton && pButton->m_IsClicked)
-			{
-				if (pButton->IsPointInside(mouseX, mouseY))
-				{
-					pButton->m_IsClicked = false;
-				}
-			}
-		}
+		//auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
+		//for (auto& pObject : buttonList)
+		//{
+		//	CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+		//	if (pButton && pButton->m_IsClicked)
+		//	{
+		//		if (pButton->IsPointInside(mouseX, mouseY))
+		//		{
+		//			pButton->m_IsClicked = false;
+		//		}
+		//	}
+		//}
 	}
 	break;
 
 	case WM_RBUTTONDOWN:
-		if (pCoveredUI)
-		{
-			m_pSelectedUI = pCoveredUI;
-			m_pSelectedUI->ButtenDown();
-		}
+		if(teamID == 0)
+			if (pCoveredUI)
+			{
+				m_pSelectedUI = pCoveredUI;
+				m_pSelectedUI->ButtenDown();
+			}
 		break;
 
 	case WM_RBUTTONUP:
-		if (m_pSelectedUI)
-		{
-			// 현재 카드UI 전용코드가 올라가있음.
-			// 아래 내용을 CCardUIObject.ButtenUp()에 넣어야함.
-			m_pSelectedUI->ButtenUp();
-			if (ptCursorPos.y > (float)clientHeight / 5 * 4)
+		if (teamID == 0)
+			if (m_pSelectedUI)
 			{
-				// 원위치로 돌아감.
-				m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
-				m_pSelectedUI = NULL;
+				// 현재 카드UI 전용코드가 올라가있음.
+				// 아래 내용을 CCardUIObject.ButtenUp()에 넣어야함.
+				m_pSelectedUI->ButtenUp();
+				if (ptCursorPos.y > (float)clientHeight / 5 * 4)
+				{
+					// 원위치로 돌아감.
+					m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
+					m_pSelectedUI = NULL;
+				}
+				else
+				{
+					UseSelectedCard();
+				}
 			}
-			else
-			{
-				UseSelectedCard();
-			}
-		}
 		break;
 
 
@@ -979,6 +984,9 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
 	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
 
+	// 현재 차례인 오브젝트의 팀
+	int teamID = m_pvEngagedObjects[m_iTurnFlag]->GetTeamId();
+
 	//std::default_random_engine dre(0);
 	switch (nMessageID)
 	{
@@ -995,19 +1003,10 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'T': m_pPlayer->Rotate(0.0f, -20.0f, 0.0f); break;
 		case 'Z':
 		case 'z':
-			//drawnCard = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->Draw(dre);
-			//// 오브젝트레이어의 카드 정보를 핸드의 정보로 바꿔줘야함.
-			//if (drawnCard != -1)
-			//{
-			//	std::cout << drawnCard << " 드로우" << endl;
-			//	bCardUpdateFlag = true;
-			//}
-			//else
-			//	std::cout << " 드로우 실패. 이미 5장이거나 덱이 없음." << endl;
 			break;
 		case 'X':
 		case 'x':
-			std::cout << "m_currentPhase : " << (int)m_currentPhase << std::endl;
+			//std::cout << "m_currentPhase : " << (int)m_currentPhase << std::endl;
 			/*intVector = m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand();
 			std::cout << "hand : ";
 			for (int card : intVector)
@@ -1038,19 +1037,20 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case '3':
 		case '4':
 		case '5':
-			tmp = wParam - 0x30 - 1;
-			if (m_currentPhase == TurnPhase::PlayPhase)
-			{
-				if (pInteractiveUIObj->size() > 0) {
-					if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
-					{
-						if (m_pSelectedUI == (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp])
-							UseSelectedCard();
-						else
-							m_pSelectedUI = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp];
+			if (teamID == 0)
+				tmp = wParam - 0x30 - 1;
+				if (m_currentPhase == TurnPhase::PlayPhase)
+				{
+					if (pInteractiveUIObj->size() > 0) {
+						if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
+						{
+							if (m_pSelectedUI == (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp])
+								UseSelectedCard();
+							else
+								m_pSelectedUI = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp];
+						}
 					}
 				}
-			}
 			break;
 		default:
 			break;
@@ -1993,6 +1993,33 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	}
 	else if (m_currentPhase == TurnPhase::PlayPhase)
 	{
+		if (turnObj->GetTeamId() == 0) {
+			//플레이어의 턴
+		}
+		else if (turnObj->GetTeamId() == 1) {
+			CMonsterObject* MonsterObj = dynamic_cast<CMonsterObject*>(turnObj);
+			if (MonsterObj)
+			{
+				int flag = MonsterObj->TurnPlay(dre);
+				// AI의 턴.
+				// 팀을 검사하는것과 다이나믹 캐스트하는 방법이 있을듯.
+				// 이 작업을 계속 하는건 비효율적일지도
+				// 카드를 적당히 사용한다.
+				// 사용한다는 함수를 부르면 해당 객체가 카드를 사용함
+				// 카드를 사용한다 라는 함수가 사용할 핸드의 번호를 리턴하며 특정 값을 리턴하면 턴 종료 함수를 호출.
+				// 아무것도 안 하는 값도 있어야함.
+				if (flag == -1);
+				else if(flag == -2)
+					IncreaseTurnFlag();
+				else {
+					if(m_pSelectedUI == NULL)
+						m_pSelectedUI = (CUIObject*)pvObjectList[(int)ObjectLayer::InteractiveUIObject][flag];
+					//if (m_pSelectedUI != (CUIObject*)pvObjectList[(int)ObjectLayer::InteractiveUIObject][flag])
+					else
+						UseSelectedCard();
+				}
+			}
+		}
 		// 카드를 뽑는다는 효과를 지닌 카드가 있을경우 여기서 처리.
 
 		// IncreaseTurnFlag() 함수를 통해 EndPhase로 넘어감.
