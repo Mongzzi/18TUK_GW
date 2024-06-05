@@ -1,6 +1,8 @@
 #pragma once
 #include "PxPhysicsAPI.h"
 
+#define PHYSX_CAPSUL_HEIGHT 200.f
+
 class CGameObject;
 class CMesh;
 class CVertex;
@@ -21,15 +23,12 @@ public:
     void stepPhysics(bool /*interactive*/, float elapsedTime = (1.0f / 60.0f));
     void cleanupPhysics(bool /*interactive*/);
 
-
     physx::PxRigidDynamic* createDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, const physx::PxVec3& velocity = physx::PxVec3(0));
     void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
 
-    void renderCallback();
-    void updateActors(physx::PxRigidActor** actors, const physx::PxU32 numActors);
-
 public:
     physx::PxActor* AddCapshulDynamic(CGameObject* object);
+    physx::PxActor* AddCapshulKinematic(CGameObject* object);
     physx::PxActor* AddStaticCustomGeometry(CGameObject* object);
 
     physx::PxRigidStatic* AddStaticMapObject(CGameObject* object) {};
@@ -37,6 +36,13 @@ public:
 public:
     // Cook Triangle Mesh Collider
     physx::PxTriangleMesh* CreateCustomTriangleMeshCollider(CMesh* pMesh);
+    physx::PxConvexMesh* ConvertConvexMeshCollider(physx::PxTriangleMesh* pTriangleMesh);
+
+public:
+    void MoveKineticActor(physx::PxRigidDynamic* kineticActor, const physx::PxVec3& deltaMove);
+    void CPhysXManager::MoveDynamicActor(physx::PxRigidDynamic* dynamicActor, const physx::PxVec3& targetPosition, float speed, float deltaTime);
+
+    physx::PxReal GetGroundHeightUsingSweep(physx::PxScene* scene, const physx::PxVec3& position, physx::PxReal maxDistance = 100.0f);
 
 private:
     physx::PxDefaultAllocator		gAllocator;

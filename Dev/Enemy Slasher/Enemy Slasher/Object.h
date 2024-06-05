@@ -439,6 +439,8 @@ public:
 
 	void AddTarget(CCharacterObject* target) { m_vTargets.push_back(target); };
 	void SetState(CharacterState state) { m_CurrentState = state; };
+
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 };
 
 class CRayObject : public CGameObject

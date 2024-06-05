@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Object.h"
 #include <vector>
+#include <stack>
 
 using namespace physx;
 
@@ -36,7 +37,7 @@ CPhysXManager::CPhysXManager()
 
     createScene();
 
-    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.2f);
 
     //PxReal stackZ = 100.0f;
 
@@ -138,45 +139,78 @@ void CPhysXManager::createStack(const physx::PxTransform& t, physx::PxU32 size, 
     shape->release();
 }
 
-void CPhysXManager::renderCallback()
-{
-    stepPhysics(true);
-
-    physx::PxScene* scene;
-    PxGetPhysics().getScenes(&scene, 1);
-    physx::PxU32 nbActors = scene->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC);
-    if (nbActors)
-    {
-        std::vector<physx::PxRigidActor*> actors(nbActors);
-        scene->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC | physx::PxActorTypeFlag::eRIGID_STATIC, reinterpret_cast<physx::PxActor**>(&actors[0]), nbActors);
-        updateActors(&actors[0], static_cast<physx::PxU32>(actors.size()));
-    }
-}
-
-void CPhysXManager::updateActors(physx::PxRigidActor** actors, const physx::PxU32 numActors)
-{
-#define MAX_NUM_ACTOR_SHAPES 128
-    physx::PxShape* shapes[MAX_NUM_ACTOR_SHAPES];
-    for (physx::PxU32 i = 0; i < numActors; i++)
-    {
-        const physx::PxU32 nbShapes = actors[i]->getNbShapes();
-        PX_ASSERT(nbShapes <= MAX_NUM_ACTOR_SHAPES);
-        actors[i]->getShapes(shapes, nbShapes);
-
-        for (physx::PxU32 j = 0; j < nbShapes; j++)
-        {
-            const physx::PxMat44 shapePose(physx::PxShapeExt::getGlobalPose(*shapes[j], *actors[i]));
-            const physx::PxGeometry& geom = shapes[j]->getGeometry();
-
-            // render object
-            //glMultMatrixf(&shapePose.column0.x);
-
-            //renderGeometry(geom);
-        }
-    }
-}
-
 physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
+{
+    using namespace physx;
+
+    XMFLOAT3 xmf3Scale, xmf3Position;
+    XMFLOAT4 xmf4Rotation;
+    DecomposeTransform(object->GetWorldMat(), xmf3Scale, xmf4Rotation, xmf3Position);
+
+    PxVec3 spawnPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+    PxReal groundHeight = GetGroundHeightUsingSweep(gScene, spawnPosition);
+    PxReal capsuleRadius = 100.f;
+    PxReal capsuleHalfHeight = PHYSX_CAPSUL_HEIGHT;
+    PxVec3 initialPosition(spawnPosition.x, groundHeight + capsuleRadius + capsuleHalfHeight + 0.1f, spawnPosition.z);
+
+    PxTransform transform(initialPosition, PxQuat(xmf4Rotation.x, xmf4Rotation.y, xmf4Rotation.z, xmf4Rotation.w)); // 위치 지정
+
+    PxRigidDynamic* aCapsuleActor = gPhysics->createRigidDynamic(PxTransform(transform));
+
+    PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0, 0, 1)));
+
+    PxShape* aCapsuleShape = PxRigidActorExt::createExclusiveShape(*aCapsuleActor,
+        PxCapsuleGeometry(capsuleRadius, capsuleHalfHeight), *gMaterial);
+    aCapsuleShape->setLocalPose(relativePose);
+    PxRigidBodyExt::updateMassAndInertia(*aCapsuleActor, 100.f);
+    aCapsuleActor->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+    gScene->addActor(*aCapsuleActor);
+
+    object->m_pPhysXActor = aCapsuleActor;
+    object->m_PhysXActorType = PhysXActorType::Dynamic;
+
+    return aCapsuleActor;
+
+    //CMesh** ppMeshs = object->GetMeshes();
+    //int nMeshs = object->GetNumMeshes();
+    //PxRigidDynamic* convexMeshActor = gPhysics->createRigidDynamic(PxTransform(transform));
+    //for (int i = 0; i < nMeshs; ++i) {
+    //    CMesh* pMesh = ppMeshs[i];
+    //    PxConvexMesh* gConvexMesh;
+
+    //    if (object->m_vpPhysXMesh.size() > i)
+    //        gConvexMesh = ConvertConvexMeshCollider(object->m_vpPhysXMesh[i]);
+    //    else
+    //        gConvexMesh = ConvertConvexMeshCollider(CreateCustomTriangleMeshCollider(pMesh));
+
+    //    // Shape를 생성.
+    //    PxConvexMeshGeometry meshGeometry;
+    //    meshGeometry.convexMesh = gConvexMesh;
+    //    meshGeometry.scale = PxVec3(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+    //    PxShape* shape = gPhysics->createShape(meshGeometry, *gMaterial);
+    //    if (shape) {
+    //        shape->setContactOffset(0.05f);
+    //        shape->setRestOffset(0.0f);
+
+    //        // 물리 시뮬레이션에 오브젝트로 추가.
+    //        convexMeshActor->attachShape(*shape);
+
+    //        shape->release();
+    //    }
+    //}
+
+    //gScene->addActor(*convexMeshActor);
+
+    //object->m_pPhysXActor = convexMeshActor;
+    //object->m_PhysXActorType = PhysXActorType::Dynamic;
+
+    //if (object->GetChild()) AddCapshulDynamic(object->GetChild());
+    //if (object->GetSibling()) AddCapshulDynamic(object->GetSibling());
+
+    //return convexMeshActor;
+}
+
+physx::PxActor* CPhysXManager::AddCapshulKinematic(CGameObject* object)
 {
     using namespace physx;
 
@@ -187,6 +221,7 @@ physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
     PxTransform transform(xmf3Position.x, xmf3Position.y, xmf3Position.z, PxQuat(xmf4Rotation.x, xmf4Rotation.y, xmf4Rotation.z, xmf4Rotation.w)); // 위치 지정
 
     PxRigidDynamic* aCapsuleActor = gPhysics->createRigidDynamic(PxTransform(transform));
+    aCapsuleActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
 
     PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0, 0, 1)));
 
@@ -198,15 +233,11 @@ physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
     aCapsuleActor->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
     gScene->addActor(*aCapsuleActor);
 
-    //aCapsuleActor->addForce(PxVec3(0.f, 0.f, 10000.f));
-    //aCapsuleActor->setLinearVelocity(PxVec3(0.f, 0.f, 100.f));
+    object->m_pPhysXActor = aCapsuleActor;
+    object->m_PhysXActorType = PhysXActorType::Kinematic;
 
-    //PxRigidDynamic* ball = createDynamic(transform, PxSphereGeometry(5), PxVec3(0, -25, -100));
-    //PxRigidBodyExt::updateMassAndInertia(*ball, 1000.f);
-
-    //PxTransform newPos = aCapsuleActor->getGlobalPose();
-    //newPos.p = PxVec3(1000.f, 0.f, 500.f);
-    //aCapsuleActor->setGlobalPose(newPos);
+    if (object->GetChild()) AddCapshulDynamic(object->GetChild());
+    if (object->GetSibling()) AddCapshulDynamic(object->GetSibling());
 
     return aCapsuleActor;
 }
@@ -247,7 +278,7 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
             // 물리 시뮬레이션에 오브젝트로 추가.
             staticActor->attachShape(*shape);
 
-            //shape->release();
+            shape->release();
         }
     }
 
@@ -319,4 +350,75 @@ physx::PxTriangleMesh* CPhysXManager::CreateCustomTriangleMeshCollider(CMesh* pM
     PxTriangleMesh* gTriangleMesh = gPhysics->createTriangleMesh(readBuffer);
 
     return gTriangleMesh;
+}
+
+physx::PxConvexMesh* CPhysXManager::ConvertConvexMeshCollider(physx::PxTriangleMesh* pTriangleMesh)
+{
+    PxConvexMeshDesc convexDesc;
+    convexDesc.points.count = pTriangleMesh->getNbVertices();
+    convexDesc.points.stride = sizeof(PxVec3);
+    convexDesc.points.data = pTriangleMesh->getVertices();
+    convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX;
+
+    PxTolerancesScale scale;
+    PxCookingParams params(scale);
+
+    PxDefaultMemoryOutputStream writeBuffer;
+    PxConvexMeshCookingResult::Enum result;
+    bool status = PxCookConvexMesh(params, convexDesc, writeBuffer, &result);
+    if (!status)
+        return NULL;
+
+    PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+    PxConvexMesh* gConvexMesh = gPhysics->createConvexMesh(readBuffer);
+
+    return gConvexMesh;
+}
+
+
+// 이동 함수 (사용자 입력에 따라 위치 변경, 충돌 검사 포함)
+void CPhysXManager::MoveKineticActor(physx::PxRigidDynamic* kineticActor, const physx::PxVec3& deltaMove) {
+    PxTransform playerTransform = kineticActor->getGlobalPose();
+    PxVec3 newPosition = playerTransform.p + deltaMove;
+
+    // Sweep 테스트를 사용한 충돌 검사
+    PxSweepBuffer hit;
+    PxCapsuleGeometry capsuleGeometry(0.5f, 1.0f);
+    PxTransform sweepStart = playerTransform;
+    PxTransform sweepEnd(newPosition);
+
+    bool hasHit = gScene->sweep(capsuleGeometry, sweepStart, deltaMove.getNormalized(), deltaMove.magnitude(), hit, PxHitFlag::eDEFAULT, PxQueryFilterData());
+
+    if (!hasHit) {
+        // 충돌이 없으면 이동
+        kineticActor->setKinematicTarget(PxTransform(newPosition));
+    }
+    else {
+        // 충돌이 있으면 이동 취소
+        kineticActor->setKinematicTarget(PxTransform(playerTransform.p));
+    }
+}
+
+// 이동 함수 (목표 방향으로 이동)
+void CPhysXManager::MoveDynamicActor(physx::PxRigidDynamic* dynamicActor, const physx::PxVec3& targetPosition, float speed, float deltaTime) {
+    PxVec3 currentPosition = dynamicActor->getGlobalPose().p;
+    PxVec3 direction = (targetPosition - currentPosition).getNormalized();
+    PxVec3 velocity = direction * speed;
+
+    dynamicActor->setLinearVelocity(velocity);
+}
+
+
+// 바닥 높이 측정을 위한 Sweep 테스트 함수
+physx::PxReal CPhysXManager::GetGroundHeightUsingSweep(physx::PxScene* scene, const physx::PxVec3& position, physx::PxReal maxDistance) {
+    PxCapsuleGeometry capsuleGeometry(0.5f, 1.0f);
+    PxTransform sweepStart(position);
+    PxVec3 sweepDirection(0.0f, -1.0f, 0.0f);
+
+    PxSweepBuffer hit;
+    if (scene->sweep(capsuleGeometry, sweepStart, sweepDirection, maxDistance, hit, PxHitFlag::eDEFAULT, PxQueryFilterData())) {
+        return hit.block.position.y;
+    }
+
+    return position.y; // 바닥을 찾지 못한 경우, 기본 높이를 반환
 }

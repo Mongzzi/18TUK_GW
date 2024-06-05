@@ -42,13 +42,11 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy) && m_pPhysXManager != nullptr)
 	{
 		physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
-		m_vPhysxPairs.emplace_back(object, actor);
 	}
 
-	if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject) && m_pPhysXManager != nullptr)
+	else if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject) && m_pPhysXManager != nullptr)
 	{
 		physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
-		//m_vPhysxPairs.emplace_back(object, actor);
 	}
 
 	m_pvObjectManager[(int)(layer)].push_back(object);
@@ -83,7 +81,6 @@ void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 	for (std::vector<CGameObject*> a : m_pvObjectManager)
 		for (CGameObject* b : a) {
 			b->Animate(fTimeTotal, fTimeElapsed);
-			//b->UpdateTransform(NULL);
 		}
 
 	{
@@ -98,16 +95,18 @@ void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 		for (const auto& a : deleteObjects) DelObj(a, ObjectLayer::TemporaryObject);	// 원본 오브젝트 삭제
 	}
 
-	{
-		if (m_pPhysXManager != nullptr) {
-			// PhysX 에 의한 물리연산 적용
-			m_pPhysXManager->stepPhysics(true, fTimeElapsed);
-			for (auto& p : m_vPhysxPairs) {
-				physx::PxTransform transform = static_cast<physx::PxRigidActor*>(p.second)->getGlobalPose();
-				physx::PxVec3 position = transform.p;
-				//((CPlayer*)p.first)->SetPosition(XMFLOAT3(position.x, position.y, position.z));
+	// PhysX 에 의한 물리연산 적용
+	if (m_pPhysXManager != nullptr) {
+		m_pPhysXManager->stepPhysics(true, fTimeElapsed);
+		physx::PxTransform transform;
+		for (std::vector<CGameObject*> a : m_pvObjectManager)
+			for (CGameObject* b : a) {
+				if (b->m_PhysXActorType == PhysXActorType::Dynamic &&
+					b->m_pPhysXActor != nullptr) {
+					transform = static_cast<physx::PxRigidDynamic*>(b->m_pPhysXActor)->getGlobalPose();
+					b->SetPosition(transform.p.x, transform.p.y - PHYSX_CAPSUL_HEIGHT, transform.p.z);
+				}
 			}
-		}
 	}
 }
 
