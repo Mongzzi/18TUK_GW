@@ -2016,7 +2016,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	}
 
 	if (m_Monster_State == MonsterState::Default_State) {
-		SetSpeed(10.0);	// 델타타임 곱해야할지 고민중
+		SetSpeed(1.0);	// 델타타임 곱해야할지 고민중
 
 		if (distance > CHASE_DISTANCE) {
 			if ((int)(fTimeTotal / 2.0f) > (int)((fTimeTotal - fTimeElapsed) / 2.0f))
@@ -2057,13 +2057,13 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
 			position_difference.x = player_position.x - monster_position.x;
-			position_difference.y = player_position.y - monster_position.y;
+			position_difference.y = 0.0f;
 			position_difference.z = player_position.z - monster_position.z;
 
 			// 단위벡터로 변환 과정 
 			float length = sqrt(position_difference.x * position_difference.x + position_difference.y * position_difference.y + position_difference.z * position_difference.z);
 			m_dir.x = position_difference.x / length;
-			m_dir.y = position_difference.y / length;
+			m_dir.y = 0.0f;
 			m_dir.z = position_difference.z / length;
 
 			SetLook(m_dir);
