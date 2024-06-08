@@ -41,7 +41,7 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	//}
 	if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy) && m_pPhysXManager != nullptr)
 	{
-		physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
+		//physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
 	}
 
 	else if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject) && m_pPhysXManager != nullptr)
@@ -54,6 +54,10 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 
 void CObjectManager::DelObj(CGameObject* object, ObjectLayer layer)
 {
+	if (object->m_pPhysXActor) {
+		m_pPhysXManager->GetScene()->removeActor(*(object->m_pPhysXActor));
+		object->m_pPhysXActor->release();
+	}
 	delete object;
 	std::vector<CGameObject*>* target = &(m_pvObjectManager[(int)layer]);
 	target->erase(remove(target->begin(), target->end(), object), target->end());
@@ -61,6 +65,10 @@ void CObjectManager::DelObj(CGameObject* object, ObjectLayer layer)
 
 void CObjectManager::DelObj(CGameObject* object)
 {
+	if (object->m_pPhysXActor) {
+		m_pPhysXManager->GetScene()->removeActor(*(object->m_pPhysXActor));
+		object->m_pPhysXActor->release();
+	}
 	delete object;
 	for (auto& target : m_pvObjectManager) {
 		target.erase(remove(target.begin(), target.end(), object), target.end());
@@ -71,7 +79,12 @@ void CObjectManager::ClearLayer(ObjectLayer layer)
 {
 	std::vector<CGameObject*>* target = &(m_pvObjectManager[(int)layer]);
 	while (false == target->empty()) {
-		delete target->back();
+		CGameObject* object = target->back();
+		if (object->m_pPhysXActor) {
+			m_pPhysXManager->GetScene()->removeActor(*(object->m_pPhysXActor));
+			object->m_pPhysXActor->release();
+		}
+		delete object;
 		target->pop_back();
 	}
 }
@@ -114,35 +127,67 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	if (false == m_pvObjectManager[(int)ObjectLayer::CutterObject].empty()) { // 비어있지 않다면
 		vector<CGameObject*>* pvCutters = (&m_pvObjectManager[(int)ObjectLayer::CutterObject]);
-		if (false == m_pvObjectManager[(int)ObjectLayer::Object].empty()) { // 비어있지 않다면
-			vector<CGameObject*> pObjects = m_pvObjectManager[(int)ObjectLayer::Object];
+
+		XMFLOAT3 cutterpos;
+		XMFLOAT3 cutterHalfExtents;
+		for (const auto& pCutter : *pvCutters) {
+			COBBCollider* pCutterOBB = pCutter->GetCollider();
+			cutterpos = Vector3::TransformCoord(pCutterOBB->GetOBBCenter(), pCutter->GetWorldMat());
+			cutterHalfExtents = pCutterOBB->GetOBBHalfExtents();
+			physx::PxTransform cutterTransform(cutterpos.x, cutterpos.y, cutterpos.z);
+			//physx::PxBoxGeometry cutterGeometry(physx::PxVec3(cutterHalfExtents.x, cutterHalfExtents.y, cutterHalfExtents.z));
+			physx::PxSphereGeometry cutterGeometry(100.f);
+
+			{ // physx debugging
+				//physx::PxRigidStatic* staticActor = m_pPhysXManager->GetPhysics()->createRigidStatic(cutterTransform);
+				//physx::PxShape* shape = m_pPhysXManager->GetPhysics()->createShape(cutterGeometry, *m_pPhysXManager->GetPhysics()->createMaterial(0.5f, 0.5f, 0.5f));
+				//staticActor->attachShape(*shape);
+				//shape->release();
+				//m_pPhysXManager->GetScene()->addActor(*staticActor);
+				//pCutter->m_pPhysXActor = staticActor;
+			}
 
 			vector<CGameObject*> newObjects;
 			vector<CGameObject*> deleteObjects;
 
-			for (const auto& pCutter : *pvCutters) {
-				for (const auto& pTargetObject : pObjects) {
+			for (const auto& pTarget : m_pvObjectManager[(int)ObjectLayer::TextureObject]) {
+				// 잘릴 수 있다면
+				if (pTarget->GetCuttable() == true) {
+					const physx::PxGeometryQueryFlags queryFlags = physx::PxGeometryQueryFlag::eDEFAULT;
+					physx::PxOverlapThreadContext* threadContext = NULL;
 
-					// 이 오브젝트가 DynamicShapeObject라면 처리
-					if (pTargetObject->GetCuttable()) {
-						XMFLOAT4X4 objectWorldMat = pTargetObject->GetWorldMat();
-						XMFLOAT4X4 cutterWorldMat = pCutter->GetWorldMat();
-						if (CollisionCheck(pTargetObject->GetCollider(), objectWorldMat, pCutter->GetCollider(), cutterWorldMat)) {
-							 //vector<CGameObject*> vRetVec = _AtomicDynamicShaping(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, /*오브젝트의 쉐이더 타입*/, fTimeElapsed, pTargetObject, pCutter, cutAlgorithm);
-							// vector<CGameObject*> vRetVec = pDynamicShapeObject->DynamicShaping(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, /*오브젝트의 쉐이더 타입*/, fTimeElapsed, pCutter, cutAlgorithm);
+					physx::PxRigidActor* pTargetActor = static_cast<physx::PxRigidActor*>(pTarget->m_pPhysXActor);
 
-							//if (false == vRetVec.empty()) { // 절단에 성공했다면 데이터를 준비한다.
-							//	newObjects.insert(newObjects.end(), vRetVec.begin(), vRetVec.end());
-							//	deleteObjects.push_back(pDynamicShapeObject);
-							//}
+					vector<CMesh*> newMeshs;
+
+					// 모든 shape에 대해 overlap test (모든 mesh에 대해서와 같은 효과)
+					for (physx::PxU32 i = 0; i < pTarget->m_vpPhysXShape.size(); ++i) {
+						const physx::PxTransform shapePose(physx::PxShapeExt::getGlobalPose(*pTarget->m_vpPhysXShape[i], *pTargetActor));
+						const physx::PxGeometry& geom = pTarget->m_vpPhysXShape[i]->getGeometry();
+
+						bool isOverlapping = physx::PxGeometryQuery::overlap(cutterGeometry, cutterTransform, geom, shapePose, queryFlags, threadContext);
+
+						// 충돌했다면
+						if (isOverlapping == true) {
+							vector<CMesh*> vRetMeshs = static_cast<CDynamicShapeMesh*>(pTarget->GetMeshes()[i])->
+								DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pTarget->GetWorldMat(),
+									static_cast<CDynamicShapeMesh*>(pCutter->GetMeshes()[0]), pCutter->GetWorldMat(),
+									cutAlgorithm);
+							newMeshs.insert(newMeshs.end(), vRetMeshs.begin(), vRetMeshs.end());
 						}
+					}
+
+					if (newMeshs.empty() == false) {
+						deleteObjects.push_back(pTarget);
+
+						for (auto& meshData : newMeshs); // 하나의 오브젝트에 하나의 메쉬 할당
 					}
 				}
 			}
+
 			for (const auto& a : deleteObjects) DelObj(a, ObjectLayer::Object);	// 원본 오브젝트 삭제
 			for (const auto& a : newObjects) AddObj(a, ObjectLayer::Object); // 절단된 오브젝트 추가
 		}
-		//while (false == pvCutters->empty()) { pvCutters->pop_back(); } // 항상 CutterObjectLayer는 비어있어야 한다.
 
 		while (false == pvCutters->empty()) { 
 			pvCutters->back()->m_fLifeTime = 1.0f;

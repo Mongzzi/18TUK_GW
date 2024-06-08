@@ -2,6 +2,7 @@
 #include "PxPhysicsAPI.h"
 
 #define PHYSX_CAPSUL_HEIGHT 200.f
+#define MAX_NUM_ACTOR_SHAPES 128
 
 class CGameObject;
 class CMesh;
@@ -27,6 +28,10 @@ public:
     void createStack(const physx::PxTransform& t, physx::PxU32 size, physx::PxReal halfExtent);
 
 public:
+    physx::PxScene* GetScene() { return gScene; }
+    physx::PxPhysics* GetPhysics() { return gPhysics; }
+
+public:
     physx::PxActor* AddCapshulDynamic(CGameObject* object);
     physx::PxActor* AddCapshulKinematic(CGameObject* object);
     physx::PxActor* AddStaticCustomGeometry(CGameObject* object);
@@ -43,6 +48,9 @@ public:
     void CPhysXManager::MoveDynamicActor(physx::PxRigidDynamic* dynamicActor, const physx::PxVec3& targetPosition, float speed, float deltaTime);
 
     physx::PxReal GetGroundHeightUsingSweep(physx::PxScene* scene, const physx::PxVec3& position, physx::PxReal maxDistance = 100.0f);
+
+public:
+    
 
 private:
     physx::PxDefaultAllocator		gAllocator;
