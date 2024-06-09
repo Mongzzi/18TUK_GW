@@ -211,7 +211,7 @@ public:
 
 };
 
-class CTestScene_Slice : public CBasicScene
+class CTestScene_Slice : public CTestScene
 {
 public:
 	CTestScene_Slice(CGameFramework* GameFramwork);

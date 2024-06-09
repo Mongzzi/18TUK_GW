@@ -1099,7 +1099,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	//m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340));
-	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 50.0f, 0.0f));
 	m_pPlayer->SetMaxVelocityXZ(1500.0f);
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pPlayer->SetName("SwordAndShield");
@@ -1130,7 +1130,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_int_distribution <> urd(0, 6);
 	int random_number = 0;
 	//int random_number = urd(dre);
-	/*if (random_number == 0) {
+	if (random_number == 0) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
 	}
 	else if (random_number == 1) {
@@ -1157,8 +1157,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "map3"));
 		m_pPlayer->SetPosition(XMFLOAT3(-17000.0f, 100.0f, -9000.0f));
 	}
+
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
-	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);*/
+	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
 
 	// ----------------- 버튼 오브젝트 ------------------
@@ -2342,7 +2343,7 @@ void CTestScene::UseSelectedCard()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-CTestScene_Slice::CTestScene_Slice(CGameFramework* GameFramwork) :CBasicScene(GameFramwork)
+CTestScene_Slice::CTestScene_Slice(CGameFramework* GameFramwork) :CTestScene(GameFramwork)
 {
 }
 
@@ -2388,7 +2389,7 @@ bool CTestScene_Slice::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 		for (const auto& objects : pvObjectList[(int)ObjectLayer::Object]) {
 			if (CGameObject* pInterObj = dynamic_cast<CGameObject*>(objects)) {
 				float tmin, tmax;
-				if (true == m_pObjectManager->CollisionCheck_RayWithAABB(&r, pInterObj, tmin, tmax)) {
+				if (true == m_pObjectManager->CollisionCheck_RayWithOBB(&r, pInterObj, tmin, tmax)) {
 					if (nearestDist > tmin) { // 가장 가까운 오브젝트 선별
 						nearestDist = tmin;
 						m_pSelectedObj = pInterObj;
@@ -2418,10 +2419,6 @@ bool CTestScene_Slice::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-			//case 'W': m_pPlayer->Move(DIR_FORWARD, m_pPlayer->GetMoveSpeed(), true); break;
-			//case 'S': m_pPlayer->Move(DIR_BACKWARD, m_pPlayer->GetMoveSpeed(), true); break;
-			//case 'A': m_pPlayer->Move(DIR_LEFT, m_pPlayer->GetMoveSpeed(), true); break;
-			//case 'D': m_pPlayer->Move(DIR_RIGHT, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'Q': m_pPlayer->Move(DIR_UP, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'E': m_pPlayer->Move(DIR_DOWN, m_pPlayer->GetMoveSpeed(), true); break;
 		case 'R': m_pPlayer->Rotate(0.0f, 20.0f, 0.0f);	break;
@@ -2455,6 +2452,13 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	m_pObjectManager->SetPhysXManager(pFBXDataManager->GetPhysXManager());
+
+	// Collider Shader 등록
+	CObjectsShader* pColliderShader = new CObjectsShader();
+	pColliderShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pObjectManager->SetColliderShader(pColliderShader);
+
 	//m_pShaderManager->BuildShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pTextShader = new CTextShader();
 	m_pTextShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -2466,38 +2470,17 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 	}
 
+	//--------------------------------- 조명, 재질 생성 ----------------------------------------
+	BuildLightsAndMaterials();
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//
+
 	{
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
-		//CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, pFBXLoader, PEASANT_1_FBX, ShaderType::CObjectsShader);
+		CFBXObject* pFBXObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Stone_lit_003");
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
-		//pFBXObject->SetScale(0.5f, 0.5f, 0.5f);
-		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
-	}
-
-	{
-		//CBoxMesh* pBoxMesh = new CBoxMesh(pd3dDevice, pd3dCommandList);
-		//CDynamicShapeObject * newObject = new CDynamicShapeObject;
-		//newObject->SetMesh(0, pBoxMesh);
-		//newObject->SetPosition(200.0f, 0.0f, 100.0f);
-		//newObject->Rotate(45.0f, 45.0f, 45.0f);
-		//newObject->SetShaderType(ShaderType::CObjectsShader);
-		//m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
-
-		//newObject = new CDynamicShapeObject;
-		//newObject->SetMesh(0, pBoxMesh);
-		//newObject->SetPosition(200.0f, 0.0f, 200.0f);
-		//newObject->Rotate(45.0f, 45.0f, 45.0f);
-		//newObject->SetShaderType(ShaderType::CObjectsShader);
-		//m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
-
-		//newObject = new CDynamicShapeObject;
-		//newObject->SetMesh(0, pBoxMesh);
-		//newObject->SetPosition(200.0f, 0.0f, 300.0f);
-		//newObject->Rotate(0.0f, 0.0f, 0.0f);
-		//newObject->SetShaderType(ShaderType::CObjectsShader);
-		//m_pObjectManager->AddObj(newObject, ObjectLayer::Object);
+		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::TextureObject);
 	}
 
 	{
@@ -2506,8 +2489,6 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		pRayObject->SetMesh(0, new CRayMesh(pd3dDevice, pd3dCommandList, NULL));
 		m_pObjectManager->AddObj(pRayObject, ObjectLayer::Ray);
 	}
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 bool CTestScene_Slice::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
@@ -2636,11 +2617,11 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
 	}
 
-	if (m_bResetFlag) {
+	if (m_bResetFlag) { // 초기화
 		m_bResetFlag = false;
 		m_pObjectManager->ClearLayer(ObjectLayer::Object);
 
-		CFBXObject* pFBXObject = new CFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+		CFBXObject* pFBXObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Stone_lit_003");
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
@@ -2670,13 +2651,13 @@ void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D
 	WCHAR objText[] = L"맵 상의 오브젝트 갯수 : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
-	int objCount = objList[(int)ObjectLayer::Object].size();
+	int objCount = objList[(int)ObjectLayer::TextureObject].size();
 	if (objCount == 0) textLen++;
 	while (objCount > 0) {
 		objCount /= 10; textLen++;
 	}
 
-	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::Object].size()));
+	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::TextureObject].size()));
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;

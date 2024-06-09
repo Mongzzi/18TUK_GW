@@ -164,7 +164,12 @@ physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
     aCapsuleShape->setLocalPose(relativePose);
     PxRigidBodyExt::updateMassAndInertia(*aCapsuleActor, 100.f);
     aCapsuleActor->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+
+    // actor가 자신의 object*를 알도록 저장
+    aCapsuleActor->userData = object;
+
     gScene->addActor(*aCapsuleActor);
+
 
     object->m_pPhysXActor = aCapsuleActor;
     object->m_PhysXActorType = PhysXActorType::Dynamic;
@@ -231,6 +236,10 @@ physx::PxActor* CPhysXManager::AddCapshulKinematic(CGameObject* object)
     aCapsuleShape->setLocalPose(relativePose);
     PxRigidBodyExt::updateMassAndInertia(*aCapsuleActor, 100.f);
     aCapsuleActor->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+
+    // actor가 자신의 object*를 알도록 저장
+    aCapsuleActor->userData = object;
+
     gScene->addActor(*aCapsuleActor);
 
     object->m_pPhysXActor = aCapsuleActor;
@@ -259,10 +268,13 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
         CMesh* pMesh = ppMeshs[i];
         PxTriangleMesh* gTriangleMesh;
 
-        if (object->m_vpPhysXMesh.size() > i)
+        if (object->m_vpPhysXMesh.size() > i) {
             gTriangleMesh = object->m_vpPhysXMesh[i];
-        else
+        }
+        else {
             gTriangleMesh = CreateCustomTriangleMeshCollider(pMesh);
+            object->m_vpPhysXMesh.push_back(gTriangleMesh);
+        }
 
         // Shape를 생성.
         //PxShapeFlags shapeFlags = PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE;
@@ -277,10 +289,14 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
 
             // 물리 시뮬레이션에 오브젝트로 추가.
             staticActor->attachShape(*shape);
+            object->m_vpPhysXShape.push_back(shape);
 
-            shape->release();
+            //shape->release();
         }
     }
+
+    // actor가 자신의 object*를 알도록 저장
+    staticActor->userData = object;
 
     gScene->addActor(*staticActor);
     

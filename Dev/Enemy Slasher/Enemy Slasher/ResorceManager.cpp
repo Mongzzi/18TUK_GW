@@ -56,6 +56,7 @@ CFBXObject* CResorceManager::LoadFBXObject(ID3D12Device* pd3dDevice, ID3D12Graph
 		std::vector<CFBXMesh*>* pNewMeshVector = new std::vector<CFBXMesh*>;
 		for (int i = 0; i < pFbxData->m_vpMeshs.size(); ++i) {
 			pNewMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, pFbxData->m_vpMeshs[i]);
+			pNewMesh->AddRef();
 			pNewMeshVector->emplace_back(pNewMesh);
 
 			delete pFbxData->m_vpMeshs[i];

@@ -212,6 +212,9 @@ public:
 	// physx actor를 만들기 위한 정보
 	std::vector<physx::PxTriangleMesh*> m_vpPhysXMesh;
 
+	// mesh 1:1 충돌체크를 위한 shape 벡터
+	std::vector<physx::PxShape*> m_vpPhysXShape;
+
 public:
 	void SetChild(CGameObject* pChild);
 	CGameObject* GetChild() { return m_pChild; }
