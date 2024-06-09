@@ -196,8 +196,13 @@ private:
 	int m_iTurnFlag;		//m_pvEngagedObjects의 m_iTurnFlag번째 원소의 턴임. flag가 어울리지 않을지도		// 하드코딩을 위해 0은 플레이어 1이상은 적 으로 정함.
 	TurnPhase m_currentPhase;		//현제의 페이즈를 나타내는 변수.
 
+	int m_iOverFlag;		// 0 = 기본 1 = 플레이어 사망 2 = 보스 사망.
+
 	TurnPhase m_lastPhase;			//Engage전의 페이즈를 나타내는 변수.
 	CCharacterObject* m_pEngageObj; //Engage되는 객체.
+
+	CMonsterObject* m_pBoss = nullptr;
+	bool m_isBossExist;
 public:
 
 	void Engage(CCharacterObject* obj);

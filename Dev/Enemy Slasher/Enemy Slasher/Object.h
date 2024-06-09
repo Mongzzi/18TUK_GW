@@ -358,6 +358,9 @@ protected:
 
 	float m_fTimeLast;
 	float m_fTimeElapsed;
+
+	float m_fAnimSpeedRatio;
+
 	float m_fTimeAnimStart;
 
 	bool m_bIsCurAnimLoof;
@@ -410,6 +413,7 @@ protected:
 	vector<CCharacterObject*> m_vTargets;
 	// 할 행동
 	CharacterState m_CurrentState;
+
 	//// 애니메이션 관련 변수
 	//bool m_bIsLoof;
 	//bool m_bIsCurAnimFinish;
@@ -419,9 +423,12 @@ protected:
 	string m_sName;
 	// 등등
 public:
+	void IncreaseKarma();
+	void DecreaseKarma();
+
 	CDeckData* GetDeckData() { return m_pDeck; };
 	float GetTurnSpeed() { return m_iTurnSpeed; };
-	float GetAtk() { return m_fAtk; };
+	float GetAtk() { return (m_fAtk * m_iKarma) / 2; };
 	float GetCurHp() { return m_fCurHp; };
 	int GetTeamId() { return m_iTeamId; };
 	string GetName() { return m_sName; };
@@ -439,7 +446,7 @@ public:
 	void Heal(float ratio = 0.2);
 
 	void AddTarget(CCharacterObject* target) { m_vTargets.push_back(target); };
-	void SetState(CharacterState state) { m_CurrentState = state; };
+	void SetCharacterState(CharacterState state) { m_CurrentState = state; };
 
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 };

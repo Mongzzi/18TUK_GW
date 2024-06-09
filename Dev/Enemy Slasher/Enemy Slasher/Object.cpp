@@ -808,6 +808,8 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	animVal = 0;
 	nowAnimNum = 0;
 
+	m_fAnimSpeedRatio = 1;
+
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//m_pcbMappedSkinningObject->m_bIsAvailable = false;
@@ -864,7 +866,7 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 				XMStoreFloat4x4(&m_pcbMappedSkinningObject->m_xmf4x4BoneMat[i], XMMatrixTranspose(XMLoadFloat4x4(&mMat)));
 			}
 			// 초당 24 프레임 올라가게 해야함.
-			animVal += m_fTimeElapsed * 24;
+			animVal += m_fTimeElapsed * 24 * m_fAnimSpeedRatio;
 			//animVal = (m_fTimeLast - m_fTimeAnimStart) * 24;
 			if (animVal >= currAnim->m_vBoneAnimations[0].m_vKeyFrames.size())
 			{
@@ -1032,7 +1034,7 @@ CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_fMaxHp = m_fCurHp = 100;
 	m_fAtk = 30.f;
 	m_iTeamId = 0;
-	m_fMoveSpeed = 100;
+	m_fMoveSpeed = 100.f;
 	m_CurrentState = CharacterState::IdleState;
 	m_sName = "Unknown";
 }
@@ -1051,7 +1053,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 	{
 		m_CurrentState = CharacterState::IdleState;
 		SetCuranimLoof(true);
-		if (m_fCurHp < 0)
+		if (m_fCurHp <= 0)
 		{
 			m_CurrentState = CharacterState::DieState;
 			SetCuranimLoof(false);
@@ -1070,16 +1072,16 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 		// 방향벡터 몬스터에서 플레이어로
 		XMFLOAT3 positionDifference;
 		positionDifference.x = targetPosition.x - GetPosition().x;
-		positionDifference.y = targetPosition.y - GetPosition().y;
+		//positionDifference.y = targetPosition.y - GetPosition().y;
 		positionDifference.z = targetPosition.z - GetPosition().z;
 
 		// 단위벡터로 변환 과정 
-		float length = sqrt(positionDifference.x * positionDifference.x + positionDifference.y * positionDifference.y + positionDifference.z * positionDifference.z);
+		float length = sqrt(positionDifference.x * positionDifference.x/* + positionDifference.y * positionDifference.y*/ + positionDifference.z * positionDifference.z);
 		float epsilon = 1e-6;
 		if (length > epsilon)
 		{
 			m_dir.x = positionDifference.x / length;
-			m_dir.y = positionDifference.y / length;
+			m_dir.y = 0;//positionDifference.y / length;
 			m_dir.z = positionDifference.z / length;
 
 			SetLook(m_dir);
@@ -1098,7 +1100,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 			break;
 		case CharacterState::MoveState:
 			// target에게 다가간다.
-			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), 1.0f);
+			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), 1);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
 			// 일정 거리 안으로 다가가면 타겟 추출.
@@ -1132,60 +1134,74 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 
 void CCharacterObject::SetCharacterByName(string name)
 {
+	float scale_ratio = 1.5;
+	float boss_scale_ratio = 2;
 	if (m_pDeck)
 		delete m_pDeck;
 	if (name == "SwordAndShield") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 2, 2, 2, 3, 3, 3});
 		m_fMaxHp = m_fCurHp = 100;
 		m_fAtk = 30.f;
-		m_fMoveSpeed = 100;
+		m_fMoveSpeed = 270.f;
 		m_iTeamId = 0;
 	}
 	else if (name == "Zombie1") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
 		m_fMaxHp = m_fCurHp = 40;
 		m_fAtk = 10.f;
-		m_fMoveSpeed = 50;
+		m_fMoveSpeed = 202.5f * scale_ratio;
 		m_iTeamId = 1;
 	}
 	else if (name == "Zombie2") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 2, 3});
 		m_fMaxHp = m_fCurHp = 60;
 		m_fAtk = 20.f;
-		m_fMoveSpeed = 70;
+		m_fMoveSpeed = 202.5f * scale_ratio;
 		m_iTeamId = 1;
 	}
 	else if (name == "Zombie3") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 0, 2, 3});
 		m_fMaxHp = m_fCurHp = 40;
 		m_fAtk = 30.f;
-		m_fMoveSpeed = 120;
+		m_fMoveSpeed = 270.f * scale_ratio;
 		m_iTeamId = 1;
 	}
 	else if (name == "Zombie4") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
 		m_fMaxHp = m_fCurHp = 50;
 		m_fAtk = 15.f;
-		m_fMoveSpeed = 50;
+		m_fMoveSpeed = 135.f * scale_ratio;
 		m_iTeamId = 1;
 	}
 	else if (name == "ZombieBoss") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 3, 3, 3});
 		m_fMaxHp = m_fCurHp = 100;
 		m_fAtk = 50.f;
-		m_fMoveSpeed = 60;
+		m_fMoveSpeed = 400.f * scale_ratio * boss_scale_ratio;
 		m_iTeamId = 1;
 	}
 	else if (name == "Unknown") {
 		m_pDeck = new CDeckData();
 		m_fMaxHp = m_fCurHp = 100;
 		m_fAtk = 30.f;
-		m_fMoveSpeed = 100;
+		m_fMoveSpeed = 100.f;
 		m_iTeamId = 1;
 	}
 	m_iTurnSpeed = 5.;
 	m_CurrentState = CharacterState::IdleState;
 	m_sName = name;
+}
+
+void CCharacterObject::IncreaseKarma()
+{
+	m_iKarma++;
+}
+
+void CCharacterObject::DecreaseKarma()
+{
+	m_iKarma = m_iKarma / 2;
+	if (m_iKarma == 0)
+		m_iKarma = 1;
 }
 
 void CCharacterObject::Reset()
@@ -1196,19 +1212,20 @@ void CCharacterObject::Reset()
 
 void CCharacterObject::StartTurn()
 {
-	m_iKarma = 0;
+	DecreaseKarma();
 	// 패를 전부 버린다.
 	m_pDeck->SendHandToUsedAll();
 }
 
 void CCharacterObject::BeforeEngage()
 {
+	m_iKarma = 1;
 	m_pDeck->InitializeDeck();
 };
 
 void CCharacterObject::TakeDamage(float atk)
 {
-	m_fCurHp -= atk;
+	m_fCurHp -= atk* m_iKarma;
 };
 
 void CCharacterObject::Heal(float ratio)
@@ -1391,29 +1408,37 @@ void CUIObject::SetScale(XMFLOAT3 scale)
 void Callback_0(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	cout << "Callback_0 : atk 1" << endl;
 	CCharacterObject* selfObj = static_cast<CCharacterObject*>(self); //dynamic_cast 고려
+	XMFLOAT3 selfPos = selfObj->GetPosition();
 
-	// 애니메이션 테스트
-	selfObj->SetAnimNum(3);
-
-	// 만약 이 카드가 제자리에서 공격이라면 
-	// 1. self의 공격력을 가져와 
 	int selfTeamId = selfObj->GetTeamId();
 	float atk = selfObj->GetAtk();
-	// 2. target에게 피해를 입힌다. 그냥 확인용으로 간단히 만듦.
-	// 팀이 다른 모든 적ㅇ게 피해를 가할듯
-	// 이런 카드는 줘도 안쓸지도
+
+	CCharacterObject* closestTarget = nullptr;
+	float closestDistance = (std::numeric_limits<float>::max)();
+
 	for (CCharacterObject* targetObj : target)
 	{
 		if (targetObj->GetTeamId() != selfTeamId)
 		{
-			cout << "targetObj HP : " << targetObj->GetCurHp() << " -> ";
-			targetObj->TakeDamage(atk);
-			cout << targetObj->GetCurHp() << endl;
-			selfObj->CCharacterObject::AddTarget(targetObj);
-			break;
+			XMFLOAT3 targetPos = targetObj->GetPosition();
+
+			XMVECTOR selfVector = XMLoadFloat3(&selfPos);
+			XMVECTOR targetVector = XMLoadFloat3(&targetPos);
+			XMVECTOR distanceVector = XMVectorSubtract(selfVector, targetVector);
+			float distance = XMVectorGetX(XMVector3Length(distanceVector));
+
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestTarget = targetObj;
+			}
 		}
 	}
-	selfObj->CCharacterObject::SetState(CharacterState::AttackState);
+	if (closestTarget == nullptr)
+		return;
+	closestTarget->TakeDamage(atk);
+	selfObj->CCharacterObject::SetCharacterState(CharacterState::AttackState);
+	selfObj->CCharacterObject::AddTarget(closestTarget);
+	selfObj->IncreaseKarma();
 }
 
 void Callback_1(CGameObject* self, std::vector<CCharacterObject*>& target) {
@@ -1436,8 +1461,9 @@ void Callback_2(CGameObject* self, std::vector<CCharacterObject*>& target) {
 	selfObj->Heal();
 	cout << selfObj->GetCurHp() << endl;
 
-	selfObj->CCharacterObject::SetState(CharacterState::BuffState);
+	selfObj->CCharacterObject::SetCharacterState(CharacterState::BuffState);
 	selfObj->CCharacterObject::AddTarget(selfObj);
+	selfObj->IncreaseKarma();
 }
 
 void Callback_3(CGameObject* self, std::vector<CCharacterObject*>& target) {
@@ -1467,8 +1493,11 @@ void Callback_3(CGameObject* self, std::vector<CCharacterObject*>& target) {
 			}
 		}
 	}
-	selfObj->CCharacterObject::SetState(CharacterState::MoveState);
+	if (closestTarget == nullptr)
+		return;
+	selfObj->CCharacterObject::SetCharacterState(CharacterState::MoveState);
 	selfObj->CCharacterObject::AddTarget(closestTarget);
+	selfObj->IncreaseKarma();
 }
 
 void Callback_4(CGameObject* self, std::vector<CCharacterObject*>& target) {
@@ -1624,7 +1653,7 @@ void CCardUIObject::InitializeTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	if (m_ppCardFaceTextures[0] == nullptr)
 	{
 		m_ppCardFaceTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-		m_ppCardFaceTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack.jpg", RESOURCE_TEXTURE2D, 0);
+		m_ppCardFaceTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/CardFaceAttack.jpg", RESOURCE_TEXTURE2D, 0);
 	}
 	if (m_ppCardFaceTextures[1] == nullptr)
 	{
@@ -1634,12 +1663,12 @@ void CCardUIObject::InitializeTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	if (m_ppCardFaceTextures[2] == nullptr)
 	{
 		m_ppCardFaceTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-		m_ppCardFaceTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack3.jpg", RESOURCE_TEXTURE2D, 0);
+		m_ppCardFaceTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/CardFaceBuff.jpg", RESOURCE_TEXTURE2D, 0);
 	}
 	if (m_ppCardFaceTextures[3] == nullptr)
 	{
 		m_ppCardFaceTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-		m_ppCardFaceTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack4.jpg", RESOURCE_TEXTURE2D, 0);
+		m_ppCardFaceTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/CardFaceMove.jpg", RESOURCE_TEXTURE2D, 0);
 	}
 	if (m_ppCardFaceTextures[4] == nullptr)
 	{
@@ -1990,13 +2019,14 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	std::random_device rd;
 	std::default_random_engine dre(rd());
 	std::uniform_real_distribution <float> urd(-1, 1);
+	std::uniform_int_distribution <int> uid(1, 4);
 
 	XMFLOAT3 player_position = m_pTestPlayer->GetPosition();
 	XMFLOAT3 monster_position = GetPosition();
 
 	float distance = sqrt(
 		pow(monster_position.x - player_position.x, 2) +
-		pow(monster_position.y - player_position.y, 2) +
+		//pow(monster_position.y - player_position.y, 2) +
 		pow(monster_position.z - player_position.z, 2));
 
 
@@ -2016,10 +2046,14 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	}
 
 	if (m_Monster_State == MonsterState::Default_State) {
-		SetSpeed(1.0);	// 델타타임 곱해야할지 고민중
+		CCharacterObject::SetCharacterState(CharacterState::MoveState); // 이걸 계속 하는게 옳은가
+		SetCuranimLoof(true);
+		SetSpeed(1.0);
+		//SetSpeed(m_fMoveSpeed);
+		int interval = uid(dre);
 
 		if (distance > CHASE_DISTANCE) {
-			if ((int)(fTimeTotal / 2.0f) > (int)((fTimeTotal - fTimeElapsed) / 2.0f))
+			if ((int)(fTimeTotal / interval) > (int)((fTimeTotal - fTimeElapsed) / interval))
 			{
 				m_dir.x = urd(dre), m_dir.z = urd(dre);
 				SetLook(m_dir);
@@ -2032,28 +2066,21 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
+		}else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
+			CMonsterObject::SetState(MonsterState::Chase_State);
+		}else if (distance < BATTLE_DISTANCE) {
+			CMonsterObject::SetState(MonsterState::Battle_State);
 		}
 
-		else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
-			SetState(MonsterState::Chase_State);
-		}
-
-		else if (distance < BATTLE_DISTANCE) {
-			SetState(MonsterState::Battle_State);
-		}
-
-	}
-
-
-	else if (m_Monster_State == MonsterState::Chase_State) {
+	}else if (m_Monster_State == MonsterState::Chase_State) {
+		CCharacterObject::SetCharacterState(CharacterState::MoveState); // 이걸 계속 하는게 옳은가
+		SetCuranimLoof(true);
 		if (distance > CHASE_DISTANCE) {
-			SetState(MonsterState::Default_State);
-		}
-
-		else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
+			CMonsterObject::SetState(MonsterState::Default_State);
+		}else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
 			m_CurHp -= 0.005f;
 
-			SetSpeed(30.0f);
+			SetSpeed(m_fMoveSpeed);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
 			position_difference.x = player_position.x - monster_position.x;
@@ -2075,22 +2102,18 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
+		}else if (distance < BATTLE_DISTANCE) {
+			CMonsterObject::SetState(MonsterState::Battle_State);
 		}
-		else if (distance < BATTLE_DISTANCE) {
-			SetState(MonsterState::Battle_State);
-		}
-	}
-
-
-	else if (m_Monster_State == MonsterState::Battle_State) {
+	}else if (m_Monster_State == MonsterState::Battle_State) {
+		//CCharacterObject::SetCharacterState(CharacterState::IdleState); // 이걸 계속 하는게 옳은가
+		//SetCuranimLoof(true);
 		// 전투가 끝날때까지 변경되지 않는다.
 		if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
-			//SetState(MonsterState::Chase_State);
-		}
-		else if (distance > CHASE_DISTANCE) {
-			//SetState(MonsterState::Default_State);
-		}
-		else if (distance < BATTLE_DISTANCE) {
+			//CMonsterObject::SetState(MonsterState::Chase_State);
+		}else if (distance > CHASE_DISTANCE) {
+			//CMonsterObject::SetState(MonsterState::Default_State);
+		}else if (distance < BATTLE_DISTANCE) {
 			// 플레이어 시점 변경
 			//m_pTestPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);;
 
