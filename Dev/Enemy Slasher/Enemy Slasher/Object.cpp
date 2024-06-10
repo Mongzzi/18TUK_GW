@@ -809,7 +809,7 @@ CFBXObject::CFBXObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	nowAnimNum = 0;
 
 	m_fAnimSpeedRatio = 1;
-
+	m_fTimeElapsed = 0;
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//m_pcbMappedSkinningObject->m_bIsAvailable = false;
@@ -1100,7 +1100,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 			break;
 		case CharacterState::MoveState:
 			// target에게 다가간다.
-			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), 1);
+			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_fMoveSpeed * m_fTimeElapsed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
 			// 일정 거리 안으로 다가가면 타겟 추출.
@@ -2048,8 +2048,8 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 	if (m_Monster_State == MonsterState::Default_State) {
 		CCharacterObject::SetCharacterState(CharacterState::MoveState); // 이걸 계속 하는게 옳은가
 		SetCuranimLoof(true);
-		SetSpeed(1.0);
-		//SetSpeed(m_fMoveSpeed);
+		//SetSpeed(1.0);
+		SetSpeed(m_fMoveSpeed * m_fTimeElapsed);
 		int interval = uid(dre);
 
 		if (distance > CHASE_DISTANCE) {
@@ -2062,8 +2062,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 					m_HpObject->SetScale(m_CurHp / m_MaxHp, 1.0f, 1.0f);
 				}
 			}
-
-			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
+			XMVECTOR vResult = XMVectorScale(XMVector3Normalize(XMLoadFloat3(&m_dir)), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
 		}else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
@@ -2080,7 +2079,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		}else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
 			m_CurHp -= 0.005f;
 
-			SetSpeed(m_fMoveSpeed);
+			SetSpeed(m_fMoveSpeed * m_fTimeElapsed);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
 			position_difference.x = player_position.x - monster_position.x;
