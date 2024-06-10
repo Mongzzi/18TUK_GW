@@ -1093,7 +1093,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//fLoader.LoadAnim(player1->m_pRootObjectData->m_pSkeleton, "fbxsdk/", "Player_Running");
 	m_pPlayer = new TestPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CTextureShader);
 	m_pPlayer->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, player1));
-	//m_pPlayer->SetScale(2.0f, 2.0f, 2.0f);
+	//m_pPlayer->SetScale(3.0f, 3.0f, 3.0f);
 	//CFBXTestMesh* pPlayerMesh = new CFBXTestMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(PEASANT_1_FBX));
 	//m_pPlayer->SetMesh(0, pPlayerMesh);
 

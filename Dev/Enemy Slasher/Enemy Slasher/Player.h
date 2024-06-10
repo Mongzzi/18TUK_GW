@@ -34,6 +34,8 @@ protected:
 	LPVOID						m_pPlayerUpdatedContext;
 	LPVOID						m_pCameraUpdatedContext;
 
+	XMFLOAT3					m_ScaleInfo;
+
 	CCamera* m_pCamera = NULL;
 
 public:
@@ -53,6 +55,10 @@ public:
 	void SetVelocity(const XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
 	void SetPosition(const XMFLOAT3& xmf3Position) { Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false); }
 	void SetMoveSpeed(float fMoveSpeed) { m_fMoveSpeed = fMoveSpeed; }
+
+	virtual void SetScale(float x, float y, float z); // 게임오브젝트로부터
+
+
 
 	const XMFLOAT3& GetVelocity() const { return(m_xmf3Velocity); }
 	float GetYaw() const { return(m_fYaw); }
