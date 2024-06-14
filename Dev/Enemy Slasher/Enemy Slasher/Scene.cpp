@@ -1100,8 +1100,8 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	//m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340));
 	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 50.0f, 0.0f));
-	m_pPlayer->SetMaxVelocityXZ(270.0f);
-	//m_pPlayer->SetMaxVelocityXZ(1500.0f);
+	//m_pPlayer->SetMaxVelocityXZ(270.0f);
+	m_pPlayer->SetMaxVelocityXZ(1500.0f);
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pPlayer->SetCharacterByName("SwordAndShield");
 	m_pPlayer->SetAnimNum(1);
@@ -1784,10 +1784,14 @@ void CTestScene::ReleaseShaderVariables()
 bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
 	DWORD dwDirection = 0;
-	if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
-	if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
-	if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
-	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
+	if (m_currentPhase == TurnPhase::NON)
+	{
+		if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
+		if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
+		if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
+		if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
+	
+	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	int xDelta = 0, yDelta = 0;

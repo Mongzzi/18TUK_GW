@@ -177,7 +177,7 @@ void CPlayer::Update(float fTimeElapsed)
 	{
 		CCharacterObject::SetCharacterState(CharacterState::MoveState);
 		SetCuranimLoof(true);
-		SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed));
+		SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed)); //애니메이션 속도 조절.
 	}
 	else
 	{
