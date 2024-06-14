@@ -1100,10 +1100,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	//m_pPlayer->SetPosition(XMFLOAT3(2160.0f, 2000.0f, 2340));
 	m_pPlayer->SetPosition(XMFLOAT3(0.0f, 50.0f, 0.0f));
-	m_pPlayer->SetMaxVelocityXZ(1500.0f);
+	m_pPlayer->SetMaxVelocityXZ(270.0f);
+	//m_pPlayer->SetMaxVelocityXZ(1500.0f);
 	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pPlayer->SetName("SwordAndShield");
+	m_pPlayer->SetCharacterByName("SwordAndShield");
 	m_pPlayer->SetAnimNum(1);
+	m_pPlayer->CCharacterObject::SetCamera(m_pPlayer->GetCamera());
 	m_pObjectManager->AddObj(m_pPlayer, ObjectLayer::Player);
 
 	//--------------------------------- 조명, 재질 생성 ----------------------------------------
@@ -1130,7 +1132,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_int_distribution <> urd(0, 6);
 	int random_number = 0;
 	//int random_number = urd(dre);
-	if (random_number == 0) {
+	/*if (random_number == 0) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
 	}
 	else if (random_number == 1) {
@@ -1159,7 +1161,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
-	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
+	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);*/
 
 
 	// ----------------- 버튼 오브젝트 ------------------

@@ -219,6 +219,7 @@ CGameObject::CGameObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_nMeshes = nMeshes;
 	m_ppMeshes = NULL;
 	m_DrawingOn = true;
+	m_xmf3Scale = XMFLOAT3(1, 1, 1);
 	if (m_nMeshes > 0)
 	{
 		m_ppMeshes = new CMesh * [m_nMeshes];
@@ -593,10 +594,16 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 
 void CGameObject::SetScale(float x, float y, float z)
 {
-	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	//assert(m_xmf3Scale.x == 0 && m_xmf3Scale.y != 0 && m_xmf3Scale.z != 0 && "Scale components should not be zero");
+	XMMATRIX mtxScale = XMMatrixScaling(1/m_xmf3Scale.x, 1/m_xmf3Scale.y, 1/m_xmf3Scale.z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
+
+	mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
 
 	UpdateTransform(NULL);
+
+	m_xmf3Scale = XMFLOAT3(x, y, z);
 }
 
 void CGameObject::SetScale(XMFLOAT3 scale)
@@ -919,6 +926,23 @@ void CFBXObject::SetCuranimLoof(bool flag)
 	}
 }
 
+void CFBXObject::SetAnimSpeedRatio(float ratio)
+{
+	m_fAnimSpeedRatio = ratio;
+	if (m_pChild)
+	{
+		CFBXObject* fo = dynamic_cast<CFBXObject*>(m_pChild);
+		if (fo)
+			fo->SetAnimSpeedRatio(ratio);
+	}
+	if (m_pSibling)
+	{
+		CFBXObject* fo = dynamic_cast<CFBXObject*>(m_pSibling);
+		if (fo)
+			fo->SetAnimSpeedRatio(ratio);
+	}
+}
+
 void CFBXObject::SetCuranimFinish(bool flag)
 {
 	m_bIsCurAnimFinish = flag;
@@ -1026,8 +1050,7 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 }
 
 
-
-CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType) :CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
+CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType, CCamera* pCamera) :CFBXObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
 {
 	m_pDeck = new CDeckData();
 	m_iTurnSpeed = 5.;
@@ -1037,6 +1060,10 @@ CCharacterObject::CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_fMoveSpeed = 100.f;
 	m_CurrentState = CharacterState::IdleState;
 	m_sName = "Unknown";
+	m_pCamera = pCamera;
+
+	m_HpObject = new CHpbarObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
+	m_fHpBarY = 100.;
 }
 
 CCharacterObject::~CCharacterObject()
@@ -1045,8 +1072,24 @@ CCharacterObject::~CCharacterObject()
 		delete m_pDeck;
 }
 
+void CCharacterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
+{
+	if (m_HpObject) {
+		if(m_fCurHp > 0)
+			m_HpObject->Render(pd3dCommandList, pCamera, pRenderOption);
+	}
+	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
+}
+
 void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	if (m_HpObject) {
+		float x = GetPosition().x;
+		float y = GetPosition().y + m_fHpBarY;
+		float z = GetPosition().z;
+		m_HpObject->SetPosition(x, y, z);
+	}
+
 	SetAnimNum(static_cast<int>(m_CurrentState));
 	// queue의 형태이면 queue를 확인한다.
 	if (m_vTargets.size() == 0)
@@ -1075,7 +1118,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 		//positionDifference.y = targetPosition.y - GetPosition().y;
 		positionDifference.z = targetPosition.z - GetPosition().z;
 
-		// 단위벡터로 변환 과정 
+		// 정규화과정  - 이거 말고 그냥  XMVector3Normalize 사용할걸 고려.
 		float length = sqrt(positionDifference.x * positionDifference.x/* + positionDifference.y * positionDifference.y*/ + positionDifference.z * positionDifference.z);
 		float epsilon = 1e-6;
 		if (length > epsilon)
@@ -1126,6 +1169,13 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 				m_bIsCurAnimFinish = false;
 		}
 	}
+	if(m_pCamera)
+		if (m_HpObject) {
+			XMFLOAT3 HPdir = m_pCamera->GetLookVector();
+			HPdir = XMFLOAT3(-HPdir.x, -HPdir.y, -HPdir.z);
+			m_HpObject->SetLook(HPdir);
+			m_HpObject->SetScale(m_fCurHp / m_fMaxHp, 1.0f, 1.0f);
+		}
 
 	
 	CFBXObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
@@ -1144,6 +1194,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 30.f;
 		m_fMoveSpeed = 270.f;
 		m_iTeamId = 0;
+		m_fHpBarY = 200;
 	}
 	else if (name == "Zombie1") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
@@ -1151,6 +1202,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 10.f;
 		m_fMoveSpeed = 202.5f * scale_ratio;
 		m_iTeamId = 1;
+		m_fHpBarY = 500.;
 	}
 	else if (name == "Zombie2") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 2, 3});
@@ -1158,6 +1210,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 20.f;
 		m_fMoveSpeed = 202.5f * scale_ratio;
 		m_iTeamId = 1;
+		m_fHpBarY = 500.;
 	}
 	else if (name == "Zombie3") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 0, 2, 3});
@@ -1165,6 +1218,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 30.f;
 		m_fMoveSpeed = 270.f * scale_ratio;
 		m_iTeamId = 1;
+		m_fHpBarY = 500.;
 	}
 	else if (name == "Zombie4") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
@@ -1172,6 +1226,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 15.f;
 		m_fMoveSpeed = 135.f * scale_ratio;
 		m_iTeamId = 1;
+		m_fHpBarY = 500.;
 	}
 	else if (name == "ZombieBoss") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 3, 3, 3});
@@ -1179,6 +1234,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 50.f;
 		m_fMoveSpeed = 400.f * scale_ratio * boss_scale_ratio;
 		m_iTeamId = 1;
+		m_fHpBarY = 500.;
 	}
 	else if (name == "Unknown") {
 		m_pDeck = new CDeckData();
@@ -1186,6 +1242,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 30.f;
 		m_fMoveSpeed = 100.f;
 		m_iTeamId = 1;
+		m_fHpBarY = 100.;
 	}
 	m_iTurnSpeed = 5.;
 	m_CurrentState = CharacterState::IdleState;
@@ -2001,11 +2058,10 @@ CAttackRangeObject::~CAttackRangeObject()
 
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CPlayer* ptestplayer, ShaderType stype)
-	:CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype)
+	:CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, ptestplayer->GetCamera())
 {
 	m_Monster_State = MonsterState::Default_State;
 	m_pTestPlayer = ptestplayer;
-	//m_HpObject = new CHpbarObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 	m_AttackRangeObject = new CAttackRangeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTexture_Position_Texcoord_Shader);
 }
 
@@ -2031,12 +2087,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 
 	// 룩벡터 설정후 스케일 설정 해줘야함 반대로할시 스케일 적용 x
-	if (m_HpObject) {
-		float x = GetPosition().x;
-		float y = GetPosition().y + 500.0f;
-		float z = GetPosition().z;
-		m_HpObject->SetPosition(x, y, z);
-	}
+	
 
 	if (m_AttackRangeObject) {
 		float x = GetPosition().x;
@@ -2057,10 +2108,6 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			{
 				m_dir.x = urd(dre), m_dir.z = urd(dre);
 				SetLook(m_dir);
-				if (m_HpObject) {
-					m_HpObject->SetLook(m_dir);
-					m_HpObject->SetScale(m_CurHp / m_MaxHp, 1.0f, 1.0f);
-				}
 			}
 			XMVECTOR vResult = XMVectorScale(XMVector3Normalize(XMLoadFloat3(&m_dir)), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
@@ -2077,8 +2124,6 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 		if (distance > CHASE_DISTANCE) {
 			CMonsterObject::SetState(MonsterState::Default_State);
 		}else if (distance > BATTLE_DISTANCE && distance < CHASE_DISTANCE) {
-			m_CurHp -= 0.005f;
-
 			SetSpeed(m_fMoveSpeed * m_fTimeElapsed);
 			// 방향벡터 몬스터에서 플레이어로
 			XMFLOAT3 position_difference;
@@ -2093,10 +2138,6 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			m_dir.z = position_difference.z / length;
 
 			SetLook(m_dir);
-			if (m_HpObject) {
-				m_HpObject->SetLook(m_dir);
-				m_HpObject->SetScale((float)m_CurHp / m_MaxHp, 1.0f, 1.0f);
-			}
 
 			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_speed);
 			XMStoreFloat3(&m_dir, vResult);
@@ -2118,6 +2159,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 		}
 	}
+	
 
 	// position update를 위해 이동 벡터 없이 해당 함수 호출 (PhysX 연동 관리)
 	MovePosition(0.f, 0.f, 0.f);
@@ -2129,11 +2171,7 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 
 void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption)
 {
-	CGameObject::Render(pd3dCommandList, pCamera, pRenderOption);
-
-	if (m_HpObject) {
-		//m_HpObject->Render(pd3dCommandList, pCamera, pRenderOption);
-	}
+	CCharacterObject::Render(pd3dCommandList, pCamera, pRenderOption);
 
 	if (m_AttackRangeObject) {
 		m_AttackRangeObject->Render(pd3dCommandList, pCamera, pRenderOption);

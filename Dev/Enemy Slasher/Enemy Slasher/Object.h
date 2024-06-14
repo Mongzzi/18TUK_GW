@@ -198,6 +198,7 @@ protected:
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
 
+	XMFLOAT3 m_xmf3Scale;
 
 protected:
 	COBBColliderWithMesh* m_pCollider = NULL;	// 충돌체
@@ -369,6 +370,7 @@ protected:
 	bool m_bIsCurAnimLoof;
 	bool m_bIsCurAnimFinish;
 	void SetCuranimLoof(bool flag); // 위에서 아래로만
+	void SetAnimSpeedRatio(float ratio);
 	void SetCuranimFinish(bool flag); // 아래에서 위로만
 public:
 	void SetAnimNum(int num);
@@ -385,11 +387,14 @@ enum class CharacterState : int {
 	SpawnState,
 };
 
+class CHpbarObject;
+
 class CCharacterObject : public CFBXObject
 {
 public:
-	CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType);
+	CCharacterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType, CCamera* pCamera);
 	~CCharacterObject();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool pRenderOption = false);
 
 	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 private:
@@ -400,6 +405,11 @@ protected:
 	// 만약 꽉 찬 오브젝트가 2 이상이면게이지가 오르지 않거나 조금만 오른다.
 	// 위 같은 경우 먼저 싸우기 시작한 순서대로 행동함.
 	// 선빵 선빵친 객채부터 턴을 진행.
+
+	CCamera* m_pCamera;
+
+	CHpbarObject* m_HpObject;
+	float m_fHpBarY;
 
 	// 체력
 	float m_fCurHp;
@@ -426,6 +436,8 @@ protected:
 	string m_sName;
 	// 등등
 public:
+	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };	// 
+
 	void IncreaseKarma();
 	void DecreaseKarma();
 
@@ -679,11 +691,10 @@ private:
 	CPlayer* m_pTestPlayer;
 	MonsterState m_Monster_State;
 
-	CHpbarObject* m_HpObject;
 	CAttackRangeObject* m_AttackRangeObject;
 
-	float m_MaxHp = 100.0f;
-	float m_CurHp = 100.0f;
+	//float m_fMaxHp = 100.0f;
+	//float m_fCurHp = 100.0f;
 
 	XMFLOAT3 m_dir = { 0.0f,0.0f,1.0f };
 	float m_speed = 100.0f;

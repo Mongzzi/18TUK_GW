@@ -10,7 +10,7 @@
 // CPlayer
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, ShaderType shaderType)
-	: CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType)
+	: CCharacterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, shaderType, NULL)
 {
 	m_pCamera = NULL;
 
@@ -170,6 +170,22 @@ void CPlayer::Update(float fTimeElapsed)
 
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	Move(xmf3Velocity, false);
+
+	// 플레이어와 캐릭터를 분리하면 여기서 빠져야함.
+	fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	if (fLength > 0.001f) 
+	{
+		CCharacterObject::SetCharacterState(CharacterState::MoveState);
+		SetCuranimLoof(true);
+		SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed));
+	}
+	else
+	{
+		CCharacterObject::SetCharacterState(CharacterState::IdleState);
+		SetCuranimLoof(true);
+		SetAnimSpeedRatio(1);
+	}
+	//
 
 	fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (m_fFriction * fTimeElapsed);
