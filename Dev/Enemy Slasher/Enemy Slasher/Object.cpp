@@ -2617,3 +2617,189 @@ int CLobbyUI2Object::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	}
 	return false;
 }
+
+CTexture* CCardButton::m_ppCardFaceTextures[5] = { nullptr };
+
+CCardButton::CCardButton(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float width, float height, ShaderType stype, int nMeshes)
+	: CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, stype, nMeshes)
+{
+	m_Card_Ui_Num =  1;
+	m_fXPosition = x;
+	m_fYPosition = y;
+	m_width = width;
+	m_height = height;
+	m_IsClicked = false;
+
+	m_fCurrntScale = m_fTargetScale = 1.0f;
+
+	if (m_pMaterial) {
+		if (m_pMaterial->m_pShader) {
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardFaceTextures[0], 0, 4);
+			m_pMaterial->SetTexture(m_ppCardFaceTextures[0]);
+		}
+	}
+
+	SetMesh(0, new CHpBarMesh(pd3dDevice, pd3dCommandList, width, height));
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+CCardButton::~CCardButton()
+{
+}
+
+void CCardButton::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_2D_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcb2DGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcb2DGameObject->Map(0, NULL, (void**)&m_pcbMapped2DGameObject);
+}
+
+void CCardButton::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pcbMapped2DGameObject->m_xmf2Position = XMFLOAT2(m_fXPosition, m_fYPosition);
+	m_pcbMapped2DGameObject->m_xmf2Scale = XMFLOAT2(CCardButton::m_xmfScale.x, CCardButton::m_xmfScale.y);
+	m_pcbMapped2DGameObject->m_IsClicked = m_IsClicked;
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcb2DGameObject->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dcbGameObjectGpuVirtualAddress);
+}
+
+void CCardButton::ReleaseShaderVariables()
+{
+	if (m_pd3dcb2DGameObject)
+	{
+		m_pd3dcb2DGameObject->Unmap(0, NULL);
+		m_pd3dcb2DGameObject->Release();
+	}
+	CGameObject::ReleaseShaderVariables();
+}
+
+void CCardButton::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_xmfScale = XMFLOAT3(m_fCurrntScale, m_fCurrntScale, 1);
+
+	if (std::fabs(m_fTargetScale - m_fCurrntScale) > EPSILON)
+	{
+		if (m_fTargetScale > m_fCurrntScale)
+		{
+			m_fCurrntScale += fTimeElapsed * TIME_ELAPSE_RATIO;
+			if (m_fTargetScale < m_fCurrntScale)
+				m_fCurrntScale = m_fTargetScale;
+		}
+		else
+		{
+			m_fCurrntScale -= fTimeElapsed * TIME_ELAPSE_RATIO;
+			if (m_fTargetScale > m_fCurrntScale)
+				m_fCurrntScale = m_fTargetScale;
+		}
+	}
+	CGameObject::Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+}
+
+void CCardButton::CursorOverObject(bool flag)
+{
+	if (flag)
+		m_fTargetScale = TARGET_SCALE;
+	else
+		m_fTargetScale = DEFUALT_SCALE;
+}
+
+void CCardButton::CallFunc(CGameObject* self, std::vector<CCharacterObject*>& target)
+{
+	if (m_callbackFunc)
+		m_callbackFunc(self, target);
+	else
+		cout << "콜백없음" << endl;
+}
+
+void CCardButton::InitializeTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//CardFace
+	if (m_ppCardFaceTextures[0] == nullptr)
+	{
+		m_ppCardFaceTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[0]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/CardFaceAttack.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[1] == nullptr)
+	{
+		m_ppCardFaceTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[1]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack2.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[2] == nullptr)
+	{
+		m_ppCardFaceTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[2]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/CardFaceBuff.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[3] == nullptr)
+	{
+		m_ppCardFaceTextures[3] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[3]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/CardFaceMove.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+	if (m_ppCardFaceTextures[4] == nullptr)
+	{
+		m_ppCardFaceTextures[4] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+		m_ppCardFaceTextures[4]->LoadTextureFromWICFile(pd3dDevice, pd3dCommandList, L"Image/attack5.jpg", RESOURCE_TEXTURE2D, 0);
+	}
+}
+
+void CCardButton::InitializeMaterial(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	
+}
+
+void CCardButton::UpdateData(int num)
+{
+	m_Card_Ui_Num = num;
+	// 콜백함수도 바꿔야함.
+	// 임시코드
+	switch (num) {
+	case 0: m_callbackFunc = Callback_0; break;
+	case 1: m_callbackFunc = Callback_1; break;
+	case 2: m_callbackFunc = Callback_2; break;
+	case 3: m_callbackFunc = Callback_3; break;
+	case 4: m_callbackFunc = Callback_4; break;
+	default:
+		break;
+	}
+}
+
+void CCardButton::UpdateTexture(ID3D12Device* pd3dDevice, int num)
+{
+	m_Card_Ui_Num = num;
+	// 임시코드
+	switch (num) {
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+		if (m_pMaterial && m_pMaterial->m_pShader)
+		{
+			if (m_pMaterial->m_pTexture)
+			{
+				m_pMaterial->m_pTexture = nullptr;
+			}
+			m_pMaterial->SetTexture(m_ppCardFaceTextures[num]);
+			m_pMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+			m_pMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, m_ppCardFaceTextures[num], 0, 4);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+bool CCardButton::IsPointInside(float x, float y)
+{
+	float halfWidth = m_width * 0.5f;
+	float halfHeight = m_height * 0.5f;
+
+	// 중심 좌표에서 절반 크기만큼 이동한 영역 내에 있는지 확인
+	float left = m_fXPosition - halfWidth;
+	float right = m_fXPosition + halfWidth;
+	float top = m_fYPosition - halfHeight;
+	float bottom = m_fYPosition + halfHeight;
+
+	return (x >= left && x <= right && y >= top && y <= bottom);
+}

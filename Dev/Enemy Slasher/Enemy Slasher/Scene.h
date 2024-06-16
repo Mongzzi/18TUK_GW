@@ -184,8 +184,10 @@ public:
 		EndBattle
 	};
 private:
-	CUIObject* pCoveredUI = NULL;
-	CUIObject* m_pSelectedUI = NULL;
+	//CUIObject* pCoveredUI = NULL;
+	//CUIObject* m_pSelectedUI = NULL;
+	CCardButton* pCoveredUI = NULL;
+	CCardButton* m_pSelectedUI = NULL;
 	bool bCardUpdateFlag = false;
 	int m_iMaxHandCount = 5;
 
@@ -208,6 +210,7 @@ public:
 	void Engage(CCharacterObject* obj);
 	void IncreaseTurnFlag();
 	void UseSelectedCard();
+	void SetSelectedUI(CCardButton* selected);
 
 };
 

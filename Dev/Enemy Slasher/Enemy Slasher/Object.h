@@ -589,6 +589,67 @@ public:
 };
 
 
+class CCardButton : public CGameObject
+{
+public:
+	CCardButton(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float x, float y, float width, float height, ShaderType stype, int nMeshes = 1);
+	~CCardButton();
+private:
+	float m_fCurrntScale;
+	float m_fTargetScale;
+
+	float m_fXPosition;
+	float m_fYPosition;
+
+	XMFLOAT3 m_xmfScale; // 필요한가?
+	//UpdateShaderVariables
+
+	//float m_x, m_y;			
+	float m_width, m_height;	
+
+	ID3D12Resource* m_pd3dcb2DGameObject = NULL;
+	CB_2D_GAMEOBJECT_INFO* m_pcbMapped2DGameObject = NULL;
+
+	static constexpr float TARGET_SCALE = 1.5f;
+	static constexpr float DEFUALT_SCALE = 1.0f;
+	static constexpr float TIME_ELAPSE_RATIO = 1.0f;
+
+	int m_Card_Ui_Num;	// 카드 목록중 카드의 번호
+
+	CardCallbackFunction m_callbackFunc = NULL;
+
+	static CTexture* m_ppCardFaceTextures[5];
+public:
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
+	virtual void Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+	void SetPositionUI(int x, int y) { m_fXPosition = x, m_fYPosition = y; };
+	void SetPositionUI(POINT pos) { m_fXPosition = pos.x, m_fYPosition = pos.y; };
+
+	POINT GetPositionUI() { return POINT(m_fXPosition, m_fYPosition); }
+
+	void CursorOverObject(bool flag);
+	//void ButtenDown();
+	//void ButtenUp();
+	void SetFunc(CardCallbackFunction callback) { m_callbackFunc = callback; };
+	void CallFunc(CGameObject* self, std::vector<CCharacterObject*>& target);
+
+	int GetUiNum() { return m_Card_Ui_Num; };
+
+	static void InitializeTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void InitializeMaterial(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void UpdateData(int num);
+	void UpdateTexture(ID3D12Device* pd3dDevice, int num);
+public:
+	bool m_IsClicked;	// UpdateShaderVariables
+	bool m_IsAbove;
+	bool IsPointInside(float x, float y);
+
+};
+
 //
 class CHeightMapTerrain : public CGameObject
 {

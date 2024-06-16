@@ -943,8 +943,8 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		if(teamID == 0)
 			if (pCoveredUI)
 			{
-				m_pSelectedUI = pCoveredUI;
-				m_pSelectedUI->ButtenDown();
+				SetSelectedUI(pCoveredUI);
+				//m_pSelectedUI->ButtenDown();
 			}
 		break;
 
@@ -954,7 +954,7 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			{
 				// 현재 카드UI 전용코드가 올라가있음.
 				// 아래 내용을 CCardUIObject.ButtenUp()에 넣어야함.
-				m_pSelectedUI->ButtenUp();
+				//m_pSelectedUI->ButtenUp();
 				if (ptCursorPos.y > (float)clientHeight / 5 * 4)
 				{
 					// 원위치로 돌아감.
@@ -978,10 +978,10 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	//int drawnCard;
-	int tmp;
+	int tmp = 0;
 	std::vector<int> intVector;
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
-	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
+	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::CardButtonObject];
 
 	// 현재 차례인 오브젝트의 팀
 	int teamID = m_pvEngagedObjects[m_iTurnFlag]->GetTeamId();
@@ -1046,10 +1046,12 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 					if (pInteractiveUIObj->size() > 0) {
 						if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
 						{
-							if (m_pSelectedUI == (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp])
+							if (m_pSelectedUI == (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp])
 								UseSelectedCard();
 							else
-								m_pSelectedUI = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][tmp];
+							{
+								SetSelectedUI((CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp]);
+							}
 						}
 					}
 				}
@@ -1706,25 +1708,42 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 
 	//// UI
-	{
-		//카드 UI 테스트용 오브젝트.
-		//CCubeMeshTextured* pCardMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
-		//CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFbx("fbxsdk/", "Card")->m_vpMeshs[0]);
-		//CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(CARD_FBX)->m_pvMeshs[0]);
+	
+	//{
+	//	//카드 UI 테스트용 오브젝트.
+	//	//CCubeMeshTextured* pCardMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 412.0f, 582.0f, 1.0f);
+	//	//CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFbx("fbxsdk/", "Card")->m_vpMeshs[0]);
+	//	//CFBXMesh* pCardMesh = new CFBXMesh(pd3dDevice, pd3dCommandList, fLoader.LoadFBX(CARD_FBX)->m_pvMeshs[0]);
+	//
+	//	CCardUIObject* pCardUIObject;
+	//	CCardUIObject::InitializeTexture(pd3dDevice, pd3dCommandList);
+	//	for (int i = 0; i < m_iMaxHandCount; i++)
+	//	{
+	//		pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUITextureShader);
+	//		pCardUIObject->SetPositionUI(100, 100);
+	//		// 순서 중요
+	//		pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card2"));
+	//		pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "CardFace2"));
+	//		pCardUIObject->InitializeMaterial(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	//		//
+	//		pCardUIObject->SetScale(1, 1, 1);
+	//		m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+	//	}
+	//}
 
-		CCardUIObject* pCardUIObject;
-		CCardUIObject::InitializeTexture(pd3dDevice, pd3dCommandList);
+	{
+		CCardButton* pCardButtonObject;
+		CCardButton::InitializeTexture(pd3dDevice, pd3dCommandList);
 		for (int i = 0; i < m_iMaxHandCount; i++)
 		{
-			pCardUIObject = new CCardUIObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer->GetCamera(), ShaderType::CUITextureShader);
-			pCardUIObject->SetPositionUI(100, 100);
-			// 순서 중요
-			pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Card2"));
-			pCardUIObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "CardFace2"));
-			pCardUIObject->InitializeMaterial(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+			pCardButtonObject = new CCardButton(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
+				FRAME_BUFFER_WIDTH * 2 / 3 + i*100, FRAME_BUFFER_HEIGHT / 7, FRAME_BUFFER_WIDTH / 10, FRAME_BUFFER_HEIGHT / 5, ShaderType::C2DObjectShader);
+			// 위치xy, 크기 xy
+			pCardButtonObject->InitializeMaterial(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 			//
-			pCardUIObject->SetScale(1, 1, 1);
-			m_pObjectManager->AddObj(pCardUIObject, ObjectLayer::InteractiveUIObject);
+			//pCardButtonObject->SetScale(2, 2, 2);
+			//m_pObjectManager->AddObj(pCardButtonObject, ObjectLayer::InteractiveUIObject);
+			m_pObjectManager->AddObj(pCardButtonObject, ObjectLayer::CardButtonObject);
 		}
 	}
 
@@ -1809,6 +1828,12 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	GetCursorPos(&ptCursorPos);
 	ScreenToClient(hWnd, &ptCursorPos);
+
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int clientWidth = clientRect.right - clientRect.left;
+	int clientHeight = clientRect.bottom - clientRect.top;
 	//-------------- 피킹
 	CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 
@@ -1816,17 +1841,21 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 	pCoveredUI = NULL;
 
+	float mouseX = static_cast<float>(ptCursorPos.x) / (clientWidth)*FRAME_BUFFER_WIDTH;
+	float mouseY = static_cast<float>(ptCursorPos.y) / (clientHeight)*FRAME_BUFFER_HEIGHT;
+
 	for (int lc = 0; lc < (int)ObjectLayer::Count; lc++)
 	{
-		if (lc == (int)ObjectLayer::InteractiveUIObject)
+		if (lc == (int)ObjectLayer::CardButtonObject)
 		{
 			for (int i = 0; i < pObjectList[lc].size(); i++) {
-				CUIObject* obj = (CUIObject*)pObjectList[lc][i];
+				CCardButton* obj = (CCardButton*)pObjectList[lc][i];
 				if (!obj)
 					continue;
 
-				float tmin, tmax;
-				if (true == m_pObjectManager->CollisionCheck_RayWithOBB(&r, obj, tmin, tmax)) {
+				//float tmin, tmax;
+				//if (true == m_pObjectManager->CollisionCheck_RayWithOBB(&r, obj, tmin, tmax)) {
+				if(obj->IsPointInside(mouseX, mouseY)){
 					pCoveredUI = obj;
 #ifdef _DEBUG
 					//cout << "Collision With Ray! \t\t ObjectNum = " << i << '\n';
@@ -1892,15 +1921,11 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			m_pSelectedUI->CursorOverObject(true);
 	}
 
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
 
 	// 카드 위치지정하는 부분.
-	int clientWidth = clientRect.right - clientRect.left;
-	int clientHeight = clientRect.bottom - clientRect.top;
 
 	// 이 레이어가 비어있을 수 있기 떄문에 먼저 포인터를 받아 검사
-	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
+	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::CardButtonObject];
 	if (pInteractiveUIObj->size() > 0) {
 		if (m_pvEngagedObjects.size() >= 2)
 		{
@@ -1912,7 +1937,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 
 			for (int i = 0; i < handSize; i++)
 			{
-				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+				CCardButton* obj = (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][i];
 				if (obj != m_pSelectedUI)
 				{
 					obj->SetPositionUI(clientWidth / 2 + ((float)i - (float)handSize / 2) * (clientWidth / 12) + (clientWidth / 24), (float)clientHeight / 10 * 9);
@@ -1923,7 +1948,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			// 손에 없는 카드 위치
 			for (int i = handSize; i < m_iMaxHandCount; i++)
 			{
-				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+				CCardButton* obj = (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][i];
 				if (obj != m_pSelectedUI)
 					obj->SetPositionUI(clientWidth * 1.2, (float)clientHeight / 10 * 9);
 			}
@@ -1932,7 +1957,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 		{
 			for (int i = 0; i < m_iMaxHandCount; i++)
 			{
-				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+				CCardButton* obj = (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][i];
 				if (obj != m_pSelectedUI)
 					obj->SetPositionUI(clientWidth * 1.2, (float)clientHeight / 10 * 9);
 			}
@@ -2086,7 +2111,7 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 					IncreaseTurnFlag();
 				else {
 					if(m_pSelectedUI == NULL)
-						m_pSelectedUI = (CUIObject*)pvObjectList[(int)ObjectLayer::InteractiveUIObject][flag];
+						m_pSelectedUI = (CCardButton*)pvObjectList[(int)ObjectLayer::CardButtonObject][flag];
 					//if (m_pSelectedUI != (CUIObject*)pvObjectList[(int)ObjectLayer::InteractiveUIObject][flag])
 					else
 						UseSelectedCard();
@@ -2135,7 +2160,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 {
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
 	// 카드패 관련
-	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::InteractiveUIObject];
+	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::CardButtonObject];
 	if (pInteractiveUIObj->size() > 0)
 	{
 		CCharacterObject* turnedObj = m_pvEngagedObjects[m_iTurnFlag];
@@ -2147,10 +2172,10 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		{
 			for (int i = 0; i < handSize; i++)
 			{
-				CUIObject* obj = (CUIObject*)pObjectList[(int)ObjectLayer::InteractiveUIObject][i];
+				CCardButton* obj = (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][i];
 
-				dynamic_cast<CCardUIObject*> (obj)->UpdateData(hand[i]);
-				dynamic_cast<CCardUIObject*> (obj)->UpdateTexture(pd3dDevice, hand[i]);
+				dynamic_cast<CCardButton*> (obj)->UpdateData(hand[i]);
+				dynamic_cast<CCardButton*> (obj)->UpdateTexture(pd3dDevice, hand[i]);
 				//dynamic_cast<CCardUIObject*> (obj)->UpdateTexture(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, hand[i]);
 			}
 			bCardUpdateFlag = false;
@@ -2340,11 +2365,18 @@ void CTestScene::IncreaseTurnFlag()
 void CTestScene::UseSelectedCard()
 {
 	// 카드 사용
-	CCardUIObject* pcUI = dynamic_cast<CCardUIObject*>(m_pSelectedUI);
+	CCardButton* pcUI = dynamic_cast<CCardButton*>(m_pSelectedUI);
 	pcUI->CallFunc(m_pvEngagedObjects[m_iTurnFlag], m_pvEngagedObjects);
 	m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->SendHandToUsedByNum(pcUI->GetUiNum());
 	bCardUpdateFlag = true;
+	m_pSelectedUI->m_IsClicked = false;
 	m_pSelectedUI = NULL;
+}
+
+void CTestScene::SetSelectedUI(CCardButton* selected)
+{
+	m_pSelectedUI = selected;
+	m_pSelectedUI->m_IsClicked = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
