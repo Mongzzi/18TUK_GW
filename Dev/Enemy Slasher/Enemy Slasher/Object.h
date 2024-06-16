@@ -847,6 +847,7 @@ public:
 	void SetType(int n) { m_type = n; };
 	int GetType() { return m_type; };
 	void SetButtonScale(float x, float y) { m_xScale = x; m_yScale = y; };
+	void SetXY(float x, float y) { m_x = x, m_y = y; };
 
 public:
 	bool m_IsButton;

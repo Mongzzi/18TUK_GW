@@ -940,32 +940,34 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	break;
 
 	case WM_RBUTTONDOWN:
-		if(teamID == 0)
-			if (pCoveredUI)
-			{
-				SetSelectedUI(pCoveredUI);
-				//m_pSelectedUI->ButtenDown();
-			}
+		if(m_iOverFlag == 0)
+			if(teamID == 0)
+				if (pCoveredUI)
+				{
+					SetSelectedUI(pCoveredUI);
+					//m_pSelectedUI->ButtenDown();
+				}
 		break;
 
 	case WM_RBUTTONUP:
-		if (teamID == 0)
-			if (m_pSelectedUI)
-			{
-				// 현재 카드UI 전용코드가 올라가있음.
-				// 아래 내용을 CCardUIObject.ButtenUp()에 넣어야함.
-				//m_pSelectedUI->ButtenUp();
-				if (ptCursorPos.y > (float)clientHeight / 5 * 4)
+		if (m_iOverFlag == 0)
+			if (teamID == 0)
+				if (m_pSelectedUI)
 				{
-					// 원위치로 돌아감.
-					m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
-					m_pSelectedUI = NULL;
+					// 현재 카드UI 전용코드가 올라가있음.
+					// 아래 내용을 CCardUIObject.ButtenUp()에 넣어야함.
+					//m_pSelectedUI->ButtenUp();
+					if (ptCursorPos.y > (float)clientHeight / 5 * 4)
+					{
+						// 원위치로 돌아감.
+						m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
+						m_pSelectedUI = NULL;
+					}
+					else
+					{
+						UseSelectedCard();
+					}
 				}
-				else
-				{
-					UseSelectedCard();
-				}
-			}
 		break;
 
 
@@ -1028,9 +1030,10 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case 'c':
 			break;
 		case VK_SPACE:
-			if (teamID == 0)
-				if (m_currentPhase == TurnPhase::PlayPhase)
-					IncreaseTurnFlag();
+			if (m_iOverFlag == 0)
+				if (teamID == 0)
+					if (m_currentPhase == TurnPhase::PlayPhase)
+						IncreaseTurnFlag();
 			//cout << m_pvEngagedObjects.size() << endl;
 			break;
 
@@ -1039,22 +1042,23 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case '3':
 		case '4':
 		case '5':
-			if (teamID == 0)
-				tmp = wParam - 0x30 - 1;
-				if (m_currentPhase == TurnPhase::PlayPhase)
-				{
-					if (pInteractiveUIObj->size() > 0) {
-						if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
-						{
-							if (m_pSelectedUI == (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp])
-								UseSelectedCard();
-							else
+			if (m_iOverFlag == 0)
+				if (teamID == 0)
+					tmp = wParam - 0x30 - 1;
+					if (m_currentPhase == TurnPhase::PlayPhase)
+					{
+						if (pInteractiveUIObj->size() > 0) {
+							if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
 							{
-								SetSelectedUI((CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp]);
+								if (m_pSelectedUI == (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp])
+									UseSelectedCard();
+								else
+								{
+									SetSelectedUI((CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp]);
+								}
 							}
 						}
 					}
-				}
 			break;
 		default:
 			break;
@@ -1746,6 +1750,23 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_pObjectManager->AddObj(pCardButtonObject, ObjectLayer::CardButtonObject);
 		}
 	}
+	///  m_iOverFlag의 역순으로 추가.
+	{
+		CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameClear.png",
+			FRAME_BUFFER_WIDTH *2 , FRAME_BUFFER_HEIGHT * 2, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/4, ShaderType::C2DObjectShader);
+		pButtonObject->SetIsButton(false);
+		m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
+
+		pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameOver.png",
+			FRAME_BUFFER_WIDTH * 2, FRAME_BUFFER_HEIGHT * 2, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/4, ShaderType::C2DObjectShader);
+		pButtonObject->SetIsButton(false);
+		m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
+
+		pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/black.png",
+			FRAME_BUFFER_WIDTH * 2, FRAME_BUFFER_HEIGHT * 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, ShaderType::C2DObjectShader);
+		pButtonObject->SetIsButton(false);
+		m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
+	}
 
 	//turn 턴 관련 초기화
 
@@ -1802,6 +1823,9 @@ void CTestScene::ReleaseShaderVariables()
 
 bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
+	if (m_iOverFlag != 0) 
+		return(true);
+
 	DWORD dwDirection = 0;
 	if (m_currentPhase == TurnPhase::NON)
 	{
@@ -2033,6 +2057,10 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	//std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::TextureObject];
 
 	// 종료조건.
+	std::vector<CGameObject*> ButtonObjectLayer = pvObjectList[(int)ObjectLayer::ButtonObject];
+	CButtonObject* clear = dynamic_cast<CButtonObject*>(ButtonObjectLayer[0]);
+	CButtonObject* over = dynamic_cast<CButtonObject*>(ButtonObjectLayer[1]);
+	CButtonObject* black = dynamic_cast<CButtonObject*>(ButtonObjectLayer[2]);
 	if (m_pPlayer)
 		if (m_pPlayer->GetCurHp() <= 0)
 			m_iOverFlag = 1;// game over
@@ -2040,7 +2068,28 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		if (m_pBoss->GetCurHp() <= 0)
 			m_iOverFlag = 2;// clear
 	if (m_iOverFlag != 0)
-		; // 종료 함수에 m_iOverFlag를 넣어 넘기거나 그 함수가 m_iOverFlag를 확인해 종료화면 출력.
+	{
+		black->SetXY(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2);
+		switch (m_iOverFlag)
+		{
+		case 1:
+			over->SetXY(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2);
+			break;
+		case 2:
+			clear->SetXY(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2);
+			break;
+		}
+	}
+	else
+	{
+		//for (CGameObject* obj : ButtonObjectLayer)
+		//{
+		//	CButtonObject* bObj = dynamic_cast<CButtonObject*>(obj);
+		//	if (bObj)
+		//		bObj->SetXY(FRAME_BUFFER_WIDTH * 2, FRAME_BUFFER_HEIGHT * 2);
+		//}
+	}
+	 // 종료 함수에 m_iOverFlag를 넣어 넘기거나 그 함수가 m_iOverFlag를 확인해 종료화면 출력.
 
 	//몬스터의 state가 Battle_State이면 추가.
 	for (CGameObject* obj : TextureObjectLayer)
