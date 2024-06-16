@@ -2287,10 +2287,14 @@ CButtonObject::CButtonObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_y = y;
 	m_width = width;
 	m_height = height;
+	
+	m_xScale = 1.0f;
+	m_yScale = 1.0f;
+
 	m_IsButton = true;
 	m_IsClicked = false;
 	m_type = 0;
-
+	
 	CTexture* ppTextures[1];
 
 	ppTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -2322,7 +2326,7 @@ void CButtonObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphi
 void CButtonObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pcbMapped2DGameObject->m_xmf2Position = XMFLOAT2(m_x, m_y);
-	m_pcbMapped2DGameObject->m_xmfSize = XMFLOAT2(m_width, m_height);
+	m_pcbMapped2DGameObject->m_xmf2Scale = XMFLOAT2(m_xScale, m_yScale);
 	m_pcbMapped2DGameObject->m_IsClicked = m_IsClicked;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress = m_pd3dcb2DGameObject->GetGPUVirtualAddress();
@@ -2384,12 +2388,13 @@ CLobbyUI1Object::CLobbyUI1Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_ppButtonObjects[0] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/gamestart.png", 640.0f, 250.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[0]->SetType(2);
-
+	
 	m_ppButtonObjects[1] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/gameexit.png", 640.0f, 350.0f, 210.0f, 40.0f, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[1]->SetType(3);
 
 	m_ppButtonObjects[2] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/ppap.png", 640.0f, 300.0f, 380.0f, 450.0f, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[2]->SetType(0);
+
 }
 
 CLobbyUI1Object::~CLobbyUI1Object()
@@ -2474,6 +2479,7 @@ void CLobbyUI1Object::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	{
 		if (m_ppButtonObjects[i])
 		{
+			
 			m_ppButtonObjects[i]->Render(pd3dCommandList, pCamera, pRenderOption);
 		}
 	}
@@ -2519,6 +2525,7 @@ CLobbyUI2Object::CLobbyUI2Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_ppButtonObjects[6] = new CButtonObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"Image/ppap.png", 640, 480, 900, 600, ShaderType::C2DObjectShader);
 	m_ppButtonObjects[6]->SetType(0);
+
 
 }
 

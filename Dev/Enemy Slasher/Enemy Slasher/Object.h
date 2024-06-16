@@ -42,7 +42,7 @@ struct CB_GAMEOBJECT_INFO
 struct CB_2D_GAMEOBJECT_INFO
 {
 	XMFLOAT2 m_xmf2Position; // 오브젝트의 화면 좌표 (x, y)
-	XMFLOAT2 m_xmfSize;		// 오브젝트의 가로 세로길이  // 절반아님
+	XMFLOAT2 m_xmf2Scale;		// 스케일값
 	bool m_IsClicked;		//	클릭 되었는지
 };
 
@@ -770,6 +770,7 @@ public:
 private:
 	float m_x, m_y;				// 오브젝트의 화면 좌표 (x, y)
 	float m_width, m_height;	// 오브젝트의 가로길이 , 세로길이
+	float m_xScale, m_yScale;	// x , y 스케일 수치
 
 	// m_type -  1번 ( 제목 로고 ) 2번 ( 게임시작 ) 3번 ( 게임종료 )
 	int m_type;
@@ -784,6 +785,7 @@ public:
 	void SetIsButton(bool IsButton) { m_IsButton = IsButton; };
 	void SetType(int n) { m_type = n; };
 	int GetType() { return m_type; };
+	void SetButtonScale(float x, float y) { m_xScale = x; m_yScale = y; };
 
 public:
 	bool m_IsButton;

@@ -30,7 +30,7 @@ cbuffer cbSkinningInfo : register(b5)
 cbuffer cb2DGameObjectInfo : register(b6)
 {
 	float2 position; // 오브젝트의 화면 좌표 (x, y)
-	float2 size;	// 오브젝트의 가로 세로길이 // 절반 길이아님
+	float2 Button_Scale;	// 스케일
 	bool IsClicked;
 }
 
@@ -146,11 +146,11 @@ VS_TEXTURED_OUTPUT_TWO_ELEMENT VS_2D_OBJECT(VS_TEXTURED_INPUT_TWO_ELEMENT input)
 {
 	VS_TEXTURED_OUTPUT_TWO_ELEMENT output;
 
-	float2 screenPos = position + input.position.xy;
+	float2 scaledPos = input.position.xy * Button_Scale;
+	float2 screenPos = position + scaledPos;
 
-	// 눌림 상태에서 버튼을 약간 이동시킴
 	if (IsClicked) {
-		screenPos += float2(2.0f, -2.0f); 
+		screenPos += float2(2.0f, -2.0f);
 	}
 
 	screenPos = screenPos / float2(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT) * 2.0f - 1.0f;
