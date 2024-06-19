@@ -4,6 +4,8 @@
 #include "BoundingBox.h"
 #include "Ray.h"
 #include "FbxLoader_V3.h"
+#include <unordered_map>
+#include <unordered_set>
 
 class CMesh
 {
@@ -140,6 +142,76 @@ public:
 	vector<CMesh*> DynamicShaping_Push(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
 	vector<CMesh*> DynamicShaping_ConvexHull(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
 	vector<CMesh*> DynamicShaping_Graph(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& mxf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
+
+	// DynamicShaping_Graph를 위한 기능 함수 정의
+private:
+	// unorderd map 사용을 위한 hash 선언
+	struct hash_fn {
+		std::size_t operator()(const XMFLOAT3& vertex) const {
+			std::size_t h1 = std::hash<float>{}(vertex.x);
+			std::size_t h2 = std::hash<float>{}(vertex.y);
+			std::size_t h3 = std::hash<float>{}(vertex.z);
+			return h1 ^ h2 ^ h3;
+		}
+	};
+
+	// Graph Edge의 Map 형식 선언
+	using EdgeMap = std::unordered_map<XMFLOAT3, std::unordered_set<XMFLOAT3, hash_fn>, hash_fn>;
+
+	void HandleTriangleCut(
+		std::vector<CVertex>& vertices, std::vector<UINT>& indices,
+		int i,
+		XMFLOAT3& planeNormal, XMFLOAT3& planePoint,
+		std::vector<CVertex>& newVerticesUp, std::vector<CVertex>& newVerticesDown,
+		std::vector<UINT>& newIndicesUp, std::vector<UINT>& newIndicesDown);
+	std::pair<CVertex, bool> CalculateIntersection(CVertex& v1, CVertex& v2, XMFLOAT3& planeNormal, XMFLOAT3& planePoint);
+	void TriangulateBoundary(const std::vector<XMFLOAT3>& boundary, std::vector<CVertex>& fillVertices, std::vector<UINT>& fillIndices);
+	std::vector<XMFLOAT3> ExtractBoundaryLoop(EdgeMap& edgeMap);
+	void FindBoundaryEdges(const std::vector<std::pair<XMFLOAT3, XMFLOAT3>>& edges, EdgeMap& edgeMap);
+
+private:
+	// 삼각형의 normal을 계산하는 함수
+	XMFLOAT3 CalculateNormal(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3) {
+		XMFLOAT3 u = { v2.x - v1.x, v2.y - v1.y, v2.z - v1.z };
+		XMFLOAT3 v = { v3.x - v1.x, v3.y - v1.y, v3.z - v1.z };
+		XMFLOAT3 normal = {
+			u.y * v.z - u.z * v.y,
+			u.z * v.x - u.x * v.z,
+			u.x * v.y - u.y * v.x
+		};
+		return normal;
+	}
+
+	// 삼각형의 무게중심점을 계산하는 함수
+	XMFLOAT3 CalculateCentroid(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3) {
+		return { (v1.x + v2.x + v3.x) / 3, (v1.y + v2.y + v3.y) / 3, (v1.z + v2.z + v3.z) / 3 };
+	}
+
+	// 점들을 무게중심점과 Normal 값을 이용해 CCW로 정렬하는 함수
+	void SortVerticesCCW(std::vector<CVertex>& vertices, const XMFLOAT3& centroid, const XMFLOAT3& normal) {
+		std::sort(vertices.begin(), vertices.end(), [&centroid, &normal](const CVertex& a, const CVertex& b) {
+			XMFLOAT3 va = { a.m_xmf3Vertex.x - centroid.x, a.m_xmf3Vertex.y - centroid.y, a.m_xmf3Vertex.z - centroid.z };
+			XMFLOAT3 vb = { b.m_xmf3Vertex.x - centroid.x, b.m_xmf3Vertex.y - centroid.y, b.m_xmf3Vertex.z - centroid.z };
+			return (va.x * vb.y - va.y * vb.x) > 0;
+			});
+	}
+
+	// 삼각형을 CCW로 vector에 저장해주는 함수
+	void AddTriangle(std::vector<CVertex>& vertices, std::vector<UINT>& indices, const CVertex& v1, const CVertex& v2, const CVertex& v3, XMFLOAT3& oriNormal) {
+		XMFLOAT3 newNormal = CalculateNormal(v1.m_xmf3Vertex, v2.m_xmf3Vertex, v3.m_xmf3Vertex);
+		vertices.push_back(v1);
+		if (Vector3::DotProduct(oriNormal, newNormal) > 0) {
+			vertices.push_back(v2);
+			vertices.push_back(v3);
+		}
+		else {
+			vertices.push_back(v3);
+			vertices.push_back(v2);
+		}
+		indices.push_back(vertices.size() - 3);
+		indices.push_back(vertices.size() - 2);
+		indices.push_back(vertices.size() - 1);
+	}
 };
 
 class CBoxMesh : public CDynamicShapeMesh

@@ -2,7 +2,8 @@
 #include "Mesh.h"
 #include <numeric>
 #include <map>
-
+#include <vector>
+#include <random>
 
 
 CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -756,6 +757,151 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_ConvexHull(ID3D12Device* pd3dDe
 	return pvNewMeshs;
 }
 
+// 외곽선 탐색 함수
+// 모든 edge 들 중 연결된 edge 들만 edges 에 담아줌
+void CDynamicShapeMesh::FindBoundaryEdges(const std::vector<std::pair<XMFLOAT3, XMFLOAT3>>& edges, EdgeMap& edgeMap)
+{
+	//for (const auto& edge : edges) {
+	//	edgeMap[edge.first].insert(edge.second);
+	//	edgeMap[edge.second].insert(edge.first);
+	//}
+}
+
+// edge의 순서를 정리해서 외곽선 루프를 만듦
+std::vector<XMFLOAT3> CDynamicShapeMesh::ExtractBoundaryLoop(EdgeMap& edgeMap)
+{
+	std::vector<XMFLOAT3> boundary;
+	//auto it = edgeMap.begin();
+	//boundary.push_back(it->first);
+	//XMFLOAT3 current = it->first;
+
+	//while (true) {
+	//	const auto& nextSet = edgeMap[current];
+	//	if (nextSet.empty()) break;
+	//	XMFLOAT3 next = *nextSet.begin();
+	//	boundary.push_back(next);
+	//	edgeMap[current].erase(next);
+	//	edgeMap[next].erase(current);
+	//	current = next;
+	//}
+
+	return boundary;
+}
+
+// 외곽선을 따라 해당 평면을 매꿔주는 함수
+void CDynamicShapeMesh::TriangulateBoundary(const std::vector<XMFLOAT3>& boundary, std::vector<CVertex>& fillVertices, std::vector<UINT>& fillIndices)
+{
+	//XMFLOAT3 center = { 0, 0, 0 };
+	//for (const auto& vertex : boundary) {
+	//	center.x += vertex.x;
+	//	center.y += vertex.y;
+	//	center.z += vertex.z;
+	//}
+	//center.x /= boundary.size();
+	//center.y /= boundary.size();
+	//center.z /= boundary.size();
+
+	//for (size_t i = 0; i < boundary.size(); ++i) {
+	//	fillVertices.push_back({ center });
+	//	fillVertices.push_back({ boundary[i] });
+	//	fillVertices.push_back({ boundary[(i + 1) % boundary.size()] });
+
+	//	uint32_t baseIndex = fillVertices.size() - 3;
+	//	fillIndices.push_back(baseIndex);
+	//	fillIndices.push_back(baseIndex + 1);
+	//	fillIndices.push_back(baseIndex + 2);
+	//}
+}
+
+std::pair<CVertex, bool> CDynamicShapeMesh::CalculateIntersection(CVertex& v1, CVertex& v2, XMFLOAT3& planeNormal, XMFLOAT3& planePoint)
+{
+	XMFLOAT3 direction = Vector3::Subtract(v2.m_xmf3Vertex, v1.m_xmf3Vertex);
+	float denominator = Vector3::DotProduct(planeNormal, direction);
+	if (denominator == 0) return { {}, false };
+
+	float t = Vector3::DotProduct(Vector3::Subtract(planePoint, v1.m_xmf3Vertex), planeNormal) / denominator;
+	if (t < 0 || t > 1) return { {}, false };
+
+    CVertex intersection;
+    intersection.m_xmf3Vertex = Vector3::Add(v1.m_xmf3Vertex, Vector3::ScalarProduct(direction, t, false));
+    intersection.m_xmf3Normal = Vector3::Normalize(Vector3::Add(v1.m_xmf3Normal, Vector3::ScalarProduct(Vector3::Subtract(v2.m_xmf3Normal, v1.m_xmf3Normal), t, false)));
+    intersection.m_xmf2UV = XMFLOAT2(v1.m_xmf2UV.x + t * (v2.m_xmf2UV.x - v1.m_xmf2UV.x), v1.m_xmf2UV.y + t * (v2.m_xmf2UV.y - v1.m_xmf2UV.y));
+
+    return { intersection, true };
+}
+
+// 한개의 삼각형에 대해서 절단 수행
+void CDynamicShapeMesh::HandleTriangleCut(
+	std::vector<CVertex>& vertices, std::vector<UINT>& indices,
+	int i,
+	XMFLOAT3& planeNormal, XMFLOAT3& planePoint,
+	std::vector<CVertex>& newVerticesUp, std::vector<CVertex>& newVerticesDown,
+	std::vector<UINT>& newIndicesUp, std::vector<UINT>& newIndicesDown)
+{
+	std::vector<std::pair<CVertex, bool>> above, below;
+
+	// 평면 상의 세 점 위치 추론
+	for (int j = 0; j < 3; ++j) {
+		int idx = indices[i * 3 + j];
+		if (IsVertexAbovePlane(vertices[idx].GetVertex(), planeNormal, planePoint)) {
+			above.emplace_back(vertices[idx], true);
+		}
+		else {
+			below.emplace_back(vertices[idx], true);
+		}
+	}
+
+	// 모든 점이 평면의 위 or 아래 에 있다면
+	if (above.size() == 3 || below.size() == 3) {
+		for (int j = 0; j < 3; ++j) {
+			int idx = indices[i * 3 + j];
+			if (above.size() == 3) {
+				newVerticesUp.push_back(vertices[idx]);
+				newIndicesUp.push_back(newVerticesUp.size() - 1);
+			}
+			else {
+				newVerticesDown.push_back(vertices[idx]);
+				newIndicesDown.push_back(newVerticesDown.size() - 1);
+			}
+		}
+		return;
+	}
+
+	std::vector<CVertex> intersections;
+	for (int j = 0; j < 3; ++j) {
+		CVertex& v1 = vertices[indices[i * 3 + j]];
+		CVertex& v2 = vertices[indices[i * 3 + (j + 1) % 3]];
+		auto [intersection, valid] = CalculateIntersection(v1, v2, planeNormal, planePoint);
+		if (valid) intersections.push_back(intersection);
+	}
+
+
+	if (above.size() == 1 || below.size() == 1) {
+		// 원래 삼각형의 normal 값을 계산
+		XMFLOAT3 oriNormal = CalculateNormal(vertices[indices[i * 3]].GetVertex(), vertices[indices[i * 3 + 1]].GetVertex(), vertices[indices[i * 3 + 2]].GetVertex());
+
+		//XMFLOAT3 centroid = CalculateCentroid(vertices[indices[i * 3]].GetVertex(), vertices[indices[i * 3 + 1]].GetVertex(), vertices[indices[i * 3 + 2]].GetVertex());
+		//SortVerticesCCW(intersections, centroid, oriNormal);
+
+
+		XMFLOAT3 newNormal;
+		// 중복 vertex가 많아 최적화 여지 존재.
+		// 새로 생긴 vertex와 기존 vertex로 새로운 삼각형들 생성
+		if (above.size() == 1) {
+			AddTriangle(newVerticesUp, newIndicesUp,		above[0].first,		intersections[0],	intersections[1],		oriNormal);
+			AddTriangle(newVerticesDown, newIndicesDown,	below[0].first,		below[1].first,		intersections[0],		oriNormal);
+			AddTriangle(newVerticesDown, newIndicesDown,	intersections[0],	below[1].first,		intersections[1],		oriNormal);
+			AddTriangle(newVerticesDown, newIndicesDown,	below[0].first,		below[1].first,		intersections[1],		oriNormal);
+		}
+		else if (below.size() == 1) {
+			AddTriangle(newVerticesDown, newIndicesDown,	below[0].first,		intersections[0],	intersections[1],		oriNormal);
+			AddTriangle(newVerticesUp, newIndicesUp,		above[0].first,		above[1].first,		intersections[0],		oriNormal);
+			AddTriangle(newVerticesUp, newIndicesUp,		intersections[0],	above[1].first,		intersections[1],		oriNormal);
+			AddTriangle(newVerticesUp, newIndicesUp,		above[0].first,		above[1].first,		intersections[1],		oriNormal);
+		}
+	}
+}
+
 vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat)
 {
 	// 이 절단은 절단 Object의 절단평면을 사용하여 절단한다.
@@ -786,10 +932,6 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 		xmf3LPlanePoint = TransformVertex(xmf3CutPoint, xmf4x4CutterMat);
 		xmf3LPlanePoint = TransformVertex(xmf3LPlanePoint, xmf4x4InvThisMat);
 
-		vector<pair<vector<CVertex>, bool>> vvNewVertices; // first = vertex, second = PlainInObject | 새로운 정점 vertex
-		vector<map<UINT, UINT>> vmIndicesMap;	// 기존 Index를 새로운 오브젝트의 Index로 mapping해줄 map
-		vector<vector<UINT>> vvnNewIndices;		// 각각 절단 오브젝트들의 새로운 Index들을 저장할 vector
-
 		// stride에 따라 Vertex 정리
 		vector<CVertex> vOriVertices;
 		{
@@ -806,151 +948,34 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 				}
 			}
 		}
-
-		constexpr int PLANE_UP = 0;
-		constexpr int PLANE_DOWN = 1;
-
-		int nNewVertices = 0;
-		{
-			// 이곳에 절단시 평면이 몇개가 생기는지 확인하면 좋다.
-			// 현재는 절단 평면 기준 좌우로 총 2개만 생기는 것을 가정한다.
-			vvNewVertices.emplace_back();
-			vvNewVertices.emplace_back();
-
-			nNewVertices = vvNewVertices.size();
-		}
-
-		for (int i = 0; i < nNewVertices; ++i) {
-			vvNewVertices[i].second = false;
-			vmIndicesMap.emplace_back();
-			vvnNewIndices.emplace_back();
-		}
-
-		int nPlainAboveCounter = 0;
-		int nPlainUnderCounter = 0;
-		{
-			// Vertex 평면 기준 분리
-			for (int i = 0; i < m_nVertices; ++i) {
-				if (IsVertexAbovePlane(vOriVertices[i].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) { // 평면 위
-					vvNewVertices[PLANE_UP].first.emplace_back(vOriVertices[i]);
-					vmIndicesMap[PLANE_UP][i] = nPlainAboveCounter++;
-
-					vvNewVertices[PLANE_UP].second = true;
-				}
-				else { // 평면 아래
-					vvNewVertices[PLANE_DOWN].first.emplace_back(vOriVertices[i]);
-					vmIndicesMap[PLANE_DOWN][i] = nPlainUnderCounter++;
-
-					vvNewVertices[PLANE_DOWN].second = true;
-				}
-			}
-		}
-
-		vector<pair<CVertex, UINT>> vConvexHullVertex;			// 절단 평면 외곽점으로 ConvexHull을 한 결과값을 저장할 vector
-		vector<vector<pair<CVertex, UINT>>> vvPlaneVertices;	// 절단 평면 외곽점과 Index를 저장할 vector
-		for (int i = 0; i < nNewVertices; ++i) {
-			vConvexHullVertex.emplace_back();
-			vvPlaneVertices.emplace_back();
-		}
-		{
-			// IndexList 구분에 따른 Vertex 재분류
-			for (int i = 0; i < m_nIndices / 3; ++i) {
-				bool bVal[3];
-				for (int j = 0; j < 3; ++j) bVal[j] = IsVertexAbovePlane(vOriVertices[m_pnIndices[i * 3 + j]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint);
-
-				if (bVal[0] && bVal[1] && bVal[2]) { // 평면 위
-					for (int j = 0; j < 3; ++j) vvnNewIndices[PLANE_UP].emplace_back(vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]]);
-				}
-				else if (bVal[0] || bVal[1] || bVal[2]) { // 평면과 겹치는 프리미티브
-					XMFLOAT3 xmf3Vertex;
-					for (int j = 0; j < 3; ++j) {
-						xmf3Vertex = ProjectVertexToPlane(vOriVertices[m_pnIndices[i * 3 + j]].m_xmf3Vertex, xmf3LPlaneNormal, xmf3LPlanePoint);
-						if (IsVertexAbovePlane(vOriVertices[m_pnIndices[i * 3 + j]].GetVertex(), xmf3LPlaneNormal, xmf3LPlanePoint)) { // 점이 평면 위
-							vvNewVertices[PLANE_DOWN].first.emplace_back(
-								xmf3Vertex,
-								vOriVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
-								vOriVertices[m_pnIndices[i * 3 + j]].m_xmf4Color);
-							vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]] = nPlainUnderCounter;
-
-							{
-								// ConvexHull 계산을 위해 Vertex를 별도 저장
-								vvPlaneVertices[PLANE_DOWN].emplace_back(
-									CVertex(xmf3Vertex,
-										vOriVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
-										vOriVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainUnderCounter);
-							}
-
-							nPlainUnderCounter++;
-						}
-						else { // 점이 평면 아래
-							vvNewVertices[PLANE_UP].first.emplace_back(
-								xmf3Vertex,
-								vOriVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
-								vOriVertices[m_pnIndices[i * 3 + j]].m_xmf4Color);
-							vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]] = nPlainAboveCounter;
-
-							{
-								// ConvexHull 계산을 위해 Vertex를 별도 저장
-								vvPlaneVertices[PLANE_UP].emplace_back(
-									CVertex(xmf3Vertex,
-										vOriVertices[m_pnIndices[i * 3 + j]].m_xmf3Normal,
-										vOriVertices[m_pnIndices[i * 3 + j]].m_xmf4Color), nPlainAboveCounter);
-							}
-
-							nPlainAboveCounter++;
-						}
-						vvnNewIndices[PLANE_UP].emplace_back(vmIndicesMap[PLANE_UP][m_pnIndices[i * 3 + j]]);
-						vvnNewIndices[PLANE_DOWN].emplace_back(vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]]);
-
-					}
-				}
-				else { // 평면 아래
-					for (int j = 0; j < 3; ++j) vvnNewIndices[PLANE_DOWN].emplace_back(vmIndicesMap[PLANE_DOWN][m_pnIndices[i * 3 + j]]);
-				}
-			}
-		}
-
-		{
-			// 만약 비어있는 벡터가 있다면 / 평면과 오브젝트가 겹치지 않았다면 제거
-			auto itVertices = vvNewVertices.begin();
-			auto itIndices = vmIndicesMap.begin();
-
-			while (itVertices != vvNewVertices.end()) {
-				if (itVertices->first.empty() || false == itVertices->second) {
-					itVertices = vvNewVertices.erase(itVertices);
-					itIndices = vmIndicesMap.erase(itIndices);
-				}
-				else {
-					++itVertices;
-					++itIndices;
-				}
-			}
-			nNewVertices = vvNewVertices.size();
-
-			if (nNewVertices < 2) return pvNewMeshs; // 절단면 기준으로 2개 이상으로 나뉘어지지 않으면 절단을 수행할 이유가 없다.
-		}
-
-
-		{
-			// 절단 평면 제작
-			// edge를 순회하며 외곽선 제작
-
-
-		}
 		
-		
-		{
-			CVertex* pNewVertices;
-			UINT* pNewIndices;
-			for (int i = 0; i < nNewVertices; ++i) {
-				pNewVertices = new CVertex[vvNewVertices[i].first.size()];
-				copy(vvNewVertices[i].first.begin(), vvNewVertices[i].first.end(), pNewVertices);
+		// 연산을 위해 Indices를 vector 로 변환
+		vector<UINT> vOriIndices(m_pnIndices, m_pnIndices + m_nIndices);
 
-				pNewIndices = new UINT[vvnNewIndices[i].size()];
+		vector<vector<CVertex>> vvNewVertices(2); // 새로운 정점 vertex
+		vector<vector<UINT>> vvnNewIndices(2);	// 각각 절단 오브젝트들의 새로운 Index들을 저장할 vector
+
+		for (int i = 0; i < m_nIndices / 3; ++i) {
+			HandleTriangleCut(
+				vOriVertices, vOriIndices,
+				i,
+				xmf3LPlaneNormal, xmf3LPlanePoint,
+				vvNewVertices[0], vvNewVertices[1],
+				vvnNewIndices[0], vvnNewIndices[1]);
+		}
+
+		if (!vvNewVertices[0].empty() && !vvNewVertices[1].empty()) {
+			for (int i = 0; i < 2; ++i) {
+				if (vvNewVertices[i].empty()) continue;
+
+				CVertex* pNewVertices = new CVertex[vvNewVertices[i].size()];
+				copy(vvNewVertices[i].begin(), vvNewVertices[i].end(), pNewVertices);
+
+				UINT* pNewIndices = new UINT[vvnNewIndices[i].size()];
 				copy(vvnNewIndices[i].begin(), vvnNewIndices[i].end(), pNewIndices);
 
 				pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
-				pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, sizeof(CVertex), pNewVertices, vvNewVertices[i].first.size(), pNewIndices, vvnNewIndices[i].size());
+				pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, sizeof(CVertex), pNewVertices, vvNewVertices[i].size(), pNewIndices, vvnNewIndices[i].size());
 				((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
 				((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
 			}
