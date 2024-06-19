@@ -180,12 +180,25 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 					if (newMeshs.empty() == false) {
 						deleteObjects.push_back(pTarget);
 
-						for (auto& meshData : newMeshs); // 하나의 오브젝트에 하나의 메쉬 할당
+						for (auto& meshData : newMeshs) { // 하나의 오브젝트에 하나의 메쉬 할당
+							CGameObject* newObj = new CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+							CMaterial* currMaterial = newObj->GetMaterial();
+							CMaterial* oriMaterial = pTarget->GetMaterial();
+							currMaterial->m_xmf4Albedo = oriMaterial->m_xmf4Albedo;
+							if (oriMaterial->m_pTexture) {
+								currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
+								currMaterial->SetTexture(oriMaterial->m_pTexture);
+							}
+
+							newObj->SetWorldMat(pTarget->GetWorldMat());
+							newObj->SetMesh(0, meshData, true);
+							newObjects.push_back(newObj);
+						}
 					}
 				}
 			}
 
-			for (const auto& a : deleteObjects) DelObj(a, ObjectLayer::Object);	// 원본 오브젝트 삭제
+			for (const auto& a : deleteObjects) DelObj(a);	// 원본 오브젝트 삭제
 			for (const auto& a : newObjects) AddObj(a, ObjectLayer::Object); // 절단된 오브젝트 추가
 		}
 

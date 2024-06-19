@@ -2715,10 +2715,12 @@ void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		m_pObjectManager->AddObj(pFBXObject, ObjectLayer::Object);
 	}
 
-	if (true == m_bCutAlgorithm)
-		m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::Push);
-	else
-		m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::ConvexHull);
+	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::Graph);
+	//m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::ConvexHull);
+	//if (true == m_bCutAlgorithm)
+	//	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::Push);
+	//else
+	//	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::ConvexHull);
 }
 
 void CTestScene_Slice::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1DeviceContext3* pd2dDeviceContext, IDWriteFactory3* pdWriteFactory, CCamera* pCamera)

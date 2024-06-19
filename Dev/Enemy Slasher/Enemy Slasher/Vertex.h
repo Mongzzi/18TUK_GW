@@ -44,6 +44,15 @@ public:
 		m_xmf4Color = c;
 		m_xmf2UV = XMFLOAT2(0.0f, 0.0f);
 	}
+
+	CVertex(const CVertex& other) // 복사생성자
+	{
+		m_xmf3Vertex = other.m_xmf3Vertex;
+		m_xmf3Normal = other.m_xmf3Normal;
+		m_xmf4Color = other.m_xmf4Color;
+		m_xmf2UV = other.m_xmf2UV;
+	}
+
 	~CVertex() { }
 
 	XMFLOAT3 GetVertex() { return m_xmf3Vertex; };
