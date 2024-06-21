@@ -266,10 +266,37 @@ private:
 		std::unordered_map<int, std::vector<int>> adjList; // 인접 리스트
 	};
 
+	class MyFloat3 {
+	public:
+		MyFloat3() { x = 0.f, y = 0.f, z = 0.f; }
+		MyFloat3(XMFLOAT3 val) { x = val.x, y = val.y, z = val.z; }
+
+		float x, y, z;
+
+		bool operator==(const MyFloat3& rhs) const {
+			return x == rhs.x && y == rhs.y && z == rhs.z;
+		}
+	};
+
+	// 고유 정점 탐색을 위한 hash 함수
+	struct Vector3Hash {
+		std::size_t operator()(const MyFloat3& v) const {
+			std::size_t h1 = std::hash<float>{}(v.x);
+			std::size_t h2 = std::hash<float>{}(v.y);
+			std::size_t h3 = std::hash<float>{}(v.z);
+			return h1 ^ h2 ^ h3;
+		}
+	};
+
 	// 그래프에서 연결된 컴포넌트를 찾는 함수 (BFS 사용)
-	std::vector<std::vector<int>> findConnectedComponents(const Graph& graph, const std::vector<CVertex>& vertices);
+	std::vector<std::vector<int>> findConnectedComponents(const Graph& graph, int vertexCount);
 	// 절단된 오브젝트를 그래프로 변환하는 함수
-	Graph createGraph(const std::vector<CVertex>& vertices, const std::vector<UINT>& indices);
+	Graph createGraph(const std::vector<UINT>& indices);
+	// 고유 정점을 찾고 인덱스를 재매핑하는 함수
+	void remapVerticesAndIndices(
+		const std::vector<CVertex>& vertices, const std::vector<UINT>& indices,
+		std::vector<CVertex>& uniqueVertices, std::vector<UINT>& remappedIndices);
+
 };
 
 class CBoxMesh : public CDynamicShapeMesh

@@ -849,11 +849,11 @@ std::pair<CVertex, bool> CDynamicShapeMesh::CalculateIntersection(CVertex& v1, C
     return { intersection, true };
 }
 
-std::vector<std::vector<int>> CDynamicShapeMesh::findConnectedComponents(const Graph& graph, const std::vector<CVertex>& vertices) {
+std::vector<std::vector<int>> CDynamicShapeMesh::findConnectedComponents(const Graph& graph, int vertexCount) {
 	std::vector<std::vector<int>> connectedComponents;
 	std::unordered_set<int> visited;
 
-	for (int i = 0; i < vertices.size(); ++i) {
+	for (int i = 0; i < vertexCount; ++i) {
 		if (visited.find(i) != visited.end()) continue;
 
 		std::vector<int> component;
@@ -880,7 +880,7 @@ std::vector<std::vector<int>> CDynamicShapeMesh::findConnectedComponents(const G
 	return connectedComponents;
 }
 
-CDynamicShapeMesh::Graph CDynamicShapeMesh::createGraph(const std::vector<CVertex>& vertices, const std::vector<UINT>& indices) {
+CDynamicShapeMesh::Graph CDynamicShapeMesh::createGraph(const std::vector<UINT>& indices) {
 	Graph graph;
 	for (int i = 0; i < indices.size(); i += 3) {
 		int v1 = indices[i];
@@ -895,6 +895,24 @@ CDynamicShapeMesh::Graph CDynamicShapeMesh::createGraph(const std::vector<CVerte
 		graph.adjList[v3].push_back(v2);
 	}
 	return graph;
+}
+
+void CDynamicShapeMesh::remapVerticesAndIndices(const std::vector<CVertex>& vertices, const std::vector<UINT>& indices, std::vector<CVertex>& uniqueVertices, std::vector<UINT>& remappedIndices) {
+
+	std::unordered_map<MyFloat3, int, Vector3Hash> vertexMap;
+	int nextIndex = 0;
+
+	for (UINT i = 0; i < indices.size(); ++i) {
+		const CVertex& vertex = vertices[indices[i]];
+		auto result = vertexMap.insert({ vertex.m_xmf3Vertex, nextIndex });
+
+		if (result.second) {
+			uniqueVertices.push_back(vertex);
+			++nextIndex;
+		}
+
+		remappedIndices.push_back(result.first->second);
+	}
 }
 
 // 한개의 삼각형에 대해서 절단 수행
@@ -1056,8 +1074,12 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 			for (int i = 0; i < 2; ++i) {
 				if (vvNewVertices[i].empty()) continue;
 
-				Graph graph = createGraph(vvNewVertices[i], vvnNewIndices[i]);
-				auto connectedComponents = findConnectedComponents(graph, vvNewVertices[i]);
+				std::vector<CVertex> uniqueVertices;
+				std::vector<UINT> remappedIndices;
+				remapVerticesAndIndices(vvNewVertices[i], vvnNewIndices[i], uniqueVertices, remappedIndices);
+
+				Graph graph = createGraph(remappedIndices);
+				auto connectedComponents = findConnectedComponents(graph, uniqueVertices.size());
 
 				for (const auto& component : connectedComponents) {
 					if (component.empty()) continue;
@@ -1068,16 +1090,16 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 					std::unordered_map<int, int> vertexMap;
 					for (int idx : component) {
 						vertexMap[idx] = newVertices.size();
-						newVertices.push_back(vvNewVertices[i][idx]);
+						newVertices.push_back(uniqueVertices[idx]);
 					}
 
-					for (int j = 0; j < vvnNewIndices[i].size(); j += 3) {
-						if (vertexMap.find(vvnNewIndices[i][j]) != vertexMap.end() &&
-							vertexMap.find(vvnNewIndices[i][j + 1]) != vertexMap.end() &&
-							vertexMap.find(vvnNewIndices[i][j + 2]) != vertexMap.end()) {
-							newIndices.push_back(vertexMap[vvnNewIndices[i][j]]);
-							newIndices.push_back(vertexMap[vvnNewIndices[i][j + 1]]);
-							newIndices.push_back(vertexMap[vvnNewIndices[i][j + 2]]);
+					for (size_t j = 0; j < remappedIndices.size(); j += 3) {
+						if (vertexMap.find(remappedIndices[j]) != vertexMap.end() &&
+							vertexMap.find(remappedIndices[j + 1]) != vertexMap.end() &&
+							vertexMap.find(remappedIndices[j + 2]) != vertexMap.end()) {
+							newIndices.push_back(vertexMap[remappedIndices[j]]);
+							newIndices.push_back(vertexMap[remappedIndices[j + 1]]);
+							newIndices.push_back(vertexMap[remappedIndices[j + 2]]);
 						}
 					}
 
