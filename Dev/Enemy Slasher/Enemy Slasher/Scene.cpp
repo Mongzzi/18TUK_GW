@@ -1853,6 +1853,10 @@ void CTestScene::ReleaseShaderVariables()
 
 bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
+	m_ptCenterCursorPos = POINT{ 0,0 };
+	GetCursorPos(&m_ptCenterCursorPos);
+	ScreenToClient(hWnd, &m_ptCenterCursorPos);
+
 	if (m_iOverFlag != 0) 
 		return(true);
 
@@ -1889,7 +1893,7 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 	int clientWidth = clientRect.right - clientRect.left;
 	int clientHeight = clientRect.bottom - clientRect.top;
 	//-------------- 피킹
-	CRay r = r.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
+	//CRay pkRay = pkRay.RayAtWorldSpace(ptCursorPos.x, ptCursorPos.y, m_pPlayer->GetCamera());
 
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
 
@@ -1922,11 +1926,11 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 			if (pCoveredUI)
 				pCoveredUI->CursorOverObject(true);
 		}
-		else if (lc == (int)ObjectLayer::Ray)
-		{
-			CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
-			rayOb->Reset(r);
-		}
+		//else if (lc == (int)ObjectLayer::Ray)
+		//{
+		//	CRayObject* rayOb = (CRayObject*)pObjectList[lc][0];
+		//	rayOb->Reset(pkRay);
+		//}
 	}
 	//----------------
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
@@ -2152,6 +2156,14 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 			CCharacterObject* cobj = m_pvEngagedObjects[i];
 			if (cobj->GetCurHp() <= 0)
 			{
+				// cobj의 위치에 절단 오브젝트 생성. 가능?
+				
+				CRay r = r.RayAtWorldSpace(m_ptCenterCursorPos.x, m_ptCenterCursorPos.y, m_pPlayer->GetCamera());
+				((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
+
+				m_pvDeadObjects.push_back(cobj);
+				//m_bAddCutter = true;
+
 				m_pvEngagedObjects.erase(m_pvEngagedObjects.begin() + i);
 				if (m_iTurnFlag > i)
 					m_iTurnFlag--;
@@ -2279,6 +2291,58 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		}
 	}
 
+	// 절단
+	XMFLOAT3 cutterPos{ 0,0,0 };
+	bool flag = false;
+
+	if (m_pvDeadObjects.size() > 0)
+	{
+		cutterPos = m_pvDeadObjects[0]->GetPosition();
+		m_pvDeadObjects.erase(m_pvDeadObjects.begin());
+
+		flag = true;
+		m_bAddCutter = true;
+	}
+
+	if (m_bAddCutter) {
+		m_bAddCutter = false;
+		float fBoxSize = 100.0f;
+		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
+		XMFLOAT3 ray_dir = pRayObj->GetRayDir();
+		XMFLOAT3 ray_origin = pRayObj->GetRayOrigin();
+
+		std::random_device rd;
+		std::default_random_engine dre(rd());
+		std::uniform_real_distribution <float> urd(-1.0, 1.0);
+
+		XMFLOAT3 randomVector(urd(dre), urd(dre), urd(dre));
+		// 외적 계산 (수직인 벡터)
+		XMFLOAT3 planeNormal = Vector3::CrossProduct(randomVector, ray_dir);
+
+		CGameObject* cutterObject = new CGameObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, ShaderType::CObjectsShader);
+		CCutterBox_NonMesh* cutterMesh = nullptr;
+
+		if (flag)
+			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize * 3, fBoxSize * 3, fBoxSize * 3);	// 박스 안의 오브젝트를 절단한다.
+		else
+			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
+
+		//if (!cutterMesh) return;
+
+		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
+		cutterObject->SetMesh(0, cutterMesh, true);
+		if (flag)
+			cutterObject->SetPosition(cutterPos);
+		else
+			cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize*3)));
+		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
+		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
+
+		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
+	}
+	if (flag)
+		flag = false;
+	m_pObjectManager->DynamicShaping(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, fTimeElapsed, CDynamicShapeMesh::CutAlgorithm::Graph);
 	//if (SelectedUInum != -1) {
 	//	float fBoxSize = 200.0f;
 	//
@@ -2334,7 +2398,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	//	m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
 	//	SelectedUInum = -1;
 	//}
-
+	
 	CBasicScene::DynamicShaping(pd3dDevice, pd3dCommandList, pFBXDataManager, fTimeElapsed);
 }
 

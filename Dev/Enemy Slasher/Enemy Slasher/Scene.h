@@ -194,6 +194,7 @@ private:
 	std::default_random_engine dre;
 
 	std::vector<CCharacterObject*> m_pvEngagedObjects;
+	std::vector<CCharacterObject*> m_pvDeadObjects;
 	int m_iCurrentTurnCount; // 전투 시작 후 몇번째 턴인지
 	int m_iTurnFlag;		//m_pvEngagedObjects의 m_iTurnFlag번째 원소의 턴임. flag가 어울리지 않을지도		// 하드코딩을 위해 0은 플레이어 1이상은 적 으로 정함.
 	TurnPhase m_currentPhase;		//현제의 페이즈를 나타내는 변수.
@@ -205,6 +206,14 @@ private:
 
 	CMonsterObject* m_pBoss = nullptr;
 	bool m_isBossExist;
+
+protected:
+	bool m_bAddCutter = false;
+
+	POINT m_ptCenterCursorPos;
+
+
+
 public:
 
 	void Engage(CCharacterObject* obj);
