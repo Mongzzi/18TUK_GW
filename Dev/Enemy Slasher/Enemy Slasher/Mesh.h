@@ -259,6 +259,17 @@ private:
 		indices.push_back(vertices.size() - 2);
 		indices.push_back(vertices.size() - 1);
 	}
+
+private:
+	// 그래프의 정점과 간선을 표현하는 구조체
+	struct Graph {
+		std::unordered_map<int, std::vector<int>> adjList; // 인접 리스트
+	};
+
+	// 그래프에서 연결된 컴포넌트를 찾는 함수 (BFS 사용)
+	std::vector<std::vector<int>> findConnectedComponents(const Graph& graph, const std::vector<CVertex>& vertices);
+	// 절단된 오브젝트를 그래프로 변환하는 함수
+	Graph createGraph(const std::vector<CVertex>& vertices, const std::vector<UINT>& indices);
 };
 
 class CBoxMesh : public CDynamicShapeMesh

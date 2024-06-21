@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <random>
+#include <queue>
 
 // 좌표를 반올림하는 함수
 float RoundToPrecision(float value, int precision) {
@@ -848,6 +849,54 @@ std::pair<CVertex, bool> CDynamicShapeMesh::CalculateIntersection(CVertex& v1, C
     return { intersection, true };
 }
 
+std::vector<std::vector<int>> CDynamicShapeMesh::findConnectedComponents(const Graph& graph, const std::vector<CVertex>& vertices) {
+	std::vector<std::vector<int>> connectedComponents;
+	std::unordered_set<int> visited;
+
+	for (int i = 0; i < vertices.size(); ++i) {
+		if (visited.find(i) != visited.end()) continue;
+
+		std::vector<int> component;
+		std::queue<int> q;
+		q.push(i);
+		visited.insert(i);
+
+		while (!q.empty()) {
+			int v = q.front();
+			q.pop();
+			component.push_back(v);
+
+			for (int neighbor : graph.adjList.at(v)) {
+				if (visited.find(neighbor) == visited.end()) {
+					q.push(neighbor);
+					visited.insert(neighbor);
+				}
+			}
+		}
+
+		connectedComponents.push_back(component);
+	}
+
+	return connectedComponents;
+}
+
+CDynamicShapeMesh::Graph CDynamicShapeMesh::createGraph(const std::vector<CVertex>& vertices, const std::vector<UINT>& indices) {
+	Graph graph;
+	for (int i = 0; i < indices.size(); i += 3) {
+		int v1 = indices[i];
+		int v2 = indices[i + 1];
+		int v3 = indices[i + 2];
+
+		graph.adjList[v1].push_back(v2);
+		graph.adjList[v1].push_back(v3);
+		graph.adjList[v2].push_back(v1);
+		graph.adjList[v2].push_back(v3);
+		graph.adjList[v3].push_back(v1);
+		graph.adjList[v3].push_back(v2);
+	}
+	return graph;
+}
+
 // 한개의 삼각형에 대해서 절단 수행
 void CDynamicShapeMesh::HandleTriangleCut(
 	std::vector<CVertex>& vertices, std::vector<UINT>& indices,
@@ -1007,16 +1056,44 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 			for (int i = 0; i < 2; ++i) {
 				if (vvNewVertices[i].empty()) continue;
 
-				CVertex* pNewVertices = new CVertex[vvNewVertices[i].size()];
-				copy(vvNewVertices[i].begin(), vvNewVertices[i].end(), pNewVertices);
+				Graph graph = createGraph(vvNewVertices[i], vvnNewIndices[i]);
+				auto connectedComponents = findConnectedComponents(graph, vvNewVertices[i]);
 
-				UINT* pNewIndices = new UINT[vvnNewIndices[i].size()];
-				copy(vvnNewIndices[i].begin(), vvnNewIndices[i].end(), pNewIndices);
+				for (const auto& component : connectedComponents) {
+					if (component.empty()) continue;
 
-				pvNewMeshs.push_back(new CDynamicShapeMesh(pd3dDevice, pd3dCommandList));
-				pvNewMeshs[i]->SetMeshData(pd3dDevice, pd3dCommandList, sizeof(CVertex), pNewVertices, vvNewVertices[i].size(), pNewIndices, vvnNewIndices[i].size());
-				((CDynamicShapeMesh*)pvNewMeshs[i])->CreateCollider(pd3dDevice, pd3dCommandList);
-				((CDynamicShapeMesh*)pvNewMeshs[i])->SetCuttable(true);
+					std::vector<CVertex> newVertices;
+					std::vector<UINT> newIndices;
+
+					std::unordered_map<int, int> vertexMap;
+					for (int idx : component) {
+						vertexMap[idx] = newVertices.size();
+						newVertices.push_back(vvNewVertices[i][idx]);
+					}
+
+					for (int j = 0; j < vvnNewIndices[i].size(); j += 3) {
+						if (vertexMap.find(vvnNewIndices[i][j]) != vertexMap.end() &&
+							vertexMap.find(vvnNewIndices[i][j + 1]) != vertexMap.end() &&
+							vertexMap.find(vvnNewIndices[i][j + 2]) != vertexMap.end()) {
+							newIndices.push_back(vertexMap[vvnNewIndices[i][j]]);
+							newIndices.push_back(vertexMap[vvnNewIndices[i][j + 1]]);
+							newIndices.push_back(vertexMap[vvnNewIndices[i][j + 2]]);
+						}
+					}
+
+					CVertex* pNewVertices = new CVertex[newVertices.size()];
+					copy(newVertices.begin(), newVertices.end(), pNewVertices);
+
+					UINT* pNewIndices = new UINT[newIndices.size()];
+					copy(newIndices.begin(), newIndices.end(), pNewIndices);
+
+					CDynamicShapeMesh* pNewMesh = new CDynamicShapeMesh(pd3dDevice, pd3dCommandList);
+					pNewMesh->SetMeshData(pd3dDevice, pd3dCommandList, sizeof(CVertex), pNewVertices, newVertices.size(), pNewIndices, newIndices.size());
+					pNewMesh->CreateCollider(pd3dDevice, pd3dCommandList);
+					pNewMesh->SetCuttable(true);
+
+					pvNewMeshs.push_back(pNewMesh);
+				}
 			}
 		}
 	}
