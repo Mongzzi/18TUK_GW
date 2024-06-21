@@ -902,43 +902,47 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	// 현재 차례인 오브젝트의 팀
 	int teamID = m_pvEngagedObjects[m_iTurnFlag]->GetTeamId();
 
+	auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
 	{
-		//std::cout << "마우스눌림" << std::endl;
-		//
-		//auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		//for (auto& pObject : buttonList)
-		//{
-		//	CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-		//	if (pButton && pButton->IsPointInside(mouseX, mouseY))
-		//	{
-		//		std::cout << "쿼카눌림" << std::endl;
-		//
-		//		pButton->m_IsClicked = true;
-		//	}
-		//}
+		if (m_iOverFlag == 0)
+			if (teamID == 0)
+			{
+				for (auto& pObject : buttonList)
+				{
+					CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+					if (pButton && pButton->m_IsButton && pButton->IsPointInside(mouseX, mouseY))
+					{
+						pButton->m_IsClicked = true;
+					}
+				}
+			}
 	}
 	break;
-
 	case WM_LBUTTONUP:
 	{
-		//auto buttonList = m_pObjectManager->GetObjectList(ObjectLayer::ButtonObject);
-		//for (auto& pObject : buttonList)
-		//{
-		//	CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
-		//	if (pButton && pButton->m_IsClicked)
-		//	{
-		//		if (pButton->IsPointInside(mouseX, mouseY))
-		//		{
-		//			pButton->m_IsClicked = false;
-		//		}
-		//	}
-		//}
+		if (m_iOverFlag == 0)
+			if (teamID == 0)
+			{
+				for (auto& pObject : buttonList)
+				{
+					CButtonObject* pButton = dynamic_cast<CButtonObject*>(pObject);
+					if (pButton && pButton->m_IsButton && pButton->m_IsClicked)
+					{
+						if (pButton->IsPointInside(mouseX, mouseY))
+						{
+							// 지금은 턴 종료 버튼밖에 없음.
+							IncreaseTurnFlag();
+
+							pButton->m_IsClicked = false;
+						}
+					}
+				}
+			}
 	}
 	break;
-
 	case WM_RBUTTONDOWN:
 		if(m_iOverFlag == 0)
 			if(teamID == 0)
@@ -984,6 +988,8 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	std::vector<int> intVector;
 	std::vector<CGameObject*>* pObjectList = m_pObjectManager->GetObjectList();
 	std::vector<CGameObject*>* pInteractiveUIObj = &pObjectList[(int)ObjectLayer::CardButtonObject];
+	std::vector<CGameObject*> ButtonObjectLayer = pObjectList[(int)ObjectLayer::ButtonObject];
+	CButtonObject* turnEnd = dynamic_cast<CButtonObject*>(ButtonObjectLayer[3]);
 
 	// 현재 차례인 오브젝트의 팀
 	int teamID = m_pvEngagedObjects[m_iTurnFlag]->GetTeamId();
@@ -1033,7 +1039,8 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			if (m_iOverFlag == 0)
 				if (teamID == 0)
 					if (m_currentPhase == TurnPhase::PlayPhase)
-						IncreaseTurnFlag();
+						turnEnd->m_IsClicked = true;;
+						//IncreaseTurnFlag();
 			//cout << m_pvEngagedObjects.size() << endl;
 			break;
 
@@ -1058,6 +1065,22 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 								}
 							}
 						}
+					}
+			break;
+		default:
+			break;
+		}
+		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_SPACE:
+			if (m_iOverFlag == 0)
+				if (teamID == 0)
+					if (m_currentPhase == TurnPhase::PlayPhase)
+					{
+						turnEnd->m_IsClicked = false;;
+						IncreaseTurnFlag();
 					}
 			break;
 		default:
@@ -1750,8 +1773,9 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_pObjectManager->AddObj(pCardButtonObject, ObjectLayer::CardButtonObject);
 		}
 	}
-	///  m_iOverFlag의 역순으로 추가.
+	///  버튼 오브젝트 m_iOverFlag의 역순으로 추가.
 	{
+		// 종료 관련
 		CButtonObject* pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/gameClear.png",
 			FRAME_BUFFER_WIDTH *2 , FRAME_BUFFER_HEIGHT * 2, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/4, ShaderType::C2DObjectShader);
 		pButtonObject->SetIsButton(false);
@@ -1765,6 +1789,12 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/black.png",
 			FRAME_BUFFER_WIDTH * 2, FRAME_BUFFER_HEIGHT * 2, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, ShaderType::C2DObjectShader);
 		pButtonObject->SetIsButton(false);
+		m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
+
+		// 그 외
+		pButtonObject = new CButtonObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Image/TurnEnd.png",
+			FRAME_BUFFER_WIDTH * 2, FRAME_BUFFER_HEIGHT * 2, FRAME_BUFFER_WIDTH/5, FRAME_BUFFER_HEIGHT/12, ShaderType::C2DObjectShader);
+		pButtonObject->SetIsButton(true);
 		m_pObjectManager->AddObj(pButtonObject, ObjectLayer::ButtonObject);
 	}
 
@@ -2056,11 +2086,17 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::Enemy];
 	//std::vector<CGameObject*> TextureObjectLayer = pvObjectList[(int)ObjectLayer::TextureObject];
 
-	// 종료조건.
+	// 버튼
 	std::vector<CGameObject*> ButtonObjectLayer = pvObjectList[(int)ObjectLayer::ButtonObject];
 	CButtonObject* clear = dynamic_cast<CButtonObject*>(ButtonObjectLayer[0]);
 	CButtonObject* over = dynamic_cast<CButtonObject*>(ButtonObjectLayer[1]);
 	CButtonObject* black = dynamic_cast<CButtonObject*>(ButtonObjectLayer[2]);
+	CButtonObject* turnEnd = dynamic_cast<CButtonObject*>(ButtonObjectLayer[3]);
+
+	// 버튼
+	turnEnd->SetXY(FRAME_BUFFER_WIDTH * 2, FRAME_BUFFER_HEIGHT * 2);
+
+	// 종료조건
 	if (m_pPlayer)
 		if (m_pPlayer->GetCurHp() <= 0)
 			m_iOverFlag = 1;// game over
@@ -2104,8 +2140,12 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		else;
 	}
 
+
 	if (m_currentPhase != TurnPhase::NON)
 	{
+		// 버튼
+		turnEnd->SetXY(FRAME_BUFFER_WIDTH / 10 * 9, FRAME_BUFFER_HEIGHT / 2);
+
 		// 체력이 적은 오브젝트 벡터에서 제거. 이렇게 하면 안되지 않나
 		for (int i = 0; i < m_pvEngagedObjects.size();)
 		{
@@ -2156,8 +2196,16 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 				// 카드를 사용한다 라는 함수가 사용할 핸드의 번호를 리턴하며 특정 값을 리턴하면 턴 종료 함수를 호출.
 				// 아무것도 안 하는 값도 있어야함.
 				if (flag == -1);
-				else if(flag == -2)
-					IncreaseTurnFlag();
+				else if (flag == -2)
+				{
+					if(!(turnEnd->m_IsClicked))
+						turnEnd->m_IsClicked = true;
+					else
+					{
+						turnEnd->m_IsClicked = false;
+						IncreaseTurnFlag();
+					}
+				}
 				else {
 					if(m_pSelectedUI == NULL)
 						m_pSelectedUI = (CCardButton*)pvObjectList[(int)ObjectLayer::CardButtonObject][flag];
