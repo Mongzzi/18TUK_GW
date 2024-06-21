@@ -185,11 +185,10 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 							CMaterial* currMaterial = newObj->GetMaterial();
 							CMaterial* oriMaterial = pTarget->GetMaterial();
 							currMaterial->m_xmf4Albedo = oriMaterial->m_xmf4Albedo;
-							if (oriMaterial->m_pTexture) {
-								currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
-								currMaterial->SetTexture(oriMaterial->m_pTexture);
-							}
-
+							//if (oriMaterial->m_pTexture) {
+							//	currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
+							//	currMaterial->SetTexture(oriMaterial->m_pTexture);
+							//}
 							newObj->SetWorldMat(pTarget->GetWorldMat());
 							newObj->SetMesh(0, meshData, true);
 							newObjects.push_back(newObj);

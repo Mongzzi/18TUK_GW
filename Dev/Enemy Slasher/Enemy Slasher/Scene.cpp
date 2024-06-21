@@ -2563,7 +2563,7 @@ void CTestScene_Slice::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	//
 
 	{
-		CFBXObject* pFBXObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Stone_lit_003");
+		CFBXObject* pFBXObject = pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "Zombie1");
 		((CDynamicShapeMesh*)(pFBXObject->GetMeshes()[0]))->SetCuttable(true);
 		pFBXObject->SetCuttable(true);
 		pFBXObject->SetPosition(50.0f, 0.0f, 100.0f);
@@ -2632,22 +2632,22 @@ void CTestScene_Slice::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 
 #ifdef _DEBUG
-	std::vector<CGameObject*> pvOL = pvObjectList[(int)ObjectLayer::Object];
-	if (pvOL.size() < 2) return;
-	XMFLOAT4X4 MatA, MatB;
-	for (int i = 0; i < pvOL.size() - 1; ++i) {
-		if (CGameObject* ObjA = dynamic_cast<CGameObject*>(pvOL[i])) {
-			for (int j = i + 1; j < pvOL.size(); ++j) {
-				if (CGameObject* ObjB = dynamic_cast<CGameObject*>(pvOL[j])) {
-					MatA = ObjA->GetWorldMat();
-					MatB = ObjB->GetWorldMat();
-					if (CollisionCheck(ObjA->GetCollider(), MatA, ObjB->GetCollider(), MatB)) {
-						//cout << "Collision! ObjectNum = " << i << '\t' << j << '\n';
-					}
-				}
-			}
-		}
-	}
+	//std::vector<CGameObject*> pvOL = pvObjectList[(int)ObjectLayer::Object];
+	//if (pvOL.size() < 2) return;
+	//XMFLOAT4X4 MatA, MatB;
+	//for (int i = 0; i < pvOL.size() - 1; ++i) {
+	//	if (CGameObject* ObjA = dynamic_cast<CGameObject*>(pvOL[i])) {
+	//		for (int j = i + 1; j < pvOL.size(); ++j) {
+	//			if (CGameObject* ObjB = dynamic_cast<CGameObject*>(pvOL[j])) {
+	//				MatA = ObjA->GetWorldMat();
+	//				MatB = ObjB->GetWorldMat();
+	//				if (CollisionCheck(ObjA->GetCollider(), MatA, ObjB->GetCollider(), MatB)) {
+	//					//cout << "Collision! ObjectNum = " << i << '\t' << j << '\n';
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 #endif // DEBUG
 		}
 
