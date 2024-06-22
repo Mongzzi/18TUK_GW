@@ -279,6 +279,13 @@ private:
 		const std::vector<CVertex>& vertices, const std::vector<UINT>& indices,
 		std::vector<CVertex>& uniqueVertices, std::vector<UINT>& remappedIndices);
 
+private:
+	// 두 정점 간의 거리를 반환하는 함수
+	float computeDistance(const CVertex& v1, const CVertex& v2);
+	// 두 mesh 간의 거리가 임계점 이하이면 병합하는 함수
+	std::vector<std::vector<int>> mergeCloseComponents(const std::vector<std::vector<int>>& components,
+		const std::vector<CVertex>& uniqueVertices,
+		float threshold);;
 };
 
 class CBoxMesh : public CDynamicShapeMesh

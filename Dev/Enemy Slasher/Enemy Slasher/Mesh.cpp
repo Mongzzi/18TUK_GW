@@ -5,6 +5,7 @@
 #include <vector>
 #include <random>
 #include <queue>
+#include <time.h>
 
 CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -905,6 +906,56 @@ void CDynamicShapeMesh::remapVerticesAndIndices(const std::vector<CVertex>& vert
 	}
 }
 
+float CDynamicShapeMesh::computeDistance(const CVertex& v1, const CVertex& v2) {
+	return sqrt(pow(v1.m_xmf3Vertex.x - v2.m_xmf3Vertex.x, 2) +
+		pow(v1.m_xmf3Vertex.y - v2.m_xmf3Vertex.y, 2) +
+		pow(v1.m_xmf3Vertex.z - v2.m_xmf3Vertex.z, 2));
+}
+
+std::vector<std::vector<int>> CDynamicShapeMesh::mergeCloseComponents(const std::vector<std::vector<int>>& components, const std::vector<CVertex>& uniqueVertices, float threshold) {
+	std::vector<std::vector<int>> mergedComponents;
+	std::vector<bool> visited(components.size(), false);
+
+	for (size_t i = 0; i < components.size(); ++i) {
+		if (visited[i]) continue;
+
+		std::queue<size_t> toVisit;
+		toVisit.push(i);
+		visited[i] = true;
+		std::vector<int> mergedComponent = components[i];
+
+		while (!toVisit.empty()) {
+			size_t current = toVisit.front();
+			toVisit.pop();
+
+			for (size_t j = 0; j < components.size(); ++j) {
+				if (visited[j]) continue;
+
+				bool shouldMerge = false;
+				for (int idx1 : components[current]) {
+					for (int idx2 : components[j]) {
+						if (computeDistance(uniqueVertices[idx1], uniqueVertices[idx2]) < threshold) {
+							shouldMerge = true;
+							break;
+						}
+					}
+					if (shouldMerge) break;
+				}
+
+				if (shouldMerge) {
+					visited[j] = true;
+					toVisit.push(j);
+					mergedComponent.insert(mergedComponent.end(), components[j].begin(), components[j].end());
+				}
+			}
+		}
+
+		mergedComponents.push_back(std::move(mergedComponent));
+	}
+
+	return mergedComponents;
+}
+
 // 한개의 삼각형에 대해서 절단 수행
 void CDynamicShapeMesh::HandleTriangleCut(
 	std::vector<CVertex>& vertices, std::vector<UINT>& indices,
@@ -1017,15 +1068,12 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 		vector<CVertex> vOriVertices;
 		{
 			if (sizeof(CVertex) == m_nStride) {
-				for (int i = 0; i < m_nVertices; ++i) {
-					vOriVertices.push_back(m_pVertices[i]);
-				}
+				vOriVertices.assign(m_pVertices, m_pVertices + m_nVertices);
 			}
 			else if (sizeof(CVertex_Skining) == m_nStride) {
 				CVertex_Skining* newVertex = static_cast<CVertex_Skining*>(m_pVertices);
 				for (int i = 0; i < m_nVertices; ++i) {
-					CVertex t = newVertex[i];
-					vOriVertices.push_back(t);
+					vOriVertices.push_back(static_cast<CVertex>(newVertex[i]));
 				}
 			}
 		}
@@ -1077,6 +1125,10 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 
 				// 생성된 Graph를 BFS 방식으로 탐색하여 이어진 mesh들을 분리
 				auto connectedComponents = findConnectedComponents(graph, uniqueVertices.size());
+
+				// 근접 componets 병합
+				float mergeThreshold = 10.1f; // 병합하기 위한 임계값
+				connectedComponents = mergeCloseComponents(connectedComponents, uniqueVertices, mergeThreshold);
 
 				// 분리된 mesh데이터들을 이용해서 실질적 mesh 생성
 				for (const auto& component : connectedComponents) {

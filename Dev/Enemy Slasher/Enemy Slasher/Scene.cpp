@@ -2761,7 +2761,7 @@ void CTestScene_Slice::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	//	}
 	//}
 #endif // DEBUG
-		}
+}
 
 void CTestScene_Slice::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CResorceManager* pFBXDataManager, float fTimeElapsed)
 {
