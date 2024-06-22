@@ -8,11 +8,6 @@
 #include <unordered_set>
 #include <cmath>
 
-// 좌표를 반올림하는 함수
-float RoundToPrecision(float value, int precision);
-// 좌표를 비교할 때 반올림하여 비교
-bool AreVerticesEqual(const XMFLOAT3& v1, const XMFLOAT3& v2, int precision = 6);
-
 class CMesh
 {
 public:
@@ -148,7 +143,6 @@ public:
 	vector<CMesh*> DynamicShaping_Push(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
 	vector<CMesh*> DynamicShaping_ConvexHull(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
 	vector<CMesh*> DynamicShaping_Graph(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 배열을 리턴한다.
-	vector<CMesh*> DynamicShaping_Graph_Meshs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fTimeElapsed, XMFLOAT4X4& xmf4x4ThisMat, CDynamicShapeMesh* pCutterMesh, XMFLOAT4X4& xmf4x4CutterMat); // 절단된 CMesh 2개 이상의 배열을 리턴한다.
 
 	// DynamicShaping_Graph를 위한 기능 함수 정의
 private:
@@ -184,23 +178,11 @@ private:
 
 	// unorderd map 사용을 위한 hash 선언
 	struct hash_fn {
-		//std::size_t operator()(const CEdge& v) const {
-		//	std::size_t h1 = std::hash<float>{}(RoundToPrecision(v.x, 0));
-		//	std::size_t h2 = std::hash<float>{}(RoundToPrecision(v.y, 0));
-		//	std::size_t h3 = std::hash<float>{}(RoundToPrecision(v.z, 0));
-		//	return h1 ^ h2 ^ h3;
-		//}
 		std::size_t operator()(const CEdge& v) const {
 			std::size_t h1 = std::hash<int>{}(v.x);
 			std::size_t h2 = std::hash<int>{}(v.y);
 			std::size_t h3 = std::hash<int>{}(v.z);
 			return h1 ^ h2 ^ h3;
-		}
-	};
-
-	struct equal_fn {
-		bool operator()(const CEdge& v1, const CEdge& v2) const {
-			return AreVerticesEqual(XMFLOAT3(v1.x, v1.y, v1.z), XMFLOAT3(v2.x, v2.y, v2.z), 6);
 		}
 	};
 
