@@ -965,11 +965,17 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 					{
 						// 원위치로 돌아감.
 						m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
-						m_pSelectedUI = NULL;
+						SetSelectedUI(nullptr);
 					}
 					else
 					{
-						UseSelectedCard();
+						if (m_pPlayer->GetCharacterState() == CharacterState::IdleState)
+							UseSelectedCard();
+						else
+						{
+							m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
+							SetSelectedUI(nullptr);
+						}
 					}
 				}
 		break;
@@ -1051,17 +1057,24 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case '5':
 			if (m_iOverFlag == 0)
 				if (teamID == 0)
-					tmp = wParam - 0x30 - 1;
-					if (m_currentPhase == TurnPhase::PlayPhase)
 					{
-						if (pInteractiveUIObj->size() > 0) {
-							if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
-							{
-								if (m_pSelectedUI == (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp])
-									UseSelectedCard();
-								else
+						tmp = wParam - 0x30 - 1;
+						if (m_currentPhase == TurnPhase::PlayPhase)
+						{
+							if (pInteractiveUIObj->size() > 0) {
+								if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
 								{
-									SetSelectedUI((CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp]);
+									if (m_pSelectedUI == (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp])
+									{
+										if (m_pPlayer->GetCharacterState() == CharacterState::IdleState)
+											UseSelectedCard();
+										else
+											SetSelectedUI(nullptr);
+									}
+									else
+									{
+										SetSelectedUI((CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp]);
+									}
 								}
 							}
 						}
@@ -2550,8 +2563,18 @@ void CTestScene::UseSelectedCard()
 
 void CTestScene::SetSelectedUI(CCardButton* selected)
 {
-	m_pSelectedUI = selected;
-	m_pSelectedUI->m_IsClicked = true;
+	if (selected)
+	{
+		if (m_pSelectedUI)
+			SetSelectedUI(nullptr);
+		m_pSelectedUI = selected;
+		m_pSelectedUI->m_IsClicked = true;
+	}
+	else
+	{
+		m_pSelectedUI->m_IsClicked = false;
+		m_pSelectedUI = nullptr;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
