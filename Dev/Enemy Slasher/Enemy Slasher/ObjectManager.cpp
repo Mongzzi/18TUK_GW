@@ -120,14 +120,31 @@ void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 	if (m_pPhysXManager != nullptr) {
 		m_pPhysXManager->stepPhysics(true, fTimeElapsed);
 		physx::PxTransform transform;
-		for (std::vector<CGameObject*> a : m_pvObjectManager)
+		for (std::vector<CGameObject*> a : m_pvObjectManager) {
 			for (CGameObject* b : a) {
 				if (b->m_PhysXActorType == PhysXActorType::Dynamic &&
 					b->m_pPhysXActor != nullptr) {
 					transform = static_cast<physx::PxRigidDynamic*>(b->m_pPhysXActor)->getGlobalPose();
 					b->SetPosition(transform.p.x, transform.p.y - PHYSX_CAPSUL_HEIGHT, transform.p.z);
 				}
+				else if (b->m_PhysXActorType == PhysXActorType::Dynamic_Allow_Rotate &&
+					b->m_pPhysXActor != nullptr) {
+					transform = static_cast<physx::PxRigidDynamic*>(b->m_pPhysXActor)->getGlobalPose();
+
+					XMMATRIX matrix = XMLoadFloat4x4(&b->GetTransMat());
+					XMVECTOR xmvScale, xmvRotate, xmvPos;
+					XMMatrixDecompose(&xmvScale, &xmvRotate, &xmvPos, matrix);
+					XMFLOAT3 scale;
+					XMStoreFloat3(&scale, xmvScale);
+
+					b->SetTransMat(Matrix4x4::Identity());
+					b->SetPosition(transform.p.x, transform.p.y, transform.p.z);
+					XMFLOAT4 quaternion(transform.q.x, transform.q.y, transform.q.z, transform.q.w);
+					b->Rotate(&quaternion);
+					b->SetScale(scale);
+				}
 			}
+		}
 	}
 }
 

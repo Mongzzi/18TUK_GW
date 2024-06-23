@@ -37,12 +37,12 @@ CPhysXManager::CPhysXManager()
 
     createScene();
 
-    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.2f);
+    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.1f);
 
     //PxReal stackZ = 100.0f;
 
-    //PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
-    //gScene->addActor(*groundPlane);
+    PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
+    gScene->addActor(*groundPlane);
 
     //for (PxU32 i = 0; i < 5; i++)
     //    createStack(PxTransform(PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
@@ -351,13 +351,15 @@ physx::PxActor* CPhysXManager::AddDynamicConvexCustomGeometry(CGameObject* objec
     // actor가 자신의 object*를 알도록 저장
     if (dynamicActor)
     {
+        PxRigidBodyExt::updateMassAndInertia(*dynamicActor, 1000.f);
+
         dynamicActor->userData = object;
 
         gScene->addActor(*dynamicActor);
     }
 
     object->m_pPhysXActor = dynamicActor;
-    object->m_PhysXActorType = PhysXActorType::Dynamic;
+    object->m_PhysXActorType = PhysXActorType::Dynamic_Allow_Rotate;
 
     if (object->GetChild()) AddStaticCustomGeometry(object->GetChild());
     if (object->GetSibling()) AddStaticCustomGeometry(object->GetSibling());
