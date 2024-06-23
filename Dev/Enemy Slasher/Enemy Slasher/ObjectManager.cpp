@@ -134,14 +134,15 @@ void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 					XMMATRIX matrix = XMLoadFloat4x4(&b->GetTransMat());
 					XMVECTOR xmvScale, xmvRotate, xmvPos;
 					XMMatrixDecompose(&xmvScale, &xmvRotate, &xmvPos, matrix);
-					XMFLOAT3 scale;
-					XMStoreFloat3(&scale, xmvScale);
 
-					b->SetTransMat(Matrix4x4::Identity());
+					XMFLOAT4X4 invRotMat = Matrix4x4::Identity();
+					XMMATRIX mtxRotate = XMMatrixRotationQuaternion(xmvRotate);
+					invRotMat = Matrix4x4::Inverse(Matrix4x4::Multiply(mtxRotate, invRotMat));
+
+					b->SetTransMat(Matrix4x4::Multiply(b->GetTransMat(), invRotMat));
 					b->SetPosition(transform.p.x, transform.p.y, transform.p.z);
 					XMFLOAT4 quaternion(transform.q.x, transform.q.y, transform.q.z, transform.q.w);
 					b->Rotate(&quaternion);
-					b->SetScale(scale);
 				}
 			}
 		}
@@ -234,6 +235,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 							}
 
 							newObj->SetWorldMat(pTarget->GetWorldMat());
+							newObj->SetTransMat(pTarget->GetTransMat());
 							newObj->SetMesh(0, meshData, true);
 							newObjects.push_back(newObj);
 						}
