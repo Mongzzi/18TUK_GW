@@ -1943,8 +1943,10 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				SetCursor(NULL);
 				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
 
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				if (m_pPlayer->GetCharacterState() != CharacterState::MoveState)
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
+				// ¿©±â´Â ¹¹¾ß?
 				std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
 				if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
 					for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
