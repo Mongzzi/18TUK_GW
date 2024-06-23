@@ -435,6 +435,7 @@ protected:
 	// 이름?
 	string m_sName;
 	// 등등
+	XMFLOAT3 m_xmf3Dir;
 public:
 	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; };	// 
 

@@ -1096,10 +1096,12 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 	if (m_vTargets.size() == 0)
 	{
 		m_CurrentState = CharacterState::IdleState;
+		//SetAnimNum(static_cast<int>(m_CurrentState));
 		SetCuranimLoof(true);
 		if (m_fCurHp <= 0)
 		{
 			m_CurrentState = CharacterState::DieState;
+			//SetAnimNum(static_cast<int>(m_CurrentState));
 			SetCuranimLoof(false);
 		}
 
@@ -1111,7 +1113,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 
 		XMFLOAT3 targetPosition = curTarget->GetPosition();
 
-		XMFLOAT3 m_dir = { 0.0f,0.0f,1.0f };
+		m_xmf3Dir = { 0.0f,0.0f,1.0f };
 
 		// 방향벡터 몬스터에서 플레이어로
 		XMFLOAT3 positionDifference;
@@ -1124,14 +1126,15 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 		float epsilon = 1e-6;
 		if (length > epsilon)
 		{
-			m_dir.x = positionDifference.x / length;
-			m_dir.y = 0;//positionDifference.y / length;
-			m_dir.z = positionDifference.z / length;
+			m_xmf3Dir.x = positionDifference.x / length;
+			m_xmf3Dir.y = 0;//positionDifference.y / length;
+			m_xmf3Dir.z = positionDifference.z / length;
 
-			SetLook(m_dir);
+			SetLook(m_xmf3Dir);
 		}
 		bool eraseFlag = false;
 		SetCuranimLoof(false);
+		XMVECTOR vResult;
 		switch (m_CurrentState)
 		{
 		case CharacterState::IdleState:
@@ -1144,10 +1147,13 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 			break;
 		case CharacterState::MoveState:
 			// target에게 다가간다.
-			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_dir), m_fMoveSpeed * m_fTimeElapsed);
-			XMStoreFloat3(&m_dir, vResult);
-			MovePosition(m_dir);
-			// 일정 거리 안으로 다가가면 타겟 추출.
+			//vResult = XMVectorScale(XMLoadFloat3(&m_xmf3Dir), m_fMoveSpeed * m_fTimeElapsed);
+			//XMStoreFloat3(&m_xmf3Dir, vResult);
+			////m_dir.x *= m_fMoveSpeed * m_fTimeElapsed;
+			////m_dir.z *= m_fMoveSpeed * m_fTimeElapsed;
+			//MovePosition(m_xmf3Dir);
+			////MovePosition(m_dir.x* m_fMoveSpeed * m_fTimeElapsed, m_dir.y, m_dir.z* m_fMoveSpeed * m_fTimeElapsed);
+			//// 일정 거리 안으로 다가가면 타겟 추출.
 			eraseFlag = length < 300.f;
 			SetCuranimLoof(true);
 			break;
@@ -1166,7 +1172,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 		if (eraseFlag)
 		{
 			m_vTargets.erase(m_vTargets.begin());
-			if (!m_bIsCurAnimLoof)
+			if (!m_bIsCurAnimLoof) // 루프하는 애니메이션이 아니면
 				m_bIsCurAnimFinish = false;
 		}
 	}
@@ -1247,6 +1253,7 @@ void CCharacterObject::SetCharacterByName(string name)
 	}
 	m_iTurnSpeed = 5.;
 	m_CurrentState = CharacterState::IdleState;
+	//SetAnimNum(static_cast<int>(m_CurrentState));
 	m_sName = name;
 }
 
@@ -2161,6 +2168,17 @@ void CMonsterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* p
 			// 플레이어 시점 변경
 			//m_pTestPlayer->ChangeCamera(SPACESHIP_CAMERA, 0.0f);;
 
+		}
+
+		if (m_CurrentState == CharacterState::MoveState)
+		{
+			SetSpeed(m_fMoveSpeed * m_fTimeElapsed);
+			// target에게 다가간다.
+			XMVECTOR vResult = XMVectorScale(XMLoadFloat3(&m_xmf3Dir), m_speed);
+			XMStoreFloat3(&m_xmf3Dir, vResult);
+			MovePosition(m_xmf3Dir);
+			// 일정 거리 안으로 다가가면 타겟 추출.
+			SetCuranimLoof(true);
 		}
 	}
 	
