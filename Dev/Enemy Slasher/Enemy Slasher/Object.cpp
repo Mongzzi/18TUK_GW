@@ -885,7 +885,8 @@ void CFBXObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 				else
 				{
 					SetCuranimFinish(true);
-					animVal -= 1;
+					//animVal -= m_fTimeElapsed * 24 * m_fAnimSpeedRatio; // 보완 필요
+					animVal = currAnim->m_vBoneAnimations[0].m_vKeyFrames.size() -1; // 
 				}
 			}
 			//cout << "Skeleton - AnimVal : " << animVal << "\n";
