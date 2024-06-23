@@ -195,12 +195,16 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 						for (auto& meshData : newMeshs) { // 하나의 오브젝트에 하나의 메쉬 할당
 							CGameObject* newObj = new CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTextureShader);
 							CMaterial* currMaterial = newObj->GetMaterial();
-							CMaterial* oriMaterial = pTarget->GetMaterial();
+							CMaterial* oriMaterial;
+							oriMaterial = pTarget->GetMaterial();
+							if (pTarget->GetChild())
+								oriMaterial = pTarget->GetChild()->GetMaterial();
 							currMaterial->m_xmf4Albedo = oriMaterial->m_xmf4Albedo;
-							//if (oriMaterial->m_pTexture) {
-							//	currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
-							//	currMaterial->SetTexture(oriMaterial->m_pTexture);
-							//}
+							if (oriMaterial->m_pTexture) {
+								currMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+								currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
+								currMaterial->SetTexture(oriMaterial->m_pTexture);
+							}
 							newObj->SetWorldMat(pTarget->GetWorldMat());
 							newObj->SetMesh(0, meshData, true);
 							newObjects.push_back(newObj);

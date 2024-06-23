@@ -73,7 +73,7 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-    return (float4(input.uv, 0.f, 1.f));
+    //return (float4(input.uv, 0.f, 1.f));
 	
 	float4 cColor = gtxtTexture.Sample(gWrapSamplerState, input.uv);
 	input.normalW = normalize(input.normalW);
