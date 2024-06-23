@@ -193,54 +193,27 @@ private:
 	void FindBoundaryEdges(const std::vector<std::pair<CEdge, CEdge>>& edges, EdgeMap& edgeMap);
 	std::vector<CEdge> ExtractBoundaryLoop(EdgeMap& edgeMap);
 	void TriangulateBoundary(const std::vector<CEdge>& boundary, std::vector<CVertex>& fillVertices, std::vector<UINT>& fillIndices, XMFLOAT3& normal);
+	void TriangulateBoundary_EAR(const std::vector<CEdge>& boundary, std::vector<CVertex>& fillVertices, std::vector<UINT>& fillIndices, XMFLOAT3& normal);
 
 	// 평면 기준 위아래 절단 오브젝트 생성 함수 (절단면이 비어있는)
 	void HandleTriangleCut(std::vector<CVertex>& vertices, std::vector<UINT>& indices, int i, XMFLOAT3& planeNormal, XMFLOAT3& planePoint, std::vector<CVertex>& newVerticesUp, std::vector<CVertex>& newVerticesDown, std::vector<UINT>& newIndicesUp, std::vector<UINT>& newIndicesDown, std::vector<std::pair<CEdge, CEdge>>& edges);
 	std::pair<CVertex, bool> CalculateIntersection(CVertex& v1, CVertex& v2, XMFLOAT3& planeNormal, XMFLOAT3& planePoint);
 
+	bool isPointInTriangle(const XMFLOAT3& p, const XMFLOAT3& a, const XMFLOAT3& b, const XMFLOAT3& c);
+	bool isEar(const std::vector<CEdge>& poly, const XMFLOAT3& normal, int i, int j, int k);
+
 private:
 	// 삼각형의 normal을 계산하는 함수
-	XMFLOAT3 CalculateNormal(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3) {
-		XMFLOAT3 u = { v2.x - v1.x, v2.y - v1.y, v2.z - v1.z };
-		XMFLOAT3 v = { v3.x - v1.x, v3.y - v1.y, v3.z - v1.z };
-		XMFLOAT3 normal = {
-			u.y * v.z - u.z * v.y,
-			u.z * v.x - u.x * v.z,
-			u.x * v.y - u.y * v.x
-		};
-		return normal;
-	}
+	XMFLOAT3 CalculateNormal(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3);
 
 	// 삼각형의 무게중심점을 계산하는 함수
-	XMFLOAT3 CalculateCentroid(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3) {
-		return { (v1.x + v2.x + v3.x) / 3, (v1.y + v2.y + v3.y) / 3, (v1.z + v2.z + v3.z) / 3 };
-	}
+	XMFLOAT3 CalculateCentroid(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3);
 
 	// 점들을 무게중심점과 Normal 값을 이용해 CCW로 정렬하는 함수
-	void SortVerticesCCW(std::vector<CVertex>& vertices, const XMFLOAT3& centroid, const XMFLOAT3& normal) {
-		std::sort(vertices.begin(), vertices.end(), [&centroid, &normal](const CVertex& a, const CVertex& b) {
-			XMFLOAT3 va = { a.m_xmf3Vertex.x - centroid.x, a.m_xmf3Vertex.y - centroid.y, a.m_xmf3Vertex.z - centroid.z };
-			XMFLOAT3 vb = { b.m_xmf3Vertex.x - centroid.x, b.m_xmf3Vertex.y - centroid.y, b.m_xmf3Vertex.z - centroid.z };
-			return (va.x * vb.y - va.y * vb.x) > 0;
-			});
-	}
+	void SortVerticesCCW(std::vector<CVertex>& vertices, const XMFLOAT3& centroid, const XMFLOAT3& normal);
 
 	// 삼각형을 CCW로 vector에 저장해주는 함수
-	void AddTriangle(std::vector<CVertex>& vertices, std::vector<UINT>& indices, const CVertex& v1, const CVertex& v2, const CVertex& v3, XMFLOAT3& oriNormal) {
-		XMFLOAT3 newNormal = CalculateNormal(v1.m_xmf3Vertex, v2.m_xmf3Vertex, v3.m_xmf3Vertex);
-		vertices.push_back(v1);
-		if (Vector3::DotProduct(oriNormal, newNormal) > 0) {
-			vertices.push_back(v2);
-			vertices.push_back(v3);
-		}
-		else {
-			vertices.push_back(v3);
-			vertices.push_back(v2);
-		}
-		indices.push_back(vertices.size() - 3);
-		indices.push_back(vertices.size() - 2);
-		indices.push_back(vertices.size() - 1);
-	}
+	void AddTriangle(std::vector<CVertex>& vertices, std::vector<UINT>& indices, const CVertex& v1, const CVertex& v2, const CVertex& v3, XMFLOAT3& oriNormal);
 
 private:
 	// 그래프의 정점과 간선을 표현하는 구조체
@@ -281,6 +254,7 @@ private:
 
 private:
 	// 두 정점 간의 거리를 반환하는 함수
+	// 성능을 위해 sqrt 제거. 반환값은 제곱된 값
 	float computeDistance(const CVertex& v1, const CVertex& v2);
 	// 두 mesh 간의 거리가 임계점 이하이면 병합하는 함수
 	std::vector<std::vector<int>> mergeCloseComponents(const std::vector<std::vector<int>>& components,

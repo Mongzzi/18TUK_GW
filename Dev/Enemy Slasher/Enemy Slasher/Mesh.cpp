@@ -794,6 +794,7 @@ std::vector<CDynamicShapeMesh::CEdge> CDynamicShapeMesh::ExtractBoundaryLoop(Edg
 }
 
 // 외곽선을 따라 해당 평면을 매꿔주는 함수
+// 무게중심점을 계산하여 무게중심점을 포함하는 삼각형으로 메꾼다.
 void CDynamicShapeMesh::TriangulateBoundary(const std::vector<CEdge>& boundary, std::vector<CVertex>& fillVertices, std::vector<UINT>& fillIndices, XMFLOAT3& normal)
 {
 	XMFLOAT3 center(0.f, 0.f, 0.f);
@@ -823,6 +824,49 @@ void CDynamicShapeMesh::TriangulateBoundary(const std::vector<CEdge>& boundary, 
 	}
 }
 
+// Ear Clipping 알고리즘을 이용해 평면을 메꿈
+void CDynamicShapeMesh::TriangulateBoundary_EAR(const std::vector<CEdge>& boundary, std::vector<CVertex>& fillVertices, std::vector<UINT>& fillIndices, XMFLOAT3& normal)
+{
+	int n = boundary.size();
+	if (n < 3) return;
+
+	std::vector<int> V(n);
+	std::iota(V.begin(), V.end(), 0);
+
+	std::vector<std::vector<int>> triangles;
+
+	CVertex newVertex1(XMFLOAT3(0.f, 0.f, 0.f), normal, XMFLOAT2(0.5f, 0.5f));
+	CVertex newVertex2(XMFLOAT3(0.f, 0.f, 0.f), normal, XMFLOAT2(0.5f, 0.5f));
+	CVertex newVertex3(XMFLOAT3(0.f, 0.f, 0.f), normal, XMFLOAT2(0.5f, 0.5f));
+
+	for (int i = 0; n > 2; ++i) {
+		int u = i;		if (n <= u) u = 0;
+		int v = u + 1;	if (n <= v) v = 0;
+		int w = v + 1;	if (n <= w) w = 0;
+
+		if (isEar(boundary, normal, V[u], V[v], V[w])) {
+
+			newVertex1.m_xmf3Vertex.x = boundary[V[u]].x;
+			newVertex1.m_xmf3Vertex.y = boundary[V[u]].y;
+			newVertex1.m_xmf3Vertex.z = boundary[V[u]].z;
+
+			newVertex2.m_xmf3Vertex.x = boundary[V[v]].x;
+			newVertex2.m_xmf3Vertex.y = boundary[V[v]].y;
+			newVertex2.m_xmf3Vertex.z = boundary[V[v]].z;
+
+			newVertex3.m_xmf3Vertex.x = boundary[V[w]].x;
+			newVertex3.m_xmf3Vertex.y = boundary[V[w]].y;
+			newVertex3.m_xmf3Vertex.z = boundary[V[w]].z;
+
+			AddTriangle(fillVertices, fillIndices, newVertex1, newVertex2, newVertex3, normal);
+
+			V.erase(V.begin() + v);
+			--n;
+			--i;
+		}
+	}
+}
+
 std::pair<CVertex, bool> CDynamicShapeMesh::CalculateIntersection(CVertex& v1, CVertex& v2, XMFLOAT3& planeNormal, XMFLOAT3& planePoint)
 {
 	XMFLOAT3 direction = Vector3::Subtract(v2.m_xmf3Vertex, v1.m_xmf3Vertex);
@@ -838,6 +882,109 @@ std::pair<CVertex, bool> CDynamicShapeMesh::CalculateIntersection(CVertex& v1, C
     intersection.m_xmf2UV = XMFLOAT2(v1.m_xmf2UV.x + t * (v2.m_xmf2UV.x - v1.m_xmf2UV.x), v1.m_xmf2UV.y + t * (v2.m_xmf2UV.y - v1.m_xmf2UV.y));
 
     return { intersection, true };
+}
+
+bool CDynamicShapeMesh::isPointInTriangle(const XMFLOAT3& p, const XMFLOAT3& a, const XMFLOAT3& b, const XMFLOAT3& c)
+{
+	//XMFLOAT3 pa = { a.x - p.x, a.y - p.y, a.z - p.z };
+	//XMFLOAT3 pb = { b.x - p.x, b.y - p.y, b.z - p.z };
+	//XMFLOAT3 pc = { c.x - p.x, c.y - p.y, c.z - p.z };
+
+	//XMFLOAT3 PAB = Vector3::CrossProduct(pa, pb);
+	//XMFLOAT3 PBC = Vector3::CrossProduct(pb, pc);
+	//XMFLOAT3 PCA = Vector3::CrossProduct(pc, pa);
+
+	//if (Vector3::DotProduct(PAB, PBC) < 0.f)
+	//	return false;
+	//else if (Vector3::DotProduct(PBC, PCA) < 0.f)
+	//	return false;
+	//else if (Vector3::DotProduct(PCA, PAB) < 0.f)
+	//	return false;
+
+	//return true;
+
+	XMFLOAT3 v0 = { c.x - a.x, c.y - a.y, c.z - a.z };
+	XMFLOAT3 v1 = { b.x - a.x, b.y - a.y, b.z - a.z };
+	XMFLOAT3 v2 = { p.x - a.x, p.y - a.y, p.z - a.z };
+
+	float d00 = Vector3::DotProduct(v0, v0);
+	float d01 = Vector3::DotProduct(v0, v1);
+	float d11 = Vector3::DotProduct(v1, v1);
+	float d20 = Vector3::DotProduct(v2, v0);
+	float d21 = Vector3::DotProduct(v2, v1);
+
+	float denom = d00 * d11 - d01 * d01;
+	float v = (d11 * d20 - d01 * d21) / denom;
+	float w = (d00 * d21 - d01 * d20) / denom;
+	float u = 1.0f - v - w;
+
+	return (v >= 0) && (w >= 0) && (u >= 0);
+}
+
+bool CDynamicShapeMesh::isEar(const std::vector<CEdge>& poly, const XMFLOAT3& normal, int i, int j, int k)
+{
+	XMFLOAT3 a(poly[i].x, poly[i].y, poly[i].z);
+	XMFLOAT3 b(poly[j].x, poly[j].y, poly[j].z);
+	XMFLOAT3 c(poly[k].x, poly[k].y, poly[k].z);
+
+	// 삼각형이 CCW 가 아니라면 false
+	XMFLOAT3 triNormal = CalculateNormal(a, b, c);
+	if (Vector3::DotProduct(triNormal, const_cast<XMFLOAT3&>(normal)) <= 0)
+		return false;
+
+	// 다른 정점이 삼각형 내부에 있다면 false
+	for (int m = 0; m < poly.size(); ++m) {
+		if (m == i || m == j || m == k) continue;
+
+		XMFLOAT3 p(poly[m].x, poly[m].y, poly[m].z);
+		if (isPointInTriangle(p, a, b, c))
+			return false;
+	}
+
+	return true;
+}
+
+// 삼각형의 normal을 계산하는 함수
+XMFLOAT3 CDynamicShapeMesh::CalculateNormal(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3) {
+	XMFLOAT3 u = { v2.x - v1.x, v2.y - v1.y, v2.z - v1.z };
+	XMFLOAT3 v = { v3.x - v1.x, v3.y - v1.y, v3.z - v1.z };
+	XMFLOAT3 normal = {
+		u.y * v.z - u.z * v.y,
+		u.z * v.x - u.x * v.z,
+		u.x * v.y - u.y * v.x
+	};
+	return normal;
+}
+
+// 삼각형의 무게중심점을 계산하는 함수
+XMFLOAT3 CDynamicShapeMesh::CalculateCentroid(const XMFLOAT3& v1, const XMFLOAT3& v2, const XMFLOAT3& v3) {
+	return { (v1.x + v2.x + v3.x) / 3, (v1.y + v2.y + v3.y) / 3, (v1.z + v2.z + v3.z) / 3 };
+}
+
+// 점들을 무게중심점과 Normal 값을 이용해 CCW로 정렬하는 함수
+void CDynamicShapeMesh::SortVerticesCCW(std::vector<CVertex>& vertices, const XMFLOAT3& centroid, const XMFLOAT3& normal) {
+	std::sort(vertices.begin(), vertices.end(), [&centroid, &normal](const CVertex& a, const CVertex& b) {
+		XMFLOAT3 va = { a.m_xmf3Vertex.x - centroid.x, a.m_xmf3Vertex.y - centroid.y, a.m_xmf3Vertex.z - centroid.z };
+		XMFLOAT3 vb = { b.m_xmf3Vertex.x - centroid.x, b.m_xmf3Vertex.y - centroid.y, b.m_xmf3Vertex.z - centroid.z };
+		return (va.x * vb.y - va.y * vb.x) > 0;
+		});
+}
+
+// 삼각형을 CCW로 vector에 저장해주는 함수
+void CDynamicShapeMesh::AddTriangle(std::vector<CVertex>& vertices, std::vector<UINT>& indices, const CVertex& v1, const CVertex& v2, const CVertex& v3, XMFLOAT3& oriNormal) {
+	XMFLOAT3 newNormal = CalculateNormal(v1.m_xmf3Vertex, v2.m_xmf3Vertex, v3.m_xmf3Vertex);
+	vertices.push_back(v1);
+	if (Vector3::DotProduct(oriNormal, newNormal) > 0) {
+		vertices.push_back(v2);
+		vertices.push_back(v3);
+	}
+	else {
+		vertices.push_back(v3);
+		vertices.push_back(v2);
+	}
+	indices.push_back(vertices.size() - 3);
+	indices.push_back(vertices.size() - 2);
+	indices.push_back(vertices.size() - 1);
 }
 
 std::vector<std::vector<int>> CDynamicShapeMesh::findConnectedComponents(const Graph& graph, int vertexCount) {
@@ -907,7 +1054,7 @@ void CDynamicShapeMesh::remapVerticesAndIndices(const std::vector<CVertex>& vert
 }
 
 float CDynamicShapeMesh::computeDistance(const CVertex& v1, const CVertex& v2) {
-	return sqrt(pow(v1.m_xmf3Vertex.x - v2.m_xmf3Vertex.x, 2) +
+	return (pow(v1.m_xmf3Vertex.x - v2.m_xmf3Vertex.x, 2) +
 		pow(v1.m_xmf3Vertex.y - v2.m_xmf3Vertex.y, 2) +
 		pow(v1.m_xmf3Vertex.z - v2.m_xmf3Vertex.z, 2));
 }
@@ -915,6 +1062,8 @@ float CDynamicShapeMesh::computeDistance(const CVertex& v1, const CVertex& v2) {
 std::vector<std::vector<int>> CDynamicShapeMesh::mergeCloseComponents(const std::vector<std::vector<int>>& components, const std::vector<CVertex>& uniqueVertices, float threshold) {
 	std::vector<std::vector<int>> mergedComponents;
 	std::vector<bool> visited(components.size(), false);
+
+	float powedThreshold = pow(threshold, 2);
 
 	for (size_t i = 0; i < components.size(); ++i) {
 		if (visited[i]) continue;
@@ -934,7 +1083,7 @@ std::vector<std::vector<int>> CDynamicShapeMesh::mergeCloseComponents(const std:
 				bool shouldMerge = false;
 				for (int idx1 : components[current]) {
 					for (int idx2 : components[j]) {
-						if (computeDistance(uniqueVertices[idx1], uniqueVertices[idx2]) < threshold) {
+						if (computeDistance(uniqueVertices[idx1], uniqueVertices[idx2]) < powedThreshold) {
 							shouldMerge = true;
 							break;
 						}
@@ -1109,6 +1258,9 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 
 				TriangulateBoundary(boundaryLoop, vvNewVertices[0], vvnNewIndices[0], Vector3::ScalarProduct(xmf3LPlaneNormal, -1));
 				TriangulateBoundary(boundaryLoop, vvNewVertices[1], vvnNewIndices[1], Vector3::ScalarProduct(xmf3LPlaneNormal, 1));
+
+				//TriangulateBoundary_EAR(boundaryLoop, vvNewVertices[0], vvnNewIndices[0], Vector3::ScalarProduct(xmf3LPlaneNormal, -1));
+				//TriangulateBoundary_EAR(boundaryLoop, vvNewVertices[1], vvnNewIndices[1], Vector3::ScalarProduct(xmf3LPlaneNormal, 1));
 			}
 
 			// 평면 위, 아래 처리
@@ -1127,7 +1279,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 				auto connectedComponents = findConnectedComponents(graph, uniqueVertices.size());
 
 				// 근접 componets 병합
-				float mergeThreshold = 10.1f; // 병합하기 위한 임계값
+				float mergeThreshold = 5.1f; // 병합하기 위한 임계값
 				connectedComponents = mergeCloseComponents(connectedComponents, uniqueVertices, mergeThreshold);
 
 				// 분리된 mesh데이터들을 이용해서 실질적 mesh 생성
