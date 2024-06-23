@@ -39,14 +39,22 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	//	physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
 	//	//m_vPhysxPairs.emplace_back(object, actor);
 	//}
-	if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy) && m_pPhysXManager != nullptr)
-	{
-		physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
-	}
+	if (m_pPhysXManager != nullptr) {
 
-	else if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject) && m_pPhysXManager != nullptr)
-	{
-		physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
+		if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy))
+		{
+			physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
+		}
+
+		else if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject))
+		{
+			physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
+		}
+
+		else if ((layer == ObjectLayer::DestroyedObject))
+		{
+			physx::PxActor* actor = m_pPhysXManager->AddDynamicConvexCustomGeometry(object);
+		}
 	}
 
 	m_pvObjectManager[(int)(layer)].push_back(object);
@@ -194,6 +202,8 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 						for (auto& meshData : newMeshs) { // 하나의 오브젝트에 하나의 메쉬 할당
 							CGameObject* newObj = new CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+
+							// Material Set
 							CMaterial* currMaterial = newObj->GetMaterial();
 							CMaterial* oriMaterial;
 							oriMaterial = pTarget->GetMaterial();
@@ -205,6 +215,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 								currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
 								currMaterial->SetTexture(oriMaterial->m_pTexture);
 							}
+
 							newObj->SetWorldMat(pTarget->GetWorldMat());
 							newObj->SetMesh(0, meshData, true);
 							newObjects.push_back(newObj);
@@ -214,7 +225,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			}
 
 			for (const auto& a : deleteObjects) DelObj(a);	// 원본 오브젝트 삭제
-			for (const auto& a : newObjects) AddObj(a, ObjectLayer::Object); // 절단된 오브젝트 추가
+			for (const auto& a : newObjects) AddObj(a, ObjectLayer::DestroyedObject); // 절단된 오브젝트 추가
 		}
 
 		while (false == pvCutters->empty()) { 

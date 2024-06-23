@@ -35,12 +35,14 @@ public:
     physx::PxActor* AddCapshulDynamic(CGameObject* object);
     physx::PxActor* AddCapshulKinematic(CGameObject* object);
     physx::PxActor* AddStaticCustomGeometry(CGameObject* object);
+    physx::PxActor* AddDynamicConvexCustomGeometry(CGameObject* object);
 
     physx::PxRigidStatic* AddStaticMapObject(CGameObject* object) {};
 
 public:
     // Cook Triangle Mesh Collider
     physx::PxTriangleMesh* CreateCustomTriangleMeshCollider(CMesh* pMesh);
+    physx::PxConvexMesh* CreateCustomConvexMeshCollider(CMesh* pMesh);
     physx::PxConvexMesh* ConvertConvexMeshCollider(physx::PxTriangleMesh* pTriangleMesh);
 
 public:
