@@ -105,7 +105,13 @@ public:
 	//	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//}
 
+	void EngageFlag(bool flag) { m_bEngageFlag = flag; };
+	void StopMove() { m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0; };
+	virtual void BeforeEngage();
+	virtual void AfterEngage();
+	
 	virtual void Animate(float fTimeTotal ,float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 private:
+	bool m_bEngageFlag;
 };

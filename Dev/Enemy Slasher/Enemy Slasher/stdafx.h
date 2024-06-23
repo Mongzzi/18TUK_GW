@@ -73,8 +73,8 @@ using Microsoft::WRL::ComPtr;
 #define FRAME_BUFFER_HEIGHT		960
 
 
-#define CHASE_DISTANCE 1000.0f
-#define BATTLE_DISTANCE 100.0f
+#define CHASE_DISTANCE 1500.0f
+#define BATTLE_DISTANCE 700.0f
 
 #include <cassert>
 

@@ -1853,8 +1853,8 @@ void CTestScene::ReleaseShaderVariables()
 
 bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
-	m_ptCenterCursorPos = POINT{ 0,0 };
-	GetCursorPos(&m_ptCenterCursorPos);
+	m_ptCenterCursorPos = POINT{ FRAME_BUFFER_WIDTH / 2,FRAME_BUFFER_HEIGHT / 2 };
+	//GetCursorPos(&m_ptCenterCursorPos);
 	ScreenToClient(hWnd, &m_ptCenterCursorPos);
 
 	if (m_iOverFlag != 0) 
@@ -2158,7 +2158,7 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 			{
 				// cobj의 위치에 절단 오브젝트 생성. 가능?
 				
-				CRay r = r.RayAtWorldSpace(m_ptCenterCursorPos.x, m_ptCenterCursorPos.y, m_pPlayer->GetCamera());
+				CRay r = r.RayAtWorldSpace(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 10 * 4, m_pPlayer->GetCamera());
 				((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
 
 				m_pvDeadObjects.push_back(cobj);
@@ -2245,6 +2245,11 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		m_iCurrentTurnCount = 0;
 		m_iTurnFlag = 0;
 		m_currentPhase = TurnPhase::NON;
+
+		for (CCharacterObject* cobj : m_pvEngagedObjects)
+		{
+			cobj->AfterEngage();
+		}
 	}
 	else if (m_currentPhase == TurnPhase::Engage)
 	{
@@ -2255,7 +2260,7 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	}
 	else if (m_currentPhase == TurnPhase::StartBattle)
 	{
-		dre.seed(0);
+		dre.seed(10);
 		for (CCharacterObject* cobj : m_pvEngagedObjects)
 		{
 			cobj->BeforeEngage();
@@ -2294,10 +2299,15 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	// 절단
 	XMFLOAT3 cutterPos{ 0,0,0 };
 	bool flag = false;
+	CRayObject* pRayObj = nullptr;
+	XMFLOAT3 ray_dir{ 0,0,0 };
+	XMFLOAT3 ray_origin{ 0,0,0 };
+	XMFLOAT3 playerLook = m_pPlayer->GetLook();
 
 	if (m_pvDeadObjects.size() > 0)
 	{
-		cutterPos = m_pvDeadObjects[0]->GetPosition();
+		//cutterPos = m_pvDeadObjects[0]->GetPosition();
+		//m_pvDeadObjects[0]->SetPosition(cutterPos);
 		m_pvDeadObjects.erase(m_pvDeadObjects.begin());
 
 		flag = true;
@@ -2307,9 +2317,9 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	if (m_bAddCutter) {
 		m_bAddCutter = false;
 		float fBoxSize = 100.0f;
-		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
-		XMFLOAT3 ray_dir = pRayObj->GetRayDir();
-		XMFLOAT3 ray_origin = pRayObj->GetRayOrigin();
+		pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
+		ray_dir = pRayObj->GetRayDir();
+		ray_origin = pRayObj->GetRayOrigin();
 
 		std::random_device rd;
 		std::default_random_engine dre(rd());
@@ -2323,7 +2333,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		CCutterBox_NonMesh* cutterMesh = nullptr;
 
 		if (flag)
-			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize * 3, fBoxSize * 3, fBoxSize * 3);	// 박스 안의 오브젝트를 절단한다.
+			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize * 2, fBoxSize * 2, fBoxSize * 2);	// 박스 안의 오브젝트를 절단한다.
 		else
 			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
 
@@ -2332,11 +2342,13 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
 		cutterObject->SetMesh(0, cutterMesh, true);
 		if (flag)
-			cutterObject->SetPosition(cutterPos);
+			cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize * 12)));
 		else
-			cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize*3)));
+			cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize * 3)));
 		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
+
+		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
 	}
