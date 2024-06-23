@@ -170,7 +170,7 @@ physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
 
     gScene->addActor(*aCapsuleActor);
 
-
+    object->m_vpPhysXShape.push_back(aCapsuleShape);
     object->m_pPhysXActor = aCapsuleActor;
     object->m_PhysXActorType = PhysXActorType::Dynamic;
 
@@ -296,9 +296,13 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
     }
 
     // actor가 자신의 object*를 알도록 저장
-    staticActor->userData = object;
+    if (staticActor)
+    {
+        staticActor->userData = object;
 
-    gScene->addActor(*staticActor);
+        gScene->addActor(*staticActor);
+    }
+
     
     object->m_pPhysXActor = staticActor;
     object->m_PhysXActorType = PhysXActorType::Static;

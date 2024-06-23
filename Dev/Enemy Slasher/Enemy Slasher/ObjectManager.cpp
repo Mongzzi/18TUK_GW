@@ -28,11 +28,11 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	// 일단 쉐이더 매니저는 항상 모든 쉐이더를 가지고 있음
 
 
-	//if (layer == ObjectLayer::Object)
-	//{
-	//	((CDynamicShapeMesh*)((((CGameObject*)object)->GetMeshes()[0])))->SetCuttable(true);
-	//	(object)->SetCuttable(true);
-	//}
+	/*if (layer == ObjectLayer::Enemy)
+	{
+		((CDynamicShapeMesh*)((((CGameObject*)object)->GetMeshes()[0])))->SetCuttable(true);
+		(object)->SetCuttable(true);
+	}*/
 
 	//if (layer == ObjectLayer::ObjectPhysX && m_pPhysXManager != nullptr)
 	//{
@@ -41,7 +41,7 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	//}
 	if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy) && m_pPhysXManager != nullptr)
 	{
-		//physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
+		physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
 	}
 
 	else if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject) && m_pPhysXManager != nullptr)
@@ -150,7 +150,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			vector<CGameObject*> newObjects;
 			vector<CGameObject*> deleteObjects;
 
-			for (const auto& pTarget : m_pvObjectManager[(int)ObjectLayer::TextureObject]) {
+			for (const auto& pTarget : m_pvObjectManager[(int)ObjectLayer::Enemy]) {
 				// 잘릴 수 있다면
 				if (pTarget->GetCuttable() == true) {
 					const physx::PxGeometryQueryFlags queryFlags = physx::PxGeometryQueryFlag::eDEFAULT;
@@ -166,14 +166,26 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 						const physx::PxGeometry& geom = pTarget->m_vpPhysXShape[i]->getGeometry();
 
 						bool isOverlapping = physx::PxGeometryQuery::overlap(cutterGeometry, cutterTransform, geom, shapePose, queryFlags, threadContext);
-
 						// 충돌했다면
 						if (isOverlapping == true) {
-							vector<CMesh*> vRetMeshs = static_cast<CDynamicShapeMesh*>(pTarget->GetMeshes()[i])->
-								DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pTarget->GetWorldMat(),
-									static_cast<CDynamicShapeMesh*>(pCutter->GetMeshes()[0]), pCutter->GetWorldMat(),
-									cutAlgorithm);
-							newMeshs.insert(newMeshs.end(), vRetMeshs.begin(), vRetMeshs.end());
+							if (pTarget->GetMeshes() == nullptr)
+							{
+								auto pTargetChild = pTarget->GetChild();
+
+								vector<CMesh*> vRetMeshs = static_cast<CDynamicShapeMesh*>(pTargetChild->GetMeshes()[i])->
+									DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pTargetChild->GetWorldMat(),
+										static_cast<CDynamicShapeMesh*>(pCutter->GetMeshes()[0]), pCutter->GetWorldMat(),
+										cutAlgorithm);
+								newMeshs.insert(newMeshs.end(), vRetMeshs.begin(), vRetMeshs.end());
+							}
+							else
+							{
+								vector<CMesh*> vRetMeshs = static_cast<CDynamicShapeMesh*>(pTarget->GetMeshes()[i])->
+									DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pTarget->GetWorldMat(),
+										static_cast<CDynamicShapeMesh*>(pCutter->GetMeshes()[0]), pCutter->GetWorldMat(),
+										cutAlgorithm);
+								newMeshs.insert(newMeshs.end(), vRetMeshs.begin(), vRetMeshs.end());
+							}
 						}
 					}
 
