@@ -455,13 +455,15 @@ public:
 	void SetTeamId(int teamId) { m_iTeamId = teamId; };
 	void SetName(string newName) { m_sName = newName; };
 
-	void BeforeEngage();
+	virtual void BeforeEngage();
+	virtual void AfterEngage();
 
 	void TakeDamage(float atk);
 	void Heal(float ratio = 0.2);
 
 	void AddTarget(CCharacterObject* target) { m_vTargets.push_back(target); };
 	void SetCharacterState(CharacterState state) { m_CurrentState = state; };
+	CharacterState GetCharacterState() { return m_CurrentState; };
 
 	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 };

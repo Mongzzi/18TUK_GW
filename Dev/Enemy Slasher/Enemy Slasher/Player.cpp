@@ -171,22 +171,6 @@ void CPlayer::Update(float fTimeElapsed)
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	Move(xmf3Velocity, false);
 
-	// 플레이어와 캐릭터를 분리하면 여기서 빠져야함.
-	fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	if (fLength > 0.001f) 
-	{
-		CCharacterObject::SetCharacterState(CharacterState::MoveState);
-		SetCuranimLoof(true);
-		SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed)); //애니메이션 속도 조절.
-	}
-	else
-	{
-		CCharacterObject::SetCharacterState(CharacterState::IdleState);
-		SetCuranimLoof(true);
-		SetAnimSpeedRatio(1);
-	}
-	//
-
 	fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (m_fFriction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
@@ -294,14 +278,103 @@ TestPlayer::TestPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	}
 	ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_bEngageFlag = false;
 }
 TestPlayer::~TestPlayer()
 {
 }
 
 
+void TestPlayer::BeforeEngage()
+{
+	m_bEngageFlag = true;
+	StopMove();
+	CCharacterObject::SetCharacterState(CharacterState::IdleState);
+	SetCuranimLoof(true);
+	SetAnimSpeedRatio(1);
+
+	CCharacterObject::BeforeEngage();
+}
+
+void TestPlayer::AfterEngage()
+{
+	m_bEngageFlag = false;
+	CCharacterObject::AfterEngage();
+}
+
 void TestPlayer::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	if (!m_bEngageFlag)
+	{
+		// 플레이어와 캐릭터를 분리하면 여기서 빠져야함.
+		if (fLength > 0.001f)
+		{
+			CCharacterObject::SetCharacterState(CharacterState::MoveState);
+			SetCuranimLoof(true);
+			SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed)); //애니메이션 속도 조절.
+		}
+		else
+		{
+			CCharacterObject::SetCharacterState(CharacterState::IdleState);
+			SetCuranimLoof(true);
+			SetAnimSpeedRatio(1);
+		}
+		//
+	}
+	else
+	{
+		if (m_vTargets.size())
+		{
+			CCharacterObject* curTarget = m_vTargets[0];
+
+			XMFLOAT3 targetPosition = curTarget->GetPosition();
+
+			XMFLOAT3 m_dir = { 0.0f,0.0f,1.0f };
+
+			// 방향벡터 몬스터에서 플레이어로
+			XMFLOAT3 positionDifference;
+			positionDifference.x = targetPosition.x - GetPosition().x;
+			//positionDifference.y = targetPosition.y - GetPosition().y;
+			positionDifference.z = targetPosition.z - GetPosition().z;
+
+			// 정규화과정  - 이거 말고 그냥  XMVector3Normalize 사용할걸 고려.
+			float length = sqrt(positionDifference.x * positionDifference.x/* + positionDifference.y * positionDifference.y*/ + positionDifference.z * positionDifference.z);
+			float epsilon = 1e-6;
+			if (length > epsilon)
+			{
+				m_dir.x = positionDifference.x / length;
+				m_dir.y = 0;//positionDifference.y / length;
+				m_dir.z = positionDifference.z / length;
+
+				//SetLook(m_dir);
+			}
+			XMFLOAT3 tmp{ 0,0,0 };
+			if(m_CurrentState == CharacterState::MoveState)
+			{
+				tmp = Vector3::CrossProduct(GetLook(), m_dir);
+				if (Vector3::DotProduct(tmp, GetUp()) > 0)
+					Rotate(0, 120 * m_fTimeElapsed, 0);
+				else
+					Rotate(0, -120 * m_fTimeElapsed, 0);
+
+				if (length > 300.f)
+				{
+					if (Vector3::DotProduct(GetLook(), m_dir) > 0.9)
+						Move(DIR_FORWARD, m_fMoveSpeed, true);
+				}
+				else
+				{
+					StopMove();
+				}
+				SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed)); //애니메이션 속도 조절.
+			}
+			else
+				SetAnimSpeedRatio(1);
+		}
+	}
+
 	//Update(fTimeElapsed);
 	if (m_pSibling) m_pSibling->Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
 	if (m_pChild) m_pChild->Animate(fTimeTotal,fTimeElapsed, &m_xmf4x4World);

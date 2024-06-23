@@ -965,11 +965,17 @@ bool CTestScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 					{
 						// 원위치로 돌아감.
 						m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
-						m_pSelectedUI = NULL;
+						SetSelectedUI(nullptr);
 					}
 					else
 					{
-						UseSelectedCard();
+						if (m_pPlayer->GetCharacterState() == CharacterState::IdleState)
+							UseSelectedCard();
+						else
+						{
+							m_pSelectedUI->SetPositionUI(m_pSelectedUI->GetPositionUI().x, (float)clientHeight / 10 * 9);
+							SetSelectedUI(nullptr);
+						}
 					}
 				}
 		break;
@@ -1051,17 +1057,24 @@ bool CTestScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		case '5':
 			if (m_iOverFlag == 0)
 				if (teamID == 0)
-					tmp = wParam - 0x30 - 1;
-					if (m_currentPhase == TurnPhase::PlayPhase)
 					{
-						if (pInteractiveUIObj->size() > 0) {
-							if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
-							{
-								if (m_pSelectedUI == (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp])
-									UseSelectedCard();
-								else
+						tmp = wParam - 0x30 - 1;
+						if (m_currentPhase == TurnPhase::PlayPhase)
+						{
+							if (pInteractiveUIObj->size() > 0) {
+								if (tmp < m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->GetHand().size())
 								{
-									SetSelectedUI((CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp]);
+									if (m_pSelectedUI == (CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp])
+									{
+										if (m_pPlayer->GetCharacterState() == CharacterState::IdleState)
+											UseSelectedCard();
+										else
+											SetSelectedUI(nullptr);
+									}
+									else
+									{
+										SetSelectedUI((CCardButton*)pObjectList[(int)ObjectLayer::CardButtonObject][tmp]);
+									}
 								}
 							}
 						}
@@ -1161,7 +1174,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	std::uniform_int_distribution <> urd(0, 6);
 	int random_number = 0;
 	//int random_number = urd(dre);
-	/*if (random_number == 0) {
+	if (random_number == 0) {
 		pMapObject->SetChild(pFBXDataManager->LoadFBXObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "fbxsdk/", "final_map"));
 	}
 	else if (random_number == 1) {
@@ -1190,7 +1203,7 @@ void CTestScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 
 	pMapObject->SetPosition(0.0f, 0.0f, 0.0f);
-	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);*/
+	m_pObjectManager->AddObj(pMapObject, ObjectLayer::Map);
 
 
 	// ----------------- 버튼 오브젝트 ------------------
@@ -1853,8 +1866,8 @@ void CTestScene::ReleaseShaderVariables()
 
 bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPos)
 {
-	m_ptCenterCursorPos = POINT{ 0,0 };
-	GetCursorPos(&m_ptCenterCursorPos);
+	m_ptCenterCursorPos = POINT{ FRAME_BUFFER_WIDTH / 2,FRAME_BUFFER_HEIGHT / 2 };
+	//GetCursorPos(&m_ptCenterCursorPos);
 	ScreenToClient(hWnd, &m_ptCenterCursorPos);
 
 	if (m_iOverFlag != 0) 
@@ -1943,20 +1956,22 @@ bool CTestScene::ProcessInput(HWND hWnd, UCHAR* pKeysBuffer, POINT ptOldCursorPo
 				SetCursor(NULL);
 				SetCursorPos(ptOldCursorPos.x, ptOldCursorPos.y);
 
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				if (m_pPlayer->GetCharacterState() != CharacterState::MoveState)
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 
-				std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
-				if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
-					for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
-						if (CGameObject* IterObj = dynamic_cast<CGameObject*>(obj)) {
-							XMFLOAT4X4 playerMat = m_pPlayer->GetWorldMat();
-							XMFLOAT4X4 objMat = IterObj->GetWorldMat();
-							if (true == CollisionCheck(m_pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
-								m_pPlayer->Rotate(-cyDelta, -cxDelta, 0.0f);
-							}
-						}
-					}
-				}
+				// 여기는 뭐야?
+				//std::vector<CGameObject*>* pvObjectList = m_pObjectManager->GetObjectList();
+				//if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
+				//	for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
+				//		if (CGameObject* IterObj = dynamic_cast<CGameObject*>(obj)) {
+				//			XMFLOAT4X4 playerMat = m_pPlayer->GetWorldMat();
+				//			XMFLOAT4X4 objMat = IterObj->GetWorldMat();
+				//			if (true == CollisionCheck(m_pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
+				//				m_pPlayer->Rotate(-cyDelta, -cxDelta, 0.0f);
+				//			}
+				//		}
+				//	}
+				//}
 			}
 			else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 			{
@@ -2036,34 +2051,34 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	if (false == pvObjectList[(int)ObjectLayer::Player].empty()) { // Player가 있다면
 		CPlayer* pPlayer = (CPlayer*)pvObjectList[(int)ObjectLayer::Player][0];
 
-		if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
-			for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
-				if (CGameObject* IterObj = dynamic_cast<CGameObject*>(obj)) {
-					XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
-					XMFLOAT4X4 playerMat = pPlayer->GetWorldMat();
-					XMFLOAT4X4 objMat = IterObj->GetWorldMat();
-					if (CollisionCheck(pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
-						XMFLOAT3 playerVal = pPlayer->GetVelocity();
-						xmfPlayerPos.x -= (playerVal.x * fTimeElapsed);
-						xmfPlayerPos.z -= (playerVal.z * fTimeElapsed);
-						pPlayer->SetPosition(xmfPlayerPos);
-					}
-				}
-			}
-		}
+		//if (false == pvObjectList[(int)ObjectLayer::Object].empty()) {
+		//	for (const auto& obj : pvObjectList[(int)ObjectLayer::Object]) {
+		//		if (CGameObject* IterObj = dynamic_cast<CGameObject*>(obj)) {
+		//			XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+		//			XMFLOAT4X4 playerMat = pPlayer->GetWorldMat();
+		//			XMFLOAT4X4 objMat = IterObj->GetWorldMat();
+		//			if (CollisionCheck(pPlayer->GetCollider(), playerMat, IterObj->GetCollider(), objMat)) {
+		//				XMFLOAT3 playerVal = pPlayer->GetVelocity();
+		//				xmfPlayerPos.x -= (playerVal.x * fTimeElapsed);
+		//				xmfPlayerPos.z -= (playerVal.z * fTimeElapsed);
+		//				pPlayer->SetPosition(xmfPlayerPos);
+		//			}
+		//		}
+		//	}
+		//}
 
-		if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain과 Player가 있다면
-			XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
-			float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
-
-			if (xmfPlayerPos.y < fHeight) {
-				xmfPlayerPos.y = fHeight;
-				pPlayer->SetPosition(xmfPlayerPos);
-				XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
-				xmfVelocity.y = 0.0f;
-				pPlayer->SetVelocity(xmfVelocity);
-			}
-		}
+		//if (false == pvObjectList[(int)ObjectLayer::Terrain].empty()) { // Terrain과 Player가 있다면
+		//	XMFLOAT3 xmfPlayerPos = pPlayer->GetPosition();
+		//	float fHeight = ((CHeightMapTerrain*)pvObjectList[(int)ObjectLayer::Terrain][0])->GetHeight(xmfPlayerPos.x, xmfPlayerPos.z);
+		//
+		//	if (xmfPlayerPos.y < fHeight) {
+		//		xmfPlayerPos.y = fHeight;
+		//		pPlayer->SetPosition(xmfPlayerPos);
+		//		XMFLOAT3 xmfVelocity = pPlayer->GetVelocity();
+		//		xmfVelocity.y = 0.0f;
+		//		pPlayer->SetVelocity(xmfVelocity);
+		//	}
+		//}
 	}
 	if (m_pLights)
 	{
@@ -2157,8 +2172,8 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 			if (cobj->GetCurHp() <= 0)
 			{
 				// cobj의 위치에 절단 오브젝트 생성. 가능?
-				
-				CRay r = r.RayAtWorldSpace(m_ptCenterCursorPos.x, m_ptCenterCursorPos.y, m_pPlayer->GetCamera());
+				cobj->SetCuttable(true);
+				CRay r = r.RayAtWorldSpace(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 20 * 7, m_pPlayer->GetCamera());
 				((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]))->Reset(r);
 
 				m_pvDeadObjects.push_back(cobj);
@@ -2245,6 +2260,11 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 		m_iCurrentTurnCount = 0;
 		m_iTurnFlag = 0;
 		m_currentPhase = TurnPhase::NON;
+
+		for (CCharacterObject* cobj : m_pvEngagedObjects)
+		{
+			cobj->AfterEngage();
+		}
 	}
 	else if (m_currentPhase == TurnPhase::Engage)
 	{
@@ -2255,7 +2275,7 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	}
 	else if (m_currentPhase == TurnPhase::StartBattle)
 	{
-		dre.seed(0);
+		dre.seed(10);
 		for (CCharacterObject* cobj : m_pvEngagedObjects)
 		{
 			cobj->BeforeEngage();
@@ -2294,10 +2314,15 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	// 절단
 	XMFLOAT3 cutterPos{ 0,0,0 };
 	bool flag = false;
+	CRayObject* pRayObj = nullptr;
+	XMFLOAT3 ray_dir{ 0,0,0 };
+	XMFLOAT3 ray_origin{ 0,0,0 };
+	XMFLOAT3 playerLook = m_pPlayer->GetLook();
 
 	if (m_pvDeadObjects.size() > 0)
 	{
-		cutterPos = m_pvDeadObjects[0]->GetPosition();
+		//cutterPos = m_pvDeadObjects[0]->GetPosition();
+		//m_pvDeadObjects[0]->SetPosition(cutterPos);
 		m_pvDeadObjects.erase(m_pvDeadObjects.begin());
 
 		flag = true;
@@ -2307,9 +2332,9 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	if (m_bAddCutter) {
 		m_bAddCutter = false;
 		float fBoxSize = 100.0f;
-		CRayObject* pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
-		XMFLOAT3 ray_dir = pRayObj->GetRayDir();
-		XMFLOAT3 ray_origin = pRayObj->GetRayOrigin();
+		pRayObj = ((CRayObject*)(m_pObjectManager->GetObjectList()[(int)ObjectLayer::Ray][0]));
+		ray_dir = pRayObj->GetRayDir();
+		ray_origin = pRayObj->GetRayOrigin();
 
 		std::random_device rd;
 		std::default_random_engine dre(rd());
@@ -2323,7 +2348,7 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		CCutterBox_NonMesh* cutterMesh = nullptr;
 
 		if (flag)
-			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize * 3, fBoxSize * 3, fBoxSize * 3);	// 박스 안의 오브젝트를 절단한다.
+			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize * 2, fBoxSize * 2, fBoxSize * 2);	// 박스 안의 오브젝트를 절단한다.
 		else
 			cutterMesh = new CCutterBox_NonMesh(pd3dDevice, pd3dCommandList, fBoxSize, fBoxSize, fBoxSize);	// 박스 안의 오브젝트를 절단한다.
 
@@ -2332,11 +2357,13 @@ void CTestScene::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		cutterMesh->SetCutPlaneNormal(planeNormal); // 절단면의 노멀
 		cutterObject->SetMesh(0, cutterMesh, true);
 		if (flag)
-			cutterObject->SetPosition(cutterPos);
+			cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize * 13.5)));
 		else
-			cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize*3)));
+			cutterObject->SetPosition(Vector3::Add(ray_origin, Vector3::ScalarProduct(ray_dir, fBoxSize * 3)));
 		cutterObject->SetAllowCutting(true);	// 이게 켜져있어야 자른다?
 		//cutterObject->SetShaderType(ShaderType::CObjectsShader);
+
+		cutterObject->Rotate(0, m_pPlayer->GetYaw(), 0);
 
 		m_pObjectManager->AddObj(cutterObject, ObjectLayer::CutterObject);
 	}
@@ -2536,8 +2563,18 @@ void CTestScene::UseSelectedCard()
 
 void CTestScene::SetSelectedUI(CCardButton* selected)
 {
-	m_pSelectedUI = selected;
-	m_pSelectedUI->m_IsClicked = true;
+	if (selected)
+	{
+		if (m_pSelectedUI)
+			SetSelectedUI(nullptr);
+		m_pSelectedUI = selected;
+		m_pSelectedUI->m_IsClicked = true;
+	}
+	else
+	{
+		m_pSelectedUI->m_IsClicked = false;
+		m_pSelectedUI = nullptr;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

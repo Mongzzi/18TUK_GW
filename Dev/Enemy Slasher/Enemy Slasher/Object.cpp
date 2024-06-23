@@ -1147,7 +1147,7 @@ void CCharacterObject::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4*
 			XMStoreFloat3(&m_dir, vResult);
 			MovePosition(m_dir);
 			// 일정 거리 안으로 다가가면 타겟 추출.
-			eraseFlag = length < 100.f;
+			eraseFlag = length < 300.f;
 			SetCuranimLoof(true);
 			break;
 		case CharacterState::BuffState:
@@ -1278,7 +1278,10 @@ void CCharacterObject::BeforeEngage()
 {
 	m_iKarma = 1;
 	m_pDeck->InitializeDeck();
-};
+}
+void CCharacterObject::AfterEngage()
+{
+}
 
 void CCharacterObject::TakeDamage(float atk)
 {
