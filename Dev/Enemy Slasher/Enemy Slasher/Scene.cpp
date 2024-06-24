@@ -2446,13 +2446,25 @@ void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devic
 	WCHAR objText[] = L"Remaining Enemies : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
-	int objCount = objList[(int)ObjectLayer::Enemy].size();
-	if (objCount == 0) textLen++;
-	while (objCount > 0) {
-		objCount /= 10; textLen++;
+
+	int objCount = 0;
+	int objL;
+	std::vector<CGameObject*> EnemyLayer = objList[(int)ObjectLayer::Enemy];
+
+	for (auto obj : EnemyLayer)
+	{
+		CMonsterObject* monsterObj = dynamic_cast<CMonsterObject*>(obj);
+
+		if (monsterObj->GetCurHp() > 0)
+			objCount++;
+	}
+	objL = objCount;
+	if (objL == 0) textLen++;
+	while (objL > 0) {
+		objL /= 10; textLen++;
 	}
 
-	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::Enemy].size()));
+	wsprintf(text, L"%s%d", objText, objCount);
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
