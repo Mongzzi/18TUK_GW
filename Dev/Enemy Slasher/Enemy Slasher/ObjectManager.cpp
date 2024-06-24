@@ -162,7 +162,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			cutterHalfExtents = pCutterOBB->GetOBBHalfExtents();
 			physx::PxTransform cutterTransform(cutterpos.x, cutterpos.y, cutterpos.z);
 			//physx::PxBoxGeometry cutterGeometry(physx::PxVec3(cutterHalfExtents.x, cutterHalfExtents.y, cutterHalfExtents.z));
-			physx::PxSphereGeometry cutterGeometry(100.f);
+			physx::PxSphereGeometry cutterGeometry(500.f);
 
 			{ // physx debugging
 				//physx::PxRigidStatic* staticActor = m_pPhysXManager->GetPhysics()->createRigidStatic(cutterTransform);

@@ -66,5 +66,5 @@ private:
     physx::PxPvd*                   gPvd = nullptr;
 
     //Gravitational acceleration
-    const physx::PxVec3             gGravity = physx::PxVec3(0.0f, -9.81f * 5.f, 0.0f);
+    const physx::PxVec3             gGravity = physx::PxVec3(0.0f, -9.81f * 50.f, 0.0f);
 };
