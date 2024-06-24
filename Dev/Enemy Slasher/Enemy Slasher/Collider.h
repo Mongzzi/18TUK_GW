@@ -12,6 +12,7 @@ protected:
 
 public:
 	virtual void MakeCollider(CVertex* pVertices, UINT nVertices) = 0;
+	CCollider* GetCollider() { return this; }
 };
 
 class CAABBCollider : public CCollider
@@ -53,6 +54,7 @@ public:
 	XMFLOAT3 GetOBBCenter() { return m_xmf3Center; }
 	XMFLOAT3 GetOBBHalfExtents() { return m_xmf3HalfExtents; }
 	XMFLOAT3* GetOBBOrientation() { return m_xmf3Orientation; }
+	COBBCollider* GetCollider() { return this; }
 };
 
 bool CollisionCheck(CAABBCollider* pACollider, XMFLOAT4X4& AWorldMat, CAABBCollider* pBCollider, XMFLOAT4X4& BWorldMat);

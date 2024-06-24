@@ -801,7 +801,7 @@ void CGameObject::SetShader(CShader* pShader)
 void CGameObject::MakeCollider()
 {
 	if (m_pCollider) delete m_pCollider;
-	m_pCollider = new COBBColliderWithMesh;
+	m_pCollider = new COBBCollider;//WithMesh;
 	XMFLOAT4X4 myWorldMat = GetWorldMat();
 	for (int i = 0; i < m_nMeshes; ++i) {
 		m_pCollider->UpdateColliderWithOBB((m_ppMeshes[i])->GetCollider(), myWorldMat);

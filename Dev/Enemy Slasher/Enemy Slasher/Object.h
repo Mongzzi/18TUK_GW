@@ -202,7 +202,8 @@ protected:
 	XMFLOAT3 m_xmf3Scale;
 
 protected:
-	COBBColliderWithMesh* m_pCollider = NULL;	// 충돌체
+	//COBBColliderWithMesh* m_pCollider = NULL;	// 충돌체
+	COBBCollider* m_pCollider = NULL;	// 충돌체
 
 	bool							m_bAllowCutting = false;	// true 라면 다른 오브젝트를 자를 수 있다.
 	bool							m_bCuttable = false;		// true 라면 다른 오브젝트에 인해 잘릴 수 있다.
