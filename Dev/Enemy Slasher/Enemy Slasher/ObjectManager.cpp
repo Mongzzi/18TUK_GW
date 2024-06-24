@@ -39,14 +39,22 @@ void CObjectManager::AddObj(CGameObject* object, ObjectLayer layer)
 	//	physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
 	//	//m_vPhysxPairs.emplace_back(object, actor);
 	//}
-	if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy) && m_pPhysXManager != nullptr)
-	{
-		physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
-	}
+	if (m_pPhysXManager != nullptr) {
 
-	else if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject) && m_pPhysXManager != nullptr)
-	{
-		physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
+		if ((layer == ObjectLayer::Player || layer == ObjectLayer::Enemy))
+		{
+			physx::PxActor* actor = m_pPhysXManager->AddCapshulDynamic(object);
+		}
+
+		else if ((layer == ObjectLayer::Map || layer == ObjectLayer::TextureObject || layer == ObjectLayer::InteractiveUIObject))
+		{
+			physx::PxActor* actor = m_pPhysXManager->AddStaticCustomGeometry(object);
+		}
+
+		else if ((layer == ObjectLayer::DestroyedObject))
+		{
+			physx::PxActor* actor = m_pPhysXManager->AddDynamicConvexCustomGeometry(object);
+		}
 	}
 
 	m_pvObjectManager[(int)(layer)].push_back(object);
@@ -112,14 +120,32 @@ void CObjectManager::AnimateObjects(float fTimeTotal, float fTimeElapsed)
 	if (m_pPhysXManager != nullptr) {
 		m_pPhysXManager->stepPhysics(true, fTimeElapsed);
 		physx::PxTransform transform;
-		for (std::vector<CGameObject*> a : m_pvObjectManager)
+		for (std::vector<CGameObject*> a : m_pvObjectManager) {
 			for (CGameObject* b : a) {
 				if (b->m_PhysXActorType == PhysXActorType::Dynamic &&
 					b->m_pPhysXActor != nullptr) {
 					transform = static_cast<physx::PxRigidDynamic*>(b->m_pPhysXActor)->getGlobalPose();
 					b->SetPosition(transform.p.x, transform.p.y - PHYSX_CAPSUL_HEIGHT, transform.p.z);
 				}
+				else if (b->m_PhysXActorType == PhysXActorType::Dynamic_Allow_Rotate &&
+					b->m_pPhysXActor != nullptr) {
+					transform = static_cast<physx::PxRigidDynamic*>(b->m_pPhysXActor)->getGlobalPose();
+
+					XMMATRIX matrix = XMLoadFloat4x4(&b->GetTransMat());
+					XMVECTOR xmvScale, xmvRotate, xmvPos;
+					XMMatrixDecompose(&xmvScale, &xmvRotate, &xmvPos, matrix);
+
+					XMFLOAT4X4 invRotMat = Matrix4x4::Identity();
+					XMMATRIX mtxRotate = XMMatrixRotationQuaternion(xmvRotate);
+					invRotMat = Matrix4x4::Inverse(Matrix4x4::Multiply(mtxRotate, invRotMat));
+
+					b->SetTransMat(Matrix4x4::Multiply(b->GetTransMat(), invRotMat));
+					b->SetPosition(transform.p.x, transform.p.y, transform.p.z);
+					XMFLOAT4 quaternion(transform.q.x, transform.q.y, transform.q.z, transform.q.w);
+					b->Rotate(&quaternion);
+				}
 			}
+		}
 	}
 }
 
@@ -136,7 +162,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			cutterHalfExtents = pCutterOBB->GetOBBHalfExtents();
 			physx::PxTransform cutterTransform(cutterpos.x, cutterpos.y, cutterpos.z);
 			//physx::PxBoxGeometry cutterGeometry(physx::PxVec3(cutterHalfExtents.x, cutterHalfExtents.y, cutterHalfExtents.z));
-			physx::PxSphereGeometry cutterGeometry(100.f);
+			physx::PxSphereGeometry cutterGeometry(500.f);
 
 			{ // physx debugging
 				//physx::PxRigidStatic* staticActor = m_pPhysXManager->GetPhysics()->createRigidStatic(cutterTransform);
@@ -194,14 +220,22 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 						for (auto& meshData : newMeshs) { // 하나의 오브젝트에 하나의 메쉬 할당
 							CGameObject* newObj = new CGameObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, ShaderType::CTextureShader);
+
+							// Material Set
 							CMaterial* currMaterial = newObj->GetMaterial();
-							CMaterial* oriMaterial = pTarget->GetMaterial();
+							CMaterial* oriMaterial;
+							oriMaterial = pTarget->GetMaterial();
+							if (pTarget->GetChild())
+								oriMaterial = pTarget->GetChild()->GetMaterial();
 							currMaterial->m_xmf4Albedo = oriMaterial->m_xmf4Albedo;
-							//if (oriMaterial->m_pTexture) {
-							//	currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
-							//	currMaterial->SetTexture(oriMaterial->m_pTexture);
-							//}
+							if (oriMaterial->m_pTexture) {
+								currMaterial->m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+								currMaterial->m_pShader->CreateShaderResourceViews(pd3dDevice, oriMaterial->m_pTexture, 0, 4);
+								currMaterial->SetTexture(oriMaterial->m_pTexture);
+							}
+
 							newObj->SetWorldMat(pTarget->GetWorldMat());
+							newObj->SetTransMat(pTarget->GetTransMat());
 							newObj->SetMesh(0, meshData, true);
 							newObjects.push_back(newObj);
 						}
@@ -210,7 +244,7 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			}
 
 			for (const auto& a : deleteObjects) DelObj(a);	// 원본 오브젝트 삭제
-			for (const auto& a : newObjects) AddObj(a, ObjectLayer::Object); // 절단된 오브젝트 추가
+			for (const auto& a : newObjects) AddObj(a, ObjectLayer::DestroyedObject); // 절단된 오브젝트 추가
 		}
 
 		while (false == pvCutters->empty()) { 

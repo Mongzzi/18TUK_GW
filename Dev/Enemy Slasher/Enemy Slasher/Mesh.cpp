@@ -1253,6 +1253,7 @@ vector<CMesh*> CDynamicShapeMesh::DynamicShaping_Graph(ID3D12Device* pd3dDevice,
 
 			// 무한 루프를 돌면서 모든 닫힌 루프 평면을 추가한다.
 			while(true) {
+				if (edgeMap.empty()) break;
 				auto boundaryLoop = ExtractBoundaryLoop(edgeMap);
 				if (boundaryLoop.size() < 3) break;
 

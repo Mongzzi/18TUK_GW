@@ -37,12 +37,12 @@ CPhysXManager::CPhysXManager()
 
     createScene();
 
-    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.2f);
+    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.1f);
 
     //PxReal stackZ = 100.0f;
 
-    //PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
-    //gScene->addActor(*groundPlane);
+    PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
+    gScene->addActor(*groundPlane);
 
     //for (PxU32 i = 0; i < 5; i++)
     //    createStack(PxTransform(PxVec3(0, 0, stackZ -= 10.0f)), 10, 2.0f);
@@ -313,6 +313,60 @@ physx::PxActor* CPhysXManager::AddStaticCustomGeometry(CGameObject* object)
     return staticActor;
 }
 
+physx::PxActor* CPhysXManager::AddDynamicConvexCustomGeometry(CGameObject* object)
+{
+    using namespace physx;
+
+    CMesh** ppMeshs = object->GetMeshes();
+    int nMeshs = object->GetNumMeshes();
+
+    XMFLOAT3 xmf3Scale, xmf3Position;
+    XMFLOAT4 xmf4Rotation;
+    DecomposeTransform(object->GetWorldMat(), xmf3Scale, xmf4Rotation, xmf3Position);
+
+    PxTransform transform(xmf3Position.x, xmf3Position.y, xmf3Position.z, PxQuat(xmf4Rotation.x, xmf4Rotation.y, xmf4Rotation.z, xmf4Rotation.w)); // 위치 지정
+    PxRigidDynamic* dynamicActor = gPhysics->createRigidDynamic(transform);
+    for (int i = 0; i < nMeshs; ++i) {
+        CMesh* pMesh = ppMeshs[i];
+        PxConvexMesh* gConvexMesh;
+        gConvexMesh = CreateCustomConvexMeshCollider(pMesh);
+
+        // Shape를 생성.
+        PxConvexMeshGeometry meshGeometry;
+        meshGeometry.convexMesh = gConvexMesh;
+        meshGeometry.scale = PxVec3(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+        PxShape* shape = gPhysics->createShape(meshGeometry, *gMaterial);
+        if (shape) {
+            shape->setContactOffset(0.05f);
+            shape->setRestOffset(0.0f);
+
+            // 물리 시뮬레이션에 오브젝트로 추가.
+            dynamicActor->attachShape(*shape);
+            object->m_vpPhysXShape.push_back(shape);
+
+            //shape->release();
+        }
+    }
+
+    // actor가 자신의 object*를 알도록 저장
+    if (dynamicActor)
+    {
+        PxRigidBodyExt::updateMassAndInertia(*dynamicActor, 1000.f);
+
+        dynamicActor->userData = object;
+
+        gScene->addActor(*dynamicActor);
+    }
+
+    object->m_pPhysXActor = dynamicActor;
+    object->m_PhysXActorType = PhysXActorType::Dynamic_Allow_Rotate;
+
+    if (object->GetChild()) AddStaticCustomGeometry(object->GetChild());
+    if (object->GetSibling()) AddStaticCustomGeometry(object->GetSibling());
+
+    return dynamicActor;
+}
+
 physx::PxTriangleMesh* CPhysXManager::CreateCustomTriangleMeshCollider(CMesh* pMesh)
 {
     UINT nStride = pMesh->GetStride();
@@ -370,6 +424,62 @@ physx::PxTriangleMesh* CPhysXManager::CreateCustomTriangleMeshCollider(CMesh* pM
     PxTriangleMesh* gTriangleMesh = gPhysics->createTriangleMesh(readBuffer);
 
     return gTriangleMesh;
+}
+
+physx::PxConvexMesh* CPhysXManager::CreateCustomConvexMeshCollider(CMesh* pMesh)
+{
+    UINT nStride = pMesh->GetStride();
+    UINT* gOriginIndices = pMesh->GetIndices();
+    UINT gVertexCount = pMesh->GetNumVertices();
+    UINT gIndexCount = pMesh->GetNumIndices();
+
+    std::vector<PxVec3> gVertices;
+    std::vector<PxU32> gIndices;
+
+    // Vertex 좌표만 추출한 배열 생성
+    {
+        if (nStride == sizeof(CVertex)) {
+            CVertex* gOriginVertices = static_cast<CVertex*>(pMesh->GetVertices());
+            for (UINT j = 0; j < gVertexCount; ++j) {
+                XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
+                gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
+            }
+        }
+        else if (nStride == sizeof(CVertex_Skining)) {
+            CVertex_Skining* gOriginVertices = static_cast<CVertex_Skining*>(pMesh->GetVertices());
+            for (UINT j = 0; j < gVertexCount; ++j) {
+                XMFLOAT3 oriVertex = gOriginVertices[j].GetVertex();
+                gVertices.push_back(PxVec3(oriVertex.x, oriVertex.y, oriVertex.z));
+            }
+        }
+    }
+    // Index 자료형 변환
+    {
+        for (UINT j = 0; j < gIndexCount; ++j) {
+            gIndices.push_back(gOriginIndices[j]);
+        }
+    }
+
+    // PhysX Mesh를 생성.
+    PxConvexMeshDesc convexDesc;
+    convexDesc.points.count = static_cast<PxU32>(gVertices.size());
+    convexDesc.points.stride = sizeof(PxVec3);
+    convexDesc.points.data = gVertices.data();
+    convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX;
+
+    PxTolerancesScale scale;
+    PxCookingParams params(scale);
+
+    PxDefaultMemoryOutputStream writeBuffer;
+    PxConvexMeshCookingResult::Enum result;
+    bool status = PxCookConvexMesh(params, convexDesc, writeBuffer, &result);
+    if (!status)
+        return NULL;
+
+    PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+    PxConvexMesh* gConvexMesh = gPhysics->createConvexMesh(readBuffer);
+
+    return gConvexMesh;
 }
 
 physx::PxConvexMesh* CPhysXManager::ConvertConvexMeshCollider(physx::PxTriangleMesh* pTriangleMesh)

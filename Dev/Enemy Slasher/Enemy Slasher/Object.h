@@ -159,7 +159,8 @@ public:
 enum class PhysXActorType {
 	Dynamic,
 	Static,
-	Kinematic
+	Kinematic,
+	Dynamic_Allow_Rotate
 };
 
 class CGameObject
