@@ -2276,7 +2276,7 @@ void CTestScene::AnimateObjects(float fTotalTime, float fTimeElapsed)
 	else if (m_currentPhase == TurnPhase::StartBattle)
 	{
 		m_iCurrentTurnCount = 1;
-		dre.seed(10);
+		dre.seed(m_CurrentTime);
 		for (CCharacterObject* cobj : m_pvEngagedObjects)
 		{
 			cobj->BeforeEngage();
@@ -2613,8 +2613,7 @@ void CTestScene::UseSelectedCard()
 	pcUI->CallFunc(m_pvEngagedObjects[m_iTurnFlag], m_pvEngagedObjects);
 	m_pvEngagedObjects[m_iTurnFlag]->GetDeckData()->SendHandToUsedByNum(pcUI->GetUiNum());
 	bCardUpdateFlag = true;
-	m_pSelectedUI->m_IsClicked = false;
-	m_pSelectedUI = NULL;
+	SetSelectedUI(nullptr);
 }
 
 void CTestScene::SetSelectedUI(CCardButton* selected)

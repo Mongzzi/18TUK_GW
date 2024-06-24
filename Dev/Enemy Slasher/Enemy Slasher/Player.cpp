@@ -313,7 +313,7 @@ void TestPlayer::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4
 		{
 			CCharacterObject::SetCharacterState(CharacterState::MoveState);
 			SetCuranimLoof(true);
-			SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed)); //애니메이션 속도 조절.
+			SetAnimSpeedRatio(fLength / 1500/*(CCharacterObject::m_fMoveSpeed) */ ); //애니메이션 속도 조절.
 		}
 		else
 		{
@@ -351,7 +351,7 @@ void TestPlayer::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4
 				//SetLook(m_dir);
 			}
 			XMFLOAT3 tmp{ 0,0,0 };
-			if(m_CurrentState == CharacterState::MoveState)
+			if (m_CurrentState == CharacterState::MoveState)
 			{
 				tmp = Vector3::CrossProduct(GetLook(), m_dir);
 				if (Vector3::DotProduct(tmp, GetUp()) > 0)
@@ -359,7 +359,7 @@ void TestPlayer::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4
 				else
 					Rotate(0, -120 * m_fTimeElapsed, 0);
 
-				if (length > 300.f)
+				if (length > 290.f)
 				{
 					if (Vector3::DotProduct(GetLook(), m_dir) > 0.9)
 						Move(DIR_FORWARD, m_fMoveSpeed, true);
@@ -368,18 +368,19 @@ void TestPlayer::Animate(float fTimeTotal, float fTimeElapsed, XMFLOAT4X4* pxmf4
 				{
 					StopMove();
 				}
-				SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed)); //애니메이션 속도 조절.
+				//SetAnimSpeedRatio(fLength / (CCharacterObject::m_fMoveSpeed)); //애니메이션 속도 조절.
 			}
 			else
-				SetAnimSpeedRatio(1);
+				;//SetAnimSpeedRatio(1);
 		}
 	}
 
 	//Update(fTimeElapsed);
-	if (m_pSibling) m_pSibling->Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
-	if (m_pChild) m_pChild->Animate(fTimeTotal,fTimeElapsed, &m_xmf4x4World);
-
 	CCharacterObject::Animate(fTimeTotal,fTimeElapsed, pxmf4x4Parent);
+
+	//if (m_pSibling) m_pSibling->Animate(fTimeTotal, fTimeElapsed, pxmf4x4Parent);
+	//if (m_pChild) m_pChild->Animate(fTimeTotal,fTimeElapsed, &m_xmf4x4World);
+
 }
 
 CCamera* TestPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
