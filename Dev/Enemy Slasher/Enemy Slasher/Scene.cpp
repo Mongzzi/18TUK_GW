@@ -2443,21 +2443,21 @@ void CTestScene::Render2D(ID3D12GraphicsCommandList* pd3dCommandList, ID2D1Devic
 
 	D2D1_RECT_F textRect = D2D1::RectF(0.0f, 0.0f, FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 14);
 	WCHAR text[100];
-	WCHAR objText[] = L"¸Ê »óÀÇ ¿ÀºêÁ§Æ® °¹¼ö : ";
+	WCHAR objText[] = L"Remaining Enemies : ";
 	int textLen = _countof(objText) - 1;
 	vector<CGameObject*>* objList = m_pObjectManager->GetObjectList();
-	int objCount = objList[(int)ObjectLayer::Object].size();
+	int objCount = objList[(int)ObjectLayer::Enemy].size();
 	if (objCount == 0) textLen++;
 	while (objCount > 0) {
 		objCount /= 10; textLen++;
 	}
 
-	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::Object].size()));
+	wsprintf(text, L"%s%d", objText, (int)(objList[(int)ObjectLayer::Enemy].size()));
 
 	ComPtr<ID2D1SolidColorBrush> mSolidColorBrush;
 	ComPtr<IDWriteTextFormat> mDWriteTextFormat;
 
-	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), mSolidColorBrush.GetAddressOf()));
+	DX::ThrowIfFailed(pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0x942525), mSolidColorBrush.GetAddressOf()));
 	DX::ThrowIfFailed(pdWriteFactory->CreateTextFormat(
 		L"Verdana",
 		nullptr,

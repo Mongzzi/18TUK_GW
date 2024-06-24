@@ -1209,7 +1209,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 10.f;
 		m_fMoveSpeed = 202.5f * scale_ratio;
 		m_iTeamId = 1;
-		m_fHpBarY = 500.;
+		m_fHpBarY = 300.;
 	}
 	else if (name == "Zombie2") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 2, 3});
@@ -1217,7 +1217,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 20.f;
 		m_fMoveSpeed = 202.5f * scale_ratio;
 		m_iTeamId = 1;
-		m_fHpBarY = 500.;
+		m_fHpBarY = 300.;
 	}
 	else if (name == "Zombie3") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 0, 2, 3});
@@ -1225,7 +1225,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 30.f;
 		m_fMoveSpeed = 270.f * scale_ratio;
 		m_iTeamId = 1;
-		m_fHpBarY = 500.;
+		m_fHpBarY = 300.;
 	}
 	else if (name == "Zombie4") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 0, 3, 3, 3});
@@ -1233,7 +1233,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 15.f;
 		m_fMoveSpeed = 135.f * scale_ratio;
 		m_iTeamId = 1;
-		m_fHpBarY = 500.;
+		m_fHpBarY = 300.;
 	}
 	else if (name == "ZombieBoss") {
 		m_pDeck = new CDeckData(std::vector<int>{0, 0, 2, 2, 3, 3, 3});
@@ -1241,7 +1241,7 @@ void CCharacterObject::SetCharacterByName(string name)
 		m_fAtk = 50.f;
 		m_fMoveSpeed = 400.f * scale_ratio * boss_scale_ratio;
 		m_iTeamId = 1;
-		m_fHpBarY = 500.;
+		m_fHpBarY = 550.;
 	}
 	else if (name == "Unknown") {
 		m_pDeck = new CDeckData();
@@ -2196,7 +2196,8 @@ void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	CCharacterObject::Render(pd3dCommandList, pCamera, pRenderOption);
 
 	if (m_AttackRangeObject) {
-		m_AttackRangeObject->Render(pd3dCommandList, pCamera, pRenderOption);
+		if(m_fCurHp > 0)
+			m_AttackRangeObject->Render(pd3dCommandList, pCamera, pRenderOption);
 	}
 
 }
