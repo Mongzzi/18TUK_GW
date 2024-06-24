@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_01A753648A904CD2A52489C345D991AC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_020E3578E2B649D386DCD959C1EFFC09"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -189,12 +195,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_3B81602B0A47451DBBD27FC46E0DA1DE"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_3D66B1DA46F6409EA79FF753DB8C151C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -309,12 +309,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_67FC27B8BC4D47A78A456CA6714EA6A2"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_6BBA749750D5426BA29EF845EAF7B816"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -370,6 +364,12 @@
         "Entry"
         {
         "MsmKey" = "8:_7E5A237BABDB4313AF1A407572B1CA45"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7FE4136B916747AEBF81C5264A7A8E22"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -877,6 +877,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -893,6 +901,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -920,6 +936,26 @@
             "TargetName" = "8:CardFaceMove.jpg"
             "Tag" = "8:"
             "Folder" = "8:_560A2794D19E4A5EBA1F474A5CCB1F9F"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_01A753648A904CD2A52489C345D991AC"
+            {
+            "SourcePath" = "8:..\\x64\\Release\\Enemy Slasher.pdb"
+            "TargetName" = "8:Enemy Slasher.pdb"
+            "Tag" = "8:"
+            "Folder" = "8:_D8821BDA646D456AA3860AEEA2F43345"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1494,26 +1530,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3B81602B0A47451DBBD27FC46E0DA1DE"
-            {
-            "SourcePath" = "8:..\\x64\\Release\\Enemy Slasher.exe"
-            "TargetName" = "8:Enemy Slasher.exe"
-            "Tag" = "8:"
-            "Folder" = "8:_D8821BDA646D456AA3860AEEA2F43345"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3D66B1DA46F6409EA79FF753DB8C151C"
             {
             "SourcePath" = "8:..\\Enemy Slasher\\Resource\\animClip\\Zombie4Die.animClip"
@@ -1894,26 +1910,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_67FC27B8BC4D47A78A456CA6714EA6A2"
-            {
-            "SourcePath" = "8:..\\x64\\Release\\Enemy Slasher.pdb"
-            "TargetName" = "8:Enemy Slasher.pdb"
-            "Tag" = "8:"
-            "Folder" = "8:_D8821BDA646D456AA3860AEEA2F43345"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6BBA749750D5426BA29EF845EAF7B816"
             {
             "SourcePath" = "8:..\\Enemy Slasher\\Image\\tree_texture.png"
@@ -2100,6 +2096,26 @@
             "TargetName" = "8:zombie_diffuse.png"
             "Tag" = "8:"
             "Folder" = "8:_560A2794D19E4A5EBA1F474A5CCB1F9F"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7FE4136B916747AEBF81C5264A7A8E22"
+            {
+            "SourcePath" = "8:..\\x64\\Release\\Enemy Slasher.exe"
+            "TargetName" = "8:Enemy Slasher.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_D8821BDA646D456AA3860AEEA2F43345"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
