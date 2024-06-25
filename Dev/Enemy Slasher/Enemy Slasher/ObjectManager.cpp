@@ -5,6 +5,7 @@
 #include "ObjectManager.h"
 #include "ShaderManager.h"
 #include "PhysXManager.h"
+#include <stack>
 
 CObjectManager::CObjectManager()
 {
@@ -194,23 +195,23 @@ void CObjectManager::DynamicShaping(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 						bool isOverlapping = physx::PxGeometryQuery::overlap(cutterGeometry, cutterTransform, geom, shapePose, queryFlags, threadContext);
 						// 충돌했다면
 						if (isOverlapping == true) {
-							if (pTarget->GetMeshes() == nullptr)
-							{
-								auto pTargetChild = pTarget->GetChild();
+							std::stack<CGameObject*> objStack;
+							objStack.push(pTarget);
 
-								vector<CMesh*> vRetMeshs = static_cast<CDynamicShapeMesh*>(pTargetChild->GetMeshes()[i])->
-									DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pTargetChild->GetWorldMat(),
-										static_cast<CDynamicShapeMesh*>(pCutter->GetMeshes()[0]), pCutter->GetWorldMat(),
-										cutAlgorithm);
-								newMeshs.insert(newMeshs.end(), vRetMeshs.begin(), vRetMeshs.end());
-							}
-							else
-							{
-								vector<CMesh*> vRetMeshs = static_cast<CDynamicShapeMesh*>(pTarget->GetMeshes()[i])->
-									DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pTarget->GetWorldMat(),
-										static_cast<CDynamicShapeMesh*>(pCutter->GetMeshes()[0]), pCutter->GetWorldMat(),
-										cutAlgorithm);
-								newMeshs.insert(newMeshs.end(), vRetMeshs.begin(), vRetMeshs.end());
+							while (objStack.empty() != true) {
+								auto pTargetObj = objStack.top();
+								objStack.pop();
+
+								for (int j = 0; j < pTargetObj->GetNumMeshes(); ++j) {
+									vector<CMesh*> vRetMeshs = static_cast<CDynamicShapeMesh*>(pTargetObj->GetMeshes()[j])->
+										DynamicShaping(pd3dDevice, pd3dCommandList, fTimeElapsed, pTargetObj->GetWorldMat(),
+											static_cast<CDynamicShapeMesh*>(pCutter->GetMeshes()[0]), pCutter->GetWorldMat(),
+											cutAlgorithm);
+									newMeshs.insert(newMeshs.end(), vRetMeshs.begin(), vRetMeshs.end());
+								}
+
+								if (pTargetObj->GetChild()) objStack.push(pTargetObj->GetChild());
+								if (pTargetObj->GetSibling()) objStack.push(pTargetObj->GetSibling());
 							}
 						}
 					}
