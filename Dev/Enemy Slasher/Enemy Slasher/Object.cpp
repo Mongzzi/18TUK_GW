@@ -1307,8 +1307,8 @@ void CCharacterObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (m_pPhysXActor && m_PhysXActorType == PhysXActorType::Dynamic) {
 		XMFLOAT3 xmfPos = GetPosition();
-		physx::PxVec3 targetPosition = physx::PxVec3(xmfPos.x, xmfPos.y+ PHYSX_CAPSUL_HEIGHT, xmfPos.z);
 		physx::PxVec3 currentPosition = static_cast<physx::PxRigidDynamic*>(m_pPhysXActor)->getGlobalPose().p;
+		physx::PxVec3 targetPosition = physx::PxVec3(xmfPos.x, currentPosition.y, xmfPos.z);
 		physx::PxVec3 direction = (targetPosition - currentPosition).getNormalized();
 		physx::PxVec3 velocity = direction * m_fMoveSpeed;
 

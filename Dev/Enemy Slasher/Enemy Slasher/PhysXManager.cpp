@@ -162,7 +162,7 @@ physx::PxActor* CPhysXManager::AddCapshulDynamic(CGameObject* object)
     PxShape* aCapsuleShape = PxRigidActorExt::createExclusiveShape(*aCapsuleActor,
         PxCapsuleGeometry(capsuleRadius, capsuleHalfHeight), *gMaterial);
     aCapsuleShape->setLocalPose(relativePose);
-    PxRigidBodyExt::updateMassAndInertia(*aCapsuleActor, 100.f);
+    PxRigidBodyExt::updateMassAndInertia(*aCapsuleActor, 1000.f);
     aCapsuleActor->setRigidDynamicLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
 
     // actor가 자신의 object*를 알도록 저장
